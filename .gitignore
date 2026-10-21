@@ -1,0 +1,6 @@
+target/
+/output/
+/.agent-work/
+/.venv/
+__pycache__/
+*.pyc

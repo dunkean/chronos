@@ -1,0 +1,12 @@
+[package]
+name = "chronos-app"
+description = "Local Chronos workshop: HTTP API, static web files and CLI."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+chronos-core = { path = "../chronos-core" }
+serde.workspace = true
+serde_json.workspace = true

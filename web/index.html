@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Chronos, atelier d’histoire</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="./style.css">
+  <script type="module" src="./app.js"></script>
+</head>
+<body>
+  <a class="skip" href="#map">Aller à la carte</a>
+
+  <header class="bar">
+    <p class="brand"><span class="brand-name">Chronos</span> <span class="brand-sub">atelier d’histoire</span></p>
+    <p class="canon" id="canon">Aucun monde chargé</p>
+    <nav class="actions" aria-label="Actions sur le monde">
+      <button type="button" class="btn btn-bar" id="btn-settings" aria-expanded="false" aria-controls="settings">Réglages</button>
+      <button type="button" class="btn btn-primary" id="btn-generate">Générer</button>
+      <button type="button" class="btn btn-bar" id="btn-import">Importer un JSON</button>
+      <button type="button" class="btn btn-bar" id="btn-export" disabled>Exporter le JSON</button>
+      <button type="button" class="btn btn-bar" id="btn-sources" aria-haspopup="dialog">Sources <span class="src-summary" id="src-summary"></span></button>
+    </nav>
+    <input type="file" id="file-import" accept="application/json,.json" hidden>
+  </header>
+
+  <div class="notices">
+    <div class="error-banner" id="error" role="alert" hidden>
+      <p id="error-text"></p>
+      <button type="button" class="btn btn-quiet" id="error-close">Fermer</button>
+    </div>
+    <p class="status" id="status" role="status" aria-live="polite"></p>
+  </div>
+
+  <main class="layout" id="layout">
+    <aside class="settings" id="settings" aria-labelledby="settings-title">
+      <h2 id="settings-title">Réglages de génération</h2>
+      <form id="cfg-form" novalidate>
+        <div id="cfg-fields"></div>
+        <div class="cfg-submit">
+          <p class="cfg-dirty" id="cfg-dirty" aria-live="polite" hidden></p>
+          <button type="submit" class="btn btn-primary">Générer</button>
+        </div>
+      </form>
+    </aside>
+
+    <section class="stage" aria-label="Carte et années">
+      <div class="map-wrap" id="map-wrap">
+        <canvas id="map" tabindex="0" role="img" aria-label="Carte du monde, aucun monde chargé." aria-describedby="map-help"></canvas>
+        <p class="sr-only" id="map-help">Survolez ou touchez un lieu pour sa fiche. Touches plus et moins pour zoomer, flèches pour déplacer, zéro pour recentrer. L’onglet Index liste tous les lieux au clavier.</p>
+        <div class="cartouche" id="cartouche" hidden>
+          <p class="cart-year" id="cart-year"></p>
+          <ul class="cart-polities" id="cart-polities" aria-label="Puissances à cette date"></ul>
+        </div>
+        <div class="map-tools" role="group" aria-label="Vue de la carte">
+          <button type="button" class="btn btn-tool" id="zoom-in" aria-label="Zoomer">+</button>
+          <button type="button" class="btn btn-tool" id="zoom-out" aria-label="Dézoomer">&minus;</button>
+          <button type="button" class="btn btn-tool" id="zoom-reset">Recentrer</button>
+          <label class="tool-check"><input type="checkbox" id="pixelated"> Cellules brutes</label>
+        </div>
+        <details class="map-legend" id="map-legend" hidden>
+          <summary>Légende</summary>
+          <div id="legend-body"></div>
+        </details>
+        <div class="map-tooltip" hidden></div>
+        <div class="map-empty" id="map-empty">
+          <p class="map-empty-title" id="map-empty-title">Chargement du monde…</p>
+          <p id="map-empty-text"></p>
+          <div class="map-empty-actions" id="map-empty-actions" hidden>
+            <button type="button" class="btn btn-primary" data-action="generate">Générer</button>
+            <button type="button" class="btn btn-quiet" data-action="import">Importer un JSON</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="rail" id="rail">
+        <div class="rail-controls">
+          <button type="button" class="btn btn-quiet" id="prev-event" title="Aller à l’année de l’événement précédent (selon les filtres)">Événement précédent</button>
+          <div class="year-stepper">
+            <button type="button" class="btn btn-tool" id="year-dec" aria-label="Année précédente">&minus;1</button>
+            <label for="year-input" class="sr-only">Année affichée</label>
+            <input type="number" id="year-input" step="1" inputmode="numeric" disabled>
+            <button type="button" class="btn btn-tool" id="year-inc" aria-label="Année suivante">+1</button>
+          </div>
+          <button type="button" class="btn btn-quiet" id="next-event" title="Aller à l’année de l’événement suivant (selon les filtres)">Événement suivant</button>
+          <button type="button" class="btn btn-quiet" id="play" aria-pressed="false">Lecture</button>
+          <p class="rail-info" id="rail-info"></p>
+        </div>
+        <div class="tl-wrap" id="tl-wrap">
+          <canvas aria-hidden="true"></canvas>
+          <div class="tl-tip" hidden></div>
+        </div>
+        <label for="year-range" class="sr-only">Curseur de l’année affichée</label>
+        <input type="range" id="year-range" step="1" disabled>
+        <p class="rail-legend">Barres : événements commencés dans l’année, par type. Trait : population totale. Bandes du haut : événements sur plusieurs années, cliquables.</p>
+      </div>
+    </section>
+
+    <section class="side" aria-label="Chronique, fiches et index">
+      <div class="tabs" role="tablist" aria-label="Panneau latéral">
+        <button type="button" role="tab" id="tab-chronicle" aria-controls="panel-chronicle" aria-selected="true">Chronique</button>
+        <button type="button" role="tab" id="tab-fiche" aria-controls="panel-fiche" aria-selected="false" tabindex="-1">Fiche</button>
+        <button type="button" role="tab" id="tab-index" aria-controls="panel-index" aria-selected="false" tabindex="-1">Index</button>
+      </div>
+      <div class="panel" role="tabpanel" id="panel-chronicle" aria-labelledby="tab-chronicle"></div>
+      <div class="panel" role="tabpanel" id="panel-fiche" aria-labelledby="tab-fiche" hidden>
+        <div class="fiche-nav">
+          <button type="button" class="btn btn-quiet" id="fiche-back" disabled>Fiche précédente</button>
+          <button type="button" class="btn btn-quiet" id="fiche-fwd" disabled>Fiche suivante</button>
+          <button type="button" class="btn btn-quiet" id="fiche-close" disabled>Fermer</button>
+        </div>
+        <div id="fiche-body"></div>
+      </div>
+      <div class="panel" role="tabpanel" id="panel-index" aria-labelledby="tab-index" hidden></div>
+    </section>
+  </main>
+
+  <dialog class="sources" id="sources-dialog" aria-labelledby="sources-title">
+    <div class="sources-head">
+      <h2 id="sources-title">Sources, provenance et limites</h2>
+      <button type="button" class="btn btn-quiet" id="sources-close">Fermer</button>
+    </div>
+    <div id="sources-body"></div>
+  </dialog>
+</body>
+</html>

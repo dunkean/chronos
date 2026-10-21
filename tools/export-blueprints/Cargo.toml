@@ -1,0 +1,15 @@
+[package]
+name = "chronos-export-blueprints"
+version = "0.1.0"
+edition = "2024"
+publish = false
+description = "One-off fixture preparation: frozen Pecking Order generic resolutions -> Chronos blueprints"
+
+# Standalone: never a member of the Chronos workspace, and only built for data preparation.
+[workspace]
+
+[dependencies]
+# Frozen copy made by tools/pecking_order/snapshot.py (the sibling repository is being rewritten).
+pecking-order = { path = "../../output/pecking-order-snapshot" }
+serde_json = "1"
+sha2 = "0.10"
