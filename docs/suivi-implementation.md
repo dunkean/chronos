@@ -163,6 +163,19 @@ Objectif : des layers de ressources du monde, raisonnées en **potentiel, stock 
 
 Si l'agent n'est plus joignable (nouvelle conversation), relance-le avec le brief de l'annexe A, en précisant de reprendre le WIP des branches `resources-layers`.
 
+### 7.3 Enrichissement depuis Azgaar
+
+**Statut : proposition documentée, aucune intégration implémentée.** Voir [integration-azgaar.md](integration-azgaar.md) : capacités présentes dans Fantasy Map Generator, écarts avec Chronos, pièces à extraire, contrats et critères de validation. Les reprises passent par des packs de contenu figés, des fonctions Rust pures et des projections cartographiques ; les responsabilités de §3 restent applicables.
+
+| Lot proposé | Portée | Statut |
+|---|---|---|
+| A0–A2 | Extraction sourcée, emblèmes, noms et lieux d'intérêt dérivés des faits existants | à faire |
+| A3 | Croyances, territoires et organisations, articulés avec P0–P3 | à faire |
+| A4 | Biens, recettes et registre économique, après contrat des ressources et R5 | à faire |
+| A5 | Voyages structurés, couches et exports datés | à faire |
+
+Ces lots complètent P0–P5 ; ils n'en changent pas le statut. Le document n'ajoute pas de dépendance FMG à l'exécution.
+
 ## 8. Décisions
 
 | # | Décision | Statut | Notes |
@@ -176,6 +189,7 @@ Si l'agent n'est plus joignable (nouvelle conversation), relance-le avec le brie
 
 ## 9. Journal
 
+- **26/10/2026, reprise Azgaar** : audit du checkout Fantasy Map Generator `67d555b`, rédaction de `docs/integration-azgaar.md`, lien depuis le README et lots proposés A0–A5 en §7.3. Comparaison des capacités avec le code Chronos actuel ; limites explicites du cycle économique, du hasard global et des récits sans causes. Documentation seulement : aucun moteur, schéma, canon ou statut P0–P5 modifié ; aucun benchmark exécuté.
 - **26/10/2026** : analyse de la vision et rédaction de `docs/reviews/vision-entites-sociales.md`. Recherche des couches de roches : la lithologie et les sols sont trouvés dans `city_generator/origin/main` (`godot-render/tools/surface_context.py`), sans aucune ressource exploitable. Agent ressources lancé, puis recadré deux fois : (1) niveau monde dans Neural Earth avec Orogen ; (2) Neural Earth comme seule chaîne multi-échelle. Mis en pause en attendant la fusion de Render v2. Création de ce document. Rien n'est commité dans Chronos.
 - **26/10/2026, pause de l'agent ressources** : commit WIP `56d78b7` dans `neural-earth-resources` (prototype monde, voir R0). Tests non passants (R0b). `RESOURCE_LAYERS.md` non écrit. À réaligner sur Render v2 : 8 classes de roche, score céréalier par pédologie, tourbe et toute la réinjection dans les textures. Littérature non vérifiée : Campbell (boisseaux par acre), Rackham (rotations), sel de Lüneburg.
 

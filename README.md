@@ -8,6 +8,7 @@ Prototype local d'un générateur de chronologie déterministe pour un petit mon
 - Ressources à fournir par Neural Earth : [socle initial de 35 couches](NeuralEarth-Resources-Starter.md) ; [catalogue détaillé](NeuralEarth-Resources.md) conservé pour les raffinements ultérieurs. Spécifications distinctes du prototype livré.
 - Univers : [catalogue fantasy et patrons steampunk, cyberpunk et Waterworld](NeuralEarth-Resources-Fantasy.md), extension du catalogue détaillé.
 - Interface : [docs/interface.md](docs/interface.md).
+- Enrichissement depuis Azgaar : [capacités, manques et proposition d'intégration](docs/integration-azgaar.md) — catalogues, religions, économie, lieux d'intérêt, emblèmes et cartographie ; étude distincte de l'implémentation.
 
 ## Lancer la démo
 
