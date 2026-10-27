@@ -1,6 +1,6 @@
 # Chronos — vision « entités sociales », état des lieux et design macro
 
-Date : 26 octobre 2026. Statut : **analyse et proposition**. Rien de ce qui est décrit en §6–7 n'est implémenté. Les chiffres « mesurés » proviennent des documents cités et n'ont pas été remesurés ici.
+Date : 26 octobre 2026 ; mise à jour le même jour avec les apports d'Azgaar (§7.2–7.4, §7.7). Statut : **analyse et proposition**. Rien de ce qui est décrit en §6–7 n'est implémenté. Les chiffres « mesurés » proviennent des documents cités et n'ont pas été remesurés ici.
 
 Sources lues : ce dépôt (code, [étude v3](../../conception_generateur_histoire_multiechelle_v3.md), [roadmap](../../Roadmap.md), [méthode](../methods/chronology.md), fixture) ; `../ttrpg_content_generator` (`doc/generation_schema.pptx`, `archive/template.py`, `worldbuilder_social_engine_study.md`, `src/genealogy/`) ; `../city_generator` (Magna Urbis) ; `../infinite_map` (Neural Earth) ; `../lineage-lab` ; `../pecking-order` ; `../namebench`.
 
@@ -119,13 +119,17 @@ SocialEntity
   ressources    registre : stocks, flux entrants/sortants, dettes/créances, droits (posséder/exploiter/taxer/revendiquer)
   empreintes    présence, contrôle, juridiction, économie, culture, recrutement → cellules → sites ; siège ← ajout
   objectifs     bornés, pondérés, parfois contradictoires
-  règles        coutumes, admission, succession, décision, tabous
+  règles        institutionnelles : admission, succession, décision (les coutumes et tabous sont des idées)
   traits        belliqueuse, secrète, pieuse… (modulent les probabilités)
-  culture       culture MU + langue/famille de noms + religion + valeurs
+  idées         distribution d'adhésion par dimension : croyance, langue, coutume/droit, savoir,
+                style. Pour un agrégat, c'est la somme de ses membres, jamais un champ propre (§7.8) ← ajout
+  appuis        relations datées avec cause vers des idées : ENDORSES (religion d'État, langue
+                officielle), ADMINISTERS (Église, école), SUPPRESSES, PATRONS (§7.8)           ← ajout
+  étiquettes    lectures dérivées, jamais stockées : religion majoritaire, religion d'État,
+                monarchie, empire, peuple naval ou nomade, culte, hérésie… (§7.8)                ← ajout
   légitimité / contrôle effectif   distincts (usurpation, prétendants)                         ← ajout
   cohésion      unité interne ; factions matérialisables au zoom                                ← ajout
   capacités     dérivées : militaire, fiscale, administrative, portée logistique                ← ajout
-  savoirs       techniques, magie, secrets (technologie stable mais savoirs inégaux)            ← ajout
   prestige / réputation   non conservés, distincts de la richesse                               ← ajout
   mémoire       griefs, dettes d'honneur, mythes fondateurs (relations historisées à cause)     ← ajout
   saillance     importance narrative → densité d'événements et niveau de détail                 ← ajout
@@ -144,10 +148,17 @@ La population se compte une seule fois, dans des cohortes disjointes ; les adhé
 
 Un seul algorithme, paramétré par une **maturité** `m` : colonisation ≈ 0,1–0,2, jeune ≈ 0,4–0,6, vieille ≈ 0,9.
 
-1. **Capacité de charge** par cellule, tirée des potentiels (eau, sols, climat, pâturage) et de l'accessibilité (coût de trajet).
-2. **Foyers d'origine** : K points d'entrée (côtes, estuaires, cols) pour une colonisation, des noyaux anciens sinon. La population initiale diffuse depuis ces foyers selon la capacité et la distance de trajet, jusqu'à remplir la fraction `m` de la capacité. La part urbaine et la profondeur de la hiérarchie (Zipf) croissent avec `m`.
-3. **Sites** : par région, Chronos calcule la liste des établissements (rang × population × culture) et appelle `Terrain::place` en mode `list` ; les grandes villes sont des ancres canoniques. Puis `Terrain::roads`, avec un niveau de développement lié à `m`.
-4. **Entités** : blocs culturels issus des foyers ; polities par regroupement sur le graphe de trajets (chefferies ou cités à faible `m`, royaumes et empires à fort `m`) ; religions ; organisations par site selon le rang et les activités (archétypes Pecking Order) ; maisons nobles et notables, avec leur généalogie.
+1. **Capacité de charge** par cellule, tirée des potentiels (eau, sols, climat, pâturage ; les layers de ressources de Neural Earth quand elles seront disponibles) et de l'accessibilité. **Coût de trajet en heures entières**, issu d'une table de transports médiévale (AZ2). En attendant les ressources, une capacité témoin lisible (eau courante, confluences, altitude, nature de la côte), invariante à la résolution (AZ4).
+2. **Foyers d'origine** : K points d'entrée (côtes, estuaires, cols) pour une colonisation, des noyaux anciens sinon. Chaque foyer sème le **répertoire d'idées** de son peuple : langue, croyances, coutumes, savoirs. L'adaptation écologique (naval, nomade…) n'est pas assignée : elle se lit ensuite dans les activités et le milieu (AZ3, §7.8). La population initiale diffuse depuis ces foyers selon la capacité et la distance de trajet, jusqu'à remplir la fraction `m` de la capacité. La part urbaine et la profondeur de la hiérarchie (Zipf) croissent avec `m`.
+3. **Un seul moteur d'expansion concurrente à coût** (AZ1), repris d'Azgaar. C'est un Dijkstra multi-sources, en coûts entiers, avec un départage total `(coût, id entité, id cellule)` et un **plafond fonction de `m`**. Il sert aux peuples, aux polities (avec affinité culturelle et lissage des enclaves), aux aires de marché et à la diffusion initiale des idées, avec des poids différents.
+4. **Sites** : par région, Chronos calcule la liste des établissements (rang × population × culture) et appelle `Terrain::place` en mode `list` ; les grandes villes sont des ancres canoniques. Le rang et les fonctions (port, fort, monastère, caravansérail…) suivent des règles déclaratives (AZ8). Puis `Terrain::roads`, avec un niveau de développement lié à `m` ; la topologie initiale est un graphe d'Urquhart (AZ6).
+5. **Entités** :
+   - peuples (entités `catégorie`) issus des foyers, avec leurs distributions d'idées ;
+   - polities issues de l'expansion, de la chefferie ou cité (faible `m`) au royaume ou à l'empire (fort `m`). Leur structure de pouvoir vient de Pecking Order ; « monarchie » ou « empire » en sont des lectures (AZ11). Elles se découpent en provinces à centre urbain, avec des colonies détachées (« Nouvelle-X ») pour le scénario colonisation (AZ12) ;
+   - des organisations qui administrent des idées (Églises, écoles) et des appuis (religion d'État, langue officielle), plus nombreux quand `m` est élevé, et seulement là où les distributions les justifient (AZ7, §7.8) ;
+   - des organisations par site selon le rang et les activités (archétypes Pecking Order) ;
+   - des maisons nobles et des notables, avec leur généalogie ;
+   - les relations diplomatiques initiales selon la distance de graphe, et la vassalité par rapport de puissance (AZ5).
 
 Une variante permet de valider la cohérence : obtenir « vieille civilisation » en lançant la progression depuis « colonisation » sur plusieurs siècles (*spin-up*). C'est plus lent, mais cela garantit qu'un départ « vieux » ressemble à un passé possible.
 
@@ -160,6 +171,13 @@ La boucle racine tourne par blocs canoniques (décennie ; année pour les crises
 3. *actions possibles*, filtrées par les règles, les capacités et les ressources ;
 4. *chocs exogènes* : climat, séisme, épidémie ;
 5. *événements proposés*, puis validés et appliqués dans un ordre canonique.
+
+Mécanismes de bloc repris d'Azgaar, mais rendus temporels et causaux (AZ5–AZ18, voir §7.7) :
+- **guerre** : la cascade d'entrée (vassaux, alliés qui rompent par peur, neutralité si alliés des deux côtés) est résolue une fois, à la déclaration ;
+- **idées** (croyances, langues, coutumes, savoirs) : un seul moteur générique de diffusion, conversion, divergence (hérésie, dialecte) et syncrétisme (§7.8). L'adoption ou la révocation d'une religion d'État est un événement ;
+- **routes** : corridors ouverts par époque, avec une remise ×0,5 sur l'existant, sans re-routage ;
+- **économie** : trésor, taxes selon la structure de pouvoir, tarifs et embargos issus de la diplomatie, plus les dépenses ;
+- **sites** : changements de rang, constructions de murailles et de temples comme événements datés.
 
 Le peuplement produit des **faits agrégés à budget** : « région R, [1320, 1330) : +12 000 habitants, +7 villages, la ville X passe au rang de bourg, ouverture du corridor R–S ». Les entités naissent, se scindent, fusionnent et meurent par événements, sans réécriture du passé.
 
@@ -194,4 +212,115 @@ Le peuplement produit des **faits agrégés à budget** : « région R, [1320, 1
 | P4 | Généalogie des notables en Rust et personnes secondaires à la demande | Dynastie cohérente sur 1 000 ans ; héros lié à une origine unique |
 | P5 | Montée en échelle : planète, 2 500 ans | Temps mesurés, publiés avec le matériel utilisé |
 
-Décisions à prendre avant P1 : la **licence** de `magna-urbis-core` ; la **taille des cellules** du support spatial (réutiliser les sommets Orogen ou une grille propre) ; le **pas de bloc** racine (décennie proposée).
+Décisions à prendre avant P1 : la **licence** de `magna-urbis-core` ; la **taille des cellules** du support spatial, sous forme d'un LOD Neural Earth (voir D2 dans le [suivi](../suivi-implementation.md)), puisque Neural Earth est le seul système multi-échelle ; le **pas de bloc** racine (décennie proposée).
+
+### 7.7 Apports retenus d'Azgaar Fantasy Map Generator
+
+Documents :
+- [docs/integration-azgaar.md](../integration-azgaar.md) (référence) : quoi reprendre et comment l'intégrer, lots A0–A5 ;
+- [azgaar-fmg-inspiration.md](azgaar-fmg-inspiration.md) : règles de génération, tâches AZ.
+
+Copie de référence : `../Fantasy-Map-Generator`, révision `67d555b` (v1.156.0). FMG est sous licence MIT avec autorisation des dérivés, mais on réimplémente à partir des règles, sans traduire le code.
+
+**Contenus repris** (`integration-azgaar.md` §3), à intégrer au modèle :
+- **emblèmes** (`EmblemSpec`) attribués une fois à une entité et stables au fil des successions ; un changement d'armes est un épisode daté ;
+- **lieux d'intérêt**, en séparant toujours trois objets : le lieu physique, le fait attesté dans le canon, et le récit ou la rumeur qui le décrit ;
+- **religions**, en séparant la croyance, la communauté de fidèles et l'organisation qui l'administre (structure Pecking Order) ; les affiliations sont datées et peuvent coexister, et ne s'additionnent pas comme des populations. Dans le méta-modèle (§7.8), cela donne : la croyance est une `Idea`, la communauté est la distribution d'adhésion, et l'organisation est une entité liée par `ADMINISTERS`. Le cas des religions devient celui de toutes les idées ;
+- **biens et recettes**, dans un registre daté de stocks, droits et transferts avec contreparties. C'est le même registre que les ressources (R5) : une seule économie ;
+- **voyages** structurés en segments ;
+- **cartographie** : labels et exports à une date, sans tirage de faits.
+
+Ces contenus arrivent par des packs figés, extraits pendant la préparation avec provenance `imported`, ou par des fonctions Rust pures, avec provenance `derived`.
+
+**Règles de génération retenues :** FMG donne de bonnes **règles de départ**. Chronos les rend **temporelles et causales** :
+
+| Règle FMG | Devient dans Chronos | Où |
+|---|---|---|
+| Expansion multi-sources à coût, plafond `growthRate` | Moteur unique d'expansion, en coûts entiers et départage total ; plafond = f(`m`) | §7.3, AZ1 |
+| Types culturels (nomade, naval, fluvial…) | Étiquette lue dans les activités et le milieu, jamais assignée | §7.8, AZ3 |
+| Score d'habitabilité (débit, confluences, côte) | Capacité témoin invariante à la résolution | §7.3, AZ4 |
+| Vitesses de transport | Coût d'arête en heures, partagé | §7.3, AZ2 |
+| Formes d'État et titres | Étiquette lue dans la structure de pouvoir (Pecking Order) ; une révolution change la structure, et l'étiquette suit | §7.8, AZ11 |
+| Provinces, colonies | `IsPartOfMe[province]`, colonies du scénario colonisation | §7.3, AZ12 |
+| Folk / organisée / culte / hérésie, religion d'État | Étiquettes de lecture sur le moteur générique d'idées : adhésions, appuis, lignée `DERIVED_FROM` datée | §7.8, AZ7 |
+| Diplomatie par distance, vassalité, cascade de guerre | Relations datées avec cause ; cascade résolue une fois | §7.3–7.4, AZ5 |
+| Urquhart + remise ×0,5 | Corridors par époque, sans re-routage | §7.3–7.4, AZ6 |
+| Taxes, trésor, tarifs et embargos | Registre de ressources, flux par bloc, embargos datés, plus les dépenses | §7.4, AZ18 |
+| Zones (épidémie sur les routes, rébellions) | Projection à une date des événements actifs | AZ9 |
+| Marqueurs à légende causale | Vestiges datés d'événements clos | AZ14 |
+| Verrous, IDs réservés | Ancres et contraintes d'auteur | AZ16 |
+
+**Écarté :** la génération statique avec un passé plaqué après coup ; l'aléa séquentiel global et les réensemencements corrélés ; l'échelle unique dépendante de la résolution ; l'état global mutable ; la matrice diplomatique sans date ni cause ; l'économie à l'équilibre en une passe ; les anachronismes. FMG n'apporte rien à la généalogie (P4).
+
+**Règle générale (§7.8) :** on ne copie pas la structure d'Azgaar quand un mécanisme générique donne le même résultat. Ses types (religion d'un État, type culturel, forme de gouvernement) deviennent des **étiquettes de lecture**. Ses contenus (doctrines, noms, emblèmes, biens) deviennent des **catalogues**.
+
+### 7.8 Méta-modèle : idées, adhésions, appuis et étiquettes dérivées
+
+Statut : **proposition**.
+
+**Principe.** Chronos ne stocke pas « la religion d'un pays », « la langue d'un peuple » ou « la forme d'un État » comme des champs. Il représente quatre mécanismes génériques, et ces notions sont des **lectures** de son état. Les doctrines, langues, coutumes, savoirs et styles viennent de catalogues (dont Azgaar) : du vocabulaire, pas de la structure. Un pays a des croyances, souvent une majoritaire ; une religion d'État *peut* en émerger, elle n'est pas imposée.
+
+**1. Idées : un seul type pour tout ce qui se transmet.** `Idea` couvre croyance, langue ou dialecte, coutume ou loi, savoir ou technique (y compris la magie), idéologie, style (art, architecture, héraldique) et mythe. Elle porte :
+- **une dimension**, qui fixe ses règles. Une croyance peut être exclusive ou cumulable (monothéisme, panthéon) ; on parle plusieurs langues ; un savoir s'accumule sans en chasser un autre ;
+- **des propriétés génériques** :
+  - attrait, c'est-à-dire la tendance à l'adoption spontanée ;
+  - exclusivité dans sa dimension ;
+  - coût d'adoption (apprentissage, initiation) ;
+  - modes de transmission : verticale (parents), horizontale (pairs, commerce), oblique (élites, institutions) ;
+  - prérequis (écriture, clergé, maître) ;
+- **des effets sur son porteur** : cohésion, légitimité, tabous qui filtrent des actions, savoirs qui débloquent des activités ;
+- **une lignée** : `DERIVED_FROM` (schisme, dialecte, réforme) et `MERGED_FROM` (syncrétisme, créole), créées par des événements datés.
+
+**2. Adhésions : des distributions, pas des attributs.** Chaque cohorte (population comptée une seule fois) porte, par dimension, une distribution sur les idées : comptes entiers, les k premières plus « autres ». Une personne canonique porte ses propres idées. Pour un agrégat (région, pays, peuple), la distribution est la **somme de ses membres**. « La religion majoritaire du royaume » est donc un argmax calculé, jamais stocké. Les minorités et les doubles appartenances (quand l'exclusivité est faible) viennent naturellement.
+
+**3. Appuis : les seules choses stockées, parce que ce sont des décisions.** Ce sont des relations datées avec cause, d'une entité-acteur vers une idée :
+- `ENDORSES` : religion d'État, langue officielle, code de lois ;
+- `ADMINISTERS` : une Église, une école, une guilde qui garde un savoir ;
+- `SUPPRESSES` : interdit, persécution ;
+- `PATRONS` : mécénat.
+
+Une religion d'État naît d'un événement « adoption », quand les pressions s'y prêtent : part majoritaire, conversion du souverain, besoin de légitimité, poids d'une organisation. Elle peut être révoquée.
+
+**4. Dynamique : un seul moteur pour toutes les dimensions.** À chaque bloc et dans chaque région, les parts évoluent par :
+- transmission verticale, qui suit la démographie des cohortes ;
+- diffusion par contact, pondérée par les trajets, le commerce et les migrations, sur le même graphe qu'AZ1 et AZ2 ;
+- biais de conformité (majorité locale) et de prestige (élites, villes) ;
+- coercition et incitation : appuis, missions des organisations ;
+- divergence en isolement, qui produit une nouvelle idée (dialecte, hérésie) au-delà d'un seuil ;
+- syncrétisme au contact prolongé, si l'exclusivité est faible.
+
+Les conversions sont des **faits agrégés à budget**, par exemple « région R, [1320, 1330) : 4 000 adhérents passent de X à Y ». Elles sont réparties exactement au raffinement. Les seuils et paramètres dépendent de la dimension.
+
+Pistes de littérature, à vérifier avant toute citation formelle :
+- Cavalli-Sforza et Feldman (1981), Boyd et Richerson (1985) : transmission culturelle, biais de conformité et de prestige ;
+- Axelrod (1997) : dissémination culturelle et risque d'homogénéisation ;
+- Stark et Bainbridge : sectes, Églises, économie religieuse ;
+- Weber : routinisation du charisme ;
+- Turchin : frontières méta-ethniques ;
+- Kuran : falsification des préférences sous coercition.
+
+**5. Étiquettes dérivées : des classifieurs purs, versionnés, documentés dans `docs/methods`.**
+
+| Étiquette | Exemple de règle de lecture |
+|---|---|
+| Folk, organisée, culte, hérésie | Folk : aucune organisation `ADMINISTERS`, liée à une seule culture. Organisée : une organisation l'administre. Culte : petite, exclusive, récente. Hérésie : `DERIVED_FROM` une idée administrée, avec griefs ou `SUPPRESSES` entre les deux |
+| Religion majoritaire, religion d'État | Argmax des adhésions ; existence d'un `ENDORSES` actif |
+| Monarchie, république, théocratie, oligarchie | Structure Pecking Order : qui détient les pouvoirs souverains, succession héréditaire ou élective, rôle du clergé |
+| Chefferie, cité-État, royaume, empire | Taille, nombre de peuples et de vassaux, profondeur de `IsPartOfMe` |
+| Peuple naval, nomade, montagnard… | Parts d'activités (pêche, pastoralisme mobile, commerce maritime) et milieu de l'empreinte |
+| Culture, ethnie | Groupe d'idées partagées : langue, coutumes, croyances. Une culture est une `catégorie` lue dans les distributions, ce qui rend l'ethnogenèse possible (scission, fusion) |
+
+Les titres (khanat, califat, doge) sont le nom de l'étiquette dans la langue ou la culture concernée, tiré d'un catalogue.
+
+**6. Ce qui reste typé, et pourquoi.**
+- **La dimension d'une idée** : une croyance et une langue n'ont ni les mêmes règles d'exclusivité ni la même transmission.
+- **Ressources et biens** : grandeurs physiques soumises à la conservation.
+- **Démographie et cohortes.**
+- **Rôles et pouvoirs** (Pecking Order).
+- **La religion reste un moteur majeur de civilisation.** Elle passe par le mécanisme générique, sans code à part, mais avec un poids à part : exclusivité forte, effets sur la légitimité et la cohésion, organisations puissantes, tabous qui filtrent les actions, griefs et `SUPPRESSES` qui alimentent des guerres de religion.
+
+**7. Réalisme et risques.**
+- **Coût**, ordre de grandeur non mesuré : 2 000 régions × 250 blocs × 4 dimensions × 8 idées, soit environ 16 M mises à jour entières de parts. C'est compatible avec l'objectif du §6.
+- **Dynamique :** une diffusion pure homogénéise tout (Axelrod) ; trop de divergence donne le chaos. Il faut des forces de rappel (identité, isolement, coercition), des tests de diversité sur plusieurs siècles, et des contraintes d'auteur pour fixer une religion ou une langue voulue.
+- **Explicabilité :** chaque changement de majorité ou d'appui est un événement cité ; chaque étiquette s'explique par sa règle.
+- **Déterminisme :** flux de parts entiers, ordre canonique, aléa `key(seed, région, bloc, dimension, slot)`.

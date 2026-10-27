@@ -6,6 +6,21 @@ Chronos is a local prototype of a deterministic chronology generator for a small
 
 Before changing the engine, read sections 14 (Rust architecture), 15 (determinism), 17 (validation) and 18 (implementation phases) of the design study. In docs, clearly separate what is proposed, what is implemented and what was measured. Keep canonical facts, social constraints and narrative accounts separate.
 
+## Resuming current work
+
+The prototype above is the J0–J4 baseline. The active work is the redesign around recursive social entities, multi-scale refinement, world resources and Azgaar-derived content. Nothing of it is implemented in the engine yet.
+
+- **Start with `docs/suivi-implementation.md`.** §0 is a resume prompt, §2 a reading order, §3 the ecosystem split, §7.0 the battle order (next steps), §7.1–7.3 task status (P0–P5, R*, A0–A5, AZ*), §8 open decisions and §9 the session log. Update §7 and §9 at the end of every session.
+- **Design:** `docs/reviews/vision-entites-sociales.md` (§7 macro design, §7.7 what is kept from Azgaar) and the v3 study (§4A, §4.5, §10, §14–18).
+- **Azgaar:** `docs/integration-azgaar.md` is the reference (content packs, integration paths, invariants, lots A0–A5). `docs/reviews/azgaar-fmg-inspiration.md` covers the generation rules (AZ tasks). The upstream clone is `../Fantasy-Map-Generator`, pinned at `67d555b`, code in `src/model/<domain>/`. Reimplement from rules; never add an FMG runtime dependency.
+- **Generic model first** (vision §7.8). Do not add typed fields such as "state religion", "culture type" or "government form". Model generic ideas (belief, language, custom, knowledge, style), integer adherence distributions per cohort, dated endorsements (`ENDORSES`, `ADMINISTERS`, `SUPPRESSES`, `PATRONS`) and Pecking Order power structures. The familiar notions are pure, versioned classifiers over that state. Azgaar supplies content and heuristics, not structure. Religion is a strong driver through weights, not a special code path.
+- **Ecosystem split** (decided, do not reopen):
+  - Neural Earth (`../infinite_map`) is the only multi-scale system, from planet down to cm.
+  - Magna Urbis (`../city_generator`) builds cities on Neural Earth 40 km tiles and will be merged into Neural Earth.
+  - Chronos is the world-scale time dimension: it reads regional aggregates and owns the historical delta.
+- **Resources work** lives outside this repo. It was merged into Neural Earth `main` (`de2fec6`, `docs/RESOURCE_LAYERS.md`) and Magna Urbis `main` (`bb7dcdf`) on 27/10/2026. The worktrees `../neural-earth-resources` and `../magna-urbis-resources` (branch `resources-layers`) remain for follow-up work. Never touch the main checkouts of `../infinite_map` or `../city_generator`.
+- **Coding is delegated to Codex CLI** (`codex exec -m gpt-6.1-sol -c model_reasoning_effort=high`), not to Claude subagents. The tracking doc §0 and §9 describe how.
+
 ## Commands
 
 Run these from the repository root. The workspace contains only `crates/chronos-core` and `crates/chronos-app`.
@@ -74,6 +89,9 @@ The crates under `tools/` declare their own `[workspace]`, are excluded from the
 
 ## Context docs
 
+- `docs/suivi-implementation.md`: **read first when resuming** (see "Resuming current work").
+- `docs/integration-azgaar.md` and `docs/reviews/azgaar-fmg-inspiration.md`: Azgaar reuse (content, rules, lots A0–A5, AZ tasks).
+- `docs/reviews/vision-entites-sociales.md`: vision, gap analysis, feasibility and macro design.
 - `docs/methods/chronology.md`: the implemented method and its known limits.
 - `docs/data-sources.md`: the fixture's provenance and structure.
 - `docs/interface.md`: the UI.
