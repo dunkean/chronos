@@ -3,6 +3,7 @@
 Prototype local d'un générateur de chronologie déterministe pour un petit monde : lieux, routes, royaumes, organisations, personnes nommées et événements datés avec leurs effets, explorables dans un atelier web (carte + frise + inspecteur).
 
 - Conception : [étude multiscalaire](conception_generateur_histoire_multiechelle_v3.md), [roadmap](Roadmap.md).
+- Prochaine version : [spécification d’implémentation sociale v2](docs/design/chronos-social-v2/README.md) — décisions, contrats, raccord des cultures, interfaces et lots S0–S8 ; spécification distincte du prototype actuel.
 - Méthode implémentée : [docs/methods/chronology.md](docs/methods/chronology.md).
 - Données importées : [docs/data-sources.md](docs/data-sources.md) (préparation dans `tools/`, fixture `fixtures/stack.json`).
 - Ressources à fournir par Neural Earth : [socle initial de 35 couches](NeuralEarth-Resources-Starter.md) ; [catalogue détaillé](NeuralEarth-Resources.md) conservé pour les raffinements ultérieurs. Spécifications distinctes du prototype livré.

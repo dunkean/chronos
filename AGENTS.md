@@ -1,10 +1,18 @@
-# CLAUDE.md
+# AGENTS.md
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 Chronos is a local prototype of a deterministic chronology generator for a small world: sites, routes, polities, organizations, named people and dated events with effects, explored in a web workshop with a map, a timeline and an inspector. User-facing docs, UI strings, warnings and source details are in French. Keep that language when editing them, and preserve the numbered sections and anchors of `conception_generateur_histoire_multiechelle_v3.md`.
 
 Before changing the engine, read sections 14 (Rust architecture), 15 (determinism), 17 (validation) and 18 (implementation phases) of the design study. In docs, clearly separate what is proposed, what is implemented and what was measured. Keep canonical facts, social constraints and narrative accounts separate.
+
+## Social v2 design scope
+
+The current implementation is v1. The architecture and cross-file invariants below describe v1 unless explicitly stated otherwise. For new social v2 work, follow `docs/design/chronos-social-v2/README.md` and lots S0–S8 in `docs/suivi-implementation.md`. Historical P0–P5 proposals do not override that specification.
+
+Keep v1 behavior and its `chronos-history-1` replay contract unchanged during migration. V2 uses separate model/schema/algorithm names. Its Rust core stays pure and WASM-compatible; `chronos-app` alone runs the pinned Python Lineage Lab worker. Core random decisions use semantic keys; the worker may use isolated versioned NumPy/Numba streams belonging to one immutable population plan. No query-dependent random stream or runtime-triggered provider fallback is allowed. The deterministic core-attempt variants declared before generation in social v2 §25.4 use the same provider and are explicitly allowed; they are not a runtime provider fallback.
+
+V2 defaults to statistical expectations, not exact quotas. Its cause ordering uses year, phase and topological rank. Its integrated people receive historical constraints before their lives are generated; this is distinct from modifying imported v1 genealogy, which remains forbidden. V2 procedural people are a declared provider/projection source, not the v1 emergency replacement rule. Update v2 method/contracts when changing v2 semantics; do not rewrite the v1 chronology method as though v2 were already implemented.
 
 ## Commands
 
@@ -27,6 +35,8 @@ cargo run --release -p chronos-app -- check world.json         # validate + comp
 The server binds only to `127.0.0.1`. It finds `web/` and `fixtures/` from the current directory, or by walking up from the executable. Override with `--root`, `--fixture` or `--web`.
 
 Rebuilding the fixture is a separate data-preparation step. It needs Node, Python and the sibling repos `../infinite_map`, `../city_generator`, `../namebench`, `../pecking-order` and `../lineage-lab`. Chronos never runs it at runtime.
+
+The `../city_generator` path is still the historical path in the v1 preparation tools. The current checkout here is `../magna-urbis`; rerunning those tools requires an explicit path configuration or alias first. Social v2 S0–S5 consumes frozen exports and does not depend on that preparation path at runtime.
 
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File tools/prepare.ps1
@@ -74,6 +84,8 @@ The crates under `tools/` declare their own `[workspace]`, are excluded from the
 
 ## Context docs
 
+- `docs/design/chronos-social-v2/README.md` and its JSON contracts: current social v2 implementation design.
+- `docs/suivi-implementation.md` section 7.4: active S0–S8 tracking; older P0–P5 are historical.
 - `docs/methods/chronology.md`: the implemented method and its known limits.
 - `docs/data-sources.md`: the fixture's provenance and structure.
 - `docs/interface.md`: the UI.

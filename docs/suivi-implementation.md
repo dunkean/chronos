@@ -2,24 +2,27 @@
 
 Document de reprise. Il permet de reprendre le développement dans une nouvelle conversation sans autre contexte. **Mets-le à jour à chaque session** : statut des tâches (§7), journal (§9), décisions (§8).
 
-Dernière mise à jour : 26/10/2026. Statut global : **conception faite, implémentation non commencée.** Rien des paliers P0–P5 n'est implémenté. Le chantier ressources est en pause (§7.2).
+Dernière mise à jour : 06/11/2026. Statut global : **design social v2 détaillé, implémentation non commencée.** Rien des paliers P0–P5 ni des nouveaux lots S0–S8 n'est implémenté. Le statut du chantier ressources décrit ci-dessous est celui consigné le 26/10 et n’a pas été réaudité dans cette session.
+
+**Point d’entrée actuel pour Chronos : [design social v2](design/chronos-social-v2/README.md).** Il intègre les remarques des deux tours de discussion, fixe le pilotage interne de Lineage Lab, les proportions statistiques par défaut et la première livraison S0–S5. Les paliers historiques P0–P5 restent des références ; la réécriture Rust de la généalogie et l’exactitude systématique des budgets ne sont plus des prérequis. Aucun moteur n’a changé dans cette session.
 
 ## 0. Reprendre en une minute
 
-Message à coller au début d'une nouvelle conversation, depuis `D:\Workspace\Self\RPG\chronos` :
+Message à coller au début d'une nouvelle conversation, depuis `D:\workspace\self\chronos` :
 
 ```text
-Lis docs/suivi-implementation.md en entier, puis les documents de son §2 « Lecture obligatoire ».
-Vérifie l'état réel (git status, branches et worktrees du §5) et signale tout écart avec le §7.
-Ensuite, reprends la prochaine tâche « à faire » du §7 (ou celle que je te donne).
+Lis le design docs/design/chronos-social-v2/README.md et les contrats de son dossier, puis ce suivi.
+Vérifie git status et les chemins actuels ; le tableau de worktrees du §5 est historique.
+Commence par S0 du §7.4, puis la première tranche non terminée S0–S5 (ou la tâche indiquée).
+Ne reprends pas P0.1 et ne remplace pas le moteur v1 : P0–P5 sont l'ancien plan.
 Mets à jour §7 et §9 à la fin de la session.
 ```
 
 Règles de travail (rappel de `CLAUDE.md`, qui fait foi) :
 - documents, interface et diagnostics en français ; séparer **proposé / implémenté / mesuré** ;
-- déterminisme strict : tout aléa passe par `keys::key/unit/range_i(seed, parties sémantiques)`, `BTreeMap`/`BTreeSet` seulement ;
+- déterminisme : noyau Rust à clés sémantiques, `BTreeMap`/`BTreeSet` ; worker v2 à plan immuable et runtime épinglé, sans flux partagé entre requêtes ;
 - `chronos-core` sans E/S ni horloge (`cargo check -p chronos-core --target wasm32-unknown-unknown`) ;
-- tout changement de sémantique change `ALGORITHM_VERSION` et `canon_id`, et `docs/methods/chronology.md` doit suivre ;
+- changement de sémantique : versions et canon changent ; méthode v1 dans `docs/methods/chronology.md`, contrats et méthode v2 dans son dossier, sans réécriture de la méthode v1 ;
 - avant de toucher au moteur, lire les §14, 15, 17 et 18 de l'étude v3.
 
 ## 1. Vision (résumé)
@@ -38,6 +41,7 @@ Le détail est dans [vision-entites-sociales.md §1](reviews/vision-entites-soci
 | # | Document | Pourquoi |
 |---|---|---|
 | 1 | `CLAUDE.md` (ce dépôt) | Commandes et invariants qui traversent les fichiers |
+| 1b | [Design social v2](design/chronos-social-v2/README.md) et ses contrats JSON | Spécification courante d’implémentation issue des commentaires du 06/11 ; arbitrages prioritaires sur les anciennes propositions |
 | 2 | [docs/reviews/vision-entites-sociales.md](reviews/vision-entites-sociales.md) | Vision, état actuel, autres projets, manques, faisabilité, design macro (§7), paliers |
 | 3 | [conception_generateur_histoire_multiechelle_v3.md](../conception_generateur_histoire_multiechelle_v3.md) §4A, §4.5, §10, §14–18 | Conception de référence : entité réifiée, propriété des événements, raffinement et budgets, architecture Rust, déterminisme, validation, phases |
 | 4 | [docs/methods/chronology.md](methods/chronology.md) | Algorithme implémenté aujourd'hui et ses limites |
@@ -55,30 +59,32 @@ Le détail est dans [vision-entites-sociales.md §1](reviews/vision-entites-soci
 | **Magna Urbis** (`../city_generator`) | Cités et établissements (`Terrain::place`, `Terrain::roads`, cultures). Travaille sur les **tuiles Neural Earth de 40 × 40 km** et utilise quelques échelles propres pour ses villes. **Sera intégré dans Neural Earth.** Son compilateur de sol (`godot-render/tools/surface_context.py`) est du traitement de tuile Neural Earth, hébergé ici provisoirement | Tuile 40 km, environ 30 m, puis échelles urbaines |
 | **Chronos** (ce dépôt) | **Dimension temporelle à l'échelle monde.** Entités sociales, chronique canonique, raffinement temporel. Lit les agrégats de Neural Earth et porte le **delta historique** (extraction, déforestation, défrichement, fondations) | Régions (LOD grossiers) × blocs de temps |
 | **Pecking Order** (`../pecking-order`) | Catalogue des structures internes : rôles, `level`, `reports_to`, `powers`, `collective`. Crate Rust | — |
-| **Lineage Lab** (`../lineage-lab`) | Référence démographique ; mode hybride noyau + cohortes, IDs stables par permutation inversible. Python | Personnes |
+| **Lineage Lab** (`../lineage-lab`) | Moteur démographique Python à piloter comme outil interne de Chronos v2, avec noyau + cohortes ; adaptateur historique à développer. L’import figé reste le comportement v1 | Personnes |
 | **Namebench** (`../namebench`) | Noms et toponymes. Non déterministe : utiliser des pools figés | — |
 | **ttrpg_content_generator** | Modèle d'origine (`doc/generation_schema.pptx`), catalogues de rôles, liens, cultures et races | — |
 
-Principe commun : **une seule identité de cellule** (LOD, coordonnées) et **un seul schéma de hasard adressé** (seed, couche, LOD, cellule ou propriétaire, slot), partagés par les trois systèmes. L'état naturel est immuable et produit par Neural Earth. Le delta historique est produit par Chronos. Une échelle fine lit « naturel + delta » à une date donnée.
+Principe commun : identités spatiales fournies par Neural Earth et hasard adressé pour les faits Chronos. Le worker Lineage Lab emploie ses flux isolés de plan et son runtime épinglé ; on ne prétend pas partager son RNG NumPy avec les autres moteurs. L’état naturel et le delta historique restent séparés.
 
 ## 4. Concepts clés
 
 | Concept | Définition courte | Référence |
 |---|---|---|
-| `SocialEntity` | Abstraction unique qui remplace `Polity`, `Organization` et `Person`. Elle porte `kind` et un archétype de catalogue | vision §7.2 ; v3 §4A |
-| Nature | `acteur` (peut décider), `agrégat` (population) ou `catégorie` (identité partagée) | vision §7.2 |
+| `SocialEntity` | Type commun v2, avec données personnelles et institutions typées séparément ; le modèle v1 reste conservé | design v2 §5 |
+| Nature | V2 : personne, groupe organisé, communauté, catégorie ou population ; capacité d’action séparée | design v2 §5 |
 | Résolution | `canonique`, `esquisse` (comptes et agrégats) ou `virtuelle` (slot non résolu) | vision §7.2 |
-| Relations | Trois familles. **Structurelles**, stockées et datées (composition, gouvernement, propriété). **D'affinité**, dérivées des attributs et jamais stockées (sang, culture, proximité, idéologie, activité). **Contractuelles et historiques**, stockées avec un événement cause (alliance, commerce, dette, rivalité, amitié, grief) | vision §7.2 |
+| Relations | Similarités calculables dérivées ; faits particuliers datés stockés, y compris confiance, amitié et entraide. Parentés sous l’autorité du fournisseur | design v2 §5 et §9 |
 | Cohortes | La population est comptée une seule fois, dans des cohortes disjointes. Une adhésion ne crée pas de personne | vision §7.2 |
 | Canon racine | Simulation par **régions et entités saillantes**, en **blocs** (décennie ; année pour les crises), jamais par site | vision §5, §7.4 |
-| Propriété | Chaque fait a un propriétaire unique (scope × bloc). Son ID est `(propriétaire, bloc, slot, version)` et son aléa `key(seed, propriétaire, bloc, slot)` | v3 §4.5, §15 ; vision §7.5 |
-| Budgets exacts | Un fait macro (« +30 villages, +50 000 habitants ») est alloué exactement aux sous-cellules et aux années, au prorata de masses canoniques, quel que soit l'ordre de requête | v3 §10.6–10.7 |
+| Propriété | Propriétaire et adresse sémantique uniques ; v2 utilise l’adresse sans perte pour l’identité, SHA-256 pour les empreintes et des clés distinctes pour l’aléa | design v2 §4 |
+| Précision des mesures | V2 : proportions attendues par défaut, réalisations locales pouvant diverger. Quotas et transferts exacts seulement quand le contrat le demande ; source, précision et couverture séparées | design v2 §4, §7 |
 | Pas de remontée | Un enfant ne modifie jamais son parent. Tout effet de portée supérieure est réservé en amont | v3 §4.5 |
 | Maturité `m` | Paramètre unique du bootstrap : colonisation ≈ 0,1–0,2, jeune ≈ 0,4–0,6, vieille ≈ 0,9 | vision §7.3 |
 | Potentiel / stock / flux | Ressources : aptitude intrinsèque, quantité épuisable, rendement renouvelable (saisonnier si utile) | §7.2 |
 | Provenance | `imported`, `derived`, `synthetic` ou `unavailable`. Un repli n'est jamais présenté comme importé | `CLAUDE.md` |
 
 ## 5. Dépôts, branches et fichiers
+
+Le tableau suivant est un relevé **historique du 26/10**. Dans ce workspace, les chemins actifs sont `D:\workspace\self\chronos`, `../magna-urbis`, `../infinite_map`, `../lineage-lab`, `../namebench` et `../pecking-order`. Les anciennes mentions `city_generator` et `D:\Workspace\Self\RPG` ne sont pas des chemins de reprise courants. Le design et les discussions du 06/11 sont la documentation nouvelle ; leur état git se vérifie à la reprise.
 
 | Où | Quoi | État au 26/10/2026 |
 |---|---|---|
@@ -110,6 +116,8 @@ cargo check -p chronos-core --target wasm32-unknown-unknown
 Statuts : `à faire`, `en cours`, `fait`, `bloqué (raison)`. Chaque tâche finie note sa preuve : test, commit ou mesure.
 
 ### 7.1 Paliers Chronos (vision §7.6)
+
+Les paliers ci-dessous décrivent le plan antérieur. Pour démarrer l’implémentation sociale, suivre les lots S0–S8 du §7.4 et les arbitrages D6–D11.
 
 **P0 — Modèle `SocialEntity`** : `à faire`. Preuve de sortie : même démo et mêmes invariants, sur le nouveau modèle.
 
@@ -176,6 +184,24 @@ Si l'agent n'est plus joignable (nouvelle conversation), relance-le avec le brie
 
 Ces lots complètent P0–P5 ; ils n'en changent pas le statut. Le document n'ajoute pas de dépendance FMG à l'exécution.
 
+### 7.4 Livraison sociale v2
+
+La spécification est rédigée ; les statuts ci-dessous concernent uniquement le code à développer. Le dossier contient le design, un raccord de 79 styles Magna Urbis vers 21 familles de paramètres, un schéma de plan démographique et un exemple de contrat.
+
+| Lot | Travail | Statut |
+|---|---|---|
+| S0 | Types, clés, atlas, contrats d’impact et validation v2 | à faire |
+| S1 | Profils culturels et archétypes exécutables ; intégrer le raccord préparé | à faire |
+| S2 | Canon général, régions, domaines fixes et contexte extérieur | à faire |
+| S3 | Worker Lineage Lab et programme historique noyau/cohortes | à faire |
+| S4 | Complément procédural, recrutement, mandats et groupes informels | à faire |
+| S5 | API, stockage, carte, graphes interactifs, chronologie et bilans | à faire |
+| S6 | Scénarios exacts, personnes requises et branches | à faire |
+| S7 | Liaisons exactes d’acteurs nommés entre domaines | à faire |
+| S8 | Mesures, checkpoints, sélection paresseuse, grands sites, fournisseur démographique procédural, profils mixtes, nouveaux sites dynamiques et formats binaires éventuels | à faire |
+
+Première livraison utilisable : S0–S5. Les contraintes exactes avancées et les liaisons nominatives entre domaines sont des extensions identifiées. La source de vérité des contrats et critères de sortie est [le design](design/chronos-social-v2/README.md).
+
 ## 8. Décisions
 
 | # | Décision | Statut | Notes |
@@ -186,9 +212,18 @@ Ces lots complètent P0–P5 ; ils n'en changent pas le statut. Le document n'aj
 | D3 | Pas de bloc racine : décennie proposée, année pour les crises | proposé | Avant P2 |
 | D4 | Format et transport des agrégats Neural Earth vers Chronos : export figé d'abord, puis API | ouvert | Lié à R2 (contrat neutre) |
 | D5 | Dépôt d'accueil final des modules communs (adressage des cellules, hasard adressé, contrat des ressources) | ouvert | Après l'intégration Neural Earth / Magna Urbis |
+| D6 | Causalité descendante et cohérence statistique ; émergence ascendante facultative | **décidé** par les commentaires utilisateur du 06/11 | design v2 §1 |
+| D7 | Chronos pilote Lineage Lab comme outil interne ; complément procédural pour monter en échelle | **décidé** par les commentaires utilisateur du 06/11 | Protocole et adaptations proposés en §8 et §13 |
+| D8 | Proportions attendues par défaut ; exactitude explicite pour scénarios et engagements | **décidé** par les commentaires utilisateur du 06/11 | Révise la généralisation des budgets exacts |
+| D9 | Domaine local fixe, horizon fixe, worker Python depuis l’hôte et paquets canoniques | choix technique proposé pour implémentation | Préserve le noyau pur et le rejeu |
+| D10 | Styles Magna Urbis regroupés en familles historiques avec variantes ; graphes interactifs et bilans dès le prototype | orientation validée par les commentaires utilisateur du 06/11 | Raccord et choix graphiques proposés dans le dossier |
+| D11 | Frontières statistiques dans S0–S5 ; suivi nominatif exact par contrat de liaison dans S7 | périmètre technique proposé | Limite déclarée, aucune fonctionnalité existante prétendue |
+
+Pour S0–S5, D1/D2/D4 ne bloquent pas le développement : l’atlas et les géométries sont des exports figés, la fixture définit explicitement cellules/routes/sites, et aucun lien d’exécution nouveau avec Magna Urbis n’est requis. Ces décisions restent à résoudre pour les intégrations d’hôte ultérieures, sans inventer une seconde grille dans Chronos.
 
 ## 9. Journal
 
+- **06/11/2026, design social v2** : prise en compte des deux tours de commentaires ; préparation de `docs/design/chronos-social-v2/` avec modèle social, hasard indexé, plans démographiques, pilotage interne de Lineage Lab, raccord culturel, recrutement, mandats, impacts statistiques ou exacts, monde ouvert, visualisations, API et lots S0–S8. Discussion et annotations utilisateur conservées. Relectures indépendantes par Claude Opus 5.5 et intégration des corrections sur les cycles, registres démographiques, mobilité, noyau, profils et contrats autonomes. Documentation et contrats seulement : aucun changement de moteur, aucune mesure de performance nouvelle.
 - **26/10/2026, reprise Azgaar** : audit du checkout Fantasy Map Generator `67d555b`, rédaction de `docs/integration-azgaar.md`, lien depuis le README et lots proposés A0–A5 en §7.3. Comparaison des capacités avec le code Chronos actuel ; limites explicites du cycle économique, du hasard global et des récits sans causes. Documentation seulement : aucun moteur, schéma, canon ou statut P0–P5 modifié ; aucun benchmark exécuté.
 - **26/10/2026** : analyse de la vision et rédaction de `docs/reviews/vision-entites-sociales.md`. Recherche des couches de roches : la lithologie et les sols sont trouvés dans `city_generator/origin/main` (`godot-render/tools/surface_context.py`), sans aucune ressource exploitable. Agent ressources lancé, puis recadré deux fois : (1) niveau monde dans Neural Earth avec Orogen ; (2) Neural Earth comme seule chaîne multi-échelle. Mis en pause en attendant la fusion de Render v2. Création de ce document. Rien n'est commité dans Chronos.
 - **26/10/2026, pause de l'agent ressources** : commit WIP `56d78b7` dans `neural-earth-resources` (prototype monde, voir R0). Tests non passants (R0b). `RESOURCE_LAYERS.md` non écrit. À réaligner sur Render v2 : 8 classes de roche, score céréalier par pédologie, tourbe et toute la réinjection dans les textures. Littérature non vérifiée : Campbell (boisseaux par acre), Rackham (rotations), sel de Lüneburg.

@@ -1,0 +1,3482 @@
+{
+  "schema_version": 1,
+  "status": "design_proposal",
+  "catalogue_version": "chronos-social-cultures-1",
+  "source_inventory": {
+    "path": "magna-urbis/rust/crates/core/src/urban/catalogue.json",
+    "sha256": "a4e2febf9ef50e58ded4d658b7fe21072f95c6d43b71eff1b62027764781f2fe",
+    "culture_count": 79,
+    "inspected_on": "2026-11-06"
+  },
+  "interpretation": "Familles de paramètres de worldbuilding partageables. Elles ne déclarent aucune équivalence historique, ethnique ou biologique. Les variantes conservent les identifiants Magna Urbis.",
+  "resolution_order": [
+    "engine_defaults",
+    "history_family",
+    "culture_variant",
+    "polity_and_institution",
+    "local_context",
+    "author_constraints"
+  ],
+  "families": [
+    {
+      "id": "agrarian_estates",
+      "label": "Domaines agraires et autorités territoriales",
+      "common_groups": [
+        "landed_house",
+        "village_council",
+        "farm_household"
+      ],
+      "governance_template": "territorial_offices",
+      "kinship_template": "household_and_lineage",
+      "parameters_status": "initial_template_not_historical_calibration",
+      "parameters": {
+        "kin_recruitment_bonus": 800,
+        "formal_association_weight": 45,
+        "geographic_mobility_multiplier_ppm": 600000
+      }
+    },
+    {
+      "id": "mercantile_communes",
+      "label": "Communes et réseaux marchands",
+      "common_groups": [
+        "merchant_house",
+        "craft_guild",
+        "civic_council"
+      ],
+      "governance_template": "civic_councils",
+      "kinship_template": "household_and_partnership",
+      "parameters_status": "initial_template_not_historical_calibration",
+      "parameters": {
+        "kin_recruitment_bonus": 400,
+        "formal_association_weight": 85,
+        "geographic_mobility_multiplier_ppm": 1400000
+      }
+    },
+    {
+      "id": "urban_administrations",
+      "label": "Administrations et quartiers urbains",
+      "common_groups": [
+        "administration",
+        "ward_community",
+        "craft_association"
+      ],
+      "governance_template": "administrative_offices",
+      "kinship_template": "household_and_lineage",
+      "parameters_status": "initial_template_not_historical_calibration",
+      "parameters": {
+        "kin_recruitment_bonus": 450,
+        "formal_association_weight": 80,
+        "geographic_mobility_multiplier_ppm": 900000
+      }
+    },
+    {
+      "id": "courts_and_bazaars",
+      "label": "Cours et réseaux de marchés",
+      "common_groups": [
+        "court",
+        "merchant_house",
+        "neighborhood"
+      ],
+      "governance_template": "court_and_local_councils",
+      "kinship_template": "household_and_lineage",
+      "parameters_status": "initial_template_not_historical_calibration",
+      "parameters": {
+        "kin_recruitment_bonus": 650,
+        "formal_association_weight": 75,
+        "geographic_mobility_multiplier_ppm": 1100000
+      }
+    },
+    {
+      "id": "temple_centres",
+      "label": "Institutions rituelles et centres de savoir",
+      "common_groups": [
+        "ritual_institution",
+        "school",
+        "service_household"
+      ],
+      "governance_template": "institutional_councils",
+      "kinship_template": "household_and_affiliation",
+      "parameters_status": "initial_template_not_historical_calibration",
+      "parameters": {
+        "kin_recruitment_bonus": 400,
+        "formal_association_weight": 85,
+        "geographic_mobility_multiplier_ppm": 800000
+      }
+    },
+    {
+      "id": "fortified_houses",
+      "label": "Maisons et territoires fortifiés",
+      "common_groups": [
+        "territorial_house",
+        "retinue",
+        "village_council"
+      ],
+      "governance_template": "house_and_territorial_offices",
+      "kinship_template": "household_and_lineage",
+      "parameters_status": "initial_template_not_historical_calibration",
+      "parameters": {
+        "kin_recruitment_bonus": 850,
+        "formal_association_weight": 60,
+        "geographic_mobility_multiplier_ppm": 650000
+      }
+    },
+    {
+      "id": "clan_assemblies",
+      "label": "Maisons et assemblées communautaires",
+      "common_groups": [
+        "kin_group",
+        "local_assembly",
+        "companionship"
+      ],
+      "governance_template": "local_assemblies",
+      "kinship_template": "household_and_lineage",
+      "parameters_status": "initial_template_not_historical_calibration",
+      "parameters": {
+        "kin_recruitment_bonus": 900,
+        "formal_association_weight": 35,
+        "geographic_mobility_multiplier_ppm": 900000
+      }
+    },
+    {
+      "id": "mobile_camps",
+      "label": "Campements et réseaux mobiles",
+      "common_groups": [
+        "mobile_household",
+        "travel_party",
+        "exchange_network"
+      ],
+      "governance_template": "mobile_group_leadership",
+      "kinship_template": "mobile_households",
+      "parameters_status": "initial_template_not_historical_calibration",
+      "parameters": {
+        "kin_recruitment_bonus": 700,
+        "formal_association_weight": 30,
+        "geographic_mobility_multiplier_ppm": 1800000
+      }
+    },
+    {
+      "id": "compound_courts",
+      "label": "Communautés de concessions et cours",
+      "common_groups": [
+        "household_compound",
+        "court",
+        "market_association"
+      ],
+      "governance_template": "court_and_local_councils",
+      "kinship_template": "extended_households",
+      "parameters_status": "initial_template_not_historical_calibration",
+      "parameters": {
+        "kin_recruitment_bonus": 850,
+        "formal_association_weight": 55,
+        "geographic_mobility_multiplier_ppm": 900000
+      }
+    },
+    {
+      "id": "maritime_networks",
+      "label": "Réseaux maritimes et communautés littorales",
+      "common_groups": [
+        "crew",
+        "merchant_house",
+        "shore_community"
+      ],
+      "governance_template": "port_and_local_councils",
+      "kinship_template": "household_and_partnership",
+      "parameters_status": "initial_template_not_historical_calibration",
+      "parameters": {
+        "kin_recruitment_bonus": 450,
+        "formal_association_weight": 70,
+        "geographic_mobility_multiplier_ppm": 1700000
+      }
+    },
+    {
+      "id": "communal_houses",
+      "label": "Maisons collectives et communautés locales",
+      "common_groups": [
+        "communal_house",
+        "local_assembly",
+        "resource_group"
+      ],
+      "governance_template": "local_assemblies",
+      "kinship_template": "communal_households",
+      "parameters_status": "initial_template_not_historical_calibration",
+      "parameters": {
+        "kin_recruitment_bonus": 850,
+        "formal_association_weight": 40,
+        "geographic_mobility_multiplier_ppm": 800000
+      }
+    },
+    {
+      "id": "redistributive_centres",
+      "label": "Centres de redistribution et communautés productrices",
+      "common_groups": [
+        "redistributive_institution",
+        "productive_community",
+        "ritual_group"
+      ],
+      "governance_template": "centre_and_community_offices",
+      "kinship_template": "household_and_community",
+      "parameters_status": "initial_template_not_historical_calibration",
+      "parameters": {
+        "kin_recruitment_bonus": 650,
+        "formal_association_weight": 75,
+        "geographic_mobility_multiplier_ppm": 800000
+      }
+    },
+    {
+      "id": "oasis_networks",
+      "label": "Oasis et réseaux caravaniers",
+      "common_groups": [
+        "caravan",
+        "water_association",
+        "merchant_house"
+      ],
+      "governance_template": "local_and_route_councils",
+      "kinship_template": "household_and_partnership",
+      "parameters_status": "initial_template_not_historical_calibration",
+      "parameters": {
+        "kin_recruitment_bonus": 650,
+        "formal_association_weight": 65,
+        "geographic_mobility_multiplier_ppm": 1600000
+      }
+    },
+    {
+      "id": "craft_holds",
+      "label": "Communautés d'ateliers et places fortes",
+      "common_groups": [
+        "craft_house",
+        "workshop",
+        "hold_council"
+      ],
+      "governance_template": "craft_and_house_councils",
+      "kinship_template": "household_and_craft_lineage",
+      "parameters_status": "initial_template_not_historical_calibration",
+      "parameters": {
+        "kin_recruitment_bonus": 800,
+        "formal_association_weight": 85,
+        "geographic_mobility_multiplier_ppm": 700000
+      }
+    },
+    {
+      "id": "forest_houses",
+      "label": "Maisons et communautés forestières",
+      "common_groups": [
+        "forest_house",
+        "resource_group",
+        "local_assembly"
+      ],
+      "governance_template": "local_assemblies",
+      "kinship_template": "household_and_lineage",
+      "parameters_status": "initial_template_not_historical_calibration",
+      "parameters": {
+        "kin_recruitment_bonus": 650,
+        "formal_association_weight": 40,
+        "geographic_mobility_multiplier_ppm": 800000
+      }
+    },
+    {
+      "id": "underground_factions",
+      "label": "Maisons et factions souterraines",
+      "common_groups": [
+        "house_faction",
+        "neighborhood",
+        "service_group"
+      ],
+      "governance_template": "faction_and_local_offices",
+      "kinship_template": "household_and_affiliation",
+      "parameters_status": "initial_template_not_historical_calibration",
+      "parameters": {
+        "kin_recruitment_bonus": 700,
+        "formal_association_weight": 60,
+        "geographic_mobility_multiplier_ppm": 800000
+      }
+    },
+    {
+      "id": "retinue_clans",
+      "label": "Clans et groupes de compagnonnage armé",
+      "common_groups": [
+        "kin_group",
+        "retinue",
+        "companionship"
+      ],
+      "governance_template": "group_and_clan_leadership",
+      "kinship_template": "household_and_lineage",
+      "parameters_status": "initial_template_not_historical_calibration",
+      "parameters": {
+        "kin_recruitment_bonus": 750,
+        "formal_association_weight": 35,
+        "geographic_mobility_multiplier_ppm": 1400000
+      }
+    },
+    {
+      "id": "colony_networks",
+      "label": "Colonies et communautés à reproduction paramétrable",
+      "common_groups": [
+        "local_colony",
+        "resource_group",
+        "exchange_network"
+      ],
+      "governance_template": "colony_coordination",
+      "kinship_template": "explicit_reproduction_profile",
+      "parameters_status": "initial_template_not_historical_calibration",
+      "parameters": {
+        "kin_recruitment_bonus": 500,
+        "formal_association_weight": 50,
+        "geographic_mobility_multiplier_ppm": 1000000
+      }
+    },
+    {
+      "id": "wetland_communities",
+      "label": "Communautés des zones humides",
+      "common_groups": [
+        "local_community",
+        "resource_group",
+        "travel_party"
+      ],
+      "governance_template": "local_assemblies",
+      "kinship_template": "explicit_reproduction_profile",
+      "parameters_status": "initial_template_not_historical_calibration",
+      "parameters": {
+        "kin_recruitment_bonus": 600,
+        "formal_association_weight": 40,
+        "geographic_mobility_multiplier_ppm": 900000
+      }
+    },
+    {
+      "id": "market_towns",
+      "label": "Villes de marché et réseaux régionaux",
+      "common_groups": [
+        "market_association",
+        "civic_council",
+        "craft_guild"
+      ],
+      "governance_template": "civic_councils",
+      "kinship_template": "household_and_partnership",
+      "parameters_status": "initial_template_not_historical_calibration",
+      "parameters": {
+        "kin_recruitment_bonus": 500,
+        "formal_association_weight": 75,
+        "geographic_mobility_multiplier_ppm": 1200000
+      }
+    },
+    {
+      "id": "hill_courts",
+      "label": "Cours et habitats anciens de hauteur",
+      "common_groups": [
+        "court",
+        "neighborhood",
+        "productive_community"
+      ],
+      "governance_template": "court_and_local_councils",
+      "kinship_template": "household_and_lineage",
+      "parameters_status": "initial_template_not_historical_calibration",
+      "parameters": {
+        "kin_recruitment_bonus": 750,
+        "formal_association_weight": 60,
+        "geographic_mobility_multiplier_ppm": 750000
+      }
+    }
+  ],
+  "bindings": [
+    {
+      "mu_culture_id": "al-andalus",
+      "history_family_id": "courts_and_bazaars",
+      "variant_id": "al-andalus",
+      "overlays": [],
+      "institution_titles": {
+        "theme_id": "generic",
+        "coverage": "generic_pending_variant"
+      },
+      "demography_society_template_id": "society-template/courts_and_bazaars"
+    },
+    {
+      "mu_culture_id": "aztec",
+      "history_family_id": "redistributive_centres",
+      "variant_id": "aztec",
+      "overlays": [],
+      "institution_titles": {
+        "theme_id": "aztec",
+        "coverage": "explicit_id_or_alias"
+      },
+      "demography_society_template_id": "society-template/redistributive_centres"
+    },
+    {
+      "mu_culture_id": "bagan",
+      "history_family_id": "temple_centres",
+      "variant_id": "bagan",
+      "overlays": [],
+      "institution_titles": {
+        "theme_id": "generic",
+        "coverage": "generic_pending_variant"
+      },
+      "demography_society_template_id": "society-template/temple_centres"
+    },
+    {
+      "mu_culture_id": "barbarian",
+      "history_family_id": "clan_assemblies",
+      "variant_id": "barbarian",
+      "overlays": [],
+      "institution_titles": {
+        "theme_id": "germanic",
+        "coverage": "explicit_id_or_alias"
+      },
+      "demography_society_template_id": "society-template/clan_assemblies"
+    },
+    {
+      "mu_culture_id": "barbarian-celtic",
+      "history_family_id": "clan_assemblies",
+      "variant_id": "barbarian-celtic",
+      "overlays": [],
+      "institution_titles": {
+        "theme_id": "celtic",
+        "coverage": "explicit_id_or_alias"
+      },
+      "demography_society_template_id": "society-template/clan_assemblies"
+    },
+    {
+      "mu_culture_id": "barbarian-norse",
+      "history_family_id": "clan_assemblies",
+      "variant_id": "barbarian-norse",
+      "overlays": [],
+      "institution_titles": {
+        "theme_id": "norse",
+        "coverage": "explicit_id_or_alias"
+      },
+      "demography_society_template_id": "society-template/clan_assemblies"
+    },
+    {
+      "mu_culture_id": "bastide",
+      "history_family_id": "agrarian_estates",
+      "variant_id": "bastide",
+      "overlays": [
+        "planned_foundation"
+      ],
+      "institution_titles": {
+        "theme_id": "western-europe",
+        "coverage": "explicit_id_or_alias"
+      },
+      "demography_society_template_id": "society-template/agrarian_estates"
+    },
+    {
+      "mu_culture_id": "budj-bim",
+      "history_family_id": "communal_houses",
+      "variant_id": "budj-bim",
+      "overlays": [],
+      "institution_titles": {
+        "theme_id": "generic",
+        "coverage": "generic_pending_variant"
+      },
+      "demography_society_template_id": "society-template/communal_houses"
+    },
+    {
+      "mu_culture_id": "byzantine-greek",
+      "history_family_id": "hill_courts",
+      "variant_id": "byzantine-greek",
+      "overlays": [],
+      "institution_titles": {
+        "theme_id": "byzantine-greek",
+        "coverage": "explicit_id_or_alias"
+      },
+      "demography_society_template_id": "society-template/hill_courts"
+    },
+    {
+      "mu_culture_id": "caucasian-highland",
+      "history_family_id": "fortified_houses",
+      "variant_id": "caucasian-highland",
+      "overlays": [],
+      "institution_titles": {
+        "theme_id": "generic",
+        "coverage": "generic_pending_variant"
+      },
+      "demography_society_template_id": "society-template/fortified_houses"
+    },
+    {
+      "mu_culture_id": "celtic-oppidum",
+      "history_family_id": "clan_assemblies",
+      "variant_id": "celtic-oppidum",
+      "overlays": [],
+      "institution_titles": {
+        "theme_id": "celtic",
+        "coverage": "explicit_id_or_alias"
+      },
+      "demography_society_template_id": "society-template/clan_assemblies"
+    },
+    {
+      "mu_culture_id": "chinese",
+      "history_family_id": "urban_administrations",
+      "variant_id": "chinese",
+      "overlays": [],
+      "institution_titles": {
+        "theme_id": "chinese",
+        "coverage": "explicit_id_or_alias"
+      },
+      "demography_society_template_id": "society-template/urban_administrations"
+    },
+    {
+      "mu_culture_id": "dravidian-temple",
+      "history_family_id": "temple_centres",
+      "variant_id": "dravidian-temple",
+      "overlays": [],
+      "institution_titles": {
+        "theme_id": "generic",
+        "coverage": "generic_pending_variant"
+      },
+      "demography_society_template_id": "society-template/temple_centres"
+    },
+    {
+      "mu_culture_id": "drow-enclave",
+      "history_family_id": "underground_factions",
+      "variant_id": "drow-enclave",
+      "overlays": [
+        "subterranean_access"
+      ],
+      "institution_titles": {
+        "theme_id": "drow-enclave",
+        "coverage": "explicit_id_or_alias"
+      },
+      "demography_society_template_id": "society-template/underground_factions"
+    },
+    {
+      "mu_culture_id": "duergar-hold",
+      "history_family_id": "craft_holds",
+      "variant_id": "duergar-hold",
+      "overlays": [
+        "subterranean_access"
+      ],
+      "institution_titles": {
+        "theme_id": "duergar-hold",
+        "coverage": "explicit_id_or_alias"
+      },
+      "demography_society_template_id": "society-template/craft_holds"
+    },
+    {
+      "mu_culture_id": "dwarven",
+      "history_family_id": "craft_holds",
+      "variant_id": "dwarven",
+      "overlays": [],
+      "institution_titles": {
+        "theme_id": "dwarven",
+        "coverage": "explicit_id_or_alias"
+      },
+      "demography_society_template_id": "society-template/craft_holds"
+    },
+    {
+      "mu_culture_id": "egyptian-planned",
+      "history_family_id": "urban_administrations",
+      "variant_id": "egyptian-planned",
+      "overlays": [
+        "planned_foundation",
+        "river_corridor"
+      ],
+      "institution_titles": {
+        "theme_id": "generic",
+        "coverage": "generic_pending_variant"
+      },
+      "demography_society_template_id": "society-template/urban_administrations"
+    },
+    {
+      "mu_culture_id": "elven",
+      "history_family_id": "forest_houses",
+      "variant_id": "elven",
+      "overlays": [
+        "forest_access"
+      ],
+      "institution_titles": {
+        "theme_id": "elven",
+        "coverage": "explicit_id_or_alias"
+      },
+      "demography_society_template_id": "society-template/forest_houses"
+    },
+    {
+      "mu_culture_id": "ethiopian-highland",
+      "history_family_id": "compound_courts",
+      "variant_id": "ethiopian-highland",
+      "overlays": [
+        "highland_routes"
+      ],
+      "institution_titles": {
+        "theme_id": "generic",
+        "coverage": "generic_pending_variant"
+      },
+      "demography_society_template_id": "society-template/compound_courts"
+    },
+    {
+      "mu_culture_id": "european-organic",
+      "history_family_id": "agrarian_estates",
+      "variant_id": "european-organic",
+      "overlays": [],
+      "institution_titles": {
+        "theme_id": "western-europe",
+        "coverage": "explicit_id_or_alias"
+      },
+      "demography_society_template_id": "society-template/agrarian_estates"
+    },
+    {
+      "mu_culture_id": "flemish-cloth-town",
+      "history_family_id": "mercantile_communes",
+      "variant_id": "flemish-cloth-town",
+      "overlays": [],
+      "institution_titles": {
+        "theme_id": "generic",
+        "coverage": "generic_pending_variant"
+      },
+      "demography_society_template_id": "society-template/mercantile_communes"
+    },
+    {
+      "mu_culture_id": "giant-hold",
+      "history_family_id": "craft_holds",
+      "variant_id": "giant-hold",
+      "overlays": [
+        "large_body_admission"
+      ],
+      "institution_titles": {
+        "theme_id": "generic",
+        "coverage": "generic_pending_variant"
+      },
+      "demography_society_template_id": "society-template/craft_holds"
+    },
+    {
+      "mu_culture_id": "gnomish",
+      "history_family_id": "mercantile_communes",
+      "variant_id": "gnomish",
+      "overlays": [
+        "canal_craft"
+      ],
+      "institution_titles": {
+        "theme_id": "gnomish",
+        "coverage": "explicit_id_or_alias"
+      },
+      "demography_society_template_id": "society-template/mercantile_communes"
+    },
+    {
+      "mu_culture_id": "goblin-warren",
+      "history_family_id": "underground_factions",
+      "variant_id": "goblin-warren",
+      "overlays": [
+        "subterranean_access"
+      ],
+      "institution_titles": {
+        "theme_id": "generic",
+        "coverage": "generic_pending_variant"
+      },
+      "demography_society_template_id": "society-template/underground_factions"
+    },
+    {
+      "mu_culture_id": "great-zimbabwe",
+      "history_family_id": "compound_courts",
+      "variant_id": "great-zimbabwe",
+      "overlays": [
+        "stone_enclosures"
+      ],
+      "institution_titles": {
+        "theme_id": "generic",
+        "coverage": "generic_pending_variant"
+      },
+      "demography_society_template_id": "society-template/compound_courts"
+    },
+    {
+      "mu_culture_id": "guarani-village",
+      "history_family_id": "communal_houses",
+      "variant_id": "guarani-village",
+      "overlays": [],
+      "institution_titles": {
+        "theme_id": "generic",
+        "coverage": "generic_pending_variant"
+      },
+      "demography_society_template_id": "society-template/communal_houses"
+    },
+    {
+      "mu_culture_id": "hadhrami-tower",
+      "history_family_id": "courts_and_bazaars",
+      "variant_id": "hadhrami-tower",
+      "overlays": [
+        "vertical_households"
+      ],
+      "institution_titles": {
+        "theme_id": "generic",
+        "coverage": "generic_pending_variant"
+      },
+      "demography_society_template_id": "society-template/courts_and_bazaars"
+    },
+    {
+      "mu_culture_id": "halfling",
+      "history_family_id": "clan_assemblies",
+      "variant_id": "halfling",
+      "overlays": [],
+      "institution_titles": {
+        "theme_id": "halfling",
+        "coverage": "explicit_id_or_alias"
+      },
+      "demography_society_template_id": "society-template/clan_assemblies"
+    },
+    {
+      "mu_culture_id": "hanseatic",
+      "history_family_id": "mercantile_communes",
+      "variant_id": "hanseatic",
+      "overlays": [],
+      "institution_titles": {
+        "theme_id": "hanseatic",
+        "coverage": "explicit_id_or_alias"
+      },
+      "demography_society_template_id": "society-template/mercantile_communes"
+    },
+    {
+      "mu_culture_id": "hausa-kano",
+      "history_family_id": "compound_courts",
+      "variant_id": "hausa-kano",
+      "overlays": [],
+      "institution_titles": {
+        "theme_id": "generic",
+        "coverage": "generic_pending_variant"
+      },
+      "demography_society_template_id": "society-template/compound_courts"
+    },
+    {
+      "mu_culture_id": "himalayan-terraces",
+      "history_family_id": "fortified_houses",
+      "variant_id": "himalayan-terraces",
+      "overlays": [
+        "terrace_agriculture"
+      ],
+      "institution_titles": {
+        "theme_id": "generic",
+        "coverage": "generic_pending_variant"
+      },
+      "demography_society_template_id": "society-template/fortified_houses"
+    },
+    {
+      "mu_culture_id": "inca",
+      "history_family_id": "redistributive_centres",
+      "variant_id": "inca",
+      "overlays": [
+        "terrace_agriculture"
+      ],
+      "institution_titles": {
+        "theme_id": "inca",
+        "coverage": "explicit_id_or_alias"
+      },
+      "demography_society_template_id": "society-template/redistributive_centres"
+    },
+    {
+      "mu_culture_id": "indian-temple",
+      "history_family_id": "temple_centres",
+      "variant_id": "indian-temple",
+      "overlays": [],
+      "institution_titles": {
+        "theme_id": "indian-temple",
+        "coverage": "explicit_id_or_alias"
+      },
+      "demography_society_template_id": "society-template/temple_centres"
+    },
+    {
+      "mu_culture_id": "indus-planned",
+      "history_family_id": "urban_administrations",
+      "variant_id": "indus-planned",
+      "overlays": [
+        "planned_foundation"
+      ],
+      "institution_titles": {
+        "theme_id": "generic",
+        "coverage": "generic_pending_variant"
+      },
+      "demography_society_template_id": "society-template/urban_administrations"
+    },
+    {
+      "mu_culture_id": "inuit-camp",
+      "history_family_id": "mobile_camps",
+      "variant_id": "inuit-camp",
+      "overlays": [
+        "cold_seasonality"
+      ],
+      "institution_titles": {
+        "theme_id": "generic",
+        "coverage": "generic_pending_variant"
+      },
+      "demography_society_template_id": "society-template/mobile_camps"
+    },
+    {
+      "mu_culture_id": "italian-comune",
+      "history_family_id": "mercantile_communes",
+      "variant_id": "italian-comune",
+      "overlays": [],
+      "institution_titles": {
+        "theme_id": "generic",
+        "coverage": "generic_pending_variant"
+      },
+      "demography_society_template_id": "society-template/mercantile_communes"
+    },
+    {
+      "mu_culture_id": "japanese-jokamachi",
+      "history_family_id": "fortified_houses",
+      "variant_id": "japanese-jokamachi",
+      "overlays": [],
+      "institution_titles": {
+        "theme_id": "japanese",
+        "coverage": "explicit_id_or_alias"
+      },
+      "demography_society_template_id": "society-template/fortified_houses"
+    },
+    {
+      "mu_culture_id": "javanese-courts",
+      "history_family_id": "redistributive_centres",
+      "variant_id": "javanese-courts",
+      "overlays": [],
+      "institution_titles": {
+        "theme_id": "generic",
+        "coverage": "generic_pending_variant"
+      },
+      "demography_society_template_id": "society-template/redistributive_centres"
+    },
+    {
+      "mu_culture_id": "khmer",
+      "history_family_id": "redistributive_centres",
+      "variant_id": "khmer",
+      "overlays": [],
+      "institution_titles": {
+        "theme_id": "khmer",
+        "coverage": "explicit_id_or_alias"
+      },
+      "demography_society_template_id": "society-template/redistributive_centres"
+    },
+    {
+      "mu_culture_id": "korean",
+      "history_family_id": "urban_administrations",
+      "variant_id": "korean",
+      "overlays": [],
+      "institution_titles": {
+        "theme_id": "korean",
+        "coverage": "explicit_id_or_alias"
+      },
+      "demography_society_template_id": "society-template/urban_administrations"
+    },
+    {
+      "mu_culture_id": "kraal",
+      "history_family_id": "compound_courts",
+      "variant_id": "kraal",
+      "overlays": [],
+      "institution_titles": {
+        "theme_id": "southern-african",
+        "coverage": "explicit_id_or_alias"
+      },
+      "demography_society_template_id": "society-template/compound_courts"
+    },
+    {
+      "mu_culture_id": "ksar-oasis",
+      "history_family_id": "oasis_networks",
+      "variant_id": "ksar-oasis",
+      "overlays": [],
+      "institution_titles": {
+        "theme_id": "generic",
+        "coverage": "generic_pending_variant"
+      },
+      "demography_society_template_id": "society-template/oasis_networks"
+    },
+    {
+      "mu_culture_id": "levantine-tell",
+      "history_family_id": "hill_courts",
+      "variant_id": "levantine-tell",
+      "overlays": [],
+      "institution_titles": {
+        "theme_id": "generic",
+        "coverage": "generic_pending_variant"
+      },
+      "demography_society_template_id": "society-template/hill_courts"
+    },
+    {
+      "mu_culture_id": "lizardfolk-swamp",
+      "history_family_id": "wetland_communities",
+      "variant_id": "lizardfolk-swamp",
+      "overlays": [
+        "wetland_access",
+        "reproduction_profile_required"
+      ],
+      "institution_titles": {
+        "theme_id": "generic",
+        "coverage": "generic_pending_variant"
+      },
+      "demography_society_template_id": "society-template/wetland_communities"
+    },
+    {
+      "mu_culture_id": "maori-pa",
+      "history_family_id": "clan_assemblies",
+      "variant_id": "maori-pa",
+      "overlays": [],
+      "institution_titles": {
+        "theme_id": "generic",
+        "coverage": "generic_pending_variant"
+      },
+      "demography_society_template_id": "society-template/clan_assemblies"
+    },
+    {
+      "mu_culture_id": "maya",
+      "history_family_id": "redistributive_centres",
+      "variant_id": "maya",
+      "overlays": [],
+      "institution_titles": {
+        "theme_id": "maya",
+        "coverage": "explicit_id_or_alias"
+      },
+      "demography_society_template_id": "society-template/redistributive_centres"
+    },
+    {
+      "mu_culture_id": "medina",
+      "history_family_id": "courts_and_bazaars",
+      "variant_id": "medina",
+      "overlays": [],
+      "institution_titles": {
+        "theme_id": "medina",
+        "coverage": "explicit_id_or_alias"
+      },
+      "demography_society_template_id": "society-template/courts_and_bazaars"
+    },
+    {
+      "mu_culture_id": "merfolk-tidal",
+      "history_family_id": "maritime_networks",
+      "variant_id": "merfolk-tidal",
+      "overlays": [
+        "aquatic_access",
+        "tidal_seasonality"
+      ],
+      "institution_titles": {
+        "theme_id": "generic",
+        "coverage": "generic_pending_variant"
+      },
+      "demography_society_template_id": "society-template/maritime_networks"
+    },
+    {
+      "mu_culture_id": "mesopotamian",
+      "history_family_id": "urban_administrations",
+      "variant_id": "mesopotamian",
+      "overlays": [],
+      "institution_titles": {
+        "theme_id": "generic",
+        "coverage": "generic_pending_variant"
+      },
+      "demography_society_template_id": "society-template/urban_administrations"
+    },
+    {
+      "mu_culture_id": "mississippian",
+      "history_family_id": "redistributive_centres",
+      "variant_id": "mississippian",
+      "overlays": [],
+      "institution_titles": {
+        "theme_id": "generic",
+        "coverage": "generic_pending_variant"
+      },
+      "demography_society_template_id": "society-template/redistributive_centres"
+    },
+    {
+      "mu_culture_id": "mongol-ordu",
+      "history_family_id": "mobile_camps",
+      "variant_id": "mongol-ordu",
+      "overlays": [
+        "pastoral_mobility"
+      ],
+      "institution_titles": {
+        "theme_id": "generic",
+        "coverage": "generic_pending_variant"
+      },
+      "demography_society_template_id": "society-template/mobile_camps"
+    },
+    {
+      "mu_culture_id": "myconid-colony",
+      "history_family_id": "colony_networks",
+      "variant_id": "myconid-colony",
+      "overlays": [
+        "fungal_ecology",
+        "reproduction_profile_required"
+      ],
+      "institution_titles": {
+        "theme_id": "myconid-colony",
+        "coverage": "explicit_id_or_alias"
+      },
+      "demography_society_template_id": "society-template/colony_networks"
+    },
+    {
+      "mu_culture_id": "native-iroquoian",
+      "history_family_id": "communal_houses",
+      "variant_id": "native-iroquoian",
+      "overlays": [],
+      "institution_titles": {
+        "theme_id": "native-iroquoian",
+        "coverage": "explicit_id_or_alias"
+      },
+      "demography_society_template_id": "society-template/communal_houses"
+    },
+    {
+      "mu_culture_id": "native-plains",
+      "history_family_id": "mobile_camps",
+      "variant_id": "native-plains",
+      "overlays": [
+        "seasonal_mobility"
+      ],
+      "institution_titles": {
+        "theme_id": "native-plains",
+        "coverage": "explicit_id_or_alias"
+      },
+      "demography_society_template_id": "society-template/mobile_camps"
+    },
+    {
+      "mu_culture_id": "native-pueblo",
+      "history_family_id": "redistributive_centres",
+      "variant_id": "native-pueblo",
+      "overlays": [
+        "compact_communal_housing"
+      ],
+      "institution_titles": {
+        "theme_id": "native-pueblo",
+        "coverage": "explicit_id_or_alias"
+      },
+      "demography_society_template_id": "society-template/redistributive_centres"
+    },
+    {
+      "mu_culture_id": "necropolis",
+      "history_family_id": "temple_centres",
+      "variant_id": "necropolis",
+      "overlays": [
+        "mortuary_institutions"
+      ],
+      "institution_titles": {
+        "theme_id": "necropolis",
+        "coverage": "explicit_id_or_alias"
+      },
+      "demography_society_template_id": "society-template/temple_centres"
+    },
+    {
+      "mu_culture_id": "newar",
+      "history_family_id": "temple_centres",
+      "variant_id": "newar",
+      "overlays": [],
+      "institution_titles": {
+        "theme_id": "generic",
+        "coverage": "generic_pending_variant"
+      },
+      "demography_society_template_id": "society-template/temple_centres"
+    },
+    {
+      "mu_culture_id": "nomad-camp",
+      "history_family_id": "mobile_camps",
+      "variant_id": "nomad-camp",
+      "overlays": [],
+      "institution_titles": {
+        "theme_id": "nomad-camp",
+        "coverage": "explicit_id_or_alias"
+      },
+      "demography_society_template_id": "society-template/mobile_camps"
+    },
+    {
+      "mu_culture_id": "norse-ringfort",
+      "history_family_id": "clan_assemblies",
+      "variant_id": "norse-ringfort",
+      "overlays": [],
+      "institution_titles": {
+        "theme_id": "norse",
+        "coverage": "explicit_id_or_alias"
+      },
+      "demography_society_template_id": "society-template/clan_assemblies"
+    },
+    {
+      "mu_culture_id": "nubian-fortified",
+      "history_family_id": "fortified_houses",
+      "variant_id": "nubian-fortified",
+      "overlays": [],
+      "institution_titles": {
+        "theme_id": "generic",
+        "coverage": "generic_pending_variant"
+      },
+      "demography_society_template_id": "society-template/fortified_houses"
+    },
+    {
+      "mu_culture_id": "oasis-caravan",
+      "history_family_id": "oasis_networks",
+      "variant_id": "oasis-caravan",
+      "overlays": [],
+      "institution_titles": {
+        "theme_id": "generic",
+        "coverage": "generic_pending_variant"
+      },
+      "demography_society_template_id": "society-template/oasis_networks"
+    },
+    {
+      "mu_culture_id": "orcish",
+      "history_family_id": "retinue_clans",
+      "variant_id": "orcish",
+      "overlays": [],
+      "institution_titles": {
+        "theme_id": "orcish",
+        "coverage": "explicit_id_or_alias"
+      },
+      "demography_society_template_id": "society-template/retinue_clans"
+    },
+    {
+      "mu_culture_id": "ottoman",
+      "history_family_id": "courts_and_bazaars",
+      "variant_id": "ottoman",
+      "overlays": [],
+      "institution_titles": {
+        "theme_id": "ottoman",
+        "coverage": "explicit_id_or_alias"
+      },
+      "demography_society_template_id": "society-template/courts_and_bazaars"
+    },
+    {
+      "mu_culture_id": "persian",
+      "history_family_id": "courts_and_bazaars",
+      "variant_id": "persian",
+      "overlays": [],
+      "institution_titles": {
+        "theme_id": "persian",
+        "coverage": "explicit_id_or_alias"
+      },
+      "demography_society_template_id": "society-template/courts_and_bazaars"
+    },
+    {
+      "mu_culture_id": "pnw-plank-village",
+      "history_family_id": "communal_houses",
+      "variant_id": "pnw-plank-village",
+      "overlays": [],
+      "institution_titles": {
+        "theme_id": "generic",
+        "coverage": "generic_pending_variant"
+      },
+      "demography_society_template_id": "society-template/communal_houses"
+    },
+    {
+      "mu_culture_id": "rajput-fort",
+      "history_family_id": "fortified_houses",
+      "variant_id": "rajput-fort",
+      "overlays": [],
+      "institution_titles": {
+        "theme_id": "generic",
+        "coverage": "generic_pending_variant"
+      },
+      "demography_society_template_id": "society-template/fortified_houses"
+    },
+    {
+      "mu_culture_id": "roman-core",
+      "history_family_id": "urban_administrations",
+      "variant_id": "roman-core",
+      "overlays": [],
+      "institution_titles": {
+        "theme_id": "roman",
+        "coverage": "explicit_id_or_alias"
+      },
+      "demography_society_template_id": "society-template/urban_administrations"
+    },
+    {
+      "mu_culture_id": "russian-kremlin",
+      "history_family_id": "agrarian_estates",
+      "variant_id": "russian-kremlin",
+      "overlays": [],
+      "institution_titles": {
+        "theme_id": "eastern-europe",
+        "coverage": "explicit_id_or_alias"
+      },
+      "demography_society_template_id": "society-template/agrarian_estates"
+    },
+    {
+      "mu_culture_id": "rynek-town",
+      "history_family_id": "market_towns",
+      "variant_id": "rynek-town",
+      "overlays": [],
+      "institution_titles": {
+        "theme_id": "generic",
+        "coverage": "generic_pending_variant"
+      },
+      "demography_society_template_id": "society-template/market_towns"
+    },
+    {
+      "mu_culture_id": "sahel",
+      "history_family_id": "compound_courts",
+      "variant_id": "sahel",
+      "overlays": [],
+      "institution_titles": {
+        "theme_id": "sahel",
+        "coverage": "explicit_id_or_alias"
+      },
+      "demography_society_template_id": "society-template/compound_courts"
+    },
+    {
+      "mu_culture_id": "siberian-camp",
+      "history_family_id": "mobile_camps",
+      "variant_id": "siberian-camp",
+      "overlays": [],
+      "institution_titles": {
+        "theme_id": "generic",
+        "coverage": "generic_pending_variant"
+      },
+      "demography_society_template_id": "society-template/mobile_camps"
+    },
+    {
+      "mu_culture_id": "slavic-gord",
+      "history_family_id": "clan_assemblies",
+      "variant_id": "slavic-gord",
+      "overlays": [],
+      "institution_titles": {
+        "theme_id": "generic",
+        "coverage": "generic_pending_variant"
+      },
+      "demography_society_template_id": "society-template/clan_assemblies"
+    },
+    {
+      "mu_culture_id": "stilt-town",
+      "history_family_id": "maritime_networks",
+      "variant_id": "stilt-town",
+      "overlays": [
+        "water_access"
+      ],
+      "institution_titles": {
+        "theme_id": "stilt-town",
+        "coverage": "explicit_id_or_alias"
+      },
+      "demography_society_template_id": "society-template/maritime_networks"
+    },
+    {
+      "mu_culture_id": "swahili-stone-town",
+      "history_family_id": "maritime_networks",
+      "variant_id": "swahili-stone-town",
+      "overlays": [],
+      "institution_titles": {
+        "theme_id": "swahili-stone-town",
+        "coverage": "explicit_id_or_alias"
+      },
+      "demography_society_template_id": "society-template/maritime_networks"
+    },
+    {
+      "mu_culture_id": "tibetan-monastery",
+      "history_family_id": "temple_centres",
+      "variant_id": "tibetan-monastery",
+      "overlays": [],
+      "institution_titles": {
+        "theme_id": "generic",
+        "coverage": "generic_pending_variant"
+      },
+      "demography_society_template_id": "society-template/temple_centres"
+    },
+    {
+      "mu_culture_id": "venetian-lagoon",
+      "history_family_id": "mercantile_communes",
+      "variant_id": "venetian-lagoon",
+      "overlays": [
+        "lagoon_transport"
+      ],
+      "institution_titles": {
+        "theme_id": "venetian-lagoon",
+        "coverage": "explicit_id_or_alias"
+      },
+      "demography_society_template_id": "society-template/mercantile_communes"
+    },
+    {
+      "mu_culture_id": "vietnamese-citadel",
+      "history_family_id": "urban_administrations",
+      "variant_id": "vietnamese-citadel",
+      "overlays": [],
+      "institution_titles": {
+        "theme_id": "generic",
+        "coverage": "generic_pending_variant"
+      },
+      "demography_society_template_id": "society-template/urban_administrations"
+    },
+    {
+      "mu_culture_id": "wizard-city",
+      "history_family_id": "temple_centres",
+      "variant_id": "wizard-city",
+      "overlays": [
+        "magical_institutions"
+      ],
+      "institution_titles": {
+        "theme_id": "wizard-city",
+        "coverage": "explicit_id_or_alias"
+      },
+      "demography_society_template_id": "society-template/temple_centres"
+    },
+    {
+      "mu_culture_id": "yoruba",
+      "history_family_id": "compound_courts",
+      "variant_id": "yoruba",
+      "overlays": [],
+      "institution_titles": {
+        "theme_id": "generic",
+        "coverage": "generic_pending_variant"
+      },
+      "demography_society_template_id": "society-template/compound_courts"
+    }
+  ],
+  "engine_defaults": {
+    "parameters_status": "worldbuilding_starting_values_not_calibrated",
+    "activity_inheritance_bps": 8000,
+    "status_inheritance_bps": 9000,
+    "kin_recruitment_bonus": 500,
+    "formal_association_weight": 50,
+    "geographic_mobility_multiplier_ppm": 1000000,
+    "cohesion_mean_bps": 6000,
+    "friend_circles_per_1000_adults": 80,
+    "friend_circle_size": {
+      "min": 3,
+      "mean": 5,
+      "max": 12
+    },
+    "activity_group_workers": {
+      "agriculture": 3,
+      "craft": 5,
+      "trade": 7,
+      "services": 4
+    },
+    "local_office": {
+      "min_age": 25,
+      "max_age": 80,
+      "term_years": 5,
+      "time_cost_bps": 2500
+    },
+    "profile_merge": "Les scalaires sont remplacés ; les listes fusionnent par ID avec retrait explicite ; les poids sont remplacés puis normalisés selon resolution_order.",
+    "friend_circle_lifetime_year_weights": {
+      "1": 2000,
+      "3": 2000,
+      "5": 2000,
+      "7": 2000,
+      "9": 2000
+    },
+    "friend_circle_size_weights": {
+      "3": 3000,
+      "4": 2000,
+      "5": 2000,
+      "6": 1500,
+      "8": 1000,
+      "12": 500
+    },
+    "formal_associations_per_1000_adults": 2,
+    "max_candidate_slots": 250000,
+    "community_groups_per_1000_adults": 2,
+    "expected_adult_share_bps": 6000,
+    "adult_workforce_participation_bps": 7500,
+    "travel_scale_days": 30,
+    "skill_initial_max": 300,
+    "skill_gain_per_activity_year": 20,
+    "network_bonus_per_prior_link": 100,
+    "network_bonus_max": 1000,
+    "work_capacity_bps_by_age": [
+      {
+        "min_age": 0,
+        "max_age": 17,
+        "capacity_bps": 0
+      },
+      {
+        "min_age": 18,
+        "max_age": 65,
+        "capacity_bps": 10000
+      },
+      {
+        "min_age": 66,
+        "max_age": 80,
+        "capacity_bps": 5000
+      },
+      {
+        "min_age": 81,
+        "max_age": 10000,
+        "capacity_bps": 0
+      }
+    ],
+    "founder_foster_children_limit": 6,
+    "influence_profiles": {
+      "recruitment": {
+        "travel_budget_days": 14,
+        "persistence_years": 3,
+        "decay_bps_per_year": 3333,
+        "max_sources": 32
+      },
+      "economy": {
+        "travel_budget_days": 30,
+        "persistence_years": 5,
+        "decay_bps_per_year": 2000,
+        "max_sources": 32
+      },
+      "culture": {
+        "travel_budget_days": 90,
+        "persistence_years": 50,
+        "decay_bps_per_year": 200,
+        "max_sources": 32
+      },
+      "religion": {
+        "travel_budget_days": 90,
+        "persistence_years": 40,
+        "decay_bps_per_year": 250,
+        "max_sources": 32
+      },
+      "military": {
+        "travel_budget_days": 30,
+        "persistence_years": 1,
+        "decay_bps_per_year": 10000,
+        "max_sources": 32
+      },
+      "memory": {
+        "travel_budget_days": 180,
+        "persistence_years": 100,
+        "decay_bps_per_year": 100,
+        "max_sources": 32
+      }
+    },
+    "split_trigger": {
+      "eligible_classes": [
+        "activity_unit",
+        "association",
+        "community",
+        "friend_circle"
+      ],
+      "cohesion_below_bps": 2500,
+      "consecutive_years": 3,
+      "min_realized_members": 12,
+      "annual_probability_bps": 2500,
+      "cooldown_years": 10,
+      "new_group_member_share_bps": 4000
+    },
+    "cohesion_effects": {
+      "exposure_member_share_min_bps": 5000,
+      "crisis_delta_bps_per_event_year": -1500,
+      "max_crises_per_year": 3,
+      "required_office_vacancy_delta_bps_per_year": -400,
+      "recovery_delta_bps_per_unpenalized_year": 200,
+      "evaluated_phase": 55,
+      "reference_state": "previous_year_published"
+    }
+  },
+  "institution_coverage": {
+    "theme_count": 67,
+    "explicit_style_count": 41,
+    "generic_style_count": 38
+  },
+  "parameter_definitions": {
+    "activity_inheritance_bps": {
+      "unit": "bps",
+      "range": [
+        0,
+        10000
+      ],
+      "meaning": "Probabilité de suivre l’affinité d’activité familiale pour les attributs sociaux procéduraux manquants."
+    },
+    "status_inheritance_bps": {
+      "unit": "bps",
+      "range": [
+        0,
+        10000
+      ],
+      "meaning": "Probabilité de suivre l’affinité familiale de statut ; les valeurs déjà établies du noyau sont conservées."
+    },
+    "kin_recruitment_bonus": {
+      "unit": "integer_score",
+      "range": [
+        0,
+        1000
+      ],
+      "formula": "weight adds bonus * kin_fit_1000 / 1000"
+    },
+    "formal_association_weight": {
+      "unit": "relative_weight",
+      "range": [
+        0,
+        100
+      ],
+      "formula": "Stock actif = formal_associations_per_1000_adults * adultes_attendus / 1000 * poids / 50"
+    },
+    "geographic_mobility_multiplier_ppm": {
+      "unit": "ppm",
+      "range": [
+        0,
+        10000000
+      ],
+      "formula": "Effective domain baseline migration rate = base rate * multiplier / 1000000; a domain resolves one society profile in S3."
+    },
+    "cohesion_mean_bps": {
+      "unit": "bps",
+      "range": [
+        0,
+        10000
+      ],
+      "meaning": "Cohésion initiale moyenne avant les événements explicites ; aucun parcours annuel de tous les agents."
+    },
+    "friend_circles_per_1000_adults": {
+      "unit": "expected_active_stock_per_1000_adults",
+      "formula": "Births per 10-year block = active stock * 10 / mean_lifetime_years; bootstrap initializes active stock."
+    }
+  },
+  "archetype_definitions": [
+    {
+      "id": "administration",
+      "class": "institution",
+      "slot_basis": "site_occupation_anchor",
+      "default_mean_lifetime_years": null,
+      "membership_policy": "overlapping",
+      "default_time_cost_bps": 0,
+      "activity_ids": [],
+      "preemptible": false
+    },
+    {
+      "id": "caravan",
+      "class": "activity_unit",
+      "slot_basis": "expected_workforce",
+      "default_mean_lifetime_years": 20,
+      "membership_policy": "time_budgeted",
+      "default_time_cost_bps": 10000,
+      "activity_ids": [
+        "trade"
+      ],
+      "preemptible": true
+    },
+    {
+      "id": "civic_council",
+      "class": "institution",
+      "slot_basis": "site_occupation_anchor",
+      "default_mean_lifetime_years": null,
+      "membership_policy": "overlapping",
+      "default_time_cost_bps": 0,
+      "activity_ids": [],
+      "preemptible": false
+    },
+    {
+      "id": "communal_house",
+      "class": "household_view",
+      "slot_basis": "provider_households",
+      "default_mean_lifetime_years": null,
+      "membership_policy": "derived_from_provider",
+      "default_time_cost_bps": 0,
+      "activity_ids": [],
+      "preemptible": false
+    },
+    {
+      "id": "companionship",
+      "class": "friend_circle",
+      "slot_basis": "expected_active_stock",
+      "default_mean_lifetime_years": 5,
+      "membership_policy": "overlapping",
+      "default_time_cost_bps": 0,
+      "activity_ids": [],
+      "preemptible": false
+    },
+    {
+      "id": "court",
+      "class": "community",
+      "slot_basis": "expected_active_stock",
+      "default_mean_lifetime_years": 50,
+      "membership_policy": "overlapping",
+      "default_time_cost_bps": 0,
+      "activity_ids": [],
+      "preemptible": false
+    },
+    {
+      "id": "craft_association",
+      "class": "association",
+      "slot_basis": "expected_active_stock",
+      "default_mean_lifetime_years": 30,
+      "membership_policy": "overlapping",
+      "default_time_cost_bps": 0,
+      "activity_ids": [],
+      "preemptible": false
+    },
+    {
+      "id": "craft_guild",
+      "class": "association",
+      "slot_basis": "expected_active_stock",
+      "default_mean_lifetime_years": 30,
+      "membership_policy": "overlapping",
+      "default_time_cost_bps": 0,
+      "activity_ids": [],
+      "preemptible": false
+    },
+    {
+      "id": "craft_house",
+      "class": "lineage_view",
+      "slot_basis": "core_lineages",
+      "default_mean_lifetime_years": null,
+      "membership_policy": "derived_from_provider",
+      "default_time_cost_bps": 0,
+      "activity_ids": [],
+      "preemptible": false
+    },
+    {
+      "id": "crew",
+      "class": "activity_unit",
+      "slot_basis": "expected_workforce",
+      "default_mean_lifetime_years": 20,
+      "membership_policy": "time_budgeted",
+      "default_time_cost_bps": 10000,
+      "activity_ids": [
+        "trade"
+      ],
+      "preemptible": true
+    },
+    {
+      "id": "exchange_network",
+      "class": "activity_unit",
+      "slot_basis": "expected_workforce",
+      "default_mean_lifetime_years": 20,
+      "membership_policy": "time_budgeted",
+      "default_time_cost_bps": 10000,
+      "activity_ids": [
+        "trade"
+      ],
+      "preemptible": true
+    },
+    {
+      "id": "farm_household",
+      "class": "household_view",
+      "slot_basis": "provider_households",
+      "default_mean_lifetime_years": null,
+      "membership_policy": "derived_from_provider",
+      "default_time_cost_bps": 0,
+      "activity_ids": [],
+      "preemptible": false
+    },
+    {
+      "id": "forest_house",
+      "class": "lineage_view",
+      "slot_basis": "core_lineages",
+      "default_mean_lifetime_years": null,
+      "membership_policy": "derived_from_provider",
+      "default_time_cost_bps": 0,
+      "activity_ids": [],
+      "preemptible": false
+    },
+    {
+      "id": "hold_council",
+      "class": "institution",
+      "slot_basis": "site_occupation_anchor",
+      "default_mean_lifetime_years": null,
+      "membership_policy": "overlapping",
+      "default_time_cost_bps": 0,
+      "activity_ids": [],
+      "preemptible": false
+    },
+    {
+      "id": "house_faction",
+      "class": "community",
+      "slot_basis": "expected_active_stock",
+      "default_mean_lifetime_years": 50,
+      "membership_policy": "overlapping",
+      "default_time_cost_bps": 0,
+      "activity_ids": [],
+      "preemptible": false
+    },
+    {
+      "id": "household_compound",
+      "class": "household_view",
+      "slot_basis": "provider_households",
+      "default_mean_lifetime_years": null,
+      "membership_policy": "derived_from_provider",
+      "default_time_cost_bps": 0,
+      "activity_ids": [],
+      "preemptible": false
+    },
+    {
+      "id": "kin_group",
+      "class": "lineage_view",
+      "slot_basis": "core_lineages",
+      "default_mean_lifetime_years": null,
+      "membership_policy": "derived_from_provider",
+      "default_time_cost_bps": 0,
+      "activity_ids": [],
+      "preemptible": false
+    },
+    {
+      "id": "landed_house",
+      "class": "lineage_view",
+      "slot_basis": "core_lineages",
+      "default_mean_lifetime_years": null,
+      "membership_policy": "derived_from_provider",
+      "default_time_cost_bps": 0,
+      "activity_ids": [],
+      "preemptible": false
+    },
+    {
+      "id": "local_assembly",
+      "class": "institution",
+      "slot_basis": "site_occupation_anchor",
+      "default_mean_lifetime_years": null,
+      "membership_policy": "overlapping",
+      "default_time_cost_bps": 0,
+      "activity_ids": [],
+      "preemptible": false
+    },
+    {
+      "id": "local_colony",
+      "class": "community",
+      "slot_basis": "expected_active_stock",
+      "default_mean_lifetime_years": 50,
+      "membership_policy": "overlapping",
+      "default_time_cost_bps": 0,
+      "activity_ids": [],
+      "preemptible": false
+    },
+    {
+      "id": "local_community",
+      "class": "community",
+      "slot_basis": "expected_active_stock",
+      "default_mean_lifetime_years": 50,
+      "membership_policy": "overlapping",
+      "default_time_cost_bps": 0,
+      "activity_ids": [],
+      "preemptible": false
+    },
+    {
+      "id": "market_association",
+      "class": "association",
+      "slot_basis": "expected_active_stock",
+      "default_mean_lifetime_years": 30,
+      "membership_policy": "overlapping",
+      "default_time_cost_bps": 0,
+      "activity_ids": [],
+      "preemptible": false
+    },
+    {
+      "id": "merchant_house",
+      "class": "lineage_view",
+      "slot_basis": "core_lineages",
+      "default_mean_lifetime_years": null,
+      "membership_policy": "derived_from_provider",
+      "default_time_cost_bps": 0,
+      "activity_ids": [],
+      "preemptible": false
+    },
+    {
+      "id": "mobile_household",
+      "class": "household_view",
+      "slot_basis": "provider_households",
+      "default_mean_lifetime_years": null,
+      "membership_policy": "derived_from_provider",
+      "default_time_cost_bps": 0,
+      "activity_ids": [],
+      "preemptible": false
+    },
+    {
+      "id": "neighborhood",
+      "class": "community",
+      "slot_basis": "expected_active_stock",
+      "default_mean_lifetime_years": 50,
+      "membership_policy": "overlapping",
+      "default_time_cost_bps": 0,
+      "activity_ids": [],
+      "preemptible": false
+    },
+    {
+      "id": "productive_community",
+      "class": "activity_unit",
+      "slot_basis": "expected_workforce",
+      "default_mean_lifetime_years": 20,
+      "membership_policy": "time_budgeted",
+      "default_time_cost_bps": 10000,
+      "activity_ids": [
+        "agriculture"
+      ],
+      "preemptible": true
+    },
+    {
+      "id": "redistributive_institution",
+      "class": "community",
+      "slot_basis": "expected_active_stock",
+      "default_mean_lifetime_years": 50,
+      "membership_policy": "overlapping",
+      "default_time_cost_bps": 0,
+      "activity_ids": [],
+      "preemptible": false
+    },
+    {
+      "id": "resource_group",
+      "class": "activity_unit",
+      "slot_basis": "expected_workforce",
+      "default_mean_lifetime_years": 20,
+      "membership_policy": "time_budgeted",
+      "default_time_cost_bps": 10000,
+      "activity_ids": [
+        "agriculture"
+      ],
+      "preemptible": true
+    },
+    {
+      "id": "retinue",
+      "class": "activity_unit",
+      "slot_basis": "expected_workforce",
+      "default_mean_lifetime_years": 20,
+      "membership_policy": "time_budgeted",
+      "default_time_cost_bps": 10000,
+      "activity_ids": [
+        "services"
+      ],
+      "preemptible": true
+    },
+    {
+      "id": "ritual_group",
+      "class": "association",
+      "slot_basis": "expected_active_stock",
+      "default_mean_lifetime_years": 30,
+      "membership_policy": "overlapping",
+      "default_time_cost_bps": 0,
+      "activity_ids": [],
+      "preemptible": false
+    },
+    {
+      "id": "ritual_institution",
+      "class": "association",
+      "slot_basis": "expected_active_stock",
+      "default_mean_lifetime_years": 30,
+      "membership_policy": "overlapping",
+      "default_time_cost_bps": 0,
+      "activity_ids": [],
+      "preemptible": false
+    },
+    {
+      "id": "school",
+      "class": "association",
+      "slot_basis": "expected_active_stock",
+      "default_mean_lifetime_years": 30,
+      "membership_policy": "overlapping",
+      "default_time_cost_bps": 0,
+      "activity_ids": [],
+      "preemptible": false
+    },
+    {
+      "id": "service_group",
+      "class": "activity_unit",
+      "slot_basis": "expected_workforce",
+      "default_mean_lifetime_years": 20,
+      "membership_policy": "time_budgeted",
+      "default_time_cost_bps": 10000,
+      "activity_ids": [
+        "services"
+      ],
+      "preemptible": true
+    },
+    {
+      "id": "service_household",
+      "class": "activity_unit",
+      "slot_basis": "expected_workforce",
+      "default_mean_lifetime_years": 20,
+      "membership_policy": "time_budgeted",
+      "default_time_cost_bps": 10000,
+      "activity_ids": [
+        "services"
+      ],
+      "preemptible": true
+    },
+    {
+      "id": "shore_community",
+      "class": "community",
+      "slot_basis": "expected_active_stock",
+      "default_mean_lifetime_years": 50,
+      "membership_policy": "overlapping",
+      "default_time_cost_bps": 0,
+      "activity_ids": [],
+      "preemptible": false
+    },
+    {
+      "id": "territorial_house",
+      "class": "lineage_view",
+      "slot_basis": "core_lineages",
+      "default_mean_lifetime_years": null,
+      "membership_policy": "derived_from_provider",
+      "default_time_cost_bps": 0,
+      "activity_ids": [],
+      "preemptible": false
+    },
+    {
+      "id": "travel_party",
+      "class": "community",
+      "slot_basis": "expected_active_stock",
+      "default_mean_lifetime_years": 50,
+      "membership_policy": "overlapping",
+      "default_time_cost_bps": 0,
+      "activity_ids": [],
+      "preemptible": false
+    },
+    {
+      "id": "village_council",
+      "class": "institution",
+      "slot_basis": "site_occupation_anchor",
+      "default_mean_lifetime_years": null,
+      "membership_policy": "overlapping",
+      "default_time_cost_bps": 0,
+      "activity_ids": [],
+      "preemptible": false
+    },
+    {
+      "id": "ward_community",
+      "class": "community",
+      "slot_basis": "expected_active_stock",
+      "default_mean_lifetime_years": 50,
+      "membership_policy": "overlapping",
+      "default_time_cost_bps": 0,
+      "activity_ids": [],
+      "preemptible": false
+    },
+    {
+      "id": "water_association",
+      "class": "association",
+      "slot_basis": "expected_active_stock",
+      "default_mean_lifetime_years": 30,
+      "membership_policy": "overlapping",
+      "default_time_cost_bps": 0,
+      "activity_ids": [],
+      "preemptible": false
+    },
+    {
+      "id": "workshop",
+      "class": "activity_unit",
+      "slot_basis": "expected_workforce",
+      "default_mean_lifetime_years": 20,
+      "membership_policy": "time_budgeted",
+      "default_time_cost_bps": 10000,
+      "activity_ids": [
+        "craft"
+      ],
+      "preemptible": true
+    },
+    {
+      "id": "base_farm",
+      "class": "activity_unit",
+      "slot_basis": "expected_workforce",
+      "default_mean_lifetime_years": 20,
+      "membership_policy": "time_budgeted",
+      "default_time_cost_bps": 10000,
+      "activity_ids": [
+        "agriculture"
+      ],
+      "preemptible": true
+    },
+    {
+      "id": "base_workshop",
+      "class": "activity_unit",
+      "slot_basis": "expected_workforce",
+      "default_mean_lifetime_years": 20,
+      "membership_policy": "time_budgeted",
+      "default_time_cost_bps": 10000,
+      "activity_ids": [
+        "craft"
+      ],
+      "preemptible": true
+    },
+    {
+      "id": "base_trade_company",
+      "class": "activity_unit",
+      "slot_basis": "expected_workforce",
+      "default_mean_lifetime_years": 20,
+      "membership_policy": "time_budgeted",
+      "default_time_cost_bps": 10000,
+      "activity_ids": [
+        "trade"
+      ],
+      "preemptible": true
+    },
+    {
+      "id": "base_service_unit",
+      "class": "activity_unit",
+      "slot_basis": "expected_workforce",
+      "default_mean_lifetime_years": 20,
+      "membership_policy": "time_budgeted",
+      "default_time_cost_bps": 10000,
+      "activity_ids": [
+        "services"
+      ],
+      "preemptible": true
+    },
+    {
+      "id": "base_friend_circle",
+      "class": "friend_circle",
+      "slot_basis": "expected_active_stock",
+      "default_mean_lifetime_years": 5,
+      "membership_policy": "overlapping",
+      "default_time_cost_bps": 0,
+      "activity_ids": [],
+      "preemptible": false
+    },
+    {
+      "id": "base_religious_community",
+      "class": "association",
+      "slot_basis": "expected_active_stock",
+      "default_mean_lifetime_years": 30,
+      "membership_policy": "overlapping",
+      "default_time_cost_bps": 0,
+      "activity_ids": [],
+      "preemptible": false
+    },
+    {
+      "id": "base_faction",
+      "class": "association",
+      "slot_basis": "expected_active_stock",
+      "default_mean_lifetime_years": 30,
+      "membership_policy": "overlapping",
+      "default_time_cost_bps": 0,
+      "activity_ids": [],
+      "preemptible": false
+    },
+    {
+      "id": "base_neighborhood",
+      "class": "community",
+      "slot_basis": "expected_active_stock",
+      "default_mean_lifetime_years": 50,
+      "membership_policy": "overlapping",
+      "default_time_cost_bps": 0,
+      "activity_ids": [],
+      "preemptible": false
+    },
+    {
+      "id": "magical_school",
+      "class": "association",
+      "slot_basis": "expected_active_stock",
+      "default_mean_lifetime_years": 30,
+      "membership_policy": "overlapping",
+      "default_time_cost_bps": 0,
+      "activity_ids": [],
+      "preemptible": false
+    },
+    {
+      "id": "mortuary_confraternity",
+      "class": "association",
+      "slot_basis": "expected_active_stock",
+      "default_mean_lifetime_years": 30,
+      "membership_policy": "overlapping",
+      "default_time_cost_bps": 0,
+      "activity_ids": [],
+      "preemptible": false
+    },
+    {
+      "id": "base_local_institution",
+      "class": "institution",
+      "slot_basis": "site_occupation_anchor",
+      "default_mean_lifetime_years": null,
+      "membership_policy": "overlapping",
+      "default_time_cost_bps": 0,
+      "activity_ids": [],
+      "preemptible": false
+    },
+    {
+      "id": "base_craft_association",
+      "class": "association",
+      "slot_basis": "expected_active_stock",
+      "default_mean_lifetime_years": 30,
+      "membership_policy": "overlapping",
+      "default_time_cost_bps": 0,
+      "activity_ids": [],
+      "preemptible": false
+    }
+  ],
+  "overlay_definitions": [
+    {
+      "id": "aquatic_access",
+      "role": "spatial_or_material_tag",
+      "social_effects": "none_unless_explicitly_overridden",
+      "description": "Tag de variante déclaré ; il ne déduit automatiquement ni biologie, ni règle juridique, ni titre.",
+      "archetype_ids": []
+    },
+    {
+      "id": "canal_craft",
+      "role": "spatial_or_material_tag",
+      "social_effects": "none_unless_explicitly_overridden",
+      "description": "Tag de variante déclaré ; il ne déduit automatiquement ni biologie, ni règle juridique, ni titre.",
+      "archetype_ids": []
+    },
+    {
+      "id": "cold_seasonality",
+      "role": "spatial_or_material_tag",
+      "social_effects": "none_unless_explicitly_overridden",
+      "description": "Tag de variante déclaré ; il ne déduit automatiquement ni biologie, ni règle juridique, ni titre.",
+      "archetype_ids": []
+    },
+    {
+      "id": "compact_communal_housing",
+      "role": "spatial_or_material_tag",
+      "social_effects": "none_unless_explicitly_overridden",
+      "description": "Tag de variante déclaré ; il ne déduit automatiquement ni biologie, ni règle juridique, ni titre.",
+      "archetype_ids": []
+    },
+    {
+      "id": "forest_access",
+      "role": "spatial_or_material_tag",
+      "social_effects": "none_unless_explicitly_overridden",
+      "description": "Tag de variante déclaré ; il ne déduit automatiquement ni biologie, ni règle juridique, ni titre.",
+      "archetype_ids": []
+    },
+    {
+      "id": "fungal_ecology",
+      "role": "spatial_or_material_tag",
+      "social_effects": "none_unless_explicitly_overridden",
+      "description": "Tag de variante déclaré ; il ne déduit automatiquement ni biologie, ni règle juridique, ni titre.",
+      "archetype_ids": []
+    },
+    {
+      "id": "highland_routes",
+      "role": "spatial_or_material_tag",
+      "social_effects": "none_unless_explicitly_overridden",
+      "description": "Tag de variante déclaré ; il ne déduit automatiquement ni biologie, ni règle juridique, ni titre.",
+      "archetype_ids": []
+    },
+    {
+      "id": "lagoon_transport",
+      "role": "spatial_or_material_tag",
+      "social_effects": "none_unless_explicitly_overridden",
+      "description": "Tag de variante déclaré ; il ne déduit automatiquement ni biologie, ni règle juridique, ni titre.",
+      "archetype_ids": []
+    },
+    {
+      "id": "large_body_admission",
+      "role": "spatial_or_material_tag",
+      "social_effects": "none_unless_explicitly_overridden",
+      "description": "Tag de variante déclaré ; il ne déduit automatiquement ni biologie, ni règle juridique, ni titre.",
+      "archetype_ids": []
+    },
+    {
+      "id": "magical_institutions",
+      "role": "enable_optional_magic_archetype",
+      "social_effects": "enable_optional_archetypes",
+      "description": "Tag de variante déclaré ; il ne déduit automatiquement ni biologie, ni règle juridique, ni titre.",
+      "archetype_ids": [
+        "magical_school"
+      ]
+    },
+    {
+      "id": "mortuary_institutions",
+      "role": "enable_optional_mortuary_archetype",
+      "social_effects": "enable_optional_archetypes",
+      "description": "Tag de variante déclaré ; il ne déduit automatiquement ni biologie, ni règle juridique, ni titre.",
+      "archetype_ids": [
+        "mortuary_confraternity"
+      ]
+    },
+    {
+      "id": "pastoral_mobility",
+      "role": "spatial_or_material_tag",
+      "social_effects": "none_unless_explicitly_overridden",
+      "description": "Tag de variante déclaré ; il ne déduit automatiquement ni biologie, ni règle juridique, ni titre.",
+      "archetype_ids": []
+    },
+    {
+      "id": "planned_foundation",
+      "role": "spatial_or_material_tag",
+      "social_effects": "none_unless_explicitly_overridden",
+      "description": "Tag de variante déclaré ; il ne déduit automatiquement ni biologie, ni règle juridique, ni titre.",
+      "archetype_ids": []
+    },
+    {
+      "id": "reproduction_profile_required",
+      "role": "require_explicit_ancestry_profile",
+      "social_effects": "none_unless_explicitly_overridden",
+      "description": "Tag de variante déclaré ; il ne déduit automatiquement ni biologie, ni règle juridique, ni titre.",
+      "archetype_ids": []
+    },
+    {
+      "id": "river_corridor",
+      "role": "spatial_or_material_tag",
+      "social_effects": "none_unless_explicitly_overridden",
+      "description": "Tag de variante déclaré ; il ne déduit automatiquement ni biologie, ni règle juridique, ni titre.",
+      "archetype_ids": []
+    },
+    {
+      "id": "seasonal_mobility",
+      "role": "spatial_or_material_tag",
+      "social_effects": "none_unless_explicitly_overridden",
+      "description": "Tag de variante déclaré ; il ne déduit automatiquement ni biologie, ni règle juridique, ni titre.",
+      "archetype_ids": []
+    },
+    {
+      "id": "stone_enclosures",
+      "role": "spatial_or_material_tag",
+      "social_effects": "none_unless_explicitly_overridden",
+      "description": "Tag de variante déclaré ; il ne déduit automatiquement ni biologie, ni règle juridique, ni titre.",
+      "archetype_ids": []
+    },
+    {
+      "id": "subterranean_access",
+      "role": "spatial_or_material_tag",
+      "social_effects": "none_unless_explicitly_overridden",
+      "description": "Tag de variante déclaré ; il ne déduit automatiquement ni biologie, ni règle juridique, ni titre.",
+      "archetype_ids": []
+    },
+    {
+      "id": "terrace_agriculture",
+      "role": "spatial_or_material_tag",
+      "social_effects": "none_unless_explicitly_overridden",
+      "description": "Tag de variante déclaré ; il ne déduit automatiquement ni biologie, ni règle juridique, ni titre.",
+      "archetype_ids": []
+    },
+    {
+      "id": "tidal_seasonality",
+      "role": "spatial_or_material_tag",
+      "social_effects": "none_unless_explicitly_overridden",
+      "description": "Tag de variante déclaré ; il ne déduit automatiquement ni biologie, ni règle juridique, ni titre.",
+      "archetype_ids": []
+    },
+    {
+      "id": "vertical_households",
+      "role": "spatial_or_material_tag",
+      "social_effects": "none_unless_explicitly_overridden",
+      "description": "Tag de variante déclaré ; il ne déduit automatiquement ni biologie, ni règle juridique, ni titre.",
+      "archetype_ids": []
+    },
+    {
+      "id": "water_access",
+      "role": "spatial_or_material_tag",
+      "social_effects": "none_unless_explicitly_overridden",
+      "description": "Tag de variante déclaré ; il ne déduit automatiquement ni biologie, ni règle juridique, ni titre.",
+      "archetype_ids": []
+    },
+    {
+      "id": "wetland_access",
+      "role": "spatial_or_material_tag",
+      "social_effects": "none_unless_explicitly_overridden",
+      "description": "Tag de variante déclaré ; il ne déduit automatiquement ni biologie, ni règle juridique, ni titre.",
+      "archetype_ids": []
+    }
+  ],
+  "governance_templates": [
+    {
+      "id": "administrative_offices",
+      "default_rule": "appointment",
+      "default_personal_term_years": 5,
+      "personal_min_age": 25,
+      "personal_max_age": 80,
+      "institution_override_allowed": true,
+      "collective_seats_thresholds": [
+        {
+          "min_expected_adults": 0,
+          "seats": 1
+        },
+        {
+          "min_expected_adults": 20,
+          "seats": 3
+        },
+        {
+          "min_expected_adults": 70,
+          "seats": 7
+        }
+      ]
+    },
+    {
+      "id": "centre_and_community_offices",
+      "default_rule": "appointment",
+      "default_personal_term_years": 5,
+      "personal_min_age": 25,
+      "personal_max_age": 80,
+      "institution_override_allowed": true,
+      "collective_seats_thresholds": [
+        {
+          "min_expected_adults": 0,
+          "seats": 1
+        },
+        {
+          "min_expected_adults": 20,
+          "seats": 3
+        },
+        {
+          "min_expected_adults": 70,
+          "seats": 7
+        }
+      ]
+    },
+    {
+      "id": "civic_councils",
+      "default_rule": "collective_body",
+      "default_personal_term_years": 5,
+      "personal_min_age": 25,
+      "personal_max_age": 80,
+      "institution_override_allowed": true,
+      "collective_seats_thresholds": [
+        {
+          "min_expected_adults": 0,
+          "seats": 1
+        },
+        {
+          "min_expected_adults": 20,
+          "seats": 3
+        },
+        {
+          "min_expected_adults": 70,
+          "seats": 7
+        }
+      ]
+    },
+    {
+      "id": "colony_coordination",
+      "default_rule": "collective_body",
+      "default_personal_term_years": 5,
+      "personal_min_age": 25,
+      "personal_max_age": 80,
+      "institution_override_allowed": true,
+      "collective_seats_thresholds": [
+        {
+          "min_expected_adults": 0,
+          "seats": 1
+        },
+        {
+          "min_expected_adults": 20,
+          "seats": 3
+        },
+        {
+          "min_expected_adults": 70,
+          "seats": 7
+        }
+      ]
+    },
+    {
+      "id": "court_and_local_councils",
+      "default_rule": "collective_body",
+      "default_personal_term_years": 5,
+      "personal_min_age": 25,
+      "personal_max_age": 80,
+      "institution_override_allowed": true,
+      "collective_seats_thresholds": [
+        {
+          "min_expected_adults": 0,
+          "seats": 1
+        },
+        {
+          "min_expected_adults": 20,
+          "seats": 3
+        },
+        {
+          "min_expected_adults": 70,
+          "seats": 7
+        }
+      ]
+    },
+    {
+      "id": "craft_and_house_councils",
+      "default_rule": "collective_body",
+      "default_personal_term_years": 5,
+      "personal_min_age": 25,
+      "personal_max_age": 80,
+      "institution_override_allowed": true,
+      "collective_seats_thresholds": [
+        {
+          "min_expected_adults": 0,
+          "seats": 1
+        },
+        {
+          "min_expected_adults": 20,
+          "seats": 3
+        },
+        {
+          "min_expected_adults": 70,
+          "seats": 7
+        }
+      ]
+    },
+    {
+      "id": "faction_and_local_offices",
+      "default_rule": "appointment",
+      "default_personal_term_years": 5,
+      "personal_min_age": 25,
+      "personal_max_age": 80,
+      "institution_override_allowed": true,
+      "collective_seats_thresholds": [
+        {
+          "min_expected_adults": 0,
+          "seats": 1
+        },
+        {
+          "min_expected_adults": 20,
+          "seats": 3
+        },
+        {
+          "min_expected_adults": 70,
+          "seats": 7
+        }
+      ]
+    },
+    {
+      "id": "group_and_clan_leadership",
+      "default_rule": "seniority",
+      "default_personal_term_years": 5,
+      "personal_min_age": 25,
+      "personal_max_age": 80,
+      "institution_override_allowed": true,
+      "collective_seats_thresholds": [
+        {
+          "min_expected_adults": 0,
+          "seats": 1
+        },
+        {
+          "min_expected_adults": 20,
+          "seats": 3
+        },
+        {
+          "min_expected_adults": 70,
+          "seats": 7
+        }
+      ]
+    },
+    {
+      "id": "house_and_territorial_offices",
+      "default_rule": "seniority",
+      "default_personal_term_years": 5,
+      "personal_min_age": 25,
+      "personal_max_age": 80,
+      "institution_override_allowed": true,
+      "collective_seats_thresholds": [
+        {
+          "min_expected_adults": 0,
+          "seats": 1
+        },
+        {
+          "min_expected_adults": 20,
+          "seats": 3
+        },
+        {
+          "min_expected_adults": 70,
+          "seats": 7
+        }
+      ]
+    },
+    {
+      "id": "institutional_councils",
+      "default_rule": "collective_body",
+      "default_personal_term_years": 5,
+      "personal_min_age": 25,
+      "personal_max_age": 80,
+      "institution_override_allowed": true,
+      "collective_seats_thresholds": [
+        {
+          "min_expected_adults": 0,
+          "seats": 1
+        },
+        {
+          "min_expected_adults": 20,
+          "seats": 3
+        },
+        {
+          "min_expected_adults": 70,
+          "seats": 7
+        }
+      ]
+    },
+    {
+      "id": "local_and_route_councils",
+      "default_rule": "collective_body",
+      "default_personal_term_years": 5,
+      "personal_min_age": 25,
+      "personal_max_age": 80,
+      "institution_override_allowed": true,
+      "collective_seats_thresholds": [
+        {
+          "min_expected_adults": 0,
+          "seats": 1
+        },
+        {
+          "min_expected_adults": 20,
+          "seats": 3
+        },
+        {
+          "min_expected_adults": 70,
+          "seats": 7
+        }
+      ]
+    },
+    {
+      "id": "local_assemblies",
+      "default_rule": "collective_body",
+      "default_personal_term_years": 5,
+      "personal_min_age": 25,
+      "personal_max_age": 80,
+      "institution_override_allowed": true,
+      "collective_seats_thresholds": [
+        {
+          "min_expected_adults": 0,
+          "seats": 1
+        },
+        {
+          "min_expected_adults": 20,
+          "seats": 3
+        },
+        {
+          "min_expected_adults": 70,
+          "seats": 7
+        }
+      ]
+    },
+    {
+      "id": "mobile_group_leadership",
+      "default_rule": "seniority",
+      "default_personal_term_years": 5,
+      "personal_min_age": 25,
+      "personal_max_age": 80,
+      "institution_override_allowed": true,
+      "collective_seats_thresholds": [
+        {
+          "min_expected_adults": 0,
+          "seats": 1
+        },
+        {
+          "min_expected_adults": 20,
+          "seats": 3
+        },
+        {
+          "min_expected_adults": 70,
+          "seats": 7
+        }
+      ]
+    },
+    {
+      "id": "port_and_local_councils",
+      "default_rule": "collective_body",
+      "default_personal_term_years": 5,
+      "personal_min_age": 25,
+      "personal_max_age": 80,
+      "institution_override_allowed": true,
+      "collective_seats_thresholds": [
+        {
+          "min_expected_adults": 0,
+          "seats": 1
+        },
+        {
+          "min_expected_adults": 20,
+          "seats": 3
+        },
+        {
+          "min_expected_adults": 70,
+          "seats": 7
+        }
+      ]
+    },
+    {
+      "id": "territorial_offices",
+      "default_rule": "appointment",
+      "default_personal_term_years": 5,
+      "personal_min_age": 25,
+      "personal_max_age": 80,
+      "institution_override_allowed": true,
+      "collective_seats_thresholds": [
+        {
+          "min_expected_adults": 0,
+          "seats": 1
+        },
+        {
+          "min_expected_adults": 20,
+          "seats": 3
+        },
+        {
+          "min_expected_adults": 70,
+          "seats": 7
+        }
+      ]
+    }
+  ],
+  "kinship_templates": [
+    {
+      "id": "communal_households",
+      "resident_household_basis": "provider_co_residence",
+      "long_lineages": "simulated_core_only",
+      "background_affinity_key": "origin_cohort_id_and_parental_pair_ordinal",
+      "reproduction_is_separate": true
+    },
+    {
+      "id": "explicit_reproduction_profile",
+      "resident_household_basis": "provider_co_residence",
+      "long_lineages": "simulated_core_only",
+      "background_affinity_key": "origin_cohort_id_and_parental_pair_ordinal",
+      "reproduction_is_separate": true
+    },
+    {
+      "id": "extended_households",
+      "resident_household_basis": "provider_co_residence",
+      "long_lineages": "simulated_core_only",
+      "background_affinity_key": "origin_cohort_id_and_parental_pair_ordinal",
+      "reproduction_is_separate": true
+    },
+    {
+      "id": "household_and_affiliation",
+      "resident_household_basis": "provider_co_residence",
+      "long_lineages": "simulated_core_only",
+      "background_affinity_key": "origin_cohort_id_and_parental_pair_ordinal",
+      "reproduction_is_separate": true
+    },
+    {
+      "id": "household_and_community",
+      "resident_household_basis": "provider_co_residence",
+      "long_lineages": "simulated_core_only",
+      "background_affinity_key": "origin_cohort_id_and_parental_pair_ordinal",
+      "reproduction_is_separate": true
+    },
+    {
+      "id": "household_and_craft_lineage",
+      "resident_household_basis": "provider_co_residence",
+      "long_lineages": "simulated_core_only",
+      "background_affinity_key": "origin_cohort_id_and_parental_pair_ordinal",
+      "reproduction_is_separate": true
+    },
+    {
+      "id": "household_and_lineage",
+      "resident_household_basis": "provider_co_residence",
+      "long_lineages": "simulated_core_only",
+      "background_affinity_key": "origin_cohort_id_and_parental_pair_ordinal",
+      "reproduction_is_separate": true
+    },
+    {
+      "id": "household_and_partnership",
+      "resident_household_basis": "provider_co_residence",
+      "long_lineages": "simulated_core_only",
+      "background_affinity_key": "origin_cohort_id_and_parental_pair_ordinal",
+      "reproduction_is_separate": true
+    },
+    {
+      "id": "mobile_households",
+      "resident_household_basis": "provider_co_residence",
+      "long_lineages": "simulated_core_only",
+      "background_affinity_key": "origin_cohort_id_and_parental_pair_ordinal",
+      "reproduction_is_separate": true
+    }
+  ],
+  "base_archetype_ids": [
+    "base_farm",
+    "base_workshop",
+    "base_trade_company",
+    "base_service_unit",
+    "base_friend_circle",
+    "base_religious_community",
+    "base_faction",
+    "base_neighborhood",
+    "base_local_institution",
+    "base_craft_association"
+  ],
+  "required_activity_coverage": [
+    "agriculture",
+    "craft",
+    "trade",
+    "services"
+  ],
+  "demography_society_templates": [
+    {
+      "id": "society-template/agrarian_estates",
+      "schema_id": "chronos-lineage-society-1",
+      "parameters": {
+        "childfree_rate_bps": 300,
+        "marriage_rate_bps": 3000,
+        "founder_match_participation_bps": 8500,
+        "marriage_min_age": 18,
+        "marriage_max_age": 65,
+        "max_age_gap": 18,
+        "divorce_rate_bps": 20,
+        "remarriage_delay_years": 1,
+        "kinship_depth": 3,
+        "matching_attempts": 12,
+        "status_affinity_bps": 8000,
+        "status_inheritance_bps": 9000,
+        "activity_inheritance_bps": 8000,
+        "migration_rate_bps": 60,
+        "dependent_age": 18,
+        "residence": "either",
+        "distance_scale_mm": 25000000,
+        "marriage_radius_mm": 60000000,
+        "migration_radius_mm": 100000000,
+        "max_neighbors": 12,
+        "local_marriage_weight": 4,
+        "capacity_growth_ppm": 2000
+      },
+      "status_weights": {
+        "commoner": 7600,
+        "skilled": 1900,
+        "notable": 450,
+        "elite": 50
+      },
+      "core_status_weights": {
+        "commoner": 1200,
+        "skilled": 1800,
+        "notable": 6000,
+        "elite": 1000
+      }
+    },
+    {
+      "id": "society-template/mercantile_communes",
+      "schema_id": "chronos-lineage-society-1",
+      "parameters": {
+        "childfree_rate_bps": 300,
+        "marriage_rate_bps": 3000,
+        "founder_match_participation_bps": 8500,
+        "marriage_min_age": 18,
+        "marriage_max_age": 65,
+        "max_age_gap": 18,
+        "divorce_rate_bps": 20,
+        "remarriage_delay_years": 1,
+        "kinship_depth": 3,
+        "matching_attempts": 12,
+        "status_affinity_bps": 8000,
+        "status_inheritance_bps": 9000,
+        "activity_inheritance_bps": 8000,
+        "migration_rate_bps": 140,
+        "dependent_age": 18,
+        "residence": "either",
+        "distance_scale_mm": 25000000,
+        "marriage_radius_mm": 60000000,
+        "migration_radius_mm": 100000000,
+        "max_neighbors": 12,
+        "local_marriage_weight": 4,
+        "capacity_growth_ppm": 2000
+      },
+      "status_weights": {
+        "commoner": 7600,
+        "skilled": 1900,
+        "notable": 450,
+        "elite": 50
+      },
+      "core_status_weights": {
+        "commoner": 1200,
+        "skilled": 1800,
+        "notable": 6000,
+        "elite": 1000
+      }
+    },
+    {
+      "id": "society-template/urban_administrations",
+      "schema_id": "chronos-lineage-society-1",
+      "parameters": {
+        "childfree_rate_bps": 300,
+        "marriage_rate_bps": 3000,
+        "founder_match_participation_bps": 8500,
+        "marriage_min_age": 18,
+        "marriage_max_age": 65,
+        "max_age_gap": 18,
+        "divorce_rate_bps": 20,
+        "remarriage_delay_years": 1,
+        "kinship_depth": 3,
+        "matching_attempts": 12,
+        "status_affinity_bps": 8000,
+        "status_inheritance_bps": 9000,
+        "activity_inheritance_bps": 8000,
+        "migration_rate_bps": 90,
+        "dependent_age": 18,
+        "residence": "either",
+        "distance_scale_mm": 25000000,
+        "marriage_radius_mm": 60000000,
+        "migration_radius_mm": 100000000,
+        "max_neighbors": 12,
+        "local_marriage_weight": 4,
+        "capacity_growth_ppm": 2000
+      },
+      "status_weights": {
+        "commoner": 7600,
+        "skilled": 1900,
+        "notable": 450,
+        "elite": 50
+      },
+      "core_status_weights": {
+        "commoner": 1200,
+        "skilled": 1800,
+        "notable": 6000,
+        "elite": 1000
+      }
+    },
+    {
+      "id": "society-template/courts_and_bazaars",
+      "schema_id": "chronos-lineage-society-1",
+      "parameters": {
+        "childfree_rate_bps": 300,
+        "marriage_rate_bps": 3000,
+        "founder_match_participation_bps": 8500,
+        "marriage_min_age": 18,
+        "marriage_max_age": 65,
+        "max_age_gap": 18,
+        "divorce_rate_bps": 20,
+        "remarriage_delay_years": 1,
+        "kinship_depth": 3,
+        "matching_attempts": 12,
+        "status_affinity_bps": 8000,
+        "status_inheritance_bps": 9000,
+        "activity_inheritance_bps": 8000,
+        "migration_rate_bps": 110,
+        "dependent_age": 18,
+        "residence": "either",
+        "distance_scale_mm": 25000000,
+        "marriage_radius_mm": 60000000,
+        "migration_radius_mm": 100000000,
+        "max_neighbors": 12,
+        "local_marriage_weight": 4,
+        "capacity_growth_ppm": 2000
+      },
+      "status_weights": {
+        "commoner": 7600,
+        "skilled": 1900,
+        "notable": 450,
+        "elite": 50
+      },
+      "core_status_weights": {
+        "commoner": 1200,
+        "skilled": 1800,
+        "notable": 6000,
+        "elite": 1000
+      }
+    },
+    {
+      "id": "society-template/temple_centres",
+      "schema_id": "chronos-lineage-society-1",
+      "parameters": {
+        "childfree_rate_bps": 300,
+        "marriage_rate_bps": 3000,
+        "founder_match_participation_bps": 8500,
+        "marriage_min_age": 18,
+        "marriage_max_age": 65,
+        "max_age_gap": 18,
+        "divorce_rate_bps": 20,
+        "remarriage_delay_years": 1,
+        "kinship_depth": 3,
+        "matching_attempts": 12,
+        "status_affinity_bps": 8000,
+        "status_inheritance_bps": 9000,
+        "activity_inheritance_bps": 8000,
+        "migration_rate_bps": 80,
+        "dependent_age": 18,
+        "residence": "either",
+        "distance_scale_mm": 25000000,
+        "marriage_radius_mm": 60000000,
+        "migration_radius_mm": 100000000,
+        "max_neighbors": 12,
+        "local_marriage_weight": 4,
+        "capacity_growth_ppm": 2000
+      },
+      "status_weights": {
+        "commoner": 7600,
+        "skilled": 1900,
+        "notable": 450,
+        "elite": 50
+      },
+      "core_status_weights": {
+        "commoner": 1200,
+        "skilled": 1800,
+        "notable": 6000,
+        "elite": 1000
+      }
+    },
+    {
+      "id": "society-template/fortified_houses",
+      "schema_id": "chronos-lineage-society-1",
+      "parameters": {
+        "childfree_rate_bps": 300,
+        "marriage_rate_bps": 3000,
+        "founder_match_participation_bps": 8500,
+        "marriage_min_age": 18,
+        "marriage_max_age": 65,
+        "max_age_gap": 18,
+        "divorce_rate_bps": 20,
+        "remarriage_delay_years": 1,
+        "kinship_depth": 3,
+        "matching_attempts": 12,
+        "status_affinity_bps": 8000,
+        "status_inheritance_bps": 9000,
+        "activity_inheritance_bps": 8000,
+        "migration_rate_bps": 65,
+        "dependent_age": 18,
+        "residence": "either",
+        "distance_scale_mm": 25000000,
+        "marriage_radius_mm": 60000000,
+        "migration_radius_mm": 100000000,
+        "max_neighbors": 12,
+        "local_marriage_weight": 4,
+        "capacity_growth_ppm": 2000
+      },
+      "status_weights": {
+        "commoner": 7600,
+        "skilled": 1900,
+        "notable": 450,
+        "elite": 50
+      },
+      "core_status_weights": {
+        "commoner": 1200,
+        "skilled": 1800,
+        "notable": 6000,
+        "elite": 1000
+      }
+    },
+    {
+      "id": "society-template/clan_assemblies",
+      "schema_id": "chronos-lineage-society-1",
+      "parameters": {
+        "childfree_rate_bps": 300,
+        "marriage_rate_bps": 3000,
+        "founder_match_participation_bps": 8500,
+        "marriage_min_age": 18,
+        "marriage_max_age": 65,
+        "max_age_gap": 18,
+        "divorce_rate_bps": 20,
+        "remarriage_delay_years": 1,
+        "kinship_depth": 3,
+        "matching_attempts": 12,
+        "status_affinity_bps": 8000,
+        "status_inheritance_bps": 9000,
+        "activity_inheritance_bps": 8000,
+        "migration_rate_bps": 90,
+        "dependent_age": 18,
+        "residence": "either",
+        "distance_scale_mm": 25000000,
+        "marriage_radius_mm": 60000000,
+        "migration_radius_mm": 100000000,
+        "max_neighbors": 12,
+        "local_marriage_weight": 4,
+        "capacity_growth_ppm": 2000
+      },
+      "status_weights": {
+        "commoner": 7600,
+        "skilled": 1900,
+        "notable": 450,
+        "elite": 50
+      },
+      "core_status_weights": {
+        "commoner": 1200,
+        "skilled": 1800,
+        "notable": 6000,
+        "elite": 1000
+      }
+    },
+    {
+      "id": "society-template/mobile_camps",
+      "schema_id": "chronos-lineage-society-1",
+      "parameters": {
+        "childfree_rate_bps": 300,
+        "marriage_rate_bps": 3000,
+        "founder_match_participation_bps": 8500,
+        "marriage_min_age": 18,
+        "marriage_max_age": 65,
+        "max_age_gap": 18,
+        "divorce_rate_bps": 20,
+        "remarriage_delay_years": 1,
+        "kinship_depth": 3,
+        "matching_attempts": 12,
+        "status_affinity_bps": 8000,
+        "status_inheritance_bps": 9000,
+        "activity_inheritance_bps": 8000,
+        "migration_rate_bps": 180,
+        "dependent_age": 18,
+        "residence": "either",
+        "distance_scale_mm": 25000000,
+        "marriage_radius_mm": 60000000,
+        "migration_radius_mm": 100000000,
+        "max_neighbors": 12,
+        "local_marriage_weight": 4,
+        "capacity_growth_ppm": 2000
+      },
+      "status_weights": {
+        "commoner": 7600,
+        "skilled": 1900,
+        "notable": 450,
+        "elite": 50
+      },
+      "core_status_weights": {
+        "commoner": 1200,
+        "skilled": 1800,
+        "notable": 6000,
+        "elite": 1000
+      }
+    },
+    {
+      "id": "society-template/compound_courts",
+      "schema_id": "chronos-lineage-society-1",
+      "parameters": {
+        "childfree_rate_bps": 300,
+        "marriage_rate_bps": 3000,
+        "founder_match_participation_bps": 8500,
+        "marriage_min_age": 18,
+        "marriage_max_age": 65,
+        "max_age_gap": 18,
+        "divorce_rate_bps": 20,
+        "remarriage_delay_years": 1,
+        "kinship_depth": 3,
+        "matching_attempts": 12,
+        "status_affinity_bps": 8000,
+        "status_inheritance_bps": 9000,
+        "activity_inheritance_bps": 8000,
+        "migration_rate_bps": 90,
+        "dependent_age": 18,
+        "residence": "either",
+        "distance_scale_mm": 25000000,
+        "marriage_radius_mm": 60000000,
+        "migration_radius_mm": 100000000,
+        "max_neighbors": 12,
+        "local_marriage_weight": 4,
+        "capacity_growth_ppm": 2000
+      },
+      "status_weights": {
+        "commoner": 7600,
+        "skilled": 1900,
+        "notable": 450,
+        "elite": 50
+      },
+      "core_status_weights": {
+        "commoner": 1200,
+        "skilled": 1800,
+        "notable": 6000,
+        "elite": 1000
+      }
+    },
+    {
+      "id": "society-template/maritime_networks",
+      "schema_id": "chronos-lineage-society-1",
+      "parameters": {
+        "childfree_rate_bps": 300,
+        "marriage_rate_bps": 3000,
+        "founder_match_participation_bps": 8500,
+        "marriage_min_age": 18,
+        "marriage_max_age": 65,
+        "max_age_gap": 18,
+        "divorce_rate_bps": 20,
+        "remarriage_delay_years": 1,
+        "kinship_depth": 3,
+        "matching_attempts": 12,
+        "status_affinity_bps": 8000,
+        "status_inheritance_bps": 9000,
+        "activity_inheritance_bps": 8000,
+        "migration_rate_bps": 170,
+        "dependent_age": 18,
+        "residence": "either",
+        "distance_scale_mm": 25000000,
+        "marriage_radius_mm": 60000000,
+        "migration_radius_mm": 100000000,
+        "max_neighbors": 12,
+        "local_marriage_weight": 4,
+        "capacity_growth_ppm": 2000
+      },
+      "status_weights": {
+        "commoner": 7600,
+        "skilled": 1900,
+        "notable": 450,
+        "elite": 50
+      },
+      "core_status_weights": {
+        "commoner": 1200,
+        "skilled": 1800,
+        "notable": 6000,
+        "elite": 1000
+      }
+    },
+    {
+      "id": "society-template/communal_houses",
+      "schema_id": "chronos-lineage-society-1",
+      "parameters": {
+        "childfree_rate_bps": 300,
+        "marriage_rate_bps": 3000,
+        "founder_match_participation_bps": 8500,
+        "marriage_min_age": 18,
+        "marriage_max_age": 65,
+        "max_age_gap": 18,
+        "divorce_rate_bps": 20,
+        "remarriage_delay_years": 1,
+        "kinship_depth": 3,
+        "matching_attempts": 12,
+        "status_affinity_bps": 8000,
+        "status_inheritance_bps": 9000,
+        "activity_inheritance_bps": 8000,
+        "migration_rate_bps": 80,
+        "dependent_age": 18,
+        "residence": "either",
+        "distance_scale_mm": 25000000,
+        "marriage_radius_mm": 60000000,
+        "migration_radius_mm": 100000000,
+        "max_neighbors": 12,
+        "local_marriage_weight": 4,
+        "capacity_growth_ppm": 2000
+      },
+      "status_weights": {
+        "commoner": 7600,
+        "skilled": 1900,
+        "notable": 450,
+        "elite": 50
+      },
+      "core_status_weights": {
+        "commoner": 1200,
+        "skilled": 1800,
+        "notable": 6000,
+        "elite": 1000
+      }
+    },
+    {
+      "id": "society-template/redistributive_centres",
+      "schema_id": "chronos-lineage-society-1",
+      "parameters": {
+        "childfree_rate_bps": 300,
+        "marriage_rate_bps": 3000,
+        "founder_match_participation_bps": 8500,
+        "marriage_min_age": 18,
+        "marriage_max_age": 65,
+        "max_age_gap": 18,
+        "divorce_rate_bps": 20,
+        "remarriage_delay_years": 1,
+        "kinship_depth": 3,
+        "matching_attempts": 12,
+        "status_affinity_bps": 8000,
+        "status_inheritance_bps": 9000,
+        "activity_inheritance_bps": 8000,
+        "migration_rate_bps": 80,
+        "dependent_age": 18,
+        "residence": "either",
+        "distance_scale_mm": 25000000,
+        "marriage_radius_mm": 60000000,
+        "migration_radius_mm": 100000000,
+        "max_neighbors": 12,
+        "local_marriage_weight": 4,
+        "capacity_growth_ppm": 2000
+      },
+      "status_weights": {
+        "commoner": 7600,
+        "skilled": 1900,
+        "notable": 450,
+        "elite": 50
+      },
+      "core_status_weights": {
+        "commoner": 1200,
+        "skilled": 1800,
+        "notable": 6000,
+        "elite": 1000
+      }
+    },
+    {
+      "id": "society-template/oasis_networks",
+      "schema_id": "chronos-lineage-society-1",
+      "parameters": {
+        "childfree_rate_bps": 300,
+        "marriage_rate_bps": 3000,
+        "founder_match_participation_bps": 8500,
+        "marriage_min_age": 18,
+        "marriage_max_age": 65,
+        "max_age_gap": 18,
+        "divorce_rate_bps": 20,
+        "remarriage_delay_years": 1,
+        "kinship_depth": 3,
+        "matching_attempts": 12,
+        "status_affinity_bps": 8000,
+        "status_inheritance_bps": 9000,
+        "activity_inheritance_bps": 8000,
+        "migration_rate_bps": 160,
+        "dependent_age": 18,
+        "residence": "either",
+        "distance_scale_mm": 25000000,
+        "marriage_radius_mm": 60000000,
+        "migration_radius_mm": 100000000,
+        "max_neighbors": 12,
+        "local_marriage_weight": 4,
+        "capacity_growth_ppm": 2000
+      },
+      "status_weights": {
+        "commoner": 7600,
+        "skilled": 1900,
+        "notable": 450,
+        "elite": 50
+      },
+      "core_status_weights": {
+        "commoner": 1200,
+        "skilled": 1800,
+        "notable": 6000,
+        "elite": 1000
+      }
+    },
+    {
+      "id": "society-template/craft_holds",
+      "schema_id": "chronos-lineage-society-1",
+      "parameters": {
+        "childfree_rate_bps": 300,
+        "marriage_rate_bps": 3000,
+        "founder_match_participation_bps": 8500,
+        "marriage_min_age": 18,
+        "marriage_max_age": 65,
+        "max_age_gap": 18,
+        "divorce_rate_bps": 20,
+        "remarriage_delay_years": 1,
+        "kinship_depth": 3,
+        "matching_attempts": 12,
+        "status_affinity_bps": 8000,
+        "status_inheritance_bps": 9000,
+        "activity_inheritance_bps": 8000,
+        "migration_rate_bps": 70,
+        "dependent_age": 18,
+        "residence": "either",
+        "distance_scale_mm": 25000000,
+        "marriage_radius_mm": 60000000,
+        "migration_radius_mm": 100000000,
+        "max_neighbors": 12,
+        "local_marriage_weight": 4,
+        "capacity_growth_ppm": 2000
+      },
+      "status_weights": {
+        "commoner": 7600,
+        "skilled": 1900,
+        "notable": 450,
+        "elite": 50
+      },
+      "core_status_weights": {
+        "commoner": 1200,
+        "skilled": 1800,
+        "notable": 6000,
+        "elite": 1000
+      }
+    },
+    {
+      "id": "society-template/forest_houses",
+      "schema_id": "chronos-lineage-society-1",
+      "parameters": {
+        "childfree_rate_bps": 300,
+        "marriage_rate_bps": 3000,
+        "founder_match_participation_bps": 8500,
+        "marriage_min_age": 18,
+        "marriage_max_age": 65,
+        "max_age_gap": 18,
+        "divorce_rate_bps": 20,
+        "remarriage_delay_years": 1,
+        "kinship_depth": 3,
+        "matching_attempts": 12,
+        "status_affinity_bps": 8000,
+        "status_inheritance_bps": 9000,
+        "activity_inheritance_bps": 8000,
+        "migration_rate_bps": 80,
+        "dependent_age": 18,
+        "residence": "either",
+        "distance_scale_mm": 25000000,
+        "marriage_radius_mm": 60000000,
+        "migration_radius_mm": 100000000,
+        "max_neighbors": 12,
+        "local_marriage_weight": 4,
+        "capacity_growth_ppm": 2000
+      },
+      "status_weights": {
+        "commoner": 7600,
+        "skilled": 1900,
+        "notable": 450,
+        "elite": 50
+      },
+      "core_status_weights": {
+        "commoner": 1200,
+        "skilled": 1800,
+        "notable": 6000,
+        "elite": 1000
+      }
+    },
+    {
+      "id": "society-template/underground_factions",
+      "schema_id": "chronos-lineage-society-1",
+      "parameters": {
+        "childfree_rate_bps": 300,
+        "marriage_rate_bps": 3000,
+        "founder_match_participation_bps": 8500,
+        "marriage_min_age": 18,
+        "marriage_max_age": 65,
+        "max_age_gap": 18,
+        "divorce_rate_bps": 20,
+        "remarriage_delay_years": 1,
+        "kinship_depth": 3,
+        "matching_attempts": 12,
+        "status_affinity_bps": 8000,
+        "status_inheritance_bps": 9000,
+        "activity_inheritance_bps": 8000,
+        "migration_rate_bps": 80,
+        "dependent_age": 18,
+        "residence": "either",
+        "distance_scale_mm": 25000000,
+        "marriage_radius_mm": 60000000,
+        "migration_radius_mm": 100000000,
+        "max_neighbors": 12,
+        "local_marriage_weight": 4,
+        "capacity_growth_ppm": 2000
+      },
+      "status_weights": {
+        "commoner": 7600,
+        "skilled": 1900,
+        "notable": 450,
+        "elite": 50
+      },
+      "core_status_weights": {
+        "commoner": 1200,
+        "skilled": 1800,
+        "notable": 6000,
+        "elite": 1000
+      }
+    },
+    {
+      "id": "society-template/retinue_clans",
+      "schema_id": "chronos-lineage-society-1",
+      "parameters": {
+        "childfree_rate_bps": 300,
+        "marriage_rate_bps": 3000,
+        "founder_match_participation_bps": 8500,
+        "marriage_min_age": 18,
+        "marriage_max_age": 65,
+        "max_age_gap": 18,
+        "divorce_rate_bps": 20,
+        "remarriage_delay_years": 1,
+        "kinship_depth": 3,
+        "matching_attempts": 12,
+        "status_affinity_bps": 8000,
+        "status_inheritance_bps": 9000,
+        "activity_inheritance_bps": 8000,
+        "migration_rate_bps": 140,
+        "dependent_age": 18,
+        "residence": "either",
+        "distance_scale_mm": 25000000,
+        "marriage_radius_mm": 60000000,
+        "migration_radius_mm": 100000000,
+        "max_neighbors": 12,
+        "local_marriage_weight": 4,
+        "capacity_growth_ppm": 2000
+      },
+      "status_weights": {
+        "commoner": 7600,
+        "skilled": 1900,
+        "notable": 450,
+        "elite": 50
+      },
+      "core_status_weights": {
+        "commoner": 1200,
+        "skilled": 1800,
+        "notable": 6000,
+        "elite": 1000
+      }
+    },
+    {
+      "id": "society-template/colony_networks",
+      "schema_id": "chronos-lineage-society-1",
+      "parameters": {
+        "childfree_rate_bps": 300,
+        "marriage_rate_bps": 3000,
+        "founder_match_participation_bps": 8500,
+        "marriage_min_age": 18,
+        "marriage_max_age": 65,
+        "max_age_gap": 18,
+        "divorce_rate_bps": 20,
+        "remarriage_delay_years": 1,
+        "kinship_depth": 3,
+        "matching_attempts": 12,
+        "status_affinity_bps": 8000,
+        "status_inheritance_bps": 9000,
+        "activity_inheritance_bps": 8000,
+        "migration_rate_bps": 100,
+        "dependent_age": 18,
+        "residence": "either",
+        "distance_scale_mm": 25000000,
+        "marriage_radius_mm": 60000000,
+        "migration_radius_mm": 100000000,
+        "max_neighbors": 12,
+        "local_marriage_weight": 4,
+        "capacity_growth_ppm": 2000
+      },
+      "status_weights": {
+        "commoner": 7600,
+        "skilled": 1900,
+        "notable": 450,
+        "elite": 50
+      },
+      "core_status_weights": {
+        "commoner": 1200,
+        "skilled": 1800,
+        "notable": 6000,
+        "elite": 1000
+      }
+    },
+    {
+      "id": "society-template/wetland_communities",
+      "schema_id": "chronos-lineage-society-1",
+      "parameters": {
+        "childfree_rate_bps": 300,
+        "marriage_rate_bps": 3000,
+        "founder_match_participation_bps": 8500,
+        "marriage_min_age": 18,
+        "marriage_max_age": 65,
+        "max_age_gap": 18,
+        "divorce_rate_bps": 20,
+        "remarriage_delay_years": 1,
+        "kinship_depth": 3,
+        "matching_attempts": 12,
+        "status_affinity_bps": 8000,
+        "status_inheritance_bps": 9000,
+        "activity_inheritance_bps": 8000,
+        "migration_rate_bps": 90,
+        "dependent_age": 18,
+        "residence": "either",
+        "distance_scale_mm": 25000000,
+        "marriage_radius_mm": 60000000,
+        "migration_radius_mm": 100000000,
+        "max_neighbors": 12,
+        "local_marriage_weight": 4,
+        "capacity_growth_ppm": 2000
+      },
+      "status_weights": {
+        "commoner": 7600,
+        "skilled": 1900,
+        "notable": 450,
+        "elite": 50
+      },
+      "core_status_weights": {
+        "commoner": 1200,
+        "skilled": 1800,
+        "notable": 6000,
+        "elite": 1000
+      }
+    },
+    {
+      "id": "society-template/market_towns",
+      "schema_id": "chronos-lineage-society-1",
+      "parameters": {
+        "childfree_rate_bps": 300,
+        "marriage_rate_bps": 3000,
+        "founder_match_participation_bps": 8500,
+        "marriage_min_age": 18,
+        "marriage_max_age": 65,
+        "max_age_gap": 18,
+        "divorce_rate_bps": 20,
+        "remarriage_delay_years": 1,
+        "kinship_depth": 3,
+        "matching_attempts": 12,
+        "status_affinity_bps": 8000,
+        "status_inheritance_bps": 9000,
+        "activity_inheritance_bps": 8000,
+        "migration_rate_bps": 120,
+        "dependent_age": 18,
+        "residence": "either",
+        "distance_scale_mm": 25000000,
+        "marriage_radius_mm": 60000000,
+        "migration_radius_mm": 100000000,
+        "max_neighbors": 12,
+        "local_marriage_weight": 4,
+        "capacity_growth_ppm": 2000
+      },
+      "status_weights": {
+        "commoner": 7600,
+        "skilled": 1900,
+        "notable": 450,
+        "elite": 50
+      },
+      "core_status_weights": {
+        "commoner": 1200,
+        "skilled": 1800,
+        "notable": 6000,
+        "elite": 1000
+      }
+    },
+    {
+      "id": "society-template/hill_courts",
+      "schema_id": "chronos-lineage-society-1",
+      "parameters": {
+        "childfree_rate_bps": 300,
+        "marriage_rate_bps": 3000,
+        "founder_match_participation_bps": 8500,
+        "marriage_min_age": 18,
+        "marriage_max_age": 65,
+        "max_age_gap": 18,
+        "divorce_rate_bps": 20,
+        "remarriage_delay_years": 1,
+        "kinship_depth": 3,
+        "matching_attempts": 12,
+        "status_affinity_bps": 8000,
+        "status_inheritance_bps": 9000,
+        "activity_inheritance_bps": 8000,
+        "migration_rate_bps": 75,
+        "dependent_age": 18,
+        "residence": "either",
+        "distance_scale_mm": 25000000,
+        "marriage_radius_mm": 60000000,
+        "migration_radius_mm": 100000000,
+        "max_neighbors": 12,
+        "local_marriage_weight": 4,
+        "capacity_growth_ppm": 2000
+      },
+      "status_weights": {
+        "commoner": 7600,
+        "skilled": 1900,
+        "notable": 450,
+        "elite": 50
+      },
+      "core_status_weights": {
+        "commoner": 1200,
+        "skilled": 1800,
+        "notable": 6000,
+        "elite": 1000
+      }
+    }
+  ]
+}
