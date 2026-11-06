@@ -1039,3 +1039,73 @@ fn names_follow_their_keys_and_never_touch_facts() {
     assert!(languages_differ);
     assert_eq!(slugs, 0, "every ref is a real name");
 }
+
+#[test]
+fn inheritance_rule_comes_from_the_culture_data() {
+    use super::display_names::person_names;
+    let world = world();
+    let people = village(&world.site(0), 30);
+    let packet = packet(&world, &people);
+    let mut table = table(&world, &people).candidate_table;
+    // 0 and 1 are the founders; 2 is their son, 3 his daughter (no mother recorded).
+    table.father_slot[2] = Some(0);
+    table.mother_slot[2] = Some(1);
+    table.father_slot[3] = Some(2);
+    table.mother_slot[3] = None;
+    table.sex[..4].copy_from_slice(&[0, 1, 0, 1]);
+    let names = |culture: &str| {
+        let mut attributes = packet.people.clone();
+        attributes
+            .iter_mut()
+            .for_each(|a| a.culture_id = culture.into());
+        let all = person_names(
+            world.canon.world_seed,
+            &packet.domain_id,
+            &table,
+            &attributes,
+        )
+        .unwrap();
+        all.into_iter()
+            .take(4)
+            .map(Option::unwrap)
+            .collect::<Vec<_>>()
+    };
+    let patri = names("european-organic");
+    assert_eq!(patri[3].surname, patri[0].surname, "through the father");
+    let matri = names("native-pueblo");
+    assert_eq!(matri[3].surname, matri[1].surname, "through the mother");
+    assert_eq!(matri[2].surname, matri[1].surname);
+    let patro = names("russian-kremlin");
+    let stem: String = patro[0].forename.chars().take(3).collect();
+    assert!(
+        patro[2].surname.starts_with(&stem),
+        "son of the first forename"
+    );
+    assert!(patro[3].surname.ends_with("na"), "daughter form");
+    let given = names("elven");
+    assert!(given[2].surname.is_empty() && !given[2].house.is_empty());
+    assert_eq!(given[2].text(), given[2].forename);
+    let first = names("korean");
+    assert_eq!(
+        first[0].text(),
+        format!("{} {}", first[0].surname, first[0].forename)
+    );
+    assert_eq!(names("russian-kremlin"), patro, "same keys, same names");
+}
+
+#[test]
+fn polity_names_come_from_the_nation_patterns() {
+    use super::display_names::{place_labels, polity_name};
+    let world = world();
+    let labels = place_labels(&world.canon).unwrap();
+    let mut named = 0;
+    for polity in &world.canon.polities {
+        let texts = polity_name(&world.canon, &labels, polity).unwrap().unwrap();
+        println!("{} | {}", texts["en"], texts["fr"]);
+        assert!(!texts["en"].is_empty() && !texts["fr"].is_empty());
+        let again = polity_name(&world.canon, &labels, polity).unwrap().unwrap();
+        assert_eq!(texts, again, "keyed by the polity, not by the query");
+        named += 1;
+    }
+    assert!(named > 0);
+}

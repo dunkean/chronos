@@ -7,7 +7,8 @@
 use super::atlas::{ContactEnd, HistoryAtlas};
 use super::canonical::canonical_bytes;
 use super::display_names::{
-    name_provenance, place_labels, render_tree, same_text, PlaceLabel, DISPLAY_NAME_RULE,
+    name_provenance, place_labels, polity_name, render_tree, same_text, PlaceLabel,
+    DISPLAY_NAME_RULE,
 };
 use super::general::{marker_dates, GeneralCanon};
 use super::ids::{AddressKind, DomainKey, Owner, OwnerScope, SemanticAddress};
@@ -659,6 +660,15 @@ fn polity_json(cx: &Cx, p: usize) -> Value {
     let polity = &cx.canon.polities[p];
     let entity = &polity.entity;
     let names = match cx.labels.get(&entity.id) {
+        Some(label)
+            if let Some(texts) = polity_name(cx.canon, &cx.labels, polity).ok().flatten() =>
+        {
+            json!({
+                "name_text": texts,
+                "name_synthetic": false,
+                "name_provenance": name_provenance(label.status, DISPLAY_NAME_RULE),
+            })
+        }
         Some(label) => json!({
             "name_key": "polity.fallback",
             "name_params": {"cell": label.text},
