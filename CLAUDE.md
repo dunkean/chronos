@@ -2,7 +2,7 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-Chronos is a local prototype of a deterministic chronology generator for a small world: sites, routes, polities, organizations, named people and dated events with effects, explored in a web workshop with a map, a timeline and an inspector. User-facing docs, UI strings, warnings and source details are in French. Keep that language when editing them, and preserve the numbered sections and anchors of `conception_generateur_histoire_multiechelle_v3.md`.
+Chronos is a local prototype of a deterministic chronology generator for a small world: sites, routes, polities, organizations, named people and dated events with effects, explored in a web workshop with a map, a timeline and an inspector. Every user-visible text exists in both English and French at all times: English is the source language, French a complete translation, shown by default. All code, identifiers, keys, comments and diagnostics are in English; v2 user text goes through stable keys. The v1 UI and the existing French design docs stay as they are until migrated. When editing the design study, preserve the numbered sections and anchors of `conception_generateur_histoire_multiechelle_v3.md`.
 
 Before changing the engine, read sections 14 (Rust architecture), 15 (determinism), 17 (validation) and 18 (implementation phases) of the design study. In docs, clearly separate what is proposed, what is implemented and what was measured. Keep canonical facts, social constraints and narrative accounts separate.
 
