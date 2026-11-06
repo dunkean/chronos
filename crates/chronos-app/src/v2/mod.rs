@@ -1,7 +1,10 @@
 //! Social v2 host: the only place that runs the provider, hashes and touches files
 //! (§2). `chronos-core` stays pure and receives finished envelopes.
+pub mod exchange;
 pub mod lineage_worker;
 pub mod orchestrator;
+pub mod sample;
+pub mod server;
 pub mod store;
 
 use chronos_core::v2::model::{ErrorCode, HistoryError};

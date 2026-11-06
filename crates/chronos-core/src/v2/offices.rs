@@ -48,6 +48,9 @@ pub struct OfficeRequirements {
     /// An office of the jurisdiction refuses its outlaws (§27.5); the private charge
     /// of a group does not.
     pub jurisdiction_bound: bool,
+    /// The head of an association is one of its members; only its founder comes from
+    /// the residents and enters with the charge.
+    pub member_only: bool,
 }
 #[derive(Clone, Debug, PartialEq, Eq, Serialize)]
 pub struct OfficeDefinition {
@@ -111,6 +114,8 @@ string_enum!(OfficeStatus {
 pub struct OfficeHolder {
     pub person_id: String,
     pub person_slot: u32,
+    /// Display label, absent when the culture has no pool.
+    pub name: Option<String>,
     pub source: SlotSource,
     pub birth_year: i32,
     pub death_year: Option<i32>,
@@ -166,6 +171,9 @@ pub fn resolve_office(
         OfficeHolder {
             person_id: person.person_id.clone(),
             person_slot: slot,
+            name: packet.person_names[slot as usize]
+                .as_ref()
+                .map(|n| n.text()),
             source: life.source,
             birth_year: life.birth_year,
             death_year: life.death_year,

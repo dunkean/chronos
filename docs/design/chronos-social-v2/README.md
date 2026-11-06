@@ -482,7 +482,7 @@ Tenure
 
 Un mandat est résolu depuis la fondation de l’office ou un checkpoint canonique complet. On ne choisit pas à nouveau un maire à chaque année demandée. Les échéances, décès, destitutions et vacances déterminent les transitions successives.
 
-Pour une élection, le premier modèle est une sélection pondérée parmi les candidats éligibles, avec popularité/compétence/réseaux agrégés. Il ne simule pas les bulletins de tous les habitants. Pour l’hérédité, le moteur applique la règle de succession versionnée aux liens familiaux exposés ; un enfant du titulaire n’est pas automatiquement son successeur.
+Pour une élection, le premier modèle est une sélection pondérée parmi les candidats éligibles, avec popularité/compétence/réseaux agrégés. Il ne simule pas les bulletins de tous les habitants. Pour l’hérédité, le moteur applique la règle de succession versionnée aux liens familiaux exposés ; un enfant du titulaire n’est pas automatiquement son successeur. Le chef d’une association est l’un de ses membres : à la fondation, le premier titulaire est tiré parmi les résidents et devient son premier membre, ensuite seuls les membres courants sont candidats, et une association dormante peut rester vacante, avec la pénalité de cohésion du §26.6.
 
 **Requête `maire(village_X, 1360)` :**
 

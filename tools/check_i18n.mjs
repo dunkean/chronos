@@ -19,11 +19,11 @@ for (const [lang, d] of [['en', en], ['fr', fr]]) for (const [k, v] of Object.en
 
 // Keys used literally in code and markup.
 const used = new Set();
-const files = ['social-app.js', 'social-graph.js', 'social-timeline.js', 'population-balance.js', 'entity-sheet.js', 'history-model.js', 'social.html'];
+const files = ['social-app.js', 'social-graph.js', 'social-timeline.js', 'population-balance.js', 'entity-sheet.js', 'history-model.js', 'social-map.js', 'social.html'];
 for (const f of files) {
   const src = fs.readFileSync(path.join(web, f), 'utf8');
   for (const m of src.matchAll(/\bt\('([\w.]+)'/g)) used.add(m[1]);
-  for (const m of src.matchAll(/'((?:graph|sheet|balance|timeline|page|app|term)\.[\w.]+)'/g)) used.add(m[1]);
+  for (const m of src.matchAll(/'((?:graph|sheet|balance|timeline|page|app|term|map|progress|explain)\.[\w.]+)'/g)) used.add(m[1]);
   for (const m of src.matchAll(/data-i18n(?:-[\w-]+)?="([\w.]+)"/g)) used.add(m[1]);
 }
 // Keys built from a data value: the allowed values of each family.
@@ -36,7 +36,14 @@ const families = {
     ['component_of', 'member_of', 'affiliated_with', 'represents', 'parent_of', 'union_with', 'adopted_by', 'trusts', 'helps', 'rivals', 'shares_past_with',
       'employed_by', 'supplies', 'holds_office', 'governs', 'protects', 'commands', 'owes_allegiance_to', 'owns', 'controls', 'claims', 'trades_with',
       'allied_with', 'in_conflict_with', 'successor_of']),
-  'kind.{}': ['person', 'village', 'jurisdiction', 'municipality', 'family', 'guild', 'criminal_network', 'charitable_order', 'enterprise', 'office'],
+  'kind.{}': ['person', 'village', 'jurisdiction', 'municipality', 'family', 'guild', 'criminal_network', 'charitable_order', 'enterprise', 'office',
+    'activity_unit', 'association', 'community', 'friend_circle', 'institution', 'polity'],
+  'channel.{}': ['recruitment', 'economy', 'culture', 'religion', 'military', 'memory', 'legality'],
+  'fit.{}': ['skill', 'activity', 'status', 'distance', 'kin', 'network'],
+  'tenure_end.{}': ['death', 'departure', 'term_end', 'ineligible', 'dissolution', 'filled'],
+  'selection_binding.{}': ['initial_observed_binding', 'founding_selection', 'succession', 'kin_succession', 'no_candidate'],
+  'progress.stage.{}': ['queued', 'population', 'packet', 'projection', 'done'],
+  'explain.sentence.{}': [],
   'nature.{}': ['person', 'organized_group', 'community', 'category', 'population'],
   'person_source.{}': ['lineage_simulated', 'lineage_projected', 'procedural', 'author'],
   'provenance.status.{}': ['imported', 'derived', 'synthetic', 'unavailable'],
@@ -64,9 +71,9 @@ const dataUsed = (node) => {
 dataUsed(fixture);
 
 // Diagnostics: every stable code raised by the Rust v2 core and host has a `diagnostics.` message, and no message is orphaned.
-const diagNamespaces = ['address', 'alignment', 'atlas', 'canon', 'canonical', 'catalogue', 'domain', 'entity', 'event', 'graph', 'id', 'impact', 'interval',
+const diagNamespaces = ['query', 'address', 'alignment', 'atlas', 'canon', 'canonical', 'catalogue', 'domain', 'entity', 'event', 'graph', 'id', 'impact', 'interval',
   'legal', 'name_tree', 'naming', 'object_ref', 'office', 'person_table', 'plan', 'population', 'region', 'relation', 'social', 'target'];
-const hostNamespaces = ['orchestrator', 'store', 'worker'];
+const hostNamespaces = ['orchestrator', 'store', 'worker', 'api', 'exchange'];
 const diagSources = [[path.join(root, 'crates', 'chronos-core', 'src', 'v2'), diagNamespaces], [path.join(root, 'crates', 'chronos-app', 'src', 'v2'), hostNamespaces]];
 const codes = new Set();
 for (const [dir, namespaces] of diagSources) for (const f of fs.readdirSync(dir).filter((n) => n.endsWith('.rs'))) {

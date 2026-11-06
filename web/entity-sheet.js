@@ -6,6 +6,14 @@ import { t, tk, tv, fmtInt } from './i18n.js';
 import {
   kindLabel, natureLabel, legalLabel, LEGAL_CLASS, personSourceLabel, eventKindLabel, predLabel, inRange,
 } from './history-model.js';
+import { entitySheet, explainFact } from './data-source.js';
+
+// `kind_key` style parameters are keys themselves.
+function resolveParams(params = {}) {
+  const out = {};
+  for (const [k, v] of Object.entries(params)) out[k.endsWith('_key') ? k.slice(0, -4) : k] = k.endsWith('_key') ? t(String(v)) : v;
+  return out;
+}
 
 const span = (v) => `${v[0]}–${v[1] ?? '…'}`;
 
@@ -13,13 +21,42 @@ export function createSheet(root, ctx) {
   const { model, state } = ctx;
   const link = (id, text) => h('button', { type: 'button', class: 's-link', onclick: () => state.set({ sel: id }) }, text ?? model.name(id));
   const section = (title, ...kids) => h('section', { class: 's-sec' }, h('h3', null, title), ...kids);
+  const explainBox = h('div', { class: 's-explain', role: 'status', 'aria-live': 'polite' });
+
+  // Sentence first, then rule, source and dependencies (section 15.4).
+  async function explain(id) {
+    clear(explainBox);
+    if (ctx.fixture || !ctx.world) { explainBox.append(h('p', { class: 's-dim' }, t('explain.fixture'))); return; }
+    explainBox.append(h('p', { class: 's-dim' }, t('explain.loading')));
+    try {
+      const r = await explainFact(ctx.world, id);
+      clear(explainBox);
+      const rows = [
+        [t('explain.rule'), r.rule_id ?? '\u2014'],
+        [t('explain.source'), r.provenance ? `${t(`provenance.status.${r.provenance.status}`)} \u00b7 ${r.provenance.source}` : '\u2014'],
+        r.domain_id ? [t('explain.domain'), r.domain_id] : null,
+        r.selection ? [t('explain.selection'), t('explain.selection_detail', {
+          candidates: r.selection.candidates ?? 0, selected: fmtInt(r.selection.selected_weight ?? 0), total: fmtInt(r.selection.total_weight ?? 0) })] : null,
+        r.constraints ? [t('explain.constraints'), t('explain.constraints_detail', {
+          min: r.constraints.min_age, max: r.constraints.max_age, term: r.constraints.term_years ?? '\u221e', site: String(r.constraints.residence_site_id).split('/').pop() })] : null,
+      ];
+      explainBox.append(h('p', { class: 's-explain-sentence' }, t(r.sentence_key, resolveParams(r.sentence_params))), dl(rows),
+        r.causes?.length ? h('div', null, h('h4', null, t('explain.causes')),
+          h('ol', { class: 's-rels' }, r.causes.map((c) => h('li', null, `${c.year} \u00b7 `, link(c.id, t(c.label_key))))))
+          : h('p', { class: 's-dim' }, t('explain.no_cause')));
+    } catch (err) {
+      clear(explainBox);
+      explainBox.append(h('p', { class: 's-warn' }, t('explain.failed', { message: err.key ?? err.message })));
+    }
+  }
+  const explainButton = (id) => h('button', { type: 'button', class: 's-mini', onclick: () => explain(id) }, t('explain.button'));
   const dl = (rows) => h('dl', { class: 's-dl' }, rows.filter(Boolean).flatMap(([k, v]) => [h('dt', null, k), h('dd', null, v)]));
 
   function provenanceBlock(p, extra = []) {
     const status = p?.status ?? 'unavailable';
     return section(t('sheet.provenance'), dl([
       [t('sheet.status'), h('span', { class: `status st-${status}` }, t(`provenance.status.${status}`))],
-      [t('sheet.source'), p?.source ?? '—'], [t('sheet.rule'), p?.rule_id ?? '—'], ...extra,
+      [t('sheet.source'), h('span', { title: p?.source ?? '' }, p?.source && p.source.length > 48 ? `${p.source.slice(0, 48)}…` : (p?.source ?? '—'))], [t('sheet.rule'), p?.rule_id ?? '—'], ...extra,
     ]));
   }
 
@@ -71,7 +108,8 @@ export function createSheet(root, ctx) {
       ul.append(h('li', null,
         out ? [h('em', null, predLabel(r.predicate)), ' ', link(r.object)] : [link(r.subject), ' ', h('em', null, predLabel(r.predicate)), ` ${t('sheet.this_entity')}`],
         h('span', { class: 's-dim' }, ` ${span(r.valid)}`),
-        r.cause_event_id ? [h('span', { class: 's-dim' }, ` · ${t('sheet.cause')} `), link(r.cause_event_id)] : null));
+        r.cause_event_id ? [h('span', { class: 's-dim' }, ` · ${t('sheet.cause')} `), link(r.cause_event_id)] : null,
+        explainButton(r.id)));
     }
     return section(t('sheet.relations_in', { year, n: rels.length }), ul);
   }
@@ -96,21 +134,29 @@ export function createSheet(root, ctx) {
 
   function officeBody(e, year) {
     const tn = model.tenureAt(e.id, year);
-    const tenures = ctx.view.tenures.filter((x) => x.office_id === e.id);
+    const tenures = ctx.view.tenures.filter((x) => x.office_id === e.id).sort((a, b) => a.valid[0] - b.valid[0]);
     const proof = tn?.selection_proof;
+    const fits = proof?.fits ? Object.entries(proof.fits).map(([k, v]) => `${t(`fit.${k}`)} ${fmtInt(v)}`).join(' \u00b7 ') : '';
     return [
       section(t('sheet.holder_in', { year }),
-        tn ? (tn.mode === 'vacant' ? h('p', { class: 's-vacant' }, t('sheet.vacant_note')) : h('p', { class: 's-holder' }, link(tn.person_id)))
+        tn ? (tn.mode === 'vacant' || !tn.person_id ? h('p', { class: 's-vacant' }, t('sheet.vacant_note')) : h('p', { class: 's-holder' }, link(tn.person_id)))
           : h('p', { class: 's-dim' }, t('sheet.no_tenure')),
         tn ? dl([[t('sheet.tenure'), span(tn.valid)], [t('sheet.mode'), t(`tenure_mode.${tn.mode}`)],
           [t('sheet.cause'), tn.cause_event_id ? link(tn.cause_event_id) : t('sheet.before_observed')],
-          [t('sheet.appointment_rule'), t(`rule.${e.appointment_rule}`)]]) : null),
+          tn.closed_by ? [t('sheet.closed_by'), t(`tenure_end.${tn.closed_by}`)] : null,
+          [t('sheet.appointment_rule'), t(`rule.${e.appointment_rule}`)]]) : null,
+        tn ? explainButton(tn.tenure_id) : null),
       proof ? section(t('sheet.why'), h('p', null, tk(proof, 'summary')),
-        proof.candidates ? h('table', { class: 's-table' },
-          h('thead', null, h('tr', null, ['sheet.col.rank', 'sheet.col.candidate', 'sheet.col.weight', 'sheet.col.remark'].map((k) => h('th', { scope: 'col' }, t(k))))),
-          h('tbody', null, proof.candidates.map((c) => h('tr', null, h('td', null, String(c.rank)), h('td', null, c.name), h('td', { class: 's-num' }, fmtInt(c.weight)), h('td', null, tk(c, 'note')))))) : null) : null,
+        dl([
+          [t('sheet.proof.candidates'), fmtInt(proof.candidates)],
+          [t('sheet.proof.weight'), t('sheet.proof.weight_detail', { selected: fmtInt(proof.selected_weight), total: fmtInt(proof.total_weight) })],
+          [t('sheet.proof.fits'), fits],
+          [t('sheet.proof.alignment_fit'), fmtInt(proof.alignment_fit)],
+          [t('sheet.proof.year'), String(proof.year)],
+        ]), h('p', { class: 's-dim' }, t('sheet.proof.note'))) : null,
+      explainBox,
       section(t('sheet.tenures'), h('ul', { class: 's-segs' }, tenures.map((x) => h('li', { class: inRange(x.valid, year) ? 'is-now' : '' },
-        `${span(x.valid)} : `, x.mode === 'vacant' ? t('term.vacant') : link(x.person_id))))),
+        `${span(x.valid)} : `, x.mode === 'vacant' || !x.person_id ? t('term.vacant') : link(x.person_id))))),
     ];
   }
 
@@ -122,7 +168,8 @@ export function createSheet(root, ctx) {
     const alive = model.exists(e.id, year);
     const head = h('header', { class: 's-sheet-head' },
       h('p', { class: 's-kicker' }, `${kindLabel(e.kind)} · ${e.id}`),
-      h('h2', null, model.name(e.id)),
+      h('h2', null, model.name(e.id), e.name_synthetic ? h('span', { class: 'status st-synthetic s-synth', title: t('sheet.synthetic_name') }, t('provenance.status.synthetic')) : null),
+      e.name_provenance ? h('p', { class: 's-dim' }, t('sheet.name_source', { status: t(`provenance.status.${e.name_provenance.status}`), source: e.name_provenance.source ?? e.name_provenance.source_ref ?? '' })) : null,
       !alive ? h('p', { class: 's-warn' }, t('sheet.not_existing', { year, span: span(e.existence ?? [0, null]) })) : null,
       h('div', { class: 's-actions' },
         h('button', { type: 'button', class: 'btn btn-quiet', onclick: () => state.set({ center: e.id }) }, t('sheet.center_graph')),
@@ -139,9 +186,36 @@ export function createSheet(root, ctx) {
     if (holds.length) parts.push(section(t('sheet.offices'), h('ul', { class: 's-rels' }, holds.map((r) => h('li', null, link(r.object), h('span', { class: 's-dim' }, ` ${span(r.valid)}`))))));
     const extra = [];
     if (e.kind === 'person') extra.push([t('sheet.person_source'), personSourceLabel(e.person_source)], [t('sheet.observed_genealogy'), span(e.observed_span)]);
-    if (e.member_count) extra.push([t('sheet.expected_headcount'), measureText(e.member_count.expected)], [t('sheet.realized_headcount'), measureText(e.member_count.realized)]);
+    if (e.member_count) {
+      const live = model.membersAt(e.id, year);
+      const realized = live == null ? e.member_count.realized : { ...e.member_count.realized, value: live, at_year: year };
+      extra.push([t('sheet.expected_headcount'), measureText(e.member_count.expected)], [t('sheet.realized_headcount'), measureText(realized)]);
+    }
     parts.push(provenanceBlock(e.provenance, extra), relationsBlock(e, year), historyBlock(e), eventsBlock(e));
+    if (e.kind === 'person' && ctx.world) parts.push(datedRecord(e, year));
+    if (e.member_series && ctx.world) {
+      parts.push(section(t('sheet.on_map'), h('p', { class: 's-dim' }, t('sheet.on_map_note')),
+        h('button', { type: 'button', class: 'btn btn-quiet', onclick: () => document.getElementById('overlay-map')?.scrollIntoView({ block: 'center' }) }, t('sheet.show_map'))));
+    }
+    parts.push(explainBox);
     return parts;
+  }
+
+  // The dated sheet served by GET /entities/{id}: family and affiliations at the year.
+  function datedRecord(e, year) {
+    const box = h('div', { class: 's-dated' }, h('p', { class: 's-dim' }, t('explain.loading')));
+    entitySheet(ctx.world, e.id, year).then((r) => {
+      const sh = r.sheet;
+      const names = (ids) => (ids.length ? ids.map((id) => link(id)).flatMap((x, i) => (i ? [', ', x] : [x])) : '\u2014');
+      clear(box).append(dl([
+        [t('sheet.dated.parents'), names(sh.family.parents)], [t('sheet.dated.partners'), names(sh.family.partners)],
+        [t('sheet.dated.children'), names(sh.family.children)],
+        [t('sheet.dated.memberships'), sh.memberships.length ? sh.memberships.map((m) => model.name(m.group_id)).join(', ') : '\u2014'],
+        [t('sheet.dated.offices'), sh.offices.length ? String(sh.offices.length) : '\u2014'],
+        [t('sheet.dated.packets'), String(r.packets_needed.length)],
+      ]));
+    }).catch((err) => { clear(box).append(h('p', { class: 's-warn' }, t('explain.failed', { message: err.key ?? err.message }))); });
+    return section(t('sheet.dated', { year }), box);
   }
 
   function eventBody(ev) {
@@ -161,8 +235,9 @@ export function createSheet(root, ctx) {
     return [
       h('header', { class: 's-sheet-head' },
         h('p', { class: 's-kicker' }, `${eventKindLabel(ev.kind)} · ${ev.end_year > ev.year ? `${ev.year}–${ev.end_year}` : ev.year}`),
-        h('h2', null, tk(ev, 'label')), h('p', null, tk(ev, 'description')),
-        h('div', { class: 's-actions' }, h('button', { type: 'button', class: 'btn btn-quiet', onclick: () => state.set({ year: ev.year }) }, t('sheet.go_to_year', { year: ev.year })))),
+        h('h2', null, tk(ev, 'label')), ev.description_key ? h('p', null, tk(ev, 'description')) : null,
+        h('div', { class: 's-actions' }, h('button', { type: 'button', class: 'btn btn-quiet', onclick: () => state.set({ year: ev.year }) }, t('sheet.go_to_year', { year: ev.year })), explainButton(ev.id))),
+      explainBox,
       ev.transition ? section(t('sheet.before_after'), h('p', { class: 's-dim' }, tk(ev.transition, 'label')),
         h('div', { class: 's-ba' },
           h('div', null, h('span', { class: 's-dim' }, t('sheet.before')), h('strong', null, tv(ev.transition.before))), h('span', { 'aria-hidden': 'true' }, '→'),
@@ -180,6 +255,7 @@ export function createSheet(root, ctx) {
     const st = state.get();
     const year = ctx.year();
     clear(root);
+    clear(explainBox);
     const id = st.sel;
     if (!id) { root.append(h('p', { class: 's-dim' }, t('sheet.empty'))); return; }
     const ev = model.events.get(id);

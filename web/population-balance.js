@@ -21,6 +21,7 @@ export function createBalance(root, ctx) {
   function measuresTable(year) {
     const tb = h('tbody');
     for (const m of view.measures) {
+      if (!m.series.length) continue;
       const snap = snapshotFor(m.series, year);
       const e = snap.expected, r = snap.realized;
       let gap = '—';
@@ -41,21 +42,29 @@ export function createBalance(root, ctx) {
       h('thead', null, h('tr', null, ['balance.col.measure', 'balance.col.expected', 'balance.col.realized', 'balance.col.gap'].map((k) => h('th', { scope: 'col' }, t(k))))), tb);
   }
 
+  function niceStep(range) {
+    const raw = range / 5;
+    const pow = 10 ** Math.floor(Math.log10(raw || 1));
+    return [1, 2, 5, 10].map((m) => m * pow).find((v) => v >= raw) ?? pow;
+  }
+
   function popChart(year) {
     const m = view.measures.find((x) => x.id === 'm/population');
     const flows = view.balances.flows;
-    const W = 700, Ht = 190, L = 44, B = 24, T = 10;
+    if (!m || !flows.length) return h('p', { class: 's-dim' }, t('balance.no_site_series'));
+    const W = 700, Ht = 190, L = 52, B = 24, T = 10;
     const from = view.period.from, to = view.period.to;
     const vals = [...m.series.map((s) => s.expected.value), ...m.series.map((s) => s.realized?.value), ...flows.map((f) => f.population)].filter((v) => v != null);
-    const lo = Math.floor((Math.min(...vals) - 10) / 20) * 20, hi = Math.ceil((Math.max(...vals) + 10) / 20) * 20;
-    const X = (y) => L + ((y - from) / (to - from)) * (W - L - 8);
+    const step = niceStep(Math.max(...vals) - Math.min(...vals) || 10);
+    const lo = Math.floor(Math.min(...vals) / step) * step, hi = Math.ceil(Math.max(...vals) / step) * step || lo + step;
+    const X = (y) => L + ((y - from) / Math.max(1, to - from)) * (W - L - 8);
     const Y = (v) => T + (1 - (v - lo) / (hi - lo)) * (Ht - T - B);
     const s = svg('svg', { viewBox: `0 0 ${W} ${Ht}`, class: 's-chart', role: 'img', 'aria-label': t('balance.chart_aria', { from, to }) });
-    for (let v = lo; v <= hi; v += 20) {
+    for (let v = lo; v <= hi; v += step) {
       s.append(svg('line', { x1: L, x2: W - 8, y1: Y(v), y2: Y(v), class: 's-tl-grid' }));
       const tick = svg('text', { x: L - 6, y: Y(v) + 3, 'text-anchor': 'end', class: 's-tl-tick' }); tick.textContent = String(v); s.append(tick);
     }
-    for (let y = from; y <= to; y += 5) {
+    for (let y = Math.ceil(from / 5) * 5; y <= to; y += 5) {
       const tick = svg('text', { x: X(y), y: Ht - 6, 'text-anchor': 'middle', class: 's-tl-tick' }); tick.textContent = String(y); s.append(tick);
     }
     s.append(svg('polyline', { points: m.series.map((p) => `${X(p.at_year)},${Y(p.expected.value)}`).join(' '), fill: 'none', stroke: '#2e5a6e', 'stroke-width': 2, 'stroke-dasharray': '6 4' }));
@@ -72,7 +81,7 @@ export function createBalance(root, ctx) {
 
   function flowsTable(year) {
     const tb = h('tbody');
-    for (const f of view.balances.flows) {
+    for (const f of view.balances.flows.filter((x) => Math.abs(x.year - year) <= 10)) {
       const calc = f.population_previous + f.births - f.deaths + f.entries - f.exits;
       const ok = calc === f.population;
       tb.append(h('tr', { class: f.year === year ? 'is-sel' : '' },
@@ -87,35 +96,29 @@ export function createBalance(root, ctx) {
         .map((k) => h('th', { scope: 'col' }, t(k))))), tb);
   }
 
+  // Realized classes at the nearest earlier marker date. No target is modelled for the
+  // class mix (section 18.3 measures it), so none is drawn.
   function classesTable(year) {
-    const exp = view.balances.conduct_expected_bps;
+    const rows = view.balances.conduct ?? [];
+    if (!rows.length) return h('p', { class: 's-dim' }, t('balance.no_classes'));
+    let row = rows[0];
+    for (const r of rows) if (r.year <= year) row = r;
     const out = [];
     for (const key of ['person', 'organization']) {
       const isOrg = key === 'organization';
-      const counts = Object.fromEntries(CONDUCT_ORDER.map((c) => [c, 0]));
-      let n = 0;
-      for (const e of view.entities) {
-        if (isOrg === (e.kind === 'person')) continue;
-        if (!model.exists(e.id, year)) continue;
-        const c = model.conduct(e.id, year);
-        if (!c) continue;
-        counts[c.cls]++; n++;
-      }
+      const counts = row[key];
+      const n = CONDUCT_ORDER.reduce((sum, c) => sum + (counts[c] ?? 0), 0);
       const tb = h('tbody');
       for (const c of CONDUCT_ORDER) {
-        const e = (exp[key][c] * n) / 10000;
-        const d = counts[c] - e;
         tb.append(h('tr', null,
           h('th', { scope: 'row' }, h('span', { class: 's-badge', style: { '--c': CONDUCT[c].color } }, `${CONDUCT[c].glyph} ${conductLabel(c, isOrg)}`)),
-          h('td', { class: 's-num' }, `${fmtNum(exp[key][c] / 100, 2)} %`),
-          h('td', { class: 's-num' }, fmtNum(e, 2)),
-          h('td', { class: 's-num' }, fmtInt(counts[c])),
-          h('td', { class: `s-num ${Math.abs(d) >= 0.5 ? 's-gap-big' : 's-gap'}` }, fmtSigned(Math.round(d * 100) / 100, 2))));
+          h('td', { class: 's-num' }, fmtInt(counts[c] ?? 0)),
+          h('td', { class: 's-num' }, n ? `${fmtNum(((counts[c] ?? 0) / n) * 100, 2)} %` : '—')));
       }
-      out.push(h('table', { class: 's-table' }, h('caption', null, t(isOrg ? 'balance.classes_orgs' : 'balance.classes_people', { year, n })),
-        h('thead', null, h('tr', null, ['balance.col.class', 'balance.col.target', 'balance.col.expected_count', 'balance.col.realized', 'balance.col.gap'].map((k) => h('th', { scope: 'col' }, t(k))))), tb));
+      out.push(h('table', { class: 's-table' }, h('caption', null, t(isOrg ? 'balance.classes_orgs' : 'balance.classes_people', { year: row.year, n })),
+        h('thead', null, h('tr', null, ['balance.col.class', 'balance.col.realized', 'balance.col.share'].map((k) => h('th', { scope: 'col' }, t(k))))), tb));
     }
-    return h('div', null, ...out, h('p', { class: 's-dim' }, t('balance.classes_note', { basis: tk(exp, 'basis') })));
+    return h('div', null, ...out, h('p', { class: 's-dim' }, t('balance.classes_note_real')));
   }
 
   function render() {

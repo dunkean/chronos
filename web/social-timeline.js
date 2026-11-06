@@ -6,12 +6,14 @@ import { h, svg, clear } from './util.js';
 import { t, tk, tv } from './i18n.js';
 import { EVENT_COLOR, eventKindLabel, predLabel } from './history-model.js';
 
-const W = 1000, LEFT = 190, RIGHT = 14, ROW = 24;
+const W = 1000, LEFT = 190, RIGHT = 14, ROW = 24, MAX_GROUP_ROWS = 24, MAX_OFFICE_ROWS = 10;
+const ORG_KINDS = new Set(['institution', 'association', 'community', 'village', 'jurisdiction', 'guild', 'criminal_network', 'charitable_order', 'enterprise', 'family', 'municipality']);
 
 export function createTimeline(root, ctx) {
   const { model, state, view } = ctx;
-  const from = view.period.from, to = view.period.to;
-  const x = (y) => LEFT + ((Math.min(Math.max(y, from), to) - from) / (to - from)) * (W - LEFT - RIGHT);
+  // The window of the view moves with the year; it is read at each render.
+  let from = view.period.from, to = view.period.to;
+  const x = (y) => LEFT + ((Math.min(Math.max(y, from), to) - from) / Math.max(1, to - from)) * (W - LEFT - RIGHT);
   const box = h('div', { class: 's-tl-box' });
   const table = h('details', { class: 's-tl-table' });
   root.append(box, table);
@@ -25,18 +27,24 @@ export function createTimeline(root, ctx) {
   const spanText = (ev) => (ev.end_year > ev.year ? `${ev.year}–${ev.end_year}` : String(ev.year));
 
   function render() {
+    from = view.period.from; to = view.period.to;
     const st = state.get();
     const year = ctx.year();
     const rows = [];
     rows.push({ kind: 'head', label: t('timeline.events') });
     rows.push({ kind: 'events' });
     rows.push({ kind: 'head', label: t('timeline.groups') });
+    // Organizations only (circles and units are many): the focus is always listed.
+    let shown = 0;
     for (const e of view.entities) {
       if (e.nature !== 'organized_group' || !classKept(e.id, year)) continue;
+      const focused = st.sel === e.id || st.center === e.id;
+      if (!focused && (!ORG_KINDS.has(e.kind) || shown >= MAX_GROUP_ROWS)) continue;
+      shown++;
       rows.push({ kind: 'group', e });
     }
     rows.push({ kind: 'head', label: t('timeline.tenures') });
-    for (const o of view.offices) rows.push({ kind: 'office', o });
+    view.offices.slice(0, MAX_OFFICE_ROWS).forEach((o) => rows.push({ kind: 'office', o }));
     const focus = st.center || st.sel;
     const fe = model.get(focus);
     const aff = [];

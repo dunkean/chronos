@@ -8,13 +8,17 @@ use std::sync::{Arc, Mutex};
 use chronos_core::{Config, World};
 use serde_json::json;
 
+use chronos_app::v2::server::{handle as handle_v2, ApiState, API_PREFIX};
+
 use crate::{check_import, default_config, timed_generate, Paths};
 
 const MAX_HEADER_BYTES: usize = 64 * 1024;
-const MAX_BODY_BYTES: usize = 256 * 1024 * 1024;
+/// An export with materialized archives reaches several hundred megabytes.
+const MAX_BODY_BYTES: usize = 1024 * 1024 * 1024;
 
 struct App {
     paths: Paths,
+    v2: Arc<ApiState>,
     /// World currently shown (last generated or imported).
     current: Mutex<Option<World>>,
 }
@@ -58,8 +62,15 @@ pub fn serve(port: u16, paths: Paths) -> Result<(), String> {
         println!("Avertissement : web/index.html absent ; seule l'API répond.");
     }
     println!("Chronos sur http://127.0.0.1:{port}/  (Ctrl+C pour arrêter)");
+    let v2 = Arc::new(ApiState::new(
+        paths.root.clone(),
+        paths.data.clone(),
+        paths.python.clone(),
+        paths.lineage_src.clone(),
+    ));
     let app = Arc::new(App {
         paths,
+        v2,
         current: Mutex::new(None),
     });
     for stream in listener.incoming() {
@@ -107,14 +118,34 @@ fn handle(app: &App, stream: TcpStream) -> std::io::Result<()> {
     let mut body = vec![0; content_length];
     reader.read_exact(&mut body)?;
     let path = target.split(['?', '#']).next().unwrap_or("/");
-    let response = route(app, &method, path, &body);
+    let query = target
+        .split('#')
+        .next()
+        .and_then(|t| t.split_once('?'))
+        .map_or("", |(_, q)| q);
+    let response = match path.strip_prefix(API_PREFIX) {
+        Some(rest) if rest.is_empty() || rest.starts_with('/') => {
+            let r = handle_v2(&app.v2, &method, rest, query, &body);
+            Response {
+                status: r.status,
+                content_type: r.content_type,
+                body: r.body,
+            }
+        }
+        _ => route(app, &method, path, &body),
+    };
     write_response(stream, response)
 }
 
 fn write_response(mut stream: TcpStream, r: Response) -> std::io::Result<()> {
     let reason = match r.status {
         200 => "OK",
+        202 => "Accepted",
         400 => "Bad Request",
+        409 => "Conflict",
+        422 => "Unprocessable Entity",
+        501 => "Not Implemented",
+        503 => "Service Unavailable",
         404 => "Not Found",
         405 => "Method Not Allowed",
         413 => "Payload Too Large",

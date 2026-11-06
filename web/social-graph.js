@@ -50,7 +50,7 @@ export function buildSubgraph(model, st, year, limits) {
       for (const r of relsOf(id)) {
         if (!familyOk(r.predicate) || !strengthOk(r)) continue;
         const other = r.subject === id ? r.object : r.subject;
-        if (!present(other) || !classOk(other)) continue;
+        if (!model.get(other) || !present(other) || !classOk(other)) continue;
         edges.set(r.id, r);
         if (!dist.has(other)) { dist.set(other, d); next.push(other); }
       }
@@ -78,7 +78,7 @@ function nodeData(model, id, year, center, dist) {
   const c = model.conduct(id, year);
   const shape = e.kind === 'person' ? 'ellipse' : e.kind === 'office' ? 'diamond'
     : (e.kind === 'village' || e.kind === 'jurisdiction') ? 'hexagon' : 'round-rectangle';
-  return { id, label: model.name(id), shape, color: c ? c.color : '#9aa8ad', cls: c ? c.cls : 'none', size: id === center ? 46 : 32, dist };
+  return { id, label: model.name(id), shape, color: c ? c.color : '#9aa8ad', cls: c ? c.cls : 'none', size: id === center ? 46 : 32, dist, synthetic: model.isSynthetic(id) ? 1 : 0 };
 }
 
 export function createGraphView(root, ctx) {
@@ -106,6 +106,7 @@ export function createGraphView(root, ctx) {
           label: 'data(label)', 'font-size': 11, 'font-family': 'Bahnschrift, Segoe UI, sans-serif', color: '#1b3440',
           'text-valign': 'bottom', 'text-margin-y': 4, 'text-wrap': 'wrap', 'text-max-width': 90,
           'border-width': 2, 'border-color': '#f3f7f6', 'text-background-color': '#f3f7f6', 'text-background-opacity': 0.85, 'text-background-padding': 1 } },
+        { selector: 'node[synthetic = 1]', style: { 'border-style': 'dashed' } },
         { selector: 'node[cls = "lawless"]', style: { 'border-color': '#2a0a10', 'border-width': 3 } },
         { selector: 'node[cls = "saintly"]', style: { 'border-color': '#d6b13a', 'border-width': 4 } },
         { selector: 'node.center', style: { 'border-color': '#1b3440', 'border-width': 4 } },
@@ -157,6 +158,7 @@ export function createGraphView(root, ctx) {
       ul.append(h('li', { class: e.id === st.sel ? 'is-sel' : '' },
         h('button', { type: 'button', class: 's-link', 'aria-current': e.id === st.sel ? 'true' : null, onclick: () => state.set({ sel: e.id }) }, model.name(e.id)),
         h('span', { class: 's-dim' }, ` ${kindLabel(e.kind)}`),
+        model.isSynthetic(e.id) ? h('span', { class: 's-tag', title: t('sheet.synthetic_name') }, t('provenance.status.synthetic')) : null,
         c ? h('span', { class: 's-badge', style: { '--c': c.color } }, `${c.glyph} ${c.label}`) : null,
         e.id === last.center ? h('span', { class: 's-dim' }, ` ${t('graph.center_suffix')}`)
           : h('button', { type: 'button', class: 's-mini', onclick: () => state.set({ center: e.id }) }, t('graph.center_button'))));
@@ -189,7 +191,9 @@ export function createGraphView(root, ctx) {
     const hidden = last.hiddenNodes || last.hiddenEdges;
     counter.textContent = last.nodes.size
       ? t('graph.counter', { nodes: last.nodes.size, edges: last.edges.length, year })
-        + ' ' + (hidden ? t('graph.truncated', { nodes: last.hiddenNodes, edges: last.hiddenEdges, maxNodes: view.limits.max_nodes, maxEdges: view.limits.max_edges }) : t('graph.not_truncated'))
+        + ' ' + (hidden ? t('graph.truncated', { nodes: last.hiddenNodes, edges: last.hiddenEdges, maxNodes: view.limits.max_nodes, maxEdges: view.limits.max_edges })
+          : view.limits.cursor ? t('graph.paged', { shown: view.limits.returned_nodes, total: view.limits.total_nodes })
+          : t('graph.not_truncated'))
       : '';
     if (cy) {
       cy.elements().remove();

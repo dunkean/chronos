@@ -1,10 +1,14 @@
 //! Pins the runtime, builds the canon, plans regions and domains, and resolves a
 //! domain's population exactly once (§14, §16). Concurrent requests share one job.
-use super::lineage_worker::{query_runtime, run_plan, RuntimeIdentity, WorkerSettings, PROTOCOL};
+use super::lineage_worker::{
+    check_result_bytes, query_runtime, run_plan, ProviderArtifact, RuntimeIdentity, WorkerSettings,
+    PROTOCOL,
+};
 use super::store::{unique_name, PopulationCacheKey, Store};
 use super::{host_error, sha256_hex};
 use chronos_core::v2::canonical::canonical_bytes;
 use chronos_core::v2::catalog::HistoryCatalogue;
+use chronos_core::v2::display_names::{pools_fingerprint, POOLS_BYTES};
 use chronos_core::v2::general::{build_canon, AuthorConstraints, GeneralCanon, WorldConfig};
 use chronos_core::v2::model::{ErrorCode, HistoryError};
 use chronos_core::v2::naming;
@@ -54,6 +58,32 @@ fn read_json<T: DeserializeOwned>(path: &Path) -> Result<(T, Vec<u8>), HistoryEr
     Ok((value, bytes))
 }
 impl WorldInputs {
+    /// Inputs rebuilt from an export: the pack bytes are kept exactly as exported, since
+    /// their fingerprints are part of the canon (§4.2).
+    pub fn from_parts(
+        config: WorldConfig,
+        constraints: AuthorConstraints,
+        atlas_bytes: Vec<u8>,
+        catalogue_bytes: Vec<u8>,
+    ) -> Result<Self, HistoryError> {
+        fn parse<T: DeserializeOwned>(bytes: &[u8]) -> Result<T, HistoryError> {
+            serde_json::from_slice(bytes).map_err(|e| {
+                host_error(
+                    ErrorCode::InvalidCanonicalValue,
+                    "orchestrator.input_invalid",
+                    e,
+                )
+            })
+        }
+        Ok(Self {
+            config,
+            atlas: parse(&atlas_bytes)?,
+            catalogue: parse(&catalogue_bytes)?,
+            constraints,
+            atlas_bytes,
+            catalogue_bytes,
+        })
+    }
     pub fn load(world: &Path, atlas: &Path, catalogue: &Path) -> Result<Self, HistoryError> {
         let (config, _) = read_json(world)?;
         let (atlas, atlas_bytes) = read_json(atlas)?;
@@ -97,6 +127,7 @@ fn world_manifest(
             "atlas": sha256_hex(&inputs.atlas_bytes),
             "catalogue": sha256_hex(&inputs.catalogue_bytes),
             "naming_generation": naming::generation_fingerprint(),
+            "person_pools": pools_fingerprint(),
         },
         "naming_algorithm": naming::NAMING_RULE,
         "runtime_fingerprint": runtime.fingerprint,
@@ -214,6 +245,7 @@ impl Orchestrator {
                 inputs.catalogue_bytes,
                 naming::PACK_BYTES.to_vec(),
                 naming::MANIFEST_BYTES.to_vec(),
+                POOLS_BYTES.to_vec(),
             ],
         )?;
         Ok(Self {
@@ -359,6 +391,60 @@ impl Orchestrator {
         packets.insert(domain_id.to_string(), packet.clone());
         Ok(packet)
     }
+    pub fn cache_key_of(&self, domain_id: &str) -> Result<PopulationCacheKey, HistoryError> {
+        self.cache_key(&self.plan_population(domain_id)?)
+    }
+    /// Domains whose packet is already in memory. A packet being built is not ready:
+    /// `try_lock` never waits behind the builder.
+    pub fn ready_domains(&self) -> Vec<String> {
+        self.packets
+            .try_lock()
+            .map(|p| p.keys().cloned().collect())
+            .unwrap_or_default()
+    }
+    pub fn packet_ready(&self, domain_id: &str) -> bool {
+        self.packets
+            .try_lock()
+            .is_ok_and(|p| p.contains_key(domain_id))
+    }
+    /// The three artifacts of a domain whose packet is ready, from memory only.
+    pub fn held(&self, domain_id: &str) -> Result<Held, HistoryError> {
+        let packet = self.social_packet(domain_id)?;
+        Ok(Held {
+            region: self.region_of(domain_id)?,
+            population: self.population(domain_id)?,
+            packet,
+        })
+    }
+    /// Adopts a provider archive made elsewhere (§16.2): structure, then fingerprint,
+    /// then the same validation as a fresh result. The provider is not rerun, so the
+    /// archive is consulted but never presented as a replay.
+    pub fn adopt_population(
+        &self,
+        domain_id: &str,
+        bytes: &[u8],
+        result_fingerprint: &str,
+    ) -> Result<(), HistoryError> {
+        let plan = self.plan_population(domain_id)?;
+        check_result_bytes(bytes, result_fingerprint)?;
+        let verified = validate_population(&plan, parse_population_result(bytes)?)?;
+        let key = self.cache_key(&plan)?;
+        let artifact = ProviderArtifact {
+            bytes: bytes.to_vec(),
+            file_sha256: sha256_hex(bytes),
+            result_fingerprint: result_fingerprint.to_string(),
+            materialize_seconds: None,
+        };
+        self.store
+            .publish_population(&key, &artifact, verified.proof())
+    }
+}
+/// Shared handles to one materialized domain.
+#[derive(Clone)]
+pub struct Held {
+    pub region: Arc<RegionPlan>,
+    pub population: Arc<VerifiedPopulation>,
+    pub packet: Arc<SocialPacket>,
 }
 
 #[cfg(test)]

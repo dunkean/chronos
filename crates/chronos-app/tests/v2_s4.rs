@@ -114,7 +114,13 @@ fn real_worker_packet_gives_a_stable_mayor_and_a_closed_balance() {
                     .iter()
                     .find(|o| o.office_id == tenure.office_id)
                     .unwrap();
-                for year in [tenure.valid.start_year, tenure.valid.end_year - 1] {
+                // The head of an association may live anywhere within its recruitment reach.
+                let years = if office.requirements.member_only {
+                    vec![]
+                } else {
+                    vec![tenure.valid.start_year, tenure.valid.end_year - 1]
+                };
+                for year in years {
                     let resident = population.residences_of(slot).iter().any(|r| {
                         r.site_id == office.site_id
                             && r.valid.start_year <= year

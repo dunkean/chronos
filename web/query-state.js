@@ -3,6 +3,7 @@
 
 const DEFAULTS = {
   year: null,      // null = the view's own year
+  site: '',        // site of the region view (API mode)
   sel: '',         // selected id (sheet)
   center: '',      // id at the centre of the graph
   mode: 'social',  // social | kinship
@@ -32,7 +33,7 @@ export class QueryState {
     const v = { ...this.defaults };
     const year = Number.parseInt(p.get('year') ?? '', 10);
     if (Number.isFinite(year)) v.year = year;
-    for (const k of ['sel', 'center']) if (p.get(k)) v[k] = p.get(k);
+    for (const k of ['sel', 'center', 'site']) if (p.get(k)) v[k] = p.get(k);
     if (p.get('mode') === 'kinship') v.mode = 'kinship';
     const depth = Number.parseInt(p.get('depth') ?? '', 10);
     if (depth >= 1 && depth <= 3) v.depth = depth;
@@ -45,6 +46,7 @@ export class QueryState {
     const p = new URLSearchParams();
     const v = this.value;
     if (v.year != null) p.set('year', v.year);
+    if (v.site) p.set('site', v.site);
     if (v.sel) p.set('sel', v.sel);
     if (v.center) p.set('center', v.center);
     if (v.mode !== DEFAULTS.mode) p.set('mode', v.mode);

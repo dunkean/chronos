@@ -8,6 +8,7 @@ use super::attributes::{
 };
 use super::canonical::canonical_value_bytes;
 use super::catalog::{ArchetypeDefinition, HistoryCatalogue, SettingProfile, SizeBounds};
+use super::display_names::{person_names, PersonName};
 use super::general::{
     blocks, date_in_block, fact_provenance, ControlEpisode, EventLedger, GeneralCanon, NewEvent,
     Polity,
@@ -248,6 +249,10 @@ pub struct SocialPacket {
     pub groups: Vec<GroupRecord>,
     pub site_views: BTreeMap<String, SiteViews>,
     pub person_group_names: Vec<PersonGroupName>,
+    /// Display labels by slot, from their own keys: no fact reads them.
+    pub person_names: Vec<Option<PersonName>>,
+    /// Surname of each family key, for the `surname` refs of name trees.
+    pub family_surnames: BTreeMap<String, String>,
     pub memberships: Vec<Membership>,
     pub links: Vec<PersonLink>,
     pub offices: Vec<OfficeDefinition>,
@@ -471,6 +476,7 @@ struct Selected {
     alignment: u32,
     candidates: u32,
     kin: bool,
+    founder: bool,
 }
 struct OpenLink {
     link: usize,
@@ -546,7 +552,7 @@ fn domain_of(result: &PopulationResult) -> Result<DomainKey, HistoryError> {
 }
 /// `[first state, end state)` of a residence: a phase at or before publication counts
 /// for its own year, so a same-year visit shows in no state (§3.2).
-fn state_span(start: i32, start_phase: u8, end: i32, end_phase: u8) -> (i32, i32) {
+pub(crate) fn state_span(start: i32, start_phase: u8, end: i32, end_phase: u8) -> (i32, i32) {
     let published = EventPhase::StatePublication as u8;
     (
         start + i32::from(start_phase > published),
@@ -1361,6 +1367,7 @@ impl<'a> Run<'a> {
                     max_age: template.personal_max_age.min(local.max_age),
                     residence_site_id: site_id,
                     jurisdiction_bound,
+                    member_only: a.class == ASSOCIATION,
                 },
                 term_years: term,
                 concurrent_holding_policy: SINGLE_PERSONAL_CHARGE.into(),
@@ -1380,16 +1387,13 @@ impl<'a> Run<'a> {
             }
             Ok::<(), HistoryError>(())
         };
-        add(
-            self,
-            role,
-            rule,
-            term,
-            false,
-            local.time_cost_bps,
-            true,
-            priority,
-        )?;
+        // The head of a time-budgeted association works inside that commitment.
+        let head_cost = if a.class == ASSOCIATION && a.default_time_cost_bps > 0 {
+            0
+        } else {
+            local.time_cost_bps
+        };
+        add(self, role, rule, term, false, head_cost, true, priority)?;
         if is_anchor {
             let body = AppointmentRule::CollectiveBody;
             add(self, COUNCIL_ROLE, body, None, true, 0, false, priority)?;
@@ -1796,11 +1800,21 @@ impl<'a> Run<'a> {
             def.requirements.max_age,
             def.requirements.jurisdiction_bound,
         );
-        if self.site_at(slot, year) != Some(site) {
+        let member_only = def.requirements.member_only;
+        let group = self.office_group[office];
+        let here = self.site_at(slot, year);
+        let present = if member_only {
+            self.is_member(group, slot)
+        } else {
+            here == Some(site)
+        };
+        if !present {
             let table = &self.result.candidate_table;
             let dead = table.death_year[slot as usize].is_some_and(|d| d <= year);
             return Some(if dead {
                 TenureEnd::Death
+            } else if member_only && here.is_some_and(|s| self.in_reach(group, s)) {
+                TenureEnd::Ineligible
             } else {
                 TenureEnd::Departure
             });
@@ -1817,6 +1831,12 @@ impl<'a> Run<'a> {
         }
         None
     }
+    fn is_member(&self, group: usize, slot: u32) -> bool {
+        self.rt[group]
+            .open
+            .iter()
+            .any(|m| self.memberships[*m as usize].person_slot == slot)
+    }
     fn select_holder(
         &mut self,
         office: usize,
@@ -1832,9 +1852,30 @@ impl<'a> Run<'a> {
             None => Rc::default(),
         };
         let group = self.office_group[office];
-        let candidates: Vec<u32> = self.residents[site][(year - self.start) as usize]
-            .iter()
-            .copied()
+        let member_only = def.requirements.member_only;
+        // A founder comes from the residents; afterwards only members qualify, and an
+        // association without an eligible member stays vacant.
+        let founder =
+            member_only && self.tenure_count[office] == 0 && self.rt[group].open.is_empty();
+        let pool: Vec<u32> = if member_only && !founder {
+            let mut members: Vec<u32> = self.rt[group]
+                .open
+                .iter()
+                .map(|m| self.memberships[*m as usize].person_slot)
+                .collect();
+            members.sort_unstable();
+            members
+        } else {
+            self.residents[site][(year - self.start) as usize].clone()
+        };
+        // Time the group itself takes and a preemption must not release.
+        let own_cost = if founder || (member_only && self.groups[group].preemptible) {
+            self.groups[group].time_cost_bps
+        } else {
+            0
+        };
+        let candidates: Vec<u32> = pool
+            .into_iter()
             .filter(|slot| {
                 let age = self.age(*slot, year);
                 let index = *slot as usize;
@@ -1842,7 +1883,7 @@ impl<'a> Run<'a> {
                 age >= def.requirements.min_age as i32
                     && age <= def.requirements.max_age as i32
                     && !self.holds_charge[index]
-                    && self.capacity_at(*slot, year) >= protected + def.time_cost_bps
+                    && self.capacity_at(*slot, year) >= protected + def.time_cost_bps + own_cost
                     && !barred.contains(slot)
             })
             .collect();
@@ -1917,6 +1958,7 @@ impl<'a> Run<'a> {
                 alignment,
                 candidates: candidates.len() as u32,
                 kin: kin_rule,
+                founder,
             }
         }))
     }
@@ -1934,16 +1976,27 @@ impl<'a> Run<'a> {
         }
     }
     /// Closes the jobs a charge displaces, traced before the tenure opens (§25.5).
-    fn preempt_jobs(&mut self, office: usize, slot: u32, year: i32) -> Result<(), HistoryError> {
-        let cost = self.offices[office].time_cost_bps;
+    fn preempt_jobs(
+        &mut self,
+        office: usize,
+        slot: u32,
+        year: i32,
+        founder: bool,
+    ) -> Result<(), HistoryError> {
+        let kept = self.office_group[office];
+        let joining = if founder {
+            self.groups[kept].time_cost_bps
+        } else {
+            0
+        };
+        let cost = self.offices[office].time_cost_bps + joining;
         let capacity = self.capacity_at(slot, year);
         while capacity < self.committed[slot as usize] + cost {
             let index = slot as usize;
-            let Some(m) = self.person_commitments[index]
-                .iter()
-                .copied()
-                .find(|m| self.groups[self.memberships[*m as usize].group as usize].preemptible)
-            else {
+            let Some(m) = self.person_commitments[index].iter().copied().find(|m| {
+                let group = self.memberships[*m as usize].group as usize;
+                self.groups[group].preemptible && group != kept
+            }) else {
                 return Err(social_error(
                     "social.charge_over_capacity",
                     &self.domain_id,
@@ -2115,8 +2168,21 @@ impl<'a> Run<'a> {
             (None, None) => self.open_tenure_record(office, year, None)?,
             (Some(s), _) => {
                 self.end_tenure(office, year, TenureEnd::Filled);
-                self.preempt_jobs(office, s.slot, year)?;
+                let (slot, founder, pool) = (s.slot, s.founder, s.candidates);
+                self.preempt_jobs(office, slot, year, founder)?;
                 self.open_tenure_record(office, year, Some(s))?;
+                if founder {
+                    let group = self.office_group[office];
+                    let cost = self.groups[group].time_cost_bps;
+                    self.join(
+                        group,
+                        slot,
+                        year,
+                        Predicate::MemberOf,
+                        cost,
+                        Ok((0, 0, pool)),
+                    );
+                }
             }
         }
         Ok(())
@@ -2268,7 +2334,15 @@ impl<'a> Run<'a> {
         )?;
         self.plan_offices(new_group)?;
         self.sort_offices();
-        for (_, slot, m) in order.iter().take(moved_count) {
+        // The head stays with the group whose charge he holds.
+        let heads: BTreeSet<u32> = self.rt[group]
+            .required_offices
+            .iter()
+            .filter_map(|o| self.open_tenure[*o])
+            .filter_map(|t| self.tenures[t].person_slot)
+            .collect();
+        let movers = order.iter().filter(|(_, slot, _)| !heads.contains(slot));
+        for (_, slot, m) in movers.take(moved_count) {
             let m = *m as usize;
             self.rt[group].open.retain(|o| *o as usize != m);
             let (predicate, cost) = {
@@ -2996,6 +3070,13 @@ impl<'a> Run<'a> {
                 source: table.source[i],
             })
             .collect();
+        let names = person_names(inputs.world_seed, &self.domain_id, table, &self.people)?;
+        let family_surnames = table
+            .family_key
+            .iter()
+            .zip(&names)
+            .filter_map(|(key, name)| Some((key.clone(), name.as_ref()?.surname.clone())))
+            .collect();
         let thresholds = inputs
             .catalogue
             .engine_defaults
@@ -3019,6 +3100,8 @@ impl<'a> Run<'a> {
             groups,
             site_views,
             person_group_names,
+            person_names: names,
+            family_surnames,
             memberships,
             links,
             offices,

@@ -912,3 +912,130 @@ fn holder_is_never_recruited_into_a_group_that_bars_his_charge() {
         }
     }
 }
+
+#[test]
+fn association_head_is_one_of_its_members() {
+    let world = world();
+    let site = world.site(0);
+    let packet = packet(&world, &village(&site, 300));
+    let mut heads = 0;
+    for tenure in packet
+        .tenures
+        .iter()
+        .filter(|t| t.mode == TenureMode::Effective)
+    {
+        let office = packet
+            .offices
+            .iter()
+            .find(|o| o.office_id == tenure.office_id)
+            .unwrap();
+        if !office.requirements.member_only {
+            continue;
+        }
+        let group = packet
+            .groups
+            .iter()
+            .position(|g| g.entity.id == office.organization_id)
+            .unwrap() as u32;
+        for year in tenure.valid.start_year..tenure.valid.end_year {
+            let member = packet.memberships.iter().any(|m| {
+                m.group == group
+                    && Some(m.person_slot) == tenure.person_slot
+                    && m.valid.contains(year)
+            });
+            assert!(member, "{year}");
+        }
+        heads += 1;
+    }
+    assert!(heads > 0);
+}
+
+/// Elders found the groups and die in 1320; the young who replace them are under the
+/// minimum age of a charge until 1326.
+#[test]
+fn dormant_association_goes_vacant_with_its_penalty() {
+    let mut world = world();
+    world.region.shocks.clear();
+    let site = world.site(0);
+    let elders = (0..40).map(|i| Person {
+        death: Some(1320),
+        family: i,
+        ..adult(1270, &site)
+    });
+    let young = (0..60).map(|i| Person {
+        family: 100 + i,
+        ..adult(1301, &site)
+    });
+    let people: Vec<Person> = elders.chain(young).collect();
+    let packet = packet(&world, &people);
+    let vacant: Vec<_> = packet
+        .tenures
+        .iter()
+        .filter(|t| t.mode == TenureMode::Vacant && t.valid.contains(1322))
+        .filter_map(|t| packet.offices.iter().find(|o| o.office_id == t.office_id))
+        .filter(|o| o.requirements.member_only)
+        .collect();
+    assert!(!vacant.is_empty(), "no member can hold the charge");
+    let penalized = vacant.iter().any(|office| {
+        let group = packet
+            .groups
+            .iter()
+            .position(|g| g.entity.id == office.organization_id)
+            .unwrap() as u32;
+        packet
+            .cohesion
+            .iter()
+            .any(|c| c.group == group && c.year == 1322 && c.vacancy_penalty && c.delta_bps == -400)
+    });
+    assert!(penalized);
+}
+
+#[test]
+fn names_follow_their_keys_and_never_touch_facts() {
+    use super::display_names::{person_names, place_labels, render_tree};
+    let world = world();
+    let site = world.site(0);
+    let people = village(&site, 30);
+    let packet = packet(&world, &people);
+    let mut with_parent = table(&world, &people);
+    with_parent.candidate_table.father_slot[1] = Some(0);
+    with_parent.candidate_table.family_key[1] = "family/other".into();
+    let names = person_names(
+        world.canon.world_seed,
+        &packet.domain_id,
+        &with_parent.candidate_table,
+        &packet.people,
+    )
+    .unwrap();
+    let (father, son) = (names[0].as_ref().unwrap(), names[1].as_ref().unwrap());
+    assert_eq!(father.surname, son.surname, "a surname runs down the line");
+    assert_eq!(packet.person_names[3], names[3], "same key, same name");
+    let labels = place_labels(&world.canon).unwrap();
+    let texts: BTreeSet<_> = world
+        .canon
+        .atlas
+        .settlements
+        .iter()
+        .map(|s| labels[&s.site_id].text.clone())
+        .collect();
+    assert_eq!(texts.len(), world.canon.atlas.settlements.len(), "distinct");
+    assert!(texts.iter().all(|t| !t.contains('/')));
+    let mut languages_differ = false;
+    let mut slugs = 0;
+    for group in &packet.groups {
+        let tree = group.entity.name_tree.as_ref().unwrap();
+        let rendered = render_tree(
+            tree,
+            &labels,
+            &packet.family_surnames,
+            world.canon.world_seed,
+            &packet.domain_id,
+        )
+        .unwrap()
+        .unwrap();
+        languages_differ |= rendered["en"] != rendered["fr"];
+        slugs += rendered.values().filter(|t| t.contains('/')).count();
+    }
+    assert!(languages_differ);
+    assert_eq!(slugs, 0, "every ref is a real name");
+}
