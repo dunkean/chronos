@@ -1439,6 +1439,7 @@ fn plan_with_full_lists() -> PopulationPlan {
     kinship.id = "zz-kinship".into();
     profiles.kinship.push(kinship);
     let mut shock = p.shocks[0].clone();
+    shock.shock_id = "episode/demo/zz".into();
     shock.source_event_id = "event/demo/zz".into();
     p.shocks.push(shock);
     p.shocks[0].site_ids = vec!["site/demo/a".into(), "site/demo/b".into()];

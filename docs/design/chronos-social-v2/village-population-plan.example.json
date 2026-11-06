@@ -345,6 +345,7 @@
   ],
   "shocks": [
     {
+      "shock_id": "episode/demo/plague-a",
       "source_event_id": "event/demo/plague",
       "valid": {
         "start_year": 1354,

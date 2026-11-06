@@ -297,7 +297,7 @@ contact endpoint anchored at its site.
 `plan_canonical_bytes` excludes `plan_id` and `plan_fingerprint`. Sorted by ID
 are: capabilities, profiles, sites, role demands, fixed people, constraints,
 ports, routes and their lists of IDs; markers are sorted by site then year,
-shocks by event, period and sites. Occupation episodes, rate episodes and
+shocks by `shock_id`. Occupation episodes, rate episodes and
 protected periods keep their order.
 
 `historical_program` is an explicitly ordered list by `(year, phase, op_id)`,
@@ -375,7 +375,10 @@ for the first standing of a chain and `dissolution` for the last one, each at it
 exact date and with the subject as participant.
 
 **Plan.** `population::plan_population(canon, region_plan, domain_id)` returns a plan
-that passes `validate_plan`. `plan_fingerprint` holds `PLAN_FINGERPRINT_PENDING` until
+that passes `validate_plan`. It holds one shock per local episode: `shock_id` is the
+`episode` address, distinct from `source_event_id`, which several shocks share.
+`validate_plan` refuses a second exposure of a site to one event, whatever its dates.
+`plan_fingerprint` holds `PLAN_FINGERPRINT_PENDING` until
 the host hashes `plan_canonical_bytes`.
 
 **Diagnostics.** Every `HistoryError` puts a stable English code in `constraint`
@@ -721,7 +724,7 @@ contact ancrée à son site.
 `plan_canonical_bytes` exclut `plan_id` et `plan_fingerprint`. Sont triés par ID :
 capacités, profils, sites, demandes de rôles, personnes fixées, contraintes, ports,
 routes et leurs listes d'IDs ; les marqueurs le sont par site puis année, les chocs
-par événement, période et sites. Les épisodes d'occupation, épisodes de taux et
+par `shock_id`. Les épisodes d'occupation, épisodes de taux et
 périodes protégées gardent leur ordre.
 
 `historical_program` est une liste explicitement ordonnée par `(année, phase, op_id)`,
@@ -798,7 +801,10 @@ aussi deux événements de vie : `foundation` pour la première fiche d'une cha�
 `dissolution` pour la dernière, à leur date exacte et avec le sujet pour participant.
 
 **Plan.** `population::plan_population(canon, region_plan, domain_id)` rend un plan qui
-passe `validate_plan`. `plan_fingerprint` vaut `PLAN_FINGERPRINT_PENDING` jusqu'à ce que
+passe `validate_plan`. Il porte un choc par épisode local : `shock_id` est l'adresse
+`episode`, distincte de `source_event_id`, que plusieurs chocs partagent. `validate_plan`
+refuse une seconde exposition d'un site à un même événement, quelles que soient ses dates.
+`plan_fingerprint` vaut `PLAN_FINGERPRINT_PENDING` jusqu'à ce que
 l'hôte hache `plan_canonical_bytes`.
 
 **Diagnostics.** Toute `HistoryError` porte un code anglais stable dans `constraint`

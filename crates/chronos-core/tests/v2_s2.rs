@@ -8,7 +8,9 @@ use chronos_core::v2::model::{
     ErrorCode, EventPhase, HistoryEvent, LegalStanding, LegalStatus, ObjectRef, ProvenanceStatus,
     TimeSpan,
 };
-use chronos_core::v2::population::{plan_canonical_bytes, plan_population, PopulationPlan};
+use chronos_core::v2::population::{
+    plan_canonical_bytes, plan_population, plan_references, validate_plan, PopulationPlan,
+};
 use chronos_core::v2::region::{plan_region, RegionPlan};
 use chronos_core::v2::validate::validate_legal_standings;
 use std::collections::{BTreeMap, BTreeSet};
@@ -401,4 +403,131 @@ fn explicit_author_series_survive_unchanged() {
     let mut partial = constraints.clone();
     partial.site_baselines.pop_first();
     assert!(build_canon(&config(), &atlas, &catalogue(), &partial).is_err());
+}
+fn seeded(seed: u64) -> WorldConfig {
+    let mut config = config();
+    config.world_seed = seed;
+    config.canon_id = format!("canon-region-demo-{seed}");
+    config
+}
+#[test]
+fn closing_after_a_same_year_change_keeps_its_end_cause() {
+    // Seed 17: an edict and a banishment hit the same group in 1305.
+    let canon = canon_of(&seeded(17), &atlas());
+    let region = plan_region(&canon, REGION).unwrap();
+    let in_year = |kind: &str| {
+        region
+            .events
+            .iter()
+            .filter(|e| e.kind == kind && e.year == 1305)
+            .flat_map(|e| &e.participants)
+            .collect::<BTreeSet<_>>()
+    };
+    let (edicts, banishments) = (in_year("edict"), in_year("banishment"));
+    let group = banishments
+        .intersection(&edicts)
+        .find(|o| {
+            canon
+                .polities
+                .iter()
+                .all(|p| ObjectRef::Entity(p.entity.id.clone()) != ***o)
+        })
+        .expect("seed 17 pairs an edict and a banishment on one group");
+    let ObjectRef::Entity(id) = group else {
+        panic!("group reference expected");
+    };
+    let last = *standings_of(&region, id).last().unwrap();
+    assert_eq!(last.valid.end_year, 1305);
+    let cause = last.end_cause_event_id.as_ref().unwrap();
+    let event = region.events.iter().find(|e| &e.id == cause).unwrap();
+    assert_eq!(event.kind, "banishment");
+}
+#[test]
+fn contact_array_order_does_not_change_identities() {
+    // Same IDs in reverse order: the canonical atlas is the same one.
+    let config = seeded(1);
+    let mut reversed = atlas();
+    reversed.external_contacts.reverse();
+    assert_eq!(
+        atlas().canonical_bytes().unwrap(),
+        reversed.canonical_bytes().unwrap()
+    );
+    let (direct, inverse) = (canon_of(&config, &atlas()), canon_of(&config, &reversed));
+    assert!(direct.events.iter().any(|e| e.kind == "diplomatic_contact"));
+    assert_eq!(
+        direct.canonical_bytes().unwrap(),
+        inverse.canonical_bytes().unwrap()
+    );
+    assert_eq!(
+        plan_region(&direct, REGION)
+            .unwrap()
+            .canonical_bytes()
+            .unwrap(),
+        plan_region(&inverse, REGION)
+            .unwrap()
+            .canonical_bytes()
+            .unwrap()
+    );
+}
+#[test]
+fn each_local_episode_has_its_own_shock_identity() {
+    let canon = canon();
+    let region = plan_region(&canon, REGION).unwrap();
+    let plans = plans(&canon, &region);
+    let shocks: Vec<_> = plans.iter().flat_map(|p| &p.shocks).collect();
+    let episodes: BTreeSet<_> = region.shocks.iter().map(|s| &s.episode_id).collect();
+    let ids: BTreeSet<_> = shocks.iter().map(|s| &s.shock_id).collect();
+    assert_eq!(ids, episodes);
+    assert_eq!(ids.len(), shocks.len());
+    let events: BTreeSet<_> = shocks.iter().map(|s| &s.source_event_id).collect();
+    assert!(
+        events.len() < shocks.len(),
+        "one event spans several shocks"
+    );
+    let exposures: BTreeSet<_> = shocks
+        .iter()
+        .flat_map(|s| s.site_ids.iter().map(|site| (&s.source_event_id, site)))
+        .collect();
+    assert_eq!(exposures.len(), shocks.len());
+    for plan in &plans {
+        let order: Vec<_> = plan.shocks.iter().map(|s| &s.shock_id).collect();
+        assert!(order.is_sorted(), "the host hashes the list as delivered");
+    }
+}
+#[test]
+fn a_plan_refuses_a_second_exposure_of_one_village_to_one_event() {
+    let canon = canon();
+    let region = plan_region(&canon, REGION).unwrap();
+    let plan = plans(&canon, &region)
+        .into_iter()
+        .find(|p| !p.shocks.is_empty())
+        .unwrap();
+    let references = plan_references(&canon, &region).unwrap();
+    assert!(validate_plan(&plan, &references).is_ok());
+    let mutated = |change: fn(&mut PopulationPlan)| {
+        let mut plan = plan.clone();
+        change(&mut plan);
+        validate_plan(&plan, &references).unwrap_err().code
+    };
+    let later_exposure = |p: &mut PopulationPlan| {
+        let mut second = p.shocks[0].clone();
+        second.shock_id = "episode/second".into();
+        second.valid.start_year += 1;
+        second.valid.end_year += 1;
+        p.shocks.push(second);
+    };
+    let same_id = |p: &mut PopulationPlan| {
+        let mut second = p.shocks[0].clone();
+        second.source_event_id = p.shocks[1].source_event_id.clone();
+        p.shocks.push(second);
+    };
+    let event_as_id =
+        |p: &mut PopulationPlan| p.shocks[0].shock_id = p.shocks[0].source_event_id.clone();
+    for change in [
+        later_exposure as fn(&mut PopulationPlan),
+        same_id,
+        event_as_id,
+    ] {
+        assert_eq!(mutated(change), ErrorCode::InvalidPopulationPlan);
+    }
 }
