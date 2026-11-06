@@ -1,8 +1,7 @@
 //! Résolution d'exposition sur le catalogue canonique complet du propriétaire.
-use super::atlas::{unique_ids, HistoryAtlas};
-use super::canonical::canonical_bytes;
+use super::atlas::HistoryAtlas;
 use super::ids::random_semantics_v2::{draw, uniform_below};
-use super::ids::{AddressKind, SemanticAddress};
+use super::ids::{AddressKind, Owner, OwnerScope, SemanticAddress};
 use super::model::{string_enum, ErrorCode, HistoryError, TimeSpan};
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
@@ -52,7 +51,7 @@ string_enum!(ExposureModel {
 pub struct ImpactContract {
     pub id: String,
     pub parent_event_id: String,
-    pub owner_scope: String,
+    pub owner_scope: OwnerScope,
     pub valid: TimeSpan,
     pub target: ImpactTarget,
     pub selector: TargetSelector,
@@ -65,133 +64,82 @@ pub struct ImpactContract {
     pub channel: String,
     pub cause: String,
 }
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub struct ImpactCandidate {
-    pub id: String,
-    pub existence: TimeSpan,
-}
-/// Preuve de complétude publiée par l'autorité du propriétaire, indépendamment
-/// de la liste qui voyage avec elle. L'empreinte FNV-1a est un contrôle
-/// d'intégrité, jamais une identité (§4.1). Une fenêtre de consultation n'a pas
-/// de quoi émettre cette preuve : seuls l'atlas validé et le noyau le peuvent.
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(deny_unknown_fields)]
-pub struct CatalogueProof {
-    pub owner_scope: String,
-    pub target: ImpactTarget,
-    pub candidate_count: u64,
-    pub catalogue_digest: String,
-}
-fn catalogue_error(message: &str) -> HistoryError {
-    HistoryError::new(ErrorCode::IncompleteCatalogue, message)
-}
-fn sorted_candidates(
-    candidates: Vec<ImpactCandidate>,
-) -> Result<BTreeMap<String, TimeSpan>, HistoryError> {
-    if !unique_ids(candidates.iter().map(|c| c.id.as_str())) {
-        return Err(catalogue_error("catalogue dupliqué ou invalide"));
-    }
-    for c in &candidates {
-        c.existence.validate(false)?;
-    }
-    Ok(candidates
-        .into_iter()
-        .map(|c| (c.id, c.existence))
-        .collect())
-}
-fn catalogue_digest(
-    owner_scope: &str,
-    target: ImpactTarget,
-    candidates: &BTreeMap<String, TimeSpan>,
-) -> Result<String, HistoryError> {
-    let value = serde_json::json!({
-        "owner_scope": owner_scope,
-        "target": target,
-        "candidates": candidates
-            .iter()
-            .map(|(id, span)| serde_json::json!([id, span.start_year, span.end_year]))
-            .collect::<Vec<_>>(),
-    });
-    Ok(crate::keys::fingerprint(&canonical_bytes(&value)?))
-}
-impl CatalogueProof {
-    /// Réservée au noyau, seule autorité du catalogue d'un propriétaire.
-    pub(crate) fn issue(
-        owner_scope: &str,
-        target: ImpactTarget,
-        candidates: Vec<ImpactCandidate>,
-    ) -> Result<Self, HistoryError> {
-        let candidates = sorted_candidates(candidates)?;
-        Ok(Self {
-            owner_scope: owner_scope.into(),
-            target,
-            candidate_count: candidates.len() as u64,
-            catalogue_digest: catalogue_digest(owner_scope, target, &candidates)?,
-        })
-    }
-    /// Pour les sites, la complétude vient de l'atlas validé, pas de la fenêtre.
-    pub fn for_atlas_sites(atlas: &HistoryAtlas, owner: &str) -> Result<Self, HistoryError> {
-        Self::issue(owner, ImpactTarget::Sites, atlas_sites(atlas, owner)?)
+impl ImpactContract {
+    /// `id` décode en adresse d'impact, fille de `parent_event_id` et portée par
+    /// `owner_scope`. Rend cette adresse, parente des effets.
+    pub fn validate(&self) -> Result<SemanticAddress, HistoryError> {
+        let fail = |message: &str| HistoryError {
+            owner: Some(self.owner_scope.to_string()),
+            at_year: Some(self.eligibility_time),
+            ..HistoryError::new(ErrorCode::InvalidImpactContract, message)
+        };
+        let impact = SemanticAddress::decode(&self.id)
+            .ok()
+            .filter(|a| a.kind() == AddressKind::Impact)
+            .ok_or_else(|| fail("id non adressé comme impact"))?;
+        if impact.parent_event().map(|e| e.encode()).as_ref() != Some(&self.parent_event_id) {
+            return Err(fail("impact étranger à son événement parent"));
+        }
+        if impact.owner().as_ref().map(|o| o.scope()) != Some(&self.owner_scope) {
+            return Err(fail("owner_scope différent de l'adresse"));
+        }
+        Ok(impact)
     }
 }
-fn atlas_sites(atlas: &HistoryAtlas, owner: &str) -> Result<Vec<ImpactCandidate>, HistoryError> {
-    atlas.validate()?;
-    if !atlas.cells.iter().any(|c| c.cell_id == owner) {
-        return Err(HistoryError {
-            owner: Some(owner.into()),
-            at_year: Some(atlas.timeline.start_year),
-            ..HistoryError::new(ErrorCode::InvalidAtlas, "propriétaire absent")
-        });
-    }
-    Ok(atlas
-        .settlements
-        .iter()
-        .filter(|s| atlas.cell_is_within(&s.cell_id, owner))
-        .map(|s| ImpactCandidate {
-            id: s.site_id.clone(),
-            existence: atlas.timeline,
-        })
-        .collect())
-}
-/// Catalogue dont la complétude est prouvée. Ce type ne peut être obtenu par
-/// une méthode de pagination ou de projection.
+/// Catalogue complet d'un propriétaire. Il n'a ni champ public ni `Deserialize`
+/// et ne se construit que depuis une source d'autorité du noyau, qui énumère
+/// elle-même les candidats : aucune liste n'est reçue de l'appelant. S0 n'a que
+/// l'atlas ; S2 ajoutera d'autres sources de la même façon.
+///
+/// ```compile_fail
+/// use chronos_core::v2::region::CompleteCandidateCatalogue;
+/// let forged: CompleteCandidateCatalogue = serde_json::from_str("{}").unwrap();
+/// ```
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct CompleteCandidateCatalogue {
-    owner_scope: String,
+    owner: Owner,
     target: ImpactTarget,
     candidates: BTreeMap<String, TimeSpan>,
 }
 impl CompleteCandidateCatalogue {
-    /// Refuse une liste que la preuve du propriétaire ne couvre pas exactement.
-    pub fn from_owner_catalogue(
-        proof: &CatalogueProof,
-        candidates: Vec<ImpactCandidate>,
-    ) -> Result<Self, HistoryError> {
-        let located = |mut e: HistoryError| {
-            e.owner.get_or_insert_with(|| proof.owner_scope.clone());
-            e
+    /// Sites du propriétaire dans l'atlas validé. Un domaine n'est pas connu de
+    /// l'atlas : sa partition appartient à S2.
+    pub fn from_atlas(atlas: &HistoryAtlas, owner: &Owner) -> Result<Self, HistoryError> {
+        atlas.validate()?;
+        let fail = |code, message: &str| HistoryError {
+            owner: Some(owner.scope().to_string()),
+            at_year: Some(atlas.timeline.start_year),
+            ..HistoryError::new(code, message)
         };
-        if !super::atlas::valid_id(&proof.owner_scope) {
-            return Err(located(catalogue_error("propriétaire invalide")));
-        }
-        let candidates = sorted_candidates(candidates).map_err(located)?;
-        if candidates.len() as u64 != proof.candidate_count
-            || catalogue_digest(&proof.owner_scope, proof.target, &candidates).map_err(located)?
-                != proof.catalogue_digest
-        {
-            return Err(located(catalogue_error(
-                "liste non couverte par la preuve de complétude",
-            )));
+        let within = |cell_id: &str, site_id: &str| match owner.scope() {
+            OwnerScope::Cell { cell_id: root } => atlas.cell_is_within(cell_id, root),
+            OwnerScope::Site { site_id: only } => site_id == only,
+            _ => true,
+        };
+        let known = match owner.scope() {
+            OwnerScope::World => true,
+            OwnerScope::Cell { cell_id } => atlas.cells.iter().any(|c| &c.cell_id == cell_id),
+            OwnerScope::Site { site_id } => atlas.settlements.iter().any(|s| &s.site_id == site_id),
+            OwnerScope::Domain { .. } => {
+                return Err(fail(
+                    ErrorCode::UnsupportedCapability,
+                    "catalogue d'un domaine : partition S2",
+                ));
+            }
+        };
+        if !known {
+            return Err(fail(ErrorCode::InvalidAtlas, "propriétaire absent"));
         }
         Ok(Self {
-            owner_scope: proof.owner_scope.clone(),
-            target: proof.target,
-            candidates,
+            owner: owner.clone(),
+            target: ImpactTarget::Sites,
+            candidates: atlas
+                .settlements
+                .iter()
+                .filter(|s| within(&s.cell_id, &s.site_id))
+                .map(|s| (s.site_id.clone(), atlas.timeline))
+                .collect(),
         })
-    }
-    pub fn from_atlas_sites(atlas: &HistoryAtlas, owner: &str) -> Result<Self, HistoryError> {
-        let proof = CatalogueProof::for_atlas_sites(atlas, owner)?;
-        Self::from_owner_catalogue(&proof, atlas_sites(atlas, owner)?)
     }
 }
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -232,19 +180,30 @@ pub fn resolve_impact(
     catalogue: &CompleteCandidateCatalogue,
 ) -> Result<ImpactResolution, HistoryError> {
     let located = |e: HistoryError| HistoryError {
-        owner: Some(contract.owner_scope.clone()),
+        owner: Some(contract.owner_scope.to_string()),
         at_year: Some(contract.eligibility_time),
         ..e
     };
     let fail = |code, s: &str| located(HistoryError::new(code, s));
     contract.valid.validate(false).map_err(located)?;
+    let impact = contract.validate()?;
+    if !matches!(contract.mode, ImpactMode::Probability { .. })
+        && matches!(
+            contract.target,
+            ImpactTarget::People | ImpactTarget::Cohorts
+        )
+    {
+        return Err(fail(
+            ErrorCode::UnsupportedCapability,
+            "exact démographique réservé à S6",
+        ));
+    }
+    // Contrat et catalogue partagent canon et propriétaire ; les effets en
+    // héritent par leur adresse.
     if !contract.valid.contains(contract.eligibility_time)
-        || contract.owner_scope != catalogue.owner_scope
+        || impact.owner().as_ref() != Some(&catalogue.owner)
         || contract.target != catalogue.target
         || [
-            &contract.id,
-            &contract.parent_event_id,
-            &contract.owner_scope,
             &contract.severity_profile,
             &contract.timing_profile,
             &contract.channel,
@@ -256,26 +215,6 @@ pub fn resolve_impact(
         return Err(fail(
             ErrorCode::InvalidImpactContract,
             "contrat ou catalogue incompatible",
-        ));
-    }
-    let parent = SemanticAddress::decode(&contract.parent_event_id)
-        .ok()
-        .filter(|a| a.kind() == AddressKind::Event)
-        .ok_or_else(|| {
-            fail(
-                ErrorCode::InvalidImpactContract,
-                "événement parent non adressé",
-            )
-        })?;
-    if !matches!(contract.mode, ImpactMode::Probability { .. })
-        && matches!(
-            contract.target,
-            ImpactTarget::People | ImpactTarget::Cohorts
-        )
-    {
-        return Err(fail(
-            ErrorCode::UnsupportedCapability,
-            "exact démographique réservé à S6",
         ));
     }
     if !matches!(contract.mode, ImpactMode::Probability { .. })
@@ -372,7 +311,8 @@ pub fn resolve_impact(
             Ok(TargetImpact {
                 target_id: id.clone(),
                 event_id: contract.parent_event_id.clone(),
-                effect_id: SemanticAddress::effect(&parent, &contract.id, id)
+                effect_id: SemanticAddress::site(catalogue.owner.world(), id)
+                    .and_then(|target| SemanticAddress::effect(&impact, &target))
                     .map_err(located)?
                     .encode(),
                 intensity_draw: draw(seed, &[&contract.id, id, "intensity"], 0, 0),
@@ -393,25 +333,28 @@ mod tests {
         start_year: 1300,
         end_year: 1400,
     };
-    fn candidates(n: usize) -> Vec<ImpactCandidate> {
-        (0..n)
-            .map(|i| ImpactCandidate {
-                id: format!("candidate/{i:06}"),
-                existence: PERIOD,
-            })
-            .collect()
+    fn owner() -> Owner {
+        Owner::cell("w", "region")
     }
-    fn catalogue(target: ImpactTarget, n: usize) -> CompleteCandidateCatalogue {
-        let list = candidates(n);
-        let proof = CatalogueProof::issue("region", target, list.clone()).unwrap();
-        CompleteCandidateCatalogue::from_owner_catalogue(&proof, list).unwrap()
+    // Construction directe, réservée à ce module : le budget se teste sans
+    // bâtir un atlas de 100 000 sites.
+    fn catalogue(n: usize) -> CompleteCandidateCatalogue {
+        CompleteCandidateCatalogue {
+            owner: owner(),
+            target: ImpactTarget::Sites,
+            candidates: (0..n)
+                .map(|i| (format!("candidate/{i:06}"), PERIOD))
+                .collect(),
+        }
     }
     fn contract(target: ImpactTarget, mode: ImpactMode) -> ImpactContract {
-        let event = SemanticAddress::event(&Owner::cell("w", "region"), "war", 1350, 0).unwrap();
+        let event = SemanticAddress::event(&owner(), "war", 1350, 0).unwrap();
         ImpactContract {
-            id: "impact/test/0".into(),
+            id: SemanticAddress::impact(&event, "impact-0")
+                .unwrap()
+                .encode(),
             parent_event_id: event.encode(),
-            owner_scope: "region".into(),
+            owner_scope: owner().scope().clone(),
             valid: PERIOD,
             target,
             selector: TargetSelector::All,
@@ -426,11 +369,10 @@ mod tests {
     }
     #[test]
     fn exact_catalogue_boundary_accepts_100_000_and_refuses_100_001() {
-        let exact = ImpactMode::ExactCount { count: 3 };
-        let accepted = catalogue(ImpactTarget::Sites, MAX_EXACT_CANDIDATES);
-        let c = contract(ImpactTarget::Sites, exact.clone());
+        let c = contract(ImpactTarget::Sites, ImpactMode::ExactCount { count: 3 });
+        let accepted = catalogue(MAX_EXACT_CANDIDATES);
         assert_eq!(resolve_impact(42, &c, &accepted).unwrap().targets.len(), 3);
-        let refused = catalogue(ImpactTarget::Sites, MAX_EXACT_CANDIDATES + 1);
+        let refused = catalogue(MAX_EXACT_CANDIDATES + 1);
         assert_eq!(
             resolve_impact(42, &c, &refused).unwrap_err().code,
             ErrorCode::BudgetExceeded
@@ -442,17 +384,14 @@ mod tests {
             ImpactTarget::Sites,
             ImpactMode::Probability { probability_bps: 1 },
         );
-        let big = catalogue(ImpactTarget::Sites, MAX_EXACT_CANDIDATES + 1);
-        assert!(resolve_impact(42, &c, &big).is_ok());
+        assert!(resolve_impact(42, &c, &catalogue(MAX_EXACT_CANDIDATES + 1)).is_ok());
     }
     #[test]
     fn exact_demographic_impacts_are_rejected_until_s6() {
         for target in [ImpactTarget::People, ImpactTarget::Cohorts] {
             let c = contract(target, ImpactMode::ExactCount { count: 0 });
             assert_eq!(
-                resolve_impact(42, &c, &catalogue(target, 0))
-                    .unwrap_err()
-                    .code,
+                resolve_impact(42, &c, &catalogue(0)).unwrap_err().code,
                 ErrorCode::UnsupportedCapability
             );
         }
@@ -461,13 +400,11 @@ mod tests {
     fn exact_count_is_taken_from_eligible_candidates_only() {
         // Un seul des deux candidats existe à la date : K=2 est infaisable et
         // une fraction d'un demi se calcule sur un seul éligible.
-        let mut list = candidates(2);
-        list[1].existence = TimeSpan {
+        let mut full = catalogue(2);
+        *full.candidates.values_mut().last().unwrap() = TimeSpan {
             start_year: 1360,
             end_year: 1400,
         };
-        let proof = CatalogueProof::issue("region", ImpactTarget::Sites, list.clone()).unwrap();
-        let full = CompleteCandidateCatalogue::from_owner_catalogue(&proof, list).unwrap();
         let c = contract(ImpactTarget::Sites, ImpactMode::ExactCount { count: 2 });
         assert_eq!(
             resolve_impact(42, &c, &full).unwrap_err().code,
@@ -485,7 +422,7 @@ mod tests {
     }
     #[test]
     fn invalid_contracts_never_report_an_exact_infeasibility() {
-        let full = catalogue(ImpactTarget::Sites, 3);
+        let full = catalogue(3);
         let bad_probability = contract(
             ImpactTarget::Sites,
             ImpactMode::Probability {
@@ -526,25 +463,5 @@ mod tests {
             assert_eq!(e.owner.as_deref(), Some("region"));
             assert_eq!(e.at_year, Some(1354));
         }
-    }
-    #[test]
-    fn organisation_targets_with_encoded_ids_keep_flat_effect_addresses() {
-        let owner = Owner::cell("w", "region");
-        let group = SemanticAddress::group(&owner, "farm", 1350, 0).unwrap();
-        let list = vec![ImpactCandidate {
-            id: group.encode(),
-            existence: PERIOD,
-        }];
-        let proof =
-            CatalogueProof::issue("region", ImpactTarget::Organizations, list.clone()).unwrap();
-        let full = CompleteCandidateCatalogue::from_owner_catalogue(&proof, list).unwrap();
-        let c = contract(
-            ImpactTarget::Organizations,
-            ImpactMode::ExactCount { count: 1 },
-        );
-        let target = &resolve_impact(42, &c, &full).unwrap().targets[0];
-        let effect = SemanticAddress::decode(&target.effect_id).unwrap();
-        assert_eq!(effect.kind(), AddressKind::Effect);
-        assert!(!effect.fields().contains(&target.target_id));
     }
 }

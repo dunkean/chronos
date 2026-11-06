@@ -7,6 +7,7 @@ use std::collections::{BTreeMap, BTreeSet};
 pub fn causal_ranks(events: &[HistoryEvent]) -> Result<BTreeMap<String, u32>, HistoryError> {
     let mut by_id = BTreeMap::new();
     for e in events {
+        e.validate()?;
         if !super::atlas::valid_id(&e.id)
             || !(-MAX_ABS_YEAR..=MAX_ABS_YEAR).contains(&e.year)
             || e.end_year
@@ -134,7 +135,7 @@ pub fn causal_ranks(events: &[HistoryEvent]) -> Result<BTreeMap<String, u32>, Hi
 }
 fn event_error(e: &HistoryEvent, code: ErrorCode, message: &str) -> HistoryError {
     HistoryError {
-        owner: Some(e.owner_scope.clone()),
+        owner: Some(e.owner_scope.to_string()),
         at_year: Some(e.year),
         ..HistoryError::new(code, message)
     }
@@ -153,6 +154,7 @@ pub fn validate_composition(relations: &[SocialRelation]) -> Result<(), HistoryE
     }
     for r in relations {
         r.valid.validate(false)?;
+        r.validate()?;
         if r.weight_bps.is_some_and(|v| v > 10_000) || r.time_cost_bps.is_some_and(|v| v > 10_000) {
             return Err(HistoryError::new(
                 ErrorCode::InvalidCanonicalValue,
@@ -212,12 +214,17 @@ pub fn legal_status_at(
         .map_or(LegalStatus::Licit, |s| s.status)
 }
 
-/// Une chaîne par couple sujet/juridiction. Son premier maillon est l'état
-/// initial ; chaque maillon suivant est un changement et cite un événement
-/// `edict`, `charter`, `heresy_trial` ou `banishment`, sans lui être postérieur.
+/// Une chaîne par couple sujet/juridiction (§27.3). Seul un segment commençant
+/// à `observed_start` peut ne citer aucune cause : tout autre début est un
+/// changement, y compris un premier segment tardif. Un segment qui finit avant
+/// `world_end` sans successeur immédiat cite son événement de fin. Les causes
+/// sont de type `edict`, `charter`, `heresy_trial` ou `banishment`, sans être
+/// postérieures à la date qu'elles expliquent.
 pub fn validate_legal_standings(
     standings: &[LegalStanding],
     events: &[HistoryEvent],
+    observed_start: i32,
+    world_end: i32,
 ) -> Result<(), HistoryError> {
     let fail = |s: &LegalStanding, message: &str| HistoryError {
         owner: Some(s.id.clone()),
@@ -231,8 +238,18 @@ pub fn validate_legal_standings(
         ));
     }
     let events: BTreeMap<_, _> = events.iter().map(|e| (e.id.as_str(), e)).collect();
+    let check_cause = |s: &LegalStanding, id: &str, date: i32| {
+        let event = events
+            .get(id)
+            .ok_or_else(|| fail(s, "événement de changement absent"))?;
+        if !LEGAL_CHANGE_EVENT_KINDS.contains(&event.kind.as_str()) || event.year > date {
+            return Err(fail(s, "événement d'un autre type ou postérieur"));
+        }
+        Ok(())
+    };
     let mut chains: BTreeMap<_, Vec<&LegalStanding>> = BTreeMap::new();
     for s in standings {
+        s.validate()?;
         s.valid.validate(false).map_err(|e| HistoryError {
             owner: Some(s.id.clone()),
             at_year: Some(s.valid.start_year),
@@ -245,6 +262,9 @@ pub fn validate_legal_standings(
         {
             return Err(fail(s, "sujet ou juridiction d'un type interdit"));
         }
+        if s.valid.start_year < observed_start || s.valid.end_year > world_end {
+            return Err(fail(s, "statut hors de la période observée"));
+        }
         chains
             .entry((&s.subject, &s.jurisdiction))
             .or_default()
@@ -252,25 +272,24 @@ pub fn validate_legal_standings(
     }
     for chain in chains.values_mut() {
         chain.sort_by_key(|s| (s.valid.start_year, s.valid.end_year));
-        for pair in chain.windows(2) {
-            if pair[1].valid.start_year < pair[0].valid.end_year {
-                return Err(fail(pair[1], "statuts légaux chevauchants"));
-            }
-        }
         for (i, s) in chain.iter().enumerate() {
+            let next_start = chain.get(i + 1).map(|next| next.valid.start_year);
+            if next_start.is_some_and(|start| start < s.valid.end_year) {
+                return Err(fail(s, "statuts légaux chevauchants"));
+            }
             match &s.cause_event_id {
-                None if i > 0 => return Err(fail(s, "changement de statut sans événement")),
-                None => {}
-                Some(id) => {
-                    let event = events
-                        .get(id.as_str())
-                        .ok_or_else(|| fail(s, "événement de changement absent"))?;
-                    if !LEGAL_CHANGE_EVENT_KINDS.contains(&event.kind.as_str())
-                        || event.year > s.valid.start_year
-                    {
-                        return Err(fail(s, "événement d'un autre type ou postérieur"));
-                    }
+                Some(id) => check_cause(s, id, s.valid.start_year)?,
+                None if s.valid.start_year != observed_start => {
+                    return Err(fail(s, "changement de statut sans événement"));
                 }
+                None => {}
+            }
+            match &s.end_cause_event_id {
+                Some(id) => check_cause(s, id, s.valid.end_year)?,
+                None if s.valid.end_year != next_start.unwrap_or(world_end) => {
+                    return Err(fail(s, "fin de statut sans événement"));
+                }
+                None => {}
             }
         }
     }

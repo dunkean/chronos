@@ -1,10 +1,18 @@
 //! Régressions S0 : seed 42, chronos-social-2, schéma de plan 1.
 use chronos_core::v2::{
-    atlas::*, canonical::canonical_bytes, ids::*, model::*, population::*, region::*, validate::*,
+    atlas::*,
+    canonical::{canonical_bytes, canonical_list_bytes, CanonicalRecord},
+    ids::*,
+    model::*,
+    population::*,
+    region::*,
+    validate::*,
 };
 use serde_json::{json, Value};
 use std::collections::{BTreeMap, BTreeSet};
 
+/// Nom d'une liste et permutation qui la retourne.
+type Permutation<T> = (&'static str, fn(&mut T));
 const WORLD: &str = "canon-s0-seed42";
 const PERIOD: TimeSpan = TimeSpan {
     start_year: 1300,
@@ -25,18 +33,33 @@ fn provenance() -> Provenance {
         rule_id: "s0-test-1".into(),
     }
 }
-fn event(id: &str, year: i32, phase: EventPhase, causes: &[&str]) -> HistoryEvent {
+fn fact(
+    address: &SemanticAddress,
+    kind: &str,
+    year: i32,
+    phase: EventPhase,
+    causes: Vec<String>,
+) -> HistoryEvent {
     HistoryEvent {
-        id: id.into(),
-        owner_scope: "region".into(),
-        kind: "test".into(),
+        id: address.encode(),
+        owner_scope: address.owner().unwrap().scope().clone(),
+        kind: kind.into(),
         year,
         end_year: None,
         phase,
-        causes: causes.iter().map(|s| (*s).into()).collect(),
+        causes,
         participants: vec![],
         provenance: provenance(),
     }
+}
+fn event_id(name: &str) -> String {
+    event_address("region", name, 0, 0).encode()
+}
+/// Événement de fixture : son nom est son type, ses causes sont d'autres noms.
+fn event(name: &str, year: i32, phase: EventPhase, causes: &[&str]) -> HistoryEvent {
+    let address = event_address("region", name, 0, 0);
+    let causes = causes.iter().map(|c| event_id(c)).collect();
+    fact(&address, name, year, phase, causes)
 }
 fn site_ids(range: std::ops::Range<usize>) -> Vec<String> {
     range.map(|i| format!("site/{i:02}")).collect()
@@ -111,19 +134,17 @@ fn fixture_atlas() -> HistoryAtlas {
         external_contacts: vec![],
     }
 }
+fn region_owner() -> Owner {
+    Owner::cell(WORLD, "region")
+}
 fn event_address(cell: &str, kind: &str, block: i32, ordinal: u32) -> SemanticAddress {
     SemanticAddress::event(&Owner::cell(WORLD, cell), kind, block, ordinal).unwrap()
 }
-fn contract_on(
-    id: &str,
-    owner: &str,
-    parent: &SemanticAddress,
-    mode: ImpactMode,
-) -> ImpactContract {
+fn contract_on(slot: &str, parent: &SemanticAddress, mode: ImpactMode) -> ImpactContract {
     ImpactContract {
-        id: id.into(),
+        id: SemanticAddress::impact(parent, slot).unwrap().encode(),
         parent_event_id: parent.encode(),
-        owner_scope: owner.into(),
+        owner_scope: parent.owner().unwrap().scope().clone(),
         valid: PERIOD,
         target: ImpactTarget::Sites,
         selector: TargetSelector::All,
@@ -137,8 +158,7 @@ fn contract_on(
     }
 }
 fn contract(mode: ImpactMode) -> ImpactContract {
-    let parent = event_address("region", "war", 1350, 0);
-    contract_on("impact/test/0", "region", &parent, mode)
+    contract_on("impact-0", &event_address("region", "war", 1350, 0), mode)
 }
 fn example_value() -> Value {
     serde_json::from_str(include_str!(
@@ -175,6 +195,10 @@ fn references(p: &PopulationPlan) -> PlanReferences {
             ("event/demo/displacement".into(), 1365),
         ]),
         office_ids: BTreeSet::from(["office/demo/mayor-a".into()]),
+        domain_sites: BTreeMap::from([(
+            p.domain_id.clone(),
+            p.settlements.iter().map(|s| s.site_id.clone()).collect(),
+        )]),
         culture_variants: BTreeMap::from([
             (
                 "european-organic".into(),
@@ -198,7 +222,7 @@ fn references(p: &PopulationPlan) -> PlanReferences {
                     port.contact_id.clone(),
                     ExternalContact {
                         contact_id: port.contact_id.clone(),
-                        owner_scope: "region/demo".into(),
+                        owner_scope: OwnerScope::cell("region/demo"),
                         ends: [
                             ContactEnd::Site(site_end(port)),
                             ContactEnd::External {
@@ -242,6 +266,14 @@ fn address_roundtrip_preserves_every_field_and_type() {
             ],
         ),
         (
+            AddressKind::Event,
+            vec!["w", "world", "plague", "1350", "2"],
+        ),
+        (
+            AddressKind::Event,
+            vec!["w", "site", "site/a", "fire", "1350", "2"],
+        ),
+        (
             AddressKind::Group,
             vec!["w", "cell", "scope", "group_slot", "farm", "1350", "2"],
         ),
@@ -263,6 +295,12 @@ fn address_roundtrip_preserves_every_field_and_type() {
         ),
         (AddressKind::Plan, vec!["w", "region", "society", "0"]),
         (AddressKind::Domain, vec!["w", "region", "society", "0"]),
+        (AddressKind::Site, vec!["w", "site/a"]),
+        (AddressKind::Activity, vec!["w", "agriculture"]),
+        (
+            AddressKind::Asset,
+            vec!["w", "cell", "scope", "asset", "mill", "1350", "x"],
+        ),
     ] {
         let address =
             SemanticAddress::from_fields(kind, fields.into_iter().map(String::from).collect())
@@ -271,16 +309,45 @@ fn address_roundtrip_preserves_every_field_and_type() {
         assert!(!address.encode().contains('='));
     }
     let domain = domain_key();
-    let a = SemanticAddress::person(&domain, "algo", "1").unwrap();
-    let b = SemanticAddress::person(&domain, "algo", "2").unwrap();
-    let owner = Owner::Domain(domain);
+    let a = ObjectRef::PersonSlot(person_id("1"));
+    let b = ObjectRef::PersonSlot(person_id("2"));
+    let owner = Owner::domain(&domain);
     let relation = SemanticAddress::relation(&owner, Predicate::ParentOf, &a, &b, -5, 0).unwrap();
     assert_eq!(
         SemanticAddress::decode(&relation.encode()).unwrap(),
         relation
     );
-    assert!(!relation.fields().contains(&a.encode()));
-    assert_ne!(a.encode(), b.encode());
+    assert!(!relation.fields().contains(&person_id("1")));
+    assert_ne!(a, b);
+}
+#[test]
+fn owner_scope_has_four_typed_json_forms() {
+    for (scope, value) in [
+        (OwnerScope::World, json!({"kind": "world"})),
+        (
+            OwnerScope::cell("region"),
+            json!({"kind": "cell", "cell_id": "region"}),
+        ),
+        (
+            OwnerScope::site("site/00"),
+            json!({"kind": "site", "site_id": "site/00"}),
+        ),
+        (
+            Owner::domain(&domain_key()).scope().clone(),
+            json!({"kind": "domain", "region": "region", "society": "society", "ordinal": 0}),
+        ),
+    ] {
+        assert_eq!(serde_json::to_value(&scope).unwrap(), value);
+        assert_eq!(serde_json::from_value::<OwnerScope>(value).unwrap(), scope);
+    }
+    for invalid in [
+        json!("region"),
+        json!({"kind": "planet"}),
+        json!({"kind": "cell", "cell_id": "region", "extra": 1}),
+        json!({"kind": "domain", "region": "r", "society": "s"}),
+    ] {
+        assert!(serde_json::from_value::<OwnerScope>(invalid).is_err());
+    }
 }
 #[test]
 fn person_tenure_and_plan_have_one_identity_per_object() {
@@ -391,62 +458,47 @@ fn direct_event_lookup_matches_projection_without_provider() {
     let battle_north = event_address("region/north", "battle", 1350, 0);
     let battle_south = event_address("region/south", "battle", 1350, 1);
     let plague = event_address("region", "plague", 1350, 1);
-    let mut frame = event(&war.encode(), 1352, EventPhase::ContextAndShocks, &[]);
+    let phase = EventPhase::ContextAndShocks;
+    let mut frame = fact(&war, "war", 1352, phase, vec![]);
     frame.end_year = Some(1360);
     let canon = vec![
         frame,
-        event(
-            &battle_north.encode(),
-            1354,
-            EventPhase::ContextAndShocks,
-            &[&war.encode()],
-        ),
-        event(
-            &battle_south.encode(),
-            1355,
-            EventPhase::ContextAndShocks,
-            &[&war.encode()],
-        ),
-        event(&plague.encode(), 1354, EventPhase::ContextAndShocks, &[]),
+        fact(&battle_north, "battle", 1354, phase, vec![war.encode()]),
+        fact(&battle_south, "battle", 1355, phase, vec![war.encode()]),
+        fact(&plague, "plague", 1354, phase, vec![]),
     ];
     causal_ranks(&canon).unwrap();
     let by_id: BTreeMap<_, _> = canon.iter().map(|e| (e.id.as_str(), e)).collect();
     let probability = |probability_bps| ImpactMode::Probability { probability_bps };
     let contracts = [
-        contract_on(
-            "impact/war",
+        (
             "region",
-            &war,
-            ImpactMode::ExactCount { count: 5 },
+            contract_on("war", &war, ImpactMode::ExactCount { count: 5 }),
         ),
-        contract_on(
-            "impact/north",
+        (
             "region/north",
-            &battle_north,
-            probability(5000),
+            contract_on("north", &battle_north, probability(5000)),
         ),
-        contract_on(
-            "impact/south",
+        (
             "region/south",
-            &battle_south,
-            ImpactMode::ExactCount { count: 3 },
+            contract_on("south", &battle_south, ImpactMode::ExactCount { count: 3 }),
         ),
-        contract_on("impact/plague", "region", &plague, probability(4000)),
+        ("region", contract_on("plague", &plague, probability(4000))),
     ];
     let mut reverse_atlas = atlas.clone();
     reverse_atlas.settlements.reverse();
     let mut direct = BTreeMap::new();
     let mut projected = BTreeMap::new();
-    for c in &contracts {
-        let owner = c.owner_scope.as_str();
+    for (cell, c) in &contracts {
+        let owner = Owner::cell(WORLD, cell);
         let ids: Vec<String> = atlas
             .settlements
             .iter()
-            .filter(|s| atlas.cell_is_within(&s.cell_id, owner))
+            .filter(|s| atlas.cell_is_within(&s.cell_id, cell))
             .map(|s| s.site_id.clone())
             .collect();
         // Accès direct : une question par site, exposé ou non.
-        let catalogue = CompleteCandidateCatalogue::from_atlas_sites(&atlas, owner).unwrap();
+        let catalogue = CompleteCandidateCatalogue::from_atlas(&atlas, &owner).unwrap();
         let resolution = resolve_impact(42, c, &catalogue).unwrap();
         for id in &ids {
             if let Some(hit) = resolution.for_target(id) {
@@ -461,8 +513,7 @@ fn direct_event_lookup_matches_projection_without_provider() {
             c.id
         );
         // Projection : autre résolution, autre ordre d'atlas, pages inversées.
-        let catalogue =
-            CompleteCandidateCatalogue::from_atlas_sites(&reverse_atlas, owner).unwrap();
+        let catalogue = CompleteCandidateCatalogue::from_atlas(&reverse_atlas, &owner).unwrap();
         let resolution = resolve_impact(42, c, &catalogue).unwrap();
         for page in ids.chunks(2).rev() {
             let page: BTreeSet<String> = page.iter().cloned().collect();
@@ -485,6 +536,7 @@ fn direct_event_lookup_matches_projection_without_provider() {
         let effect = SemanticAddress::decode(effect_id).unwrap();
         assert_eq!(effect.kind(), AddressKind::Effect);
         assert_eq!(&effect.fields()[..parent.fields().len()], parent.fields());
+        assert_eq!(effect.owner(), parent.owner());
         assert!(by_id.contains_key(event_id.as_str()));
     }
     // Parent et enfant restent deux faits : un même site touché par les deux
@@ -518,7 +570,7 @@ fn impact_is_independent_of_target_enumeration_order() {
         let before = resolve_impact(
             42,
             &c,
-            &CompleteCandidateCatalogue::from_atlas_sites(&atlas, "region").unwrap(),
+            &CompleteCandidateCatalogue::from_atlas(&atlas, &region_owner()).unwrap(),
         )
         .unwrap();
         atlas.settlements.reverse();
@@ -526,27 +578,17 @@ fn impact_is_independent_of_target_enumeration_order() {
         let after = resolve_impact(
             42,
             &c,
-            &CompleteCandidateCatalogue::from_atlas_sites(&atlas, "region").unwrap(),
+            &CompleteCandidateCatalogue::from_atlas(&atlas, &region_owner()).unwrap(),
         )
         .unwrap();
         assert_eq!(before, after);
     }
 }
-fn sites_as_candidates(atlas: &HistoryAtlas) -> Vec<ImpactCandidate> {
-    atlas
-        .settlements
-        .iter()
-        .map(|s| ImpactCandidate {
-            id: s.site_id.clone(),
-            existence: PERIOD,
-        })
-        .collect()
-}
 #[test]
 fn exact_impact_uses_full_candidate_set() {
     let atlas = fixture_atlas();
     let c = contract(ImpactMode::ExactCount { count: 5 });
-    let full = CompleteCandidateCatalogue::from_atlas_sites(&atlas, "region").unwrap();
+    let full = CompleteCandidateCatalogue::from_atlas(&atlas, &region_owner()).unwrap();
     let r = resolve_impact(42, &c, &full).unwrap();
     // Classement refait ici sur les douze sites : priorité, puis ID.
     let mut ranked: Vec<_> = atlas
@@ -582,72 +624,111 @@ fn exact_impact_uses_full_candidate_set() {
         paged.sort_by(|a, b| a.target_id.cmp(&b.target_id));
         assert_eq!(paged, r.targets, "pages de {size}");
     }
-    // Une page ne devient jamais un catalogue : la preuve du propriétaire la
-    // refuse, même si K y tiendrait.
-    let proof = CatalogueProof::for_atlas_sites(&atlas, "region").unwrap();
-    let all = sites_as_candidates(&atlas);
+    // Un atlas tronqué ne produit aucun catalogue : la liste vient de l'autorité,
+    // et un résumé de cellule qui ne colle plus la fait refuser.
+    let mut truncated = atlas.clone();
+    truncated.settlements.truncate(6);
     assert_eq!(
-        CompleteCandidateCatalogue::from_owner_catalogue(&proof, all[..6].to_vec())
+        CompleteCandidateCatalogue::from_atlas(&truncated, &region_owner())
             .unwrap_err()
             .code,
-        ErrorCode::IncompleteCatalogue
+        ErrorCode::InvalidAtlas
+    );
+}
+fn catalogue_size(atlas: &HistoryAtlas, owner: &Owner) -> usize {
+    let parent = SemanticAddress::event(owner, "survey", 1350, 0).unwrap();
+    let c = contract_on(
+        "survey",
+        &parent,
+        ImpactMode::Probability {
+            probability_bps: 10_000,
+        },
+    );
+    let catalogue = CompleteCandidateCatalogue::from_atlas(atlas, owner).unwrap();
+    resolve_impact(42, &c, &catalogue).unwrap().targets.len()
+}
+#[test]
+fn catalogue_enumerates_candidates_from_the_atlas_for_each_owner() {
+    let atlas = fixture_atlas();
+    assert_eq!(catalogue_size(&atlas, &Owner::whole_world(WORLD)), 12);
+    assert_eq!(catalogue_size(&atlas, &region_owner()), 12);
+    assert_eq!(
+        catalogue_size(&atlas, &Owner::cell(WORLD, "region/north")),
+        6
+    );
+    assert_eq!(catalogue_size(&atlas, &Owner::site(WORLD, "site/03")), 1);
+    let refused = |owner: &Owner| {
+        CompleteCandidateCatalogue::from_atlas(&atlas, owner)
+            .unwrap_err()
+            .code
+    };
+    // La partition des domaines relève de S2 : l'atlas n'en sait rien.
+    assert_eq!(
+        refused(&Owner::domain(&domain_key())),
+        ErrorCode::UnsupportedCapability
+    );
+    assert_eq!(
+        refused(&Owner::cell(WORLD, "absente")),
+        ErrorCode::InvalidAtlas
+    );
+    assert_eq!(
+        refused(&Owner::site(WORLD, "absent")),
+        ErrorCode::InvalidAtlas
     );
 }
 #[test]
-fn owner_catalogue_requires_a_proof_bound_to_its_owner() {
+fn impact_contract_identity_is_bound_to_parent_owner_and_catalogue() {
     let atlas = fixture_atlas();
-    let proof = CatalogueProof::for_atlas_sites(&atlas, "region").unwrap();
-    let all = sites_as_candidates(&atlas);
-    let c = contract(ImpactMode::ExactCount { count: 5 });
-    let accepted = CompleteCandidateCatalogue::from_owner_catalogue(&proof, all.clone()).unwrap();
-    assert_eq!(
-        accepted,
-        CompleteCandidateCatalogue::from_atlas_sites(&atlas, "region").unwrap()
-    );
-    assert!(resolve_impact(42, &c, &accepted).is_ok());
-    let mut substituted = all.clone();
-    substituted[0].id = "site/autre".into();
-    let mut duplicated = all.clone();
-    duplicated[1] = duplicated[0].clone();
-    let mut shifted = all.clone();
-    shifted[0].existence.start_year += 1;
-    let mut longer = all.clone();
-    longer.push(ImpactCandidate {
-        id: "site/en-trop".into(),
-        existence: PERIOD,
-    });
-    for list in [all[..11].to_vec(), substituted, duplicated, shifted, longer] {
-        let e = CompleteCandidateCatalogue::from_owner_catalogue(&proof, list).unwrap_err();
-        assert_eq!(e.code, ErrorCode::IncompleteCatalogue);
-        assert_eq!(e.owner.as_deref(), Some("region"));
-    }
-    // La preuve d'un propriétaire ne couvre ni un autre propriétaire ni un
-    // autre type de cible, même avec la bonne liste.
-    let mut other_owner = proof.clone();
-    other_owner.owner_scope = "region/north".into();
-    let mut other_target = proof.clone();
-    other_target.target = ImpactTarget::Assets;
-    for forged in [other_owner, other_target] {
+    let full = CompleteCandidateCatalogue::from_atlas(&atlas, &region_owner()).unwrap();
+    let exact = ImpactMode::ExactCount { count: 2 };
+    let good = contract(exact.clone());
+    good.validate().unwrap();
+    let refused = |c: &ImpactContract, catalogue: &CompleteCandidateCatalogue| {
         assert_eq!(
-            CompleteCandidateCatalogue::from_owner_catalogue(&forged, all.clone())
-                .unwrap_err()
-                .code,
-            ErrorCode::IncompleteCatalogue
+            resolve_impact(42, c, catalogue).unwrap_err().code,
+            ErrorCode::InvalidImpactContract
         );
+    };
+    // `id` n'est pas une adresse d'impact, ou pas celle de ce parent.
+    let mut readable = good.clone();
+    readable.id = "impact/test/0".into();
+    let mut event_as_id = good.clone();
+    event_as_id.id = good.parent_event_id.clone();
+    let mut other_parent = good.clone();
+    other_parent.parent_event_id = event_address("region", "plague", 1350, 1).encode();
+    let mut other_owner = good.clone();
+    other_owner.owner_scope = OwnerScope::cell("region/north");
+    for c in [&readable, &event_as_id, &other_parent, &other_owner] {
+        assert!(c.validate().is_err());
+        refused(c, &full);
     }
-    // Le catalogue d'une cellule fille ne sert pas un contrat de la région.
-    let north = CompleteCandidateCatalogue::from_atlas_sites(&atlas, "region/north").unwrap();
-    assert_eq!(
-        resolve_impact(42, &c, &north).unwrap_err().code,
-        ErrorCode::InvalidImpactContract
-    );
+    // Contrat cohérent en lui-même mais d'un autre canon que le catalogue.
+    let foreign = SemanticAddress::event(&Owner::cell("canon-autre", "region"), "war", 1350, 0);
+    let foreign = contract_on("impact-0", &foreign.unwrap(), exact.clone());
+    foreign.validate().unwrap();
+    refused(&foreign, &full);
+    // Contrat cohérent d'un autre propriétaire que le catalogue.
+    let north = event_address("region/north", "battle", 1350, 0);
+    let north = contract_on("impact-0", &north, exact);
+    north.validate().unwrap();
+    refused(&north, &full);
+    let cell = Owner::cell(WORLD, "region/north");
+    let north_catalogue = CompleteCandidateCatalogue::from_atlas(&atlas, &cell).unwrap();
+    resolve_impact(42, &north, &north_catalogue).unwrap();
+    refused(&good, &north_catalogue);
+    // Les effets partagent canon et propriétaire avec leur parent.
+    for target in resolve_impact(42, &good, &full).unwrap().targets {
+        let effect = SemanticAddress::decode(&target.effect_id).unwrap();
+        assert_eq!(effect.owner(), Some(region_owner()));
+        assert_eq!(effect.fields()[0], WORLD);
+    }
 }
 #[test]
 fn impact_draws_are_pinned_by_literal_values() {
     // Oracle : port Python indépendant de keys.rs. Changer `exposure`,
     // `priority`, `intensity` ou l'ordre des parties fait échouer ce test.
     let atlas = fixture_atlas();
-    let full = CompleteCandidateCatalogue::from_atlas_sites(&atlas, "region").unwrap();
+    let full = CompleteCandidateCatalogue::from_atlas(&atlas, &region_owner()).unwrap();
     let selected = |mode| {
         resolve_impact(42, &contract(mode), &full)
             .unwrap()
@@ -658,34 +739,34 @@ fn impact_draws_are_pinned_by_literal_values() {
     };
     assert_eq!(
         selected(ImpactMode::ExactCount { count: 5 }),
-        ["site/00", "site/01", "site/05", "site/09", "site/10"]
+        ["site/05", "site/07", "site/08", "site/09", "site/11"]
     );
     assert_eq!(
         selected(ImpactMode::Probability {
             probability_bps: 2500
         }),
-        ["site/00", "site/06", "site/10"]
+        ["site/00", "site/01", "site/04"]
     );
     assert_eq!(
         selected(ImpactMode::Probability {
             probability_bps: 5000
         }),
-        ["site/00", "site/02", "site/05", "site/06", "site/10"]
+        ["site/00", "site/01", "site/02", "site/04", "site/05", "site/06", "site/11"]
     );
     let r = resolve_impact(42, &contract(ImpactMode::ExactCount { count: 5 }), &full).unwrap();
     assert_eq!(
-        r.for_target("site/00").unwrap().intensity_draw,
-        11969561304100620598
+        r.for_target("site/05").unwrap().intensity_draw,
+        7138363109131796565
     );
     assert_eq!(
-        r.for_target("site/01").unwrap().intensity_draw,
-        15264254884598781494
+        r.for_target("site/07").unwrap().intensity_draw,
+        8833795781382205987
     );
 }
 #[test]
 fn exact_impact_attains_k_with_declared_rounding_or_fails() {
     let atlas = fixture_atlas();
-    let full = CompleteCandidateCatalogue::from_atlas_sites(&atlas, "region").unwrap();
+    let full = CompleteCandidateCatalogue::from_atlas(&atlas, &region_owner()).unwrap();
     for (mode, k) in [
         (ImpactMode::ExactCount { count: 0 }, 0),
         (ImpactMode::ExactCount { count: 12 }, 12),
@@ -733,7 +814,7 @@ fn probability_impact_uses_independent_exposure_and_separate_intensity_keys() {
     let c = contract(ImpactMode::Probability {
         probability_bps: 2500,
     });
-    let full = CompleteCandidateCatalogue::from_atlas_sites(&atlas, "region").unwrap();
+    let full = CompleteCandidateCatalogue::from_atlas(&atlas, &region_owner()).unwrap();
     let result = resolve_impact(42, &c, &full).unwrap();
     // On vérifie chaque Bernoulli ; aucune assertion de quota sur la somme.
     for s in atlas.settlements {
@@ -831,7 +912,7 @@ fn intraphase_ranks_follow_dependencies_before_lexical_ids() {
         event("b", 1350, EventPhase::Deaths, &[]),
     ];
     let ranks = causal_ranks(&events).unwrap();
-    assert!(ranks["z"] < ranks["a"]);
+    assert!(ranks[&event_id("z")] < ranks[&event_id("a")]);
     events.reverse();
     assert_eq!(ranks, causal_ranks(&events).unwrap());
     events[0].causes.push("missing".into());
@@ -854,12 +935,19 @@ fn future_causes_are_rejected() {
         );
     }
 }
-fn relation(id: &str, a: &str, b: &str, predicate: Predicate) -> SocialRelation {
+fn guild(slot: &str) -> SemanticAddress {
+    SemanticAddress::entity(&region_owner(), "guild", 1300, slot).unwrap()
+}
+fn guild_ref(slot: &str) -> ObjectRef {
+    ObjectRef::Entity(guild(slot).encode())
+}
+fn link(subject: ObjectRef, predicate: Predicate, object: ObjectRef) -> SocialRelation {
+    let id = SemanticAddress::relation(&region_owner(), predicate, &subject, &object, 1300, 0);
     SocialRelation {
-        id: id.into(),
-        subject: ObjectRef::Entity(a.into()),
+        id: id.unwrap().encode(),
+        subject,
         predicate,
-        object: ObjectRef::Entity(b.into()),
+        object,
         valid: PERIOD,
         role_id: None,
         weight_bps: None,
@@ -869,31 +957,129 @@ fn relation(id: &str, a: &str, b: &str, predicate: Predicate) -> SocialRelation 
         rule_id: "test-1".into(),
     }
 }
+fn relation(a: &str, b: &str, predicate: Predicate) -> SocialRelation {
+    link(guild_ref(a), predicate, guild_ref(b))
+}
 #[test]
 fn strict_composition_is_acyclic_but_affiliations_may_overlap() {
-    let mut relations = vec![
-        relation("ab", "a", "b", Predicate::ComponentOf),
-        relation("ba", "b", "a", Predicate::ComponentOf),
+    let cycle = [
+        relation("a", "b", Predicate::ComponentOf),
+        relation("b", "a", Predicate::ComponentOf),
     ];
     assert_eq!(
-        validate_composition(&relations).unwrap_err().code,
+        validate_composition(&cycle).unwrap_err().code,
         ErrorCode::CompositionCycle
     );
-    relations[1].predicate = Predicate::MemberOf;
-    assert!(validate_composition(&relations).is_ok());
+    let overlap = [
+        relation("a", "b", Predicate::ComponentOf),
+        relation("b", "a", Predicate::MemberOf),
+    ];
+    assert!(validate_composition(&overlap).is_ok());
 }
 #[test]
 fn duplicate_relation_id_is_not_reported_as_a_cycle() {
-    let r = relation("ab", "a", "b", Predicate::MemberOf);
+    let r = relation("a", "b", Predicate::MemberOf);
     assert_eq!(
         validate_composition(&[r.clone(), r]).unwrap_err().code,
         ErrorCode::InvalidCanonicalValue
     );
 }
+#[test]
+fn relation_identity_is_proved_against_its_address() {
+    let good = relation("a", "b", Predicate::Trusts);
+    good.validate().unwrap();
+    let mut predicate = good.clone();
+    predicate.predicate = Predicate::Helps;
+    let mut subject = good.clone();
+    subject.subject = guild_ref("c");
+    let mut object = good.clone();
+    object.object = guild_ref("c");
+    let mut start = good.clone();
+    start.valid.start_year = 1301;
+    let mut readable = good.clone();
+    readable.id = "ab".into();
+    let mut other_kind = good.clone();
+    other_kind.id = guild("a").encode();
+    for invalid in [predicate, subject, object, start, readable, other_kind] {
+        assert_eq!(
+            invalid.validate().unwrap_err().code,
+            ErrorCode::InvalidRecordIdentity
+        );
+        assert_eq!(
+            validate_composition(&[invalid]).unwrap_err().code,
+            ErrorCode::InvalidRecordIdentity
+        );
+    }
+}
+#[test]
+fn relation_constructor_accepts_every_addressable_object_ref() {
+    let owner = region_owner();
+    let site = SemanticAddress::site(WORLD, "site/00").unwrap();
+    let activity = SemanticAddress::activity(WORLD, "agriculture").unwrap();
+    let asset = SemanticAddress::asset(&owner, "mill", 1300, "north").unwrap();
+    let office = SemanticAddress::entity(&owner, "office", 1300, "mayor").unwrap();
+    let group = SemanticAddress::group(&owner, "farm", 1300, 0).unwrap();
+    let household = SemanticAddress::household(&domain_key(), "singleton/1", 1300).unwrap();
+    let refs = [
+        guild_ref("a"),
+        ObjectRef::Entity(group.encode()),
+        ObjectRef::Entity(household.encode()),
+        ObjectRef::Office(office.encode()),
+        ObjectRef::Site(site.encode()),
+        ObjectRef::Asset(asset.encode()),
+        ObjectRef::PersonSlot(person_id("1")),
+        ObjectRef::Activity(activity.encode()),
+    ];
+    for object in &refs {
+        let r = link(guild_ref("owner"), Predicate::Owns, object.clone());
+        r.validate().unwrap();
+        let decoded = SemanticAddress::decode(&r.id).unwrap();
+        let parts = decoded.link().unwrap();
+        assert_eq!(parts.owner, owner);
+        assert_eq!(parts.predicate, Some(Predicate::Owns));
+        assert_eq!(&ObjectRef::from_address(&parts.object).unwrap(), object);
+        assert_eq!(&object.address().unwrap(), &parts.object);
+        assert_eq!(parts.start, 1300);
+    }
+    // Une forme canonique par objet : un office, une personne ou un site
+    // déguisés sous une autre variante sont refusés.
+    for invalid in [
+        ObjectRef::Entity(office.encode()),
+        ObjectRef::Entity(person_id("1")),
+        ObjectRef::Office(guild("a").encode()),
+        ObjectRef::Site(activity.encode()),
+        ObjectRef::Asset(site.encode()),
+        ObjectRef::PersonSlot(guild("a").encode()),
+        ObjectRef::Activity("agriculture".into()),
+        ObjectRef::Entity(event_id("war")),
+    ] {
+        assert!(invalid.address().is_err(), "{invalid:?}");
+        assert!(SemanticAddress::relation(
+            &owner,
+            Predicate::Owns,
+            &guild_ref("owner"),
+            &invalid,
+            1300,
+            0
+        )
+        .is_err());
+    }
+}
+fn person_id(local: &str) -> String {
+    SemanticAddress::person(&domain_key(), "algo", local)
+        .unwrap()
+        .encode()
+}
+fn tags() -> BTreeSet<String> {
+    ["charity", "extortion", "violence"]
+        .into_iter()
+        .map(String::from)
+        .collect()
+}
 fn person() -> PersonRecord {
     PersonRecord {
-        entity_id: "p".into(),
-        provider_ref: "fixture".into(),
+        entity_id: person_id("17"),
+        provider_ref: "17".into(),
         birth_year: 1300,
         death_year: Some(1356),
         parent_refs: vec![],
@@ -935,18 +1121,51 @@ fn person_record_keeps_unknown_death_and_observation_distinct_from_coverage() {
     assert!(serde_json::from_value::<PersonRecord>(missing).is_err());
 }
 #[test]
+fn person_life_and_observation_are_consistent() {
+    person().validate(&tags()).unwrap();
+    let mut empty_life = person();
+    empty_life.death_year = Some(1300);
+    empty_life.validate(&tags()).unwrap();
+    let mut before_birth = person();
+    before_birth.death_year = Some(1299);
+    assert!(before_birth.validate(&tags()).is_err());
+    for (start_year, end_year) in [(1400, 1300), (-100_001, 1300), (1300, 100_001)] {
+        let mut p = person();
+        p.observed_span = TimeSpan {
+            start_year,
+            end_year,
+        };
+        assert!(p.validate(&tags()).is_err(), "{start_year}/{end_year}");
+    }
+}
+#[test]
+fn person_identity_is_proved_against_its_address() {
+    let mut readable = person();
+    readable.entity_id = "p".into();
+    let mut other_kind = person();
+    other_kind.entity_id = guild("a").encode();
+    let mut other_local = person();
+    other_local.provider_ref = "18".into();
+    for invalid in [readable, other_kind, other_local] {
+        assert_eq!(
+            invalid.validate(&tags()).unwrap_err().code,
+            ErrorCode::InvalidRecordIdentity
+        );
+    }
+}
+#[test]
 fn parent_refs_are_table_rows_or_typed_bounded_external_refs() {
     let mut p = person();
     p.parent_refs = vec![
         ParentRef::Slot {
-            person_id: "row/1".into(),
+            person_id: person_id("1"),
         },
         ParentRef::External {
             origin: ExternalParentOrigin::ExternalArrival,
             ref_id: "arrival/1".into(),
         },
     ];
-    p.validate().unwrap();
+    p.validate(&tags()).unwrap();
     let v = serde_json::to_value(&p).unwrap();
     assert_eq!(v["parent_refs"][1]["kind"], "external");
     assert_eq!(v["parent_refs"][1]["origin"], "external_arrival");
@@ -958,17 +1177,25 @@ fn parent_refs_are_table_rows_or_typed_bounded_external_refs() {
     };
     let mut three = p.clone();
     three.parent_refs.push(ParentRef::Slot {
-        person_id: "row/3".into(),
+        person_id: person_id("3"),
     });
     let mut twice = p.clone();
     twice.parent_refs[1] = twice.parent_refs[0].clone();
-    let mut too_old = p;
+    let mut too_old = p.clone();
     too_old.birth_year = -100_001;
     for invalid in [unbounded, three, twice, too_old] {
-        let e = invalid.validate().unwrap_err();
+        let e = invalid.validate(&tags()).unwrap_err();
         assert_eq!(e.code, ErrorCode::InvalidCanonicalValue);
-        assert_eq!(e.owner.as_deref(), Some("p"));
+        assert_eq!(e.owner, Some(person_id("17")));
     }
+    let mut not_a_person = p;
+    not_a_person.parent_refs[0] = ParentRef::Slot {
+        person_id: "row/1".into(),
+    };
+    assert_eq!(
+        not_a_person.validate(&tags()).unwrap_err().code,
+        ErrorCode::InvalidRecordIdentity
+    );
     assert!(serde_json::from_value::<ParentRef>(json!({"kind":"entity","id":"p"})).is_err());
 }
 #[test]
@@ -1061,6 +1288,11 @@ fn plan_is_bound_to_the_canon_and_the_world_horizon() {
     let mut refs = good.clone();
     refs.world_seed += 1;
     invalid_plan(&p, &refs);
+    // Seul le plan change de graine mondiale, références intactes : `seed` reste
+    // cohérent avec les références, seule la comparaison explicite le refuse.
+    let mut q = p.clone();
+    q.world_seed = "43".into();
+    invalid_plan(&q, &good);
     // Horizon plus long ou plus court que le plan : jamais un plan partiel.
     for end_year in [1399, 1401] {
         let mut refs = good.clone();
@@ -1092,10 +1324,29 @@ fn plan_is_bound_to_the_canon_and_the_world_horizon() {
     let mut q = p.clone();
     q.domain_id = "domain/demo/0".into();
     invalid_plan(&q, &good);
-    // Un autre domaine du même monde reste un plan valide s'il est complet.
+    // Mêmes sites sous un autre ordinal : la partition attendue le refuse, et
+    // elle seule, car ce plan est par ailleurs entièrement cohérent.
     let mut q = p.clone();
     with_plan_identity(&mut q, &other);
-    validate_plan(&q, &good).unwrap();
+    invalid_plan(&q, &good);
+    let mut moved = good.clone();
+    moved.domain_sites =
+        BTreeMap::from([(q.domain_id.clone(), good.domain_sites[&p.domain_id].clone())]);
+    validate_plan(&q, &moved).unwrap();
+    // Domaine connu mais sites différents, dans un sens ou dans l'autre.
+    let mut fewer = good.clone();
+    fewer
+        .domain_sites
+        .get_mut(&p.domain_id)
+        .unwrap()
+        .remove("site/demo/b");
+    invalid_plan(&p, &fewer);
+    let mut more = good.clone();
+    more.domain_sites
+        .get_mut(&p.domain_id)
+        .unwrap()
+        .insert("site/demo/c".into());
+    invalid_plan(&p, &more);
 }
 fn capability_error(p: &PopulationPlan, refs: &PlanReferences) {
     assert_eq!(
@@ -1172,8 +1423,126 @@ fn principal_variant_must_belong_to_its_declared_family() {
         );
     }
 }
+/// Toutes les listes triées du plan portent au moins deux éléments distincts.
+fn plan_with_full_lists() -> PopulationPlan {
+    let mut p = example();
+    let profiles = &mut p.resolved_profiles;
+    let mut ancestry = profiles.ancestries[0].clone();
+    ancestry.id = "zz-ancestry".into();
+    profiles.ancestries.push(ancestry);
+    let mut external = profiles.external[0].clone();
+    external.id = "zz-external".into();
+    profiles.external.push(external);
+    let mut kinship = profiles.kinship[0].clone();
+    kinship.id = "zz-kinship".into();
+    profiles.kinship.push(kinship);
+    let mut shock = p.shocks[0].clone();
+    shock.source_event_id = "event/demo/zz".into();
+    p.shocks.push(shock);
+    p.shocks[0].site_ids = vec!["site/demo/a".into(), "site/demo/b".into()];
+    let mut move_op = p.historical_program[0].clone();
+    if let HistoricalOperation::MoveHouseholds { op_id, .. } = &mut move_op {
+        *op_id = "op/demo/zz".into();
+    }
+    p.historical_program.push(move_op);
+    p.historical_program.push(
+        serde_json::from_value(json!({
+            "op_id": "op/admit", "source_event_id": "event/demo/plague", "kind": "admit_people",
+            "person_ids": ["person/a", "person/b"], "source_port_id": "port/demo/north",
+            "year": 1370
+        }))
+        .unwrap(),
+    );
+    let mut role = p.role_demands[0].clone();
+    role.slot_id = "slot/demo/zz".into();
+    role.activity_ids = vec!["craft".into(), "trade".into()];
+    p.role_demands.push(role);
+    for id in ["person/a", "person/b"] {
+        p.fixed_people.push(
+            serde_json::from_value(json!({
+                "person_id": id, "birth_year": 1320, "death_year": null,
+                "ancestry_profile_id": "human-example", "sex": "F",
+                "parent_ids": ["parent/a", "parent/b"], "initial_site_id": "site/demo/a",
+                "protected_spans": []
+            }))
+            .unwrap(),
+        );
+    }
+    for id in ["constraint/a", "constraint/b"] {
+        p.exact_constraints.push(
+            serde_json::from_value(json!({
+                "constraint_id": id, "source_event_id": "event/demo/plague",
+                "kind": "population_at_date", "year": 1354,
+                "site_ids": ["site/demo/a", "site/demo/b"], "count": 100, "phase": 80,
+                "effect_mode": "assert", "count_basis": "state_at_date"
+            }))
+            .unwrap(),
+        );
+    }
+    let mut port = p.boundary_ports[0].clone();
+    port.port_id = "port/demo/zz".into();
+    p.boundary_ports.push(port);
+    let mut edge = p.mobility_edges[0].clone();
+    edge.edge_id = "edge/demo/zz".into();
+    p.mobility_edges.push(edge);
+    p
+}
 #[test]
-fn plan_canonical_bytes_ignore_identity_fields_and_list_order() {
+fn plan_canonical_bytes_do_not_depend_on_any_sorted_list_order() {
+    let p = plan_with_full_lists();
+    let reference = plan_canonical_bytes(&p).unwrap();
+    let permutations: [Permutation<PopulationPlan>; 21] = [
+        ("capacités", |p| p.provider.capabilities.reverse()),
+        ("ascendances", |p| p.resolved_profiles.ancestries.reverse()),
+        ("classes", |p| p.resolved_profiles.social_classes.reverse()),
+        ("profils extérieurs", |p| {
+            p.resolved_profiles.external.reverse()
+        }),
+        ("parentés", |p| p.resolved_profiles.kinship.reverse()),
+        ("sites", |p| p.settlements.reverse()),
+        ("marqueurs", |p| p.baseline_markers.reverse()),
+        ("chocs", |p| p.shocks.reverse()),
+        ("sites d'un choc", |p| p.shocks[0].site_ids.reverse()),
+        ("opérations", |p| p.historical_program.reverse()),
+        ("personnes admises", |p| {
+            for op in &mut p.historical_program {
+                if let HistoricalOperation::AdmitPeople { person_ids, .. } = op {
+                    person_ids.reverse();
+                }
+            }
+        }),
+        ("rôles", |p| p.role_demands.reverse()),
+        ("statuts d'un rôle", |p| {
+            p.role_demands[0].status_ids.reverse()
+        }),
+        ("activités d'un rôle", |p| {
+            p.role_demands[1].activity_ids.reverse()
+        }),
+        ("personnes fixées", |p| p.fixed_people.reverse()),
+        ("parents d'une personne", |p| {
+            p.fixed_people[0].parent_ids.reverse()
+        }),
+        ("contraintes", |p| p.exact_constraints.reverse()),
+        ("sites d'une contrainte", |p| {
+            p.exact_constraints[0].site_ids.reverse()
+        }),
+        ("ports", |p| p.boundary_ports.reverse()),
+        ("routes", |p| p.mobility_edges.reverse()),
+        ("tout à la fois", |p| {
+            p.settlements.reverse();
+            p.boundary_ports.reverse();
+            p.resolved_profiles.ancestries.reverse();
+        }),
+    ];
+    for (name, permute) in permutations {
+        let mut q = p.clone();
+        permute(&mut q);
+        assert_ne!(q, p, "{name} : liste à un seul élément");
+        assert_eq!(plan_canonical_bytes(&q).unwrap(), reference, "{name}");
+    }
+}
+#[test]
+fn plan_canonical_bytes_exclude_identity_fields_and_keep_ordered_lists() {
     let p = example();
     let reference = plan_canonical_bytes(&p).unwrap();
     let value: Value = serde_json::from_slice(&reference).unwrap();
@@ -1183,14 +1552,6 @@ fn plan_canonical_bytes_ignore_identity_fields_and_list_order() {
     let mut q = p.clone();
     q.plan_id = "plan.autre".into();
     q.plan_fingerprint = "autre".into();
-    assert_eq!(plan_canonical_bytes(&q).unwrap(), reference);
-    let mut q = p.clone();
-    q.provider.capabilities.reverse();
-    q.resolved_profiles.social_classes.reverse();
-    q.settlements.reverse();
-    q.baseline_markers.reverse();
-    q.role_demands[0].status_ids.reverse();
-    assert_ne!(q, p);
     assert_eq!(plan_canonical_bytes(&q).unwrap(), reference);
     // Listes triées par octets UTF-8 dans le résultat.
     let ids: Vec<_> = value["resolved_profiles"]["social_classes"]
@@ -1215,6 +1576,66 @@ fn plan_canonical_bytes_ignore_identity_fields_and_list_order() {
     let ordered = plan_canonical_bytes(&q).unwrap();
     q.settlements[0].occupation_episodes.reverse();
     assert_ne!(plan_canonical_bytes(&q).unwrap(), ordered);
+}
+#[test]
+fn historical_program_is_ordered_by_year_phase_then_op_id() {
+    let mut p = example();
+    let op = |json: Value| serde_json::from_value::<HistoricalOperation>(json).unwrap();
+    let moves = |id: &str, year: i32| {
+        op(json!({
+            "op_id": id, "source_event_id": "event/demo/plague", "kind": "move_households",
+            "year": year, "origin_site_id": "site/demo/a", "destination_site_id": "site/demo/b",
+            "destination_port_id": null, "target_households": 3, "precision": "expected"
+        }))
+    };
+    let death = op(json!({
+        "op_id": "op/z-death", "source_event_id": "event/demo/plague", "kind": "force_death",
+        "person_id": "p", "year": 1350
+    }));
+    let protect = op(json!({
+        "op_id": "op/z-protect", "source_event_id": "event/demo/plague", "kind": "protect_person",
+        "person_id": "p", "valid": {"start_year": 1350, "end_year": 1352}
+    }));
+    let admit = op(json!({
+        "op_id": "op/a-admit", "source_event_id": "event/demo/plague", "kind": "admit_people",
+        "person_ids": ["p"], "source_port_id": "port/demo/north", "year": 1350
+    }));
+    assert_eq!(death.application_key().1, EventPhase::Deaths);
+    assert_eq!(
+        moves("op", 1350).application_key().1,
+        EventPhase::Residences
+    );
+    assert_eq!(admit.application_key().1, EventPhase::Residences);
+    assert_eq!(
+        protect.application_key(),
+        (1350, EventPhase::ContextAndShocks, "op/z-protect")
+    );
+    p.historical_program = vec![
+        moves("op/c", 1350),
+        moves("op/a", 1360),
+        admit,
+        death,
+        moves("op/b", 1350),
+        protect,
+    ];
+    let value: Value = serde_json::from_slice(&plan_canonical_bytes(&p).unwrap()).unwrap();
+    let ids: Vec<_> = value["historical_program"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|op| op["op_id"].as_str().unwrap())
+        .collect();
+    assert_eq!(
+        ids,
+        [
+            "op/z-protect",
+            "op/z-death",
+            "op/a-admit",
+            "op/b",
+            "op/c",
+            "op/a"
+        ]
+    );
 }
 #[test]
 fn kinship_profile_must_match_the_society_profile() {
@@ -1551,7 +1972,7 @@ fn atlas_with_contact(ends: [ContactEnd; 2]) -> HistoryAtlas {
     let mut a = fixture_atlas();
     a.external_contacts.push(ExternalContact {
         contact_id: "contact/0".into(),
-        owner_scope: "region".into(),
+        owner_scope: OwnerScope::cell("region"),
         ends,
         valid: PERIOD,
     });
@@ -1565,6 +1986,95 @@ fn contact_site(site: &str, context: &str) -> ContactEnd {
         external_profile_id: "outside-profile".into(),
         population_expected: 100,
     })
+}
+#[test]
+fn contact_owner_is_the_world_or_an_enclosing_cell() {
+    let ends = [
+        contact_site("site/00", "outside/0"),
+        ContactEnd::External {
+            context_id: "outside/0".into(),
+        },
+    ];
+    let with_owner = |owner_scope| {
+        let mut a = atlas_with_contact(ends.clone());
+        a.external_contacts[0].owner_scope = owner_scope;
+        a
+    };
+    with_owner(OwnerScope::World).validate().unwrap();
+    with_owner(OwnerScope::cell("region/north"))
+        .validate()
+        .unwrap();
+    for invalid in [
+        OwnerScope::cell("region/south"),
+        OwnerScope::cell("absente"),
+        OwnerScope::site("site/00"),
+        Owner::domain(&domain_key()).scope().clone(),
+    ] {
+        assert!(with_owner(invalid).validate().is_err());
+    }
+}
+fn atlas_with_full_lists() -> HistoryAtlas {
+    let mut a = atlas_with_contact([
+        contact_site("site/00", "outside/0"),
+        ContactEnd::External {
+            context_id: "outside/0".into(),
+        },
+    ]);
+    let mut contact = a.external_contacts[0].clone();
+    contact.contact_id = "contact/1".into();
+    a.external_contacts.push(contact);
+    a.region_ids.push("region/north".into());
+    a.cells[1].neighbors.push("region".into());
+    for id in ["edge/0", "edge/1"] {
+        a.mobility_edges.push(MobilityEdge {
+            edge_id: id.into(),
+            from_site_id: "site/00".into(),
+            to_site_id: "site/01".into(),
+            valid: PERIOD,
+            travel_days: 1,
+            bidirectional: true,
+            mode: MobilityMode::Land,
+        });
+    }
+    a
+}
+#[test]
+fn atlas_canonical_bytes_do_not_depend_on_any_sorted_list_order() {
+    let a = atlas_with_full_lists();
+    let reference = a.canonical_bytes().unwrap();
+    let permutations: [Permutation<HistoryAtlas>; 7] = [
+        ("cellules", |a| a.cells.reverse()),
+        ("régions", |a| a.region_ids.reverse()),
+        ("voisins", |a| a.cells[1].neighbors.reverse()),
+        ("sites d'une cellule", |a| {
+            a.cells[0].settlement_summary.site_ids.reverse()
+        }),
+        ("sites", |a| a.settlements.reverse()),
+        ("routes", |a| a.mobility_edges.reverse()),
+        ("contacts", |a| a.external_contacts.reverse()),
+    ];
+    for (name, permute) in permutations {
+        let mut b = a.clone();
+        permute(&mut b);
+        assert_ne!(b, a, "{name} : liste à un seul élément");
+        assert_eq!(b.canonical_bytes().unwrap(), reference, "{name}");
+    }
+    let value: Value = serde_json::from_slice(&reference).unwrap();
+    assert_eq!(value["cells"][0]["cell_id"], "region");
+    assert_eq!(value["settlements"][11]["site_id"], "site/11");
+    // Un fait change les octets ; une liste ordonnée n'est pas retriée.
+    let mut b = a.clone();
+    b.settlements[0].initial_population += 1;
+    assert_ne!(b.canonical_bytes().unwrap(), reference);
+    let site = &mut b.settlements[1];
+    let mut later = site.occupation_episodes[0].clone();
+    site.occupation_episodes[0].valid.end_year = 1350;
+    later.valid.start_year = 1350;
+    later.capacity += 1;
+    site.occupation_episodes.push(later);
+    let ordered = b.canonical_bytes().unwrap();
+    b.settlements[1].occupation_episodes.reverse();
+    assert_ne!(b.canonical_bytes().unwrap(), ordered);
 }
 #[test]
 fn external_contact_carries_two_valid_ends() {
@@ -1679,53 +2189,71 @@ fn alignment_axes_out_of_bounds_are_refused() {
     let v = json!({"morality_bps": 1, "lawfulness_bps": 2, "class": "saintly"});
     assert!(serde_json::from_value::<AlignmentAxes>(v).is_err());
 }
-#[test]
-fn entity_state_stores_axes_and_tags_but_never_the_conduct_class() {
-    let measure = CountMeasure {
-        value: None,
-        unit: "person".into(),
-        precision: Precision {
-            mode: PrecisionMode::Expected,
-        },
-        coverage: Coverage::Partial,
-        basis: "fixture".into(),
-        at_year: 1354,
-    };
-    let state = EntityState {
-        entity_id: "e".into(),
-        at_year: 1354,
+fn entity_state(id: &str, at_year: i32) -> EntityState {
+    EntityState {
+        entity_id: id.into(),
+        at_year,
         lifecycle: Lifecycle::Active,
-        member_count: measure,
+        member_count: CountMeasure {
+            value: None,
+            unit: "person".into(),
+            precision: Precision {
+                mode: PrecisionMode::Expected,
+            },
+            coverage: Coverage::Partial,
+            basis: "fixture".into(),
+            at_year,
+        },
         cohesion_bps: 6000,
         legitimacy_bps: 5000,
         wealth_index: 0,
         capabilities: vec![],
         alignment: axes(-7000, -5000),
-        conduct_tags: BTreeSet::from([ConductTag::Violence, ConductTag::Extortion]),
+        conduct_tags: BTreeSet::from(["violence".into(), "extortion".into()]),
         visibility: Visibility::Covert,
         goals: vec![],
         assets: vec![],
         footprint_refs: vec![],
         institution_version: "1".into(),
-    };
+    }
+}
+#[test]
+fn entity_state_stores_axes_and_tags_but_never_the_conduct_class() {
+    let state = entity_state("e", 1354);
+    state.validate(&tags()).unwrap();
     let v = serde_json::to_value(&state).unwrap();
     assert!(v.get("conduct_class").is_none());
     assert_eq!(v["visibility"], "covert");
     // Tags triés par ID, comme toute liste canonique.
     assert_eq!(v["conduct_tags"], json!(["extortion", "violence"]));
     assert_eq!(serde_json::from_value::<EntityState>(v).unwrap(), state);
-    let all = BTreeSet::from([
-        ConductTag::Violence,
-        ConductTag::Usury,
-        ConductTag::Sorcery,
-        ConductTag::Extortion,
-        ConductTag::Charity,
-        ConductTag::Blasphemy,
-    ]);
-    let names = serde_json::to_value(&all).unwrap();
-    let names: Vec<_> = names.as_array().unwrap().iter().collect();
-    assert!(names.windows(2).all(|w| w[0].as_str() < w[1].as_str()));
-    assert!(serde_json::from_value::<ConductTag>(json!("inconnu")).is_err());
+}
+#[test]
+fn conduct_tags_are_ids_validated_against_the_received_catalogue() {
+    // Un tag n'est pas figé dans le noyau : le catalogue reçu fait foi.
+    let state = entity_state("e", 1354);
+    let without_violence: BTreeSet<_> = ["extortion".to_string()].into();
+    assert_eq!(
+        state.validate(&without_violence).unwrap_err().code,
+        ErrorCode::InvalidAlignment
+    );
+    let with_new_tag: BTreeSet<_> = ["extortion", "violence", "contrebande"]
+        .into_iter()
+        .map(String::from)
+        .collect();
+    let mut extended = state;
+    extended.conduct_tags.insert("contrebande".into());
+    extended.validate(&with_new_tag).unwrap();
+    assert!(extended.validate(&tags()).is_err());
+    let mut p = person();
+    let mut episode = alignment_episode(1300, 1340, None);
+    episode.conduct_tags.insert("contrebande".into());
+    p.alignment_episodes = vec![episode];
+    assert_eq!(
+        p.validate(&tags()).unwrap_err().code,
+        ErrorCode::InvalidAlignment
+    );
+    p.validate(&with_new_tag).unwrap();
 }
 fn alignment_episode(start: i32, end: i32, cause: Option<&str>) -> AlignmentEpisode {
     AlignmentEpisode {
@@ -1746,7 +2274,7 @@ fn alignment_change_cites_an_event_and_episodes_are_ordered() {
         alignment_episode(1300, 1340, None),
         alignment_episode(1340, 1356, Some("event/conversion")),
     ];
-    p.validate().unwrap();
+    p.validate(&tags()).unwrap();
     let v = serde_json::to_value(&p).unwrap();
     assert_eq!(serde_json::from_value::<PersonRecord>(v).unwrap(), p);
     let mut uncaused = p.clone();
@@ -1755,85 +2283,113 @@ fn alignment_change_cites_an_event_and_episodes_are_ordered() {
     overlapping.alignment_episodes[1].valid.start_year = 1339;
     for invalid in [uncaused, overlapping] {
         assert_eq!(
-            invalid.validate().unwrap_err().code,
+            invalid.validate(&tags()).unwrap_err().code,
             ErrorCode::InvalidAlignment
         );
     }
 }
+const OBSERVED_START: i32 = 1300;
+const WORLD_END: i32 = 1400;
+fn legal_event(kind: &str, ordinal: u32, year: i32) -> HistoryEvent {
+    let address = event_address("region", kind, 0, ordinal);
+    fact(
+        &address,
+        kind,
+        year,
+        EventPhase::InstitutionsAndVacancies,
+        vec![],
+    )
+}
 fn standing(
-    id: &str,
     subject: &str,
     jurisdiction: &str,
     status: LegalStatus,
     (start_year, end_year): (i32, i32),
-    cause: Option<&str>,
+    cause: Option<&HistoryEvent>,
+    end_cause: Option<&HistoryEvent>,
 ) -> LegalStanding {
+    let (subject, jurisdiction) = (guild_ref(subject), guild_ref(jurisdiction));
+    let id = SemanticAddress::standing(&region_owner(), &subject, &jurisdiction, start_year, 0);
     LegalStanding {
-        id: id.into(),
-        subject: ObjectRef::Entity(subject.into()),
-        jurisdiction: ObjectRef::Entity(jurisdiction.into()),
+        id: id.unwrap().encode(),
+        subject,
+        jurisdiction,
         status,
         valid: TimeSpan {
             start_year,
             end_year,
         },
-        cause_event_id: cause.map(String::from),
+        cause_event_id: cause.map(|e| e.id.clone()),
+        end_cause_event_id: end_cause.map(|e| e.id.clone()),
         provenance: provenance(),
         rule_id: "s0-test-1".into(),
     }
 }
+fn check_standings(
+    standings: &[LegalStanding],
+    events: &[HistoryEvent],
+) -> Result<(), HistoryError> {
+    validate_legal_standings(standings, events, OBSERVED_START, WORLD_END)
+}
+fn refused_standings(standings: &[LegalStanding], events: &[HistoryEvent], message: &str) {
+    assert_eq!(
+        check_standings(standings, events).unwrap_err().code,
+        ErrorCode::InvalidLegalStanding,
+        "{message}"
+    );
+}
 #[test]
 fn legal_standing_is_relative_to_jurisdiction() {
     use LegalStatus::*;
-    let edict = {
-        let mut e = event("edict/1", 1350, EventPhase::InstitutionsAndVacancies, &[]);
-        e.kind = "edict".into();
-        e
-    };
+    let edict = legal_event("edict", 0, 1350);
     let standings = [
-        standing("a", "cult", "city/a", Licit, (1300, 1350), None),
+        standing("cult", "city-a", Licit, (1300, 1350), None, None),
         standing(
-            "b",
             "cult",
-            "city/a",
+            "city-a",
             Proscribed,
             (1350, 1400),
-            Some("edict/1"),
+            Some(&edict),
+            None,
         ),
-        standing("c", "cult", "city/b", Tolerated, (1300, 1400), None),
+        standing("cult", "city-b", Tolerated, (1300, 1400), None, None),
     ];
-    validate_legal_standings(&standings, std::slice::from_ref(&edict)).unwrap();
+    check_standings(&standings, std::slice::from_ref(&edict)).unwrap();
     let at = |jurisdiction: &str, year| {
         legal_status_at(
             &standings,
-            &ObjectRef::Entity("cult".into()),
-            &ObjectRef::Entity(jurisdiction.into()),
+            &guild_ref("cult"),
+            &guild_ref(jurisdiction),
             year,
         )
     };
     // Même sujet, même date, deux statuts ; intervalle semi-ouvert.
-    assert_eq!(at("city/a", 1349), Licit);
-    assert_eq!(at("city/a", 1350), Proscribed);
-    assert_eq!(at("city/b", 1350), Tolerated);
+    assert_eq!(at("city-a", 1349), Licit);
+    assert_eq!(at("city-a", 1350), Proscribed);
+    assert_eq!(at("city-b", 1350), Tolerated);
     // Aucune fiche dans une juridiction, ou hors de la période : licite.
-    assert_eq!(at("city/c", 1350), Licit);
-    assert_eq!(at("city/a", 1400), Licit);
+    assert_eq!(at("city-c", 1350), Licit);
+    assert_eq!(at("city-a", 1400), Licit);
     // Sujets légaux admis, juridiction qui gouverne seulement.
-    let mut activity = standings[2].clone();
-    activity.subject = ObjectRef::Activity("usury".into());
-    let mut person_slot = standings[2].clone();
-    person_slot.subject = ObjectRef::PersonSlot("slot/1".into());
-    validate_legal_standings(&[activity.clone()], &[]).unwrap();
-    validate_legal_standings(&[person_slot], &[]).unwrap();
-    let mut site_subject = activity.clone();
-    site_subject.subject = ObjectRef::Site("site/00".into());
-    let mut activity_jurisdiction = activity;
-    activity_jurisdiction.jurisdiction = ObjectRef::Activity("usury".into());
-    for invalid in [site_subject, activity_jurisdiction] {
-        assert_eq!(
-            validate_legal_standings(&[invalid], &[]).unwrap_err().code,
-            ErrorCode::InvalidLegalStanding
-        );
+    let rebuilt = |subject: ObjectRef, jurisdiction: ObjectRef| {
+        let mut s = standings[2].clone();
+        let id = SemanticAddress::standing(&region_owner(), &subject, &jurisdiction, 1300, 0);
+        s.id = id.unwrap().encode();
+        s.subject = subject;
+        s.jurisdiction = jurisdiction;
+        s
+    };
+    let usury = SemanticAddress::activity(WORLD, "usury").unwrap().encode();
+    let activity = ObjectRef::Activity(usury);
+    let site = SemanticAddress::site(WORLD, "site/00").unwrap().encode();
+    check_standings(&[rebuilt(activity.clone(), guild_ref("city"))], &[]).unwrap();
+    let slot = ObjectRef::PersonSlot(person_id("1"));
+    check_standings(&[rebuilt(slot, guild_ref("city"))], &[]).unwrap();
+    for invalid in [
+        rebuilt(ObjectRef::Site(site), guild_ref("city")),
+        rebuilt(guild_ref("cult"), activity),
+    ] {
+        refused_standings(&[invalid], &[], "type interdit");
     }
     // Conduite et légalité restent indépendantes : une résistance proscrite
     // peut être vertueuse.
@@ -1847,74 +2403,418 @@ fn legal_standing_is_relative_to_jurisdiction() {
         serde_json::from_value::<LegalStanding>(v.clone()).unwrap(),
         standings[0]
     );
-    let mut missing = v;
-    missing.as_object_mut().unwrap().remove("cause_event_id");
-    assert!(serde_json::from_value::<LegalStanding>(missing).is_err());
+    for field in ["cause_event_id", "end_cause_event_id"] {
+        let mut missing = v.clone();
+        missing.as_object_mut().unwrap().remove(field);
+        assert!(serde_json::from_value::<LegalStanding>(missing).is_err());
+    }
+}
+#[test]
+fn legal_standing_identity_is_proved_against_its_address() {
+    use LegalStatus::*;
+    let good = standing("cult", "city", Licit, (1300, 1400), None, None);
+    good.validate().unwrap();
+    let mut readable = good.clone();
+    readable.id = "a".into();
+    let mut other_kind = good.clone();
+    other_kind.id = guild("cult").encode();
+    let mut subject = good.clone();
+    subject.subject = guild_ref("autre");
+    let mut jurisdiction = good.clone();
+    jurisdiction.jurisdiction = guild_ref("autre");
+    let mut start = good.clone();
+    start.valid.start_year = 1301;
+    for invalid in [readable, other_kind, subject, jurisdiction, start] {
+        assert_eq!(
+            invalid.validate().unwrap_err().code,
+            ErrorCode::InvalidRecordIdentity
+        );
+        assert_eq!(
+            check_standings(&[invalid], &[]).unwrap_err().code,
+            ErrorCode::InvalidRecordIdentity
+        );
+    }
 }
 #[test]
 fn standing_change_cites_an_event() {
     use LegalStatus::*;
-    let of_kind = |id: &str, kind: &str, year| {
-        let mut e = event(id, year, EventPhase::InstitutionsAndVacancies, &[]);
-        e.kind = kind.into();
-        e
-    };
     for kind in LEGAL_CHANGE_EVENT_KINDS {
-        let events = [of_kind("cause", kind, 1350)];
+        let cause = legal_event(kind, 0, 1350);
         let chain = [
-            standing("a", "g", "j", Licit, (1300, 1350), None),
-            standing("b", "g", "j", Proscribed, (1350, 1400), Some("cause")),
+            standing("g", "j", Licit, (1300, 1350), None, None),
+            standing("g", "j", Proscribed, (1350, 1400), Some(&cause), None),
         ];
-        validate_legal_standings(&chain, &events).unwrap();
+        check_standings(&chain, std::slice::from_ref(&cause)).unwrap();
     }
-    let events = [
-        of_kind("edict", "edict", 1350),
-        of_kind("late", "charter", 1351),
-        of_kind("war", "war", 1350),
-    ];
-    let initial = standing("a", "g", "j", Licit, (1300, 1350), None);
+    let edict = legal_event("edict", 0, 1350);
+    let late = legal_event("charter", 1, 1351);
+    let war = legal_event("war", 2, 1350);
+    let absent = legal_event("edict", 9, 1350);
+    let events = [edict.clone(), late.clone(), war.clone()];
+    let initial = standing("g", "j", Licit, (1300, 1350), None, None);
     for (cause, message) in [
         (None, "sans événement"),
-        (Some("absent"), "événement absent"),
-        (Some("late"), "événement postérieur"),
-        (Some("war"), "autre type d'événement"),
+        (Some(&absent), "événement absent"),
+        (Some(&late), "événement postérieur"),
+        (Some(&war), "autre type d'événement"),
     ] {
-        let change = standing("b", "g", "j", Proscribed, (1350, 1400), cause);
-        assert_eq!(
-            validate_legal_standings(&[change, initial.clone()], &events)
-                .unwrap_err()
-                .code,
-            ErrorCode::InvalidLegalStanding,
-            "{message}"
-        );
+        let change = standing("g", "j", Proscribed, (1350, 1400), cause, None);
+        refused_standings(&[change, initial.clone()], &events, message);
     }
     // Deux statuts simultanés dans la même juridiction.
-    let overlap = standing("b", "g", "j", Proscribed, (1349, 1400), Some("edict"));
-    assert!(validate_legal_standings(&[initial.clone(), overlap], &events).is_err());
+    let overlap = standing("g", "j", Proscribed, (1349, 1400), Some(&edict), None);
+    let whole = standing("g", "j", Licit, (1300, 1349), None, None);
+    let mut overlapping = whole;
+    overlapping.valid.end_year = 1350;
+    refused_standings(&[overlapping, overlap], &events, "chevauchement");
     // Une autre juridiction ouvre sa propre chaîne, avec son état initial.
-    let elsewhere = standing("b", "g", "k", Proscribed, (1350, 1400), None);
-    validate_legal_standings(&[initial, elsewhere], &events).unwrap();
+    let elsewhere = standing("g", "k", Proscribed, (1300, 1400), None, None);
+    let whole = standing("g", "j", Licit, (1300, 1400), None, None);
+    check_standings(&[whole, elsewhere], &events).unwrap();
+}
+#[test]
+fn only_a_segment_starting_at_observed_start_may_have_no_cause() {
+    use LegalStatus::*;
+    let edict = legal_event("edict", 0, 1350);
+    let repeal = legal_event("charter", 1, 1360);
+    let events = [edict.clone(), repeal.clone()];
+    // Cas de la relecture : proscrit en 1350, sans cause, licite à nouveau en 1360.
+    refused_standings(
+        &[standing("g", "j", Proscribed, (1350, 1360), None, None)],
+        &events,
+        "premier segment tardif sans cause",
+    );
+    refused_standings(
+        &[standing("g", "j", Proscribed, (1350, 1400), None, None)],
+        &events,
+        "premier segment tardif sans cause, jusqu'à la fin du monde",
+    );
+    check_standings(
+        &[standing(
+            "g",
+            "j",
+            Proscribed,
+            (1350, 1400),
+            Some(&edict),
+            None,
+        )],
+        &events,
+    )
+    .unwrap();
+    // Hors de la période observée.
+    refused_standings(
+        &[standing("g", "j", Licit, (1299, 1400), None, None)],
+        &events,
+        "début avant l'observation",
+    );
+    refused_standings(
+        &[standing("g", "j", Licit, (1300, 1401), None, None)],
+        &events,
+        "fin après le monde",
+    );
+}
+#[test]
+fn a_segment_ending_early_or_before_a_gap_cites_an_end_event() {
+    use LegalStatus::*;
+    let edict = legal_event("edict", 0, 1350);
+    let repeal = legal_event("charter", 1, 1360);
+    let later = legal_event("charter", 2, 1361);
+    let trial = legal_event("heresy_trial", 3, 1370);
+    let war = legal_event("war", 4, 1360);
+    let events = [
+        edict.clone(),
+        repeal.clone(),
+        later.clone(),
+        trial.clone(),
+        war.clone(),
+    ];
+    // Fin avant celle du monde, sans successeur.
+    refused_standings(
+        &[standing(
+            "g",
+            "j",
+            Proscribed,
+            (1350, 1360),
+            Some(&edict),
+            None,
+        )],
+        &events,
+        "fin sans événement",
+    );
+    refused_standings(
+        &[standing("g", "j", Licit, (1300, 1360), None, None)],
+        &events,
+        "fin sans événement depuis l'état initial",
+    );
+    check_standings(
+        &[standing(
+            "g",
+            "j",
+            Proscribed,
+            (1350, 1360),
+            Some(&edict),
+            Some(&repeal),
+        )],
+        &events,
+    )
+    .unwrap();
+    // Trou entre segments.
+    let after_gap = standing("g", "j", Tolerated, (1370, 1400), Some(&trial), None);
+    refused_standings(
+        &[
+            standing("g", "j", Licit, (1300, 1360), None, None),
+            after_gap.clone(),
+        ],
+        &events,
+        "trou sans événement de fin",
+    );
+    check_standings(
+        &[
+            standing("g", "j", Licit, (1300, 1360), None, Some(&repeal)),
+            after_gap,
+        ],
+        &events,
+    )
+    .unwrap();
+    // Un événement de fin obéit aux mêmes règles qu'une cause.
+    let absent = legal_event("charter", 9, 1360);
+    for (end, message) in [
+        (&absent, "événement de fin absent"),
+        (&later, "événement de fin postérieur"),
+        (&war, "événement de fin d'un autre type"),
+    ] {
+        refused_standings(
+            &[standing("g", "j", Licit, (1300, 1360), None, Some(end))],
+            &events,
+            message,
+        );
+    }
+}
+fn social_entity(
+    address: &SemanticAddress,
+    kind: &str,
+    archetype: &str,
+    nature: EntityNature,
+    owner_scope: OwnerScope,
+) -> SocialEntity {
+    SocialEntity {
+        id: address.encode(),
+        semantic_address: address.clone(),
+        kind: kind.into(),
+        archetype_id: archetype.into(),
+        nature,
+        agency: Agency::Governed,
+        owner_scope,
+        existence: PERIOD,
+        culture_refs: vec![],
+        institution_ref: None,
+        provenance: provenance(),
+        name_tree: None,
+    }
+}
+fn guild_entity(slot: &str) -> SocialEntity {
+    social_entity(
+        &guild(slot),
+        "guild",
+        "base_association",
+        EntityNature::OrganizedGroup,
+        OwnerScope::cell("region"),
+    )
+}
+#[test]
+fn social_entity_identity_is_proved_against_its_address() {
+    let refused = |e: &SocialEntity| {
+        assert_eq!(
+            e.validate().unwrap_err().code,
+            ErrorCode::InvalidRecordIdentity,
+            "{e:?}"
+        );
+    };
+    let good = guild_entity("marchands");
+    good.validate().unwrap();
+    // Une guilde qui porte une adresse d'événement : le cas de la relecture.
+    let war = event_address("region", "war", 1350, 0);
+    refused(&social_entity(
+        &war,
+        "guild",
+        "base_association",
+        EntityNature::OrganizedGroup,
+        OwnerScope::cell("region"),
+    ));
+    let mut readable = good.clone();
+    readable.id = "entity/0".into();
+    refused(&readable);
+    let mut other_id = good.clone();
+    other_id.id = guild("autre").encode();
+    refused(&other_id);
+    let mut other_kind = good.clone();
+    other_kind.kind = "faction".into();
+    refused(&other_kind);
+    let mut other_owner = good.clone();
+    other_owner.owner_scope = OwnerScope::cell("region/north");
+    refused(&other_owner);
+    let mut person_nature = good.clone();
+    person_nature.nature = EntityNature::Person;
+    refused(&person_nature);
+    // Slot de groupe : son archétype est dans l'adresse.
+    let owner = Owner::domain(&domain_key());
+    let slot = SemanticAddress::group(&owner, "base_farm", 1300, 0).unwrap();
+    let nature = EntityNature::OrganizedGroup;
+    let group = social_entity(&slot, "farm", "base_farm", nature, owner.scope().clone());
+    group.validate().unwrap();
+    let mut other_archetype = group.clone();
+    other_archetype.archetype_id = "base_workshop".into();
+    refused(&other_archetype);
+    // Personne et ménage appartiennent à leur domaine.
+    let person_address = SemanticAddress::decode(&person_id("17")).unwrap();
+    let scope = owner.scope().clone();
+    let person = social_entity(
+        &person_address,
+        "person",
+        "person",
+        EntityNature::Person,
+        scope,
+    );
+    person.validate().unwrap();
+    let mut group_nature = person.clone();
+    group_nature.nature = EntityNature::OrganizedGroup;
+    refused(&group_nature);
+    let mut not_person = person;
+    not_person.kind = "guild".into();
+    refused(&not_person);
+    let household = SemanticAddress::household(&domain_key(), "singleton/1", 1300).unwrap();
+    let scope = owner.scope().clone();
+    let nature = EntityNature::Community;
+    let household = social_entity(&household, "household", "household_view", nature, scope);
+    household.validate().unwrap();
+    let mut not_household = household;
+    not_household.kind = "guild".into();
+    refused(&not_household);
+}
+#[test]
+fn history_event_identity_is_proved_against_its_address() {
+    let good = event("war", 1350, EventPhase::ContextAndShocks, &[]);
+    good.validate().unwrap();
+    let mut other_kind = good.clone();
+    other_kind.kind = "plague".into();
+    let mut other_owner = good.clone();
+    other_owner.owner_scope = OwnerScope::cell("region/north");
+    let mut readable = good.clone();
+    readable.id = "event/demo/plague".into();
+    let mut not_event = good.clone();
+    not_event.id = guild("a").encode();
+    for invalid in [other_kind, other_owner, readable, not_event] {
+        assert_eq!(
+            invalid.validate().unwrap_err().code,
+            ErrorCode::InvalidRecordIdentity
+        );
+        assert_eq!(
+            causal_ranks(&[invalid]).unwrap_err().code,
+            ErrorCode::InvalidRecordIdentity
+        );
+    }
+}
+fn assert_order_free<T: CanonicalRecord + std::fmt::Debug + PartialEq>(
+    mut items: Vec<T>,
+    shuffles: &[fn(&mut T)],
+) {
+    let reference = canonical_list_bytes(&items).unwrap();
+    for shuffle in shuffles {
+        let mut changed = items.clone();
+        shuffle(&mut changed[0]);
+        assert_ne!(changed, items, "liste interne à un seul élément");
+        assert_eq!(canonical_list_bytes(&changed).unwrap(), reference);
+    }
+    items.reverse();
+    assert_eq!(canonical_list_bytes(&items).unwrap(), reference);
+}
+#[test]
+fn social_lists_have_canonical_bytes_independent_of_their_order() {
+    let mut a = guild_entity("a");
+    a.culture_refs = vec!["culture/a".into(), "culture/b".into()];
+    assert_order_free(vec![a, guild_entity("b")], &[|e| e.culture_refs.reverse()]);
+    let mut state = entity_state("a", 1350);
+    state.capabilities = vec!["a".into(), "b".into()];
+    state.goals = vec!["a".into(), "b".into()];
+    state.assets = vec!["a".into(), "b".into()];
+    state.footprint_refs = vec!["a".into(), "b".into()];
+    assert_order_free(
+        vec![state, entity_state("a", 1351), entity_state("b", 1350)],
+        &[
+            |s| s.capabilities.reverse(),
+            |s| s.goals.reverse(),
+            |s| s.assets.reverse(),
+            |s| s.footprint_refs.reverse(),
+        ],
+    );
+    assert_order_free(
+        vec![
+            relation("a", "b", Predicate::Trusts),
+            relation("a", "c", Predicate::Trusts),
+        ],
+        &[],
+    );
+    let mut e = event("a", 1350, EventPhase::Deaths, &["b", "c"]);
+    e.participants = vec![guild_ref("a"), guild_ref("b")];
+    assert_order_free(
+        vec![e, event("b", 1350, EventPhase::Deaths, &[])],
+        &[|e| e.causes.reverse(), |e| e.participants.reverse()],
+    );
+    let mut p = person();
+    p.parent_refs = vec![
+        ParentRef::Slot {
+            person_id: person_id("1"),
+        },
+        ParentRef::Slot {
+            person_id: person_id("2"),
+        },
+    ];
+    p.union_refs = vec!["union/a".into(), "union/b".into()];
+    let mut other = person();
+    other.entity_id = person_id("18");
+    assert_order_free(
+        vec![p, other],
+        &[|p| p.parent_refs.reverse(), |p| p.union_refs.reverse()],
+    );
+    use LegalStatus::*;
+    assert_order_free(
+        vec![
+            standing("a", "j", Licit, (1300, 1400), None, None),
+            standing("b", "j", Licit, (1300, 1400), None, None),
+        ],
+        &[],
+    );
+}
+#[test]
+fn canonical_lists_are_sorted_by_id_and_keep_ordered_episodes() {
+    let (a, b) = (guild_entity("a"), guild_entity("b"));
+    let (first, second) = if a.id < b.id { (a, b) } else { (b, a) };
+    let bytes = canonical_list_bytes(&[second.clone(), first.clone()]).unwrap();
+    let value: Value = serde_json::from_slice(&bytes).unwrap();
+    assert_eq!(value[0]["id"], first.id);
+    assert_eq!(value[1]["id"], second.id);
+    // Les épisodes sont des listes ordonnées : leur ordre reste un fait.
+    let episode = |site: &str, start_year, end_year| ResidenceEpisode {
+        site_id: site.into(),
+        valid: TimeSpan {
+            start_year,
+            end_year,
+        },
+    };
+    let mut p = person();
+    p.residence_episodes = vec![episode("a", 1300, 1340), episode("b", 1340, 1356)];
+    let ordered = canonical_list_bytes(std::slice::from_ref(&p)).unwrap();
+    p.residence_episodes.reverse();
+    assert_ne!(canonical_list_bytes(&[p]).unwrap(), ordered);
 }
 fn entity_value() -> Value {
-    let address = event_address("region", "war", 1350, 0);
-    json!({
-        "id": "entity/0",
-        "semantic_address": address,
-        "kind": "guild",
-        "archetype_id": "base_workshop",
-        "nature": "organized_group",
-        "agency": "governed",
-        "owner_scope": "region",
-        "existence": {"start_year": 1300, "end_year": 1400},
-        "culture_refs": [],
-        "institution_ref": null,
-        "provenance": provenance(),
-    })
+    serde_json::to_value(guild_entity("marchands")).unwrap()
 }
 #[test]
 fn name_tree_is_absent_by_default_and_kept_as_opaque_canonical_json() {
     let entity: SocialEntity = serde_json::from_value(entity_value()).unwrap();
     assert_eq!(entity.name_tree, None);
+    entity.validate().unwrap();
     let v = serde_json::to_value(&entity).unwrap();
     assert!(v.get("name_tree").is_none());
     let tree = json!({"rule": "guild", "parts": [{"text": "Marchands", "rank": 2}, null, true]});

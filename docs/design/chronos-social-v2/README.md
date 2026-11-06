@@ -134,6 +134,8 @@ world / event_owner / event_kind / origin_block / ordinal
 
 Les IDs v2 sont **l’adresse complète**, encodée sans perte en base64url sans bourrage, préfixée par le type et un point (`event.Y2hy…`), caractère absent de l’alphabet base64url et sans ambiguïté de schéma dans une URL relative. Chaque objet possède une seule forme d’adresse : les champs d’un domaine ou d’un propriétaire sont toujours aplatis, et un champ littéral (`household`, `transfer`, `relation`, `group_slot`) n’admet que sa valeur. Encodage binaire : préfixe UTF-8 `chr2\0`, puis pour chaque champ sa longueur u32 little-endian et ses octets UTF-8. Les champs numériques sont des entiers décimaux normalisés. Leurs bornes maintiennent l’ID sous 4 096 caractères ; un dépassement est refusé. Aucun hash de 64 bits ne sert d’identité : il n’existe donc pas de collision historique cachée découverte seulement à la seconde visite.
 
+Un propriétaire s’écrit à plat derrière un discriminant : `world` sans autre champ, `cell` et l’ID de cellule, `site` et l’ID de site, `domain` puis région, profil et ordinal. `owner_scope`, `event_owner` et `owner` désignent cette forme dans toutes les adresses. Le discriminant fait partie de l’adresse : une cellule et un domaine de même libellé restent deux propriétaires. Les adresses dont le propriétaire est toujours un domaine (personne, ménage, plan, domaine) reprennent monde, région, profil et ordinal, sans discriminant. Dans les faits, `owner_scope` est ce type structuré sans le monde : l’atlas le porte aussi, et il est une entrée du canon, donc antérieur à tout `canon_id`.
+
 Le namespace d’une personne inclut son domaine et son plan fournisseur. Les migrations ne changent jamais cette adresse. Les anciens IDs v1 restent opaques dans l’adaptateur v1.
 
 Les adresses filles réutilisent les champs du préfixe sémantique, sans réencoder récursivement un ID parent complet comme champ. L’adresse d’une personne est aplatie en monde, domaine, algorithme fournisseur et ID local ; le manifeste mondial fixe son plan. Les objets persistants ne changent pas d’ID lorsque leur libellé ou résidence évolue.
@@ -175,8 +177,8 @@ SocialEntity
   id, semantic_address, kind, archetype_id
   nature: person | organized_group | community | category | population
   agency: none | individual | delegated | governed
-  owner_scope, existence: [start, end)
-  culture_refs[], institution_ref?, provenance
+  owner_scope: world | cell | site | domain, existence: [start, end)
+  culture_refs[], institution_ref?, provenance, name_tree?
 
 EntityState
   entity_id, at_year
@@ -198,9 +200,11 @@ PersonRecord
   entity_id, provider_ref, birth_year, death_year?
   parent_refs[], union_refs[], residence_episodes[]
   source: lineage_simulated | lineage_projected | procedural | author
-  ancestry_profile, social_attribute_episodes[], coverage
+  ancestry_profile, social_attribute_episodes[], observed_span
   alignment_episodes[]
 ```
+
+`name_tree` est l’arbre de nom du §23.3, valeur JSON opaque soumise au contrôle canonique, omise tant qu’aucun arbre n’existe. `observed_span` donne les années observées par le fournisseur, à ne pas confondre avec l’axe `coverage` du §4.3.
 
 L’entité est commune, mais la charge personnelle et les structures internes des groupes restent typées séparément. Les propriétés de sites et actifs sont reliées au graphe sans prétendre que toute montagne est un acteur social.
 
@@ -540,7 +544,7 @@ Les transferts exacts débitent et créditent les deux registres au même `Trans
 Transport proposé : processus enfant local, JSONL sur stdin/stdout, une enveloppe par ligne ; logs sur stderr. `Command` reçoit une liste d’arguments, jamais une commande shell construite par concaténation. Le chemin de l’interpréteur et la version installée sont configurés dans l’hôte.
 
 ```json
-{"protocol":"chronos-lineage-1","request_id":"req-17","method":"materialize","plan_id":"pop/demo/domain-0/v1","payload_ref":"plan-sha256"}
+{"protocol":"chronos-lineage-1","request_id":"req-17","method":"materialize","plan_id":"plan.Y2hy…","payload_ref":"plan-sha256"}
 ```
 
 `prepare` transmet le plan complet ; `materialize` réfère à cette même empreinte. Une réponse contient `request_id`, `ok`, `plan_id`, `result_fingerprint`, résultat ou erreur structurée. `request_id` ne participe à aucun tirage. Le résultat volumineux est un fichier JSON canonique UTF-8 `population-result-json-1` dans un répertoire temporaire propre au job. L’enveloppe JSONL porte `result_ref {relative_path, file_sha256, bytes, format}`. L’hôte vérifie que le chemin résolu reste dans ce répertoire, puis taille et empreinte avant de lire le fichier. Le worker publie le fichier atomiquement ; les durées restent dans les métriques de l’enveloppe, hors du fichier canonique. Les blocs binaires sont reportés à S8.
@@ -913,6 +917,8 @@ Les épisodes d’occupation ne se chevauchent pas et couvrent la période rési
 
 Un choc fourni est **déjà exposé au niveau local**. Le worker ne retire pas un deuxième tirage d’exposition. Les sites sont explicitement non vides dans sa liste ; aucune liste vide ne signifie implicitement « tout le monde ».
 
+`historical_program` est une liste explicitement ordonnée par `(année, phase, op_id)`, clé d’application et de normalisation. La phase découle du type d’opération : 10 pour `protect_person`, à sa date de début ; 30 pour `force_death` ; 40 pour `move_households` et `admit_people`.
+
 `move_households` déplace au plus le nombre de ménages disponibles dans le mode souple, et enregistre la réalisation. `protect_person`, `force_death` et `admit_people` nécessitent S6 et réfèrent à `fixed_people` ; les admissions sont préparées dans le plan, pas ajoutées pour réparer un total à la fin. `bridge_plan_id` est nul pour un port statistique et obligatoire pour un pont engagé.
 
 Les contraintes `population_at_date` sont des assertions en phase 80 après les opérations explicites. Les contraintes de décès sont en phase 30, avec base et mode additionnel ou remplacement déclarés. Le remplacement désactive les aléas de mortalité normale sur son ensemble avant la sélection, sans annuler une obligation biologique dure ; un conflit est refusé. Ces modes restent conditionnés aux capacités S6.
@@ -940,7 +946,17 @@ world / owner / group_slot / archetype / origin_block / ordinal
 world / domain / household / origin_union_or_singleton / creation_year
 world / owner / relation / predicate / subject_address / object_address / start_year / ordinal
 world / owner / transfer / origin / destination / effective_year / ordinal
+world / owner / standing / subject_address / jurisdiction_address / start_year / ordinal
+world / site_id
+world / activity_id
+world / owner / asset / asset_kind / origin_block / semantic_slot
+world / event_owner / event_kind / origin_block / ordinal / impact_slot
+world / event_owner / event_kind / origin_block / ordinal / impact_slot / target
 ```
+
+Les six dernières lignes adressent, dans l’ordre, statut légal, site, activité, actif, contrat d’impact et effet. Un `ObjectRef` a une seule forme canonique : une personne est un `person_slot`, une entité de type `office` un `office`, et une relation ou un statut relie deux `ObjectRef` adressables.
+
+Un contrat d’impact est fils de son événement parent. Un **effet** est l’exposition d’une cible à un contrat : fils du contrat, unique par cible, avec `target` écrite à plat, type puis champs sans le monde. Il partage donc canon et propriétaire avec son parent, et n’a pas de dimension annuelle. Les épisodes locaux du profil temporel (§7.2) sont des sous-slots de l’effet, ajoutés en S2 à la suite de son adresse : l’exposition tirée une fois garde son identité, chaque épisode a la sienne.
 
 Les préfixes communs des adresses d’extrémités sont factorisés, sans concaténation récursive d’IDs encodés. Une relation garde son ID lorsque son poids évolue dans des épisodes ; un changement de type ou un nouveau lien après rupture possède un nouvel ordinal.
 
@@ -1100,10 +1116,10 @@ Les libellés « mafia » et « lambda » s’appliquent aux groupes organisés 
 LegalStanding
   id, subject: ObjectRef, jurisdiction: ObjectRef
   status: licit | tolerated | proscribed
-  valid: [start, end), cause_event_id?, provenance, rule_id
+  valid: [start, end), cause_event_id?, end_cause_event_id?, provenance, rule_id
 ```
 
-Le sujet est une organisation, une activité ou une personne ; la juridiction est une institution ou un collectif gouvernant. Un même culte peut donc être licite ici et proscrit là, et un même groupe changer de statut quand le contrôle d’un site change. Tout changement après l’état initial cite un événement : `edict`, `charter`, `heresy_trial` ou `banishment`. Une personne `proscribed` dans une juridiction est hors-la-loi. L’absence de `LegalStanding` vaut `licit`.
+Le sujet est une organisation, une activité ou une personne ; la juridiction est une institution ou un collectif gouvernant. Un même culte peut donc être licite ici et proscrit là, et un même groupe changer de statut quand le contrôle d’un site change. Tout changement cite un événement : `edict`, `charter`, `heresy_trial` ou `banishment`. Par sujet et juridiction, seul un segment commençant à `observed_start`, début de la période observée, peut être sans cause ; tout autre début en cite une, y compris un premier segment tardif. Un segment qui finit avant la fin du monde sans successeur immédiat, ou avant un trou, cite son événement de fin dans `end_cause_event_id`. Une personne `proscribed` dans une juridiction est hors-la-loi. L’absence de `LegalStanding` vaut `licit`.
 
 **Légalité et conduite sont indépendantes.** Une entreprise licite peut être véreuse, une résistance proscrite peut être vertueuse. `visibility = covert` marque un groupe dont l’existence est cachée ; les façades légales d’un groupe criminel sont reportées après S5.
 

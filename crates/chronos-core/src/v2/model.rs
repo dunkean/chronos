@@ -1,4 +1,6 @@
 //! Faits, mesures et diagnostics v2 (§3–5, §7.3, §13, §27).
+use super::canonical::CanonicalRecord;
+use super::ids::{AddressKind, OwnerScope, SemanticAddress};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::collections::{BTreeMap, BTreeSet};
@@ -157,12 +159,12 @@ impl From<NameTree> for Value {
 #[serde(deny_unknown_fields)]
 pub struct SocialEntity {
     pub id: String,
-    pub semantic_address: super::ids::SemanticAddress,
+    pub semantic_address: SemanticAddress,
     pub kind: String,
     pub archetype_id: String,
     pub nature: EntityNature,
     pub agency: Agency,
-    pub owner_scope: String,
+    pub owner_scope: OwnerScope,
     pub existence: TimeSpan,
     pub culture_refs: Vec<String>,
     pub institution_ref: Option<String>,
@@ -174,6 +176,57 @@ pub struct SocialEntity {
         skip_serializing_if = "Option::is_none"
     )]
     pub name_tree: Option<NameTree>,
+}
+fn identity_error(owner: &str, at_year: i32, message: &str) -> HistoryError {
+    HistoryError {
+        owner: Some(owner.into()),
+        at_year: Some(at_year),
+        ..HistoryError::new(ErrorCode::InvalidRecordIdentity, message)
+    }
+}
+impl SocialEntity {
+    /// `id` décode en `semantic_address`, adresse d'une entité, d'un slot de
+    /// groupe, d'un ménage ou d'une personne, cohérente avec `kind`, `nature`,
+    /// `archetype_id` et `owner_scope`.
+    pub fn validate(&self) -> Result<(), HistoryError> {
+        let fail = |message: &str| identity_error(&self.id, self.existence.start_year, message);
+        let address = SemanticAddress::decode(&self.id).map_err(|_| fail("id non adressé"))?;
+        if address != self.semantic_address {
+            return Err(fail("id différent de semantic_address"));
+        }
+        if address.owner().as_ref().map(|o| o.scope()) != Some(&self.owner_scope) {
+            return Err(fail("owner_scope différent de l'adresse"));
+        }
+        let is_person = self.nature == EntityNature::Person;
+        let tail = address.owned_tail();
+        let coherent = match address.kind() {
+            AddressKind::Entity => !is_person && self.kind == tail[0],
+            AddressKind::Group => !is_person && self.archetype_id == tail[1],
+            AddressKind::Household => !is_person && self.kind == "household",
+            AddressKind::Person => is_person && self.kind == "person",
+            _ => false,
+        };
+        if !coherent {
+            return Err(fail("type d'adresse incompatible avec l'entité"));
+        }
+        // Seule une vie peut être un intervalle vide (§3.2).
+        self.existence
+            .validate(is_person)
+            .map_err(|e| HistoryError {
+                owner: Some(self.id.clone()),
+                at_year: Some(self.existence.start_year),
+                ..e
+            })
+    }
+}
+impl CanonicalRecord for SocialEntity {
+    type Key = String;
+    fn canonical_key(&self) -> String {
+        self.id.clone()
+    }
+    fn normalize(&mut self) {
+        self.culture_refs.sort();
+    }
 }
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -187,12 +240,47 @@ pub struct EntityState {
     pub wealth_index: i64,
     pub capabilities: Vec<String>,
     pub alignment: AlignmentAxes,
-    pub conduct_tags: BTreeSet<ConductTag>,
+    pub conduct_tags: BTreeSet<String>,
     pub visibility: Visibility,
     pub goals: Vec<String>,
     pub assets: Vec<String>,
     pub footprint_refs: Vec<String>,
     pub institution_version: String,
+}
+impl EntityState {
+    /// `conduct_tags` est le catalogue reçu : il évolue en donnée (§5.2).
+    pub fn validate(&self, conduct_tags: &BTreeSet<String>) -> Result<(), HistoryError> {
+        check_conduct_tags(&self.conduct_tags, conduct_tags).map_err(|mut e| {
+            e.owner = Some(self.entity_id.clone());
+            e.at_year = Some(self.at_year);
+            e
+        })
+    }
+}
+impl CanonicalRecord for EntityState {
+    type Key = (String, i32);
+    fn canonical_key(&self) -> Self::Key {
+        (self.entity_id.clone(), self.at_year)
+    }
+    fn normalize(&mut self) {
+        self.capabilities.sort();
+        self.goals.sort();
+        self.assets.sort();
+        self.footprint_refs.sort();
+    }
+}
+fn check_conduct_tags(
+    tags: &BTreeSet<String>,
+    catalogue: &BTreeSet<String>,
+) -> Result<(), HistoryError> {
+    if tags.is_subset(catalogue) {
+        Ok(())
+    } else {
+        Err(HistoryError::new(
+            ErrorCode::InvalidAlignment,
+            "tag de conduite absent du catalogue",
+        ))
+    }
 }
 string_enum!(Predicate {
     ComponentOf,
@@ -241,6 +329,46 @@ pub enum ObjectRef {
     PersonSlot(String),
     Activity(String),
 }
+impl ObjectRef {
+    /// Forme canonique : un type d'adresse donne une seule variante. Une personne
+    /// est un `PersonSlot`, une entité de type `office` un `Office`.
+    pub fn from_address(address: &SemanticAddress) -> Result<Self, HistoryError> {
+        let id = address.encode();
+        match address.kind() {
+            AddressKind::Entity if address.owned_tail()[0] == "office" => Ok(Self::Office(id)),
+            AddressKind::Entity | AddressKind::Group | AddressKind::Household => {
+                Ok(Self::Entity(id))
+            }
+            AddressKind::Person => Ok(Self::PersonSlot(id)),
+            AddressKind::Site => Ok(Self::Site(id)),
+            AddressKind::Asset => Ok(Self::Asset(id)),
+            AddressKind::Activity => Ok(Self::Activity(id)),
+            _ => Err(HistoryError::new(
+                ErrorCode::InvalidRecordIdentity,
+                "adresse qu'un ObjectRef ne désigne pas",
+            )),
+        }
+    }
+    /// Adresse désignée, refusée si la variante n'est pas sa forme canonique.
+    pub fn address(&self) -> Result<SemanticAddress, HistoryError> {
+        let id = match self {
+            Self::Entity(id)
+            | Self::Office(id)
+            | Self::Site(id)
+            | Self::Asset(id)
+            | Self::PersonSlot(id)
+            | Self::Activity(id) => id,
+        };
+        let address = SemanticAddress::decode(id)?;
+        if &Self::from_address(&address)? != self {
+            return Err(HistoryError::new(
+                ErrorCode::InvalidRecordIdentity,
+                "variante d'ObjectRef non canonique pour cette adresse",
+            ));
+        }
+        Ok(address)
+    }
+}
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct SocialRelation {
@@ -255,6 +383,32 @@ pub struct SocialRelation {
     pub cause_event_id: Option<String>,
     pub provenance: Provenance,
     pub rule_id: String,
+}
+impl SocialRelation {
+    /// `id` décode en adresse de relation portant les mêmes prédicat, extrémités
+    /// et début que l'enregistrement.
+    pub fn validate(&self) -> Result<(), HistoryError> {
+        let fail = |message: &str| identity_error(&self.id, self.valid.start_year, message);
+        let address = SemanticAddress::decode(&self.id).map_err(|_| fail("id non adressé"))?;
+        if address.kind() != AddressKind::Relation {
+            return Err(fail("id d'un autre type que relation"));
+        }
+        let link = address.link().ok_or_else(|| fail("relation illisible"))?;
+        if link.predicate != Some(self.predicate)
+            || ObjectRef::from_address(&link.subject).as_ref() != Ok(&self.subject)
+            || ObjectRef::from_address(&link.object).as_ref() != Ok(&self.object)
+            || link.start != self.valid.start_year
+        {
+            return Err(fail("relation différente de son adresse"));
+        }
+        Ok(())
+    }
+}
+impl CanonicalRecord for SocialRelation {
+    type Key = String;
+    fn canonical_key(&self) -> String {
+        self.id.clone()
+    }
 }
 string_enum!(PersonSource {
     LineageSimulated,
@@ -324,18 +478,30 @@ impl PersonRecord {
             && self.birth_year <= year
             && self.death_year.is_none_or(|d| year < d)
     }
-    /// Bornes des références parentales et épisodes d'alignement ordonnés. Un
+    /// `entity_id` est l'adresse de cette personne, et son ID local `provider_ref`.
+    /// Dates et références parentales bornées, épisodes d'alignement ordonnés : un
     /// épisode après le premier cite l'événement qui change les axes (§27.5).
-    pub fn validate(&self) -> Result<(), HistoryError> {
+    pub fn validate(&self, conduct_tags: &BTreeSet<String>) -> Result<(), HistoryError> {
         let fail = |code, message: &str| HistoryError {
             owner: Some(self.entity_id.clone()),
             at_year: Some(self.birth_year),
             ..HistoryError::new(code, message)
         };
+        let identity = ErrorCode::InvalidRecordIdentity;
+        let address = SemanticAddress::decode(&self.entity_id)
+            .map_err(|_| fail(identity, "entity_id non adressé"))?;
+        if address.kind() != AddressKind::Person || address.owned_tail()[1] != self.provider_ref {
+            return Err(fail(
+                identity,
+                "entity_id d'un autre type ou d'un autre slot",
+            ));
+        }
         let years = -MAX_ABS_YEAR..=MAX_ABS_YEAR;
         let parents: BTreeSet<_> = self.parent_refs.iter().map(ParentRef::id).collect();
         if !years.contains(&self.birth_year)
-            || self.death_year.is_some_and(|y| !years.contains(&y))
+            || self
+                .death_year
+                .is_some_and(|y| !years.contains(&y) || y < self.birth_year)
             || self.parent_refs.len() > MAX_PARENT_REFS
             || parents.len() != self.parent_refs.len()
             || !parents.iter().all(|id| super::atlas::valid_id(id))
@@ -345,11 +511,23 @@ impl PersonRecord {
                 "dates de vie ou références parentales hors bornes",
             ));
         }
+        for parent in &self.parent_refs {
+            if let ParentRef::Slot { person_id } = parent {
+                if SemanticAddress::decode(person_id).map(|a| a.kind()) != Ok(AddressKind::Person) {
+                    return Err(fail(identity, "parent de table non adressé"));
+                }
+            }
+        }
+        self.observed_span
+            .validate(true)
+            .map_err(|e| fail(e.code, &e.constraint))?;
         let mut previous_end = None;
         for episode in &self.alignment_episodes {
             episode
                 .valid
                 .validate(false)
+                .map_err(|e| fail(e.code, &e.constraint))?;
+            check_conduct_tags(&episode.conduct_tags, conduct_tags)
                 .map_err(|e| fail(e.code, &e.constraint))?;
             if previous_end.is_some_and(|end| episode.valid.start_year < end) {
                 return Err(fail(
@@ -366,6 +544,17 @@ impl PersonRecord {
             previous_end = Some(episode.valid.end_year);
         }
         Ok(())
+    }
+}
+
+impl CanonicalRecord for PersonRecord {
+    type Key = String;
+    fn canonical_key(&self) -> String {
+        self.entity_id.clone()
+    }
+    fn normalize(&mut self) {
+        self.parent_refs.sort_by(|a, b| a.id().cmp(b.id()));
+        self.union_refs.sort();
     }
 }
 
@@ -472,24 +661,13 @@ pub fn entity_conduct_class(
         EntityNature::Category | EntityNature::Population => None,
     }
 }
-// Variantes en ordre alphabétique : `BTreeSet` sérialise ainsi la liste dans
-// l'ordre canonique par ID (§4.2). Le catalogue fermé (§27.4) n'expose que les
-// tags que la spécification nomme ; S1 y ajoute les siens.
-string_enum!(ConductTag {
-    Blasphemy,
-    Charity,
-    Extortion,
-    Sorcery,
-    Usury,
-    Violence
-});
 string_enum!(Visibility { Open, Covert });
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct AlignmentEpisode {
     pub valid: TimeSpan,
     pub axes: AlignmentAxes,
-    pub conduct_tags: BTreeSet<ConductTag>,
+    pub conduct_tags: BTreeSet<String>,
     #[serde(deserialize_with = "required_nullable")]
     pub cause_event_id: Option<String>,
     pub provenance: Provenance,
@@ -511,8 +689,36 @@ pub struct LegalStanding {
     pub valid: TimeSpan,
     #[serde(deserialize_with = "required_nullable")]
     pub cause_event_id: Option<String>,
+    /// Événement de fin d'un segment sans successeur immédiat.
+    #[serde(deserialize_with = "required_nullable")]
+    pub end_cause_event_id: Option<String>,
     pub provenance: Provenance,
     pub rule_id: String,
+}
+impl LegalStanding {
+    /// `id` décode en adresse de statut portant le même sujet, la même
+    /// juridiction et le même début.
+    pub fn validate(&self) -> Result<(), HistoryError> {
+        let fail = |message: &str| identity_error(&self.id, self.valid.start_year, message);
+        let address = SemanticAddress::decode(&self.id).map_err(|_| fail("id non adressé"))?;
+        if address.kind() != AddressKind::Standing {
+            return Err(fail("id d'un autre type que statut légal"));
+        }
+        let link = address.link().ok_or_else(|| fail("statut illisible"))?;
+        if ObjectRef::from_address(&link.subject).as_ref() != Ok(&self.subject)
+            || ObjectRef::from_address(&link.object).as_ref() != Ok(&self.jurisdiction)
+            || link.start != self.valid.start_year
+        {
+            return Err(fail("statut différent de son adresse"));
+        }
+        Ok(())
+    }
+}
+impl CanonicalRecord for LegalStanding {
+    type Key = String;
+    fn canonical_key(&self) -> String {
+        self.id.clone()
+    }
 }
 
 /// Les valeurs numériques sont celles du contrat ; sérialisation JSON entière.
@@ -558,7 +764,7 @@ impl<'de> Deserialize<'de> for EventPhase {
 #[serde(deny_unknown_fields)]
 pub struct HistoryEvent {
     pub id: String,
-    pub owner_scope: String,
+    pub owner_scope: OwnerScope,
     pub kind: String,
     pub year: i32,
     /// Fin exclusive d'un événement-cadre ; `null` pour un événement daté.
@@ -568,6 +774,30 @@ pub struct HistoryEvent {
     pub causes: Vec<String>,
     pub participants: Vec<ObjectRef>,
     pub provenance: Provenance,
+}
+impl HistoryEvent {
+    /// `id` décode en adresse d'événement de ce type et de ce propriétaire.
+    pub fn validate(&self) -> Result<(), HistoryError> {
+        let fail = |message: &str| identity_error(&self.id, self.year, message);
+        let address = SemanticAddress::decode(&self.id).map_err(|_| fail("id non adressé"))?;
+        if address.kind() != AddressKind::Event
+            || address.owner().as_ref().map(|o| o.scope()) != Some(&self.owner_scope)
+            || address.owned_tail()[0] != self.kind
+        {
+            return Err(fail("événement différent de son adresse"));
+        }
+        Ok(())
+    }
+}
+impl CanonicalRecord for HistoryEvent {
+    type Key = String;
+    fn canonical_key(&self) -> String {
+        self.id.clone()
+    }
+    fn normalize(&mut self) {
+        self.causes.sort();
+        self.participants.sort();
+    }
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub enum ErrorCode {
@@ -589,9 +819,9 @@ pub enum ErrorCode {
     InvalidCausalOrder,
     CompositionCycle,
     InvalidImpactContract,
-    IncompleteCatalogue,
     InvalidAlignment,
     InvalidLegalStanding,
+    InvalidRecordIdentity,
 }
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]

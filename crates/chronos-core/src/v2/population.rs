@@ -5,7 +5,9 @@ use super::atlas::{
 };
 use super::canonical::canonical_bytes;
 use super::ids::{DomainKey, SemanticAddress};
-use super::model::{present_optional, required_nullable, ErrorCode, HistoryError, TimeSpan};
+use super::model::{
+    present_optional, required_nullable, ErrorCode, EventPhase, HistoryError, TimeSpan,
+};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::collections::{BTreeMap, BTreeSet};
@@ -470,12 +472,17 @@ pub struct PopulationPlan {
 }
 
 impl HistoricalOperation {
-    fn op_id(&self) -> &str {
+    /// Clé d'application et de normalisation du programme (§24.2) : année, phase
+    /// du §7.3, `op_id`. La phase découle du type d'opération.
+    pub fn application_key(&self) -> (i32, EventPhase, &str) {
         match self {
-            Self::MoveHouseholds { op_id, .. }
-            | Self::ProtectPerson { op_id, .. }
-            | Self::ForceDeath { op_id, .. }
-            | Self::AdmitPeople { op_id, .. } => op_id,
+            Self::ProtectPerson { op_id, valid, .. } => {
+                (valid.start_year, EventPhase::ContextAndShocks, op_id)
+            }
+            Self::ForceDeath { op_id, year, .. } => (*year, EventPhase::Deaths, op_id),
+            Self::MoveHouseholds { op_id, year, .. } | Self::AdmitPeople { op_id, year, .. } => {
+                (*year, EventPhase::Residences, op_id)
+            }
         }
     }
 }
@@ -512,7 +519,7 @@ pub fn plan_canonical_bytes(plan: &PopulationPlan) -> Result<Vec<u8>, HistoryErr
         }
     }
     p.historical_program
-        .sort_by(|a, b| a.op_id().cmp(b.op_id()));
+        .sort_by(|a, b| a.application_key().cmp(&b.application_key()));
     for role in &mut p.role_demands {
         role.status_ids.sort();
         role.activity_ids.sort();
@@ -556,6 +563,8 @@ pub struct PlanReferences {
     pub catalogue_fingerprints: CatalogueFingerprints,
     pub event_years: BTreeMap<String, i32>,
     pub office_ids: BTreeSet<String>,
+    /// Partition attendue, fixée au bootstrap (§3.1) : `domain_id` -> sites.
+    pub domain_sites: BTreeMap<String, BTreeSet<String>>,
     /// `mu_culture_id` -> famille et profil social résolus par S1.
     pub culture_variants: BTreeMap<String, CultureVariant>,
     pub activity_ids: BTreeSet<String>,
@@ -777,6 +786,17 @@ fn validate_plan_inner(p: &PopulationPlan, refs: &PlanReferences) -> Result<(), 
         return Err(invalid("identifiant local fournisseur dupliqué"));
     }
     let sites: BTreeSet<_> = p.settlements.iter().map(|s| s.site_id.as_str()).collect();
+    let expected = refs
+        .domain_sites
+        .get(&p.domain_id)
+        .ok_or_else(|| invalid("domaine absent de la partition"))?;
+    if !sites
+        .iter()
+        .copied()
+        .eq(expected.iter().map(String::as_str))
+    {
+        return Err(invalid("sites différents de la partition attendue"));
+    }
     let frames: BTreeSet<_> = p.settlements.iter().map(|s| &s.coordinate_frame).collect();
     if frames.len() != 1 {
         return Err(invalid("plusieurs référentiels dans un domaine"));

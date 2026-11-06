@@ -1,4 +1,6 @@
 //! Atlas régional figé : aucune partition démographique ni géométrie générée.
+use super::canonical::canonical_value_bytes;
+use super::ids::OwnerScope;
 use super::model::{
     required_nullable, string_enum, ErrorCode, HistoryError, TimeSpan, MAX_ABS_COORDINATE_MM,
     MAX_ABS_YEAR,
@@ -109,7 +111,7 @@ pub enum ContactEnd {
 #[serde(deny_unknown_fields)]
 pub struct ExternalContact {
     pub contact_id: String,
-    pub owner_scope: String,
+    pub owner_scope: OwnerScope,
     pub ends: [ContactEnd; 2],
     pub valid: TimeSpan,
 }
@@ -162,6 +164,22 @@ pub(crate) fn covers(spans: impl IntoIterator<Item = TimeSpan>, period: TimeSpan
     cursor == period.end_year
 }
 impl HistoryAtlas {
+    /// Octets canoniques (§4.2) : listes triées par ID, épisodes d'occupation
+    /// dans leur ordre. Les extrémités d'un contact sont déjà triées par `validate`.
+    pub fn canonical_bytes(&self) -> Result<Vec<u8>, HistoryError> {
+        let mut a = self.clone();
+        for cell in &mut a.cells {
+            cell.neighbors.sort();
+            cell.settlement_summary.site_ids.sort();
+        }
+        a.cells.sort_by(|x, y| x.cell_id.cmp(&y.cell_id));
+        a.region_ids.sort();
+        a.settlements.sort_by(|x, y| x.site_id.cmp(&y.site_id));
+        a.mobility_edges.sort_by(|x, y| x.edge_id.cmp(&y.edge_id));
+        a.external_contacts
+            .sort_by(|x, y| x.contact_id.cmp(&y.contact_id));
+        canonical_value_bytes(&a)
+    }
     /// Toute erreur porte l'atlas comme propriétaire et sa date d'ouverture,
     /// sauf si la contrainte a déjà désigné plus précis (§13).
     pub fn validate(&self) -> Result<(), HistoryError> {
@@ -300,8 +318,7 @@ impl HistoryAtlas {
         for c in &self.external_contacts {
             c.valid.validate(false)?;
             let [first, second] = &c.ends;
-            if !cells.contains_key(c.owner_scope.as_str())
-                || !self.timeline.encloses(c.valid)
+            if !self.timeline.encloses(c.valid)
                 // Tri strict : refuse aussi deux fois la même extrémité.
                 || first >= second
                 || !matches!(first, ContactEnd::Site(_))
@@ -329,9 +346,15 @@ impl HistoryAtlas {
             ContactEnd::Site(other) => other.site_id != side.site_id,
         };
         context_matches
-            && sites
-                .get(side.site_id.as_str())
-                .is_some_and(|s| self.cell_is_within(&s.cell_id, &contact.owner_scope))
+            && sites.get(side.site_id.as_str()).is_some_and(|s| {
+                match &contact.owner_scope {
+                    OwnerScope::World => true,
+                    OwnerScope::Cell { cell_id } => self.cell_is_within(&s.cell_id, cell_id),
+                    // Un contact relie plusieurs lieux : ni un site ni un domaine,
+                    // que l'atlas ignore, ne peuvent en être le propriétaire unique.
+                    OwnerScope::Site { .. } | OwnerScope::Domain { .. } => false,
+                }
+            })
             && valid_id(&side.external_context_id)
             && valid_id(&side.external_profile_id)
             && side.population_expected <= 1_000_000_000_000
