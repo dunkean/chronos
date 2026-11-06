@@ -129,7 +129,7 @@ export function createSheet(root, ctx) {
   function eventsBlock(e) {
     const evs = model.eventsFor(e.id);
     if (!evs.length) return null;
-    return section(t('sheet.events'), h('ul', { class: 's-rels' }, evs.map((ev) => h('li', null, `${ev.year} · `, link(ev.id, tk(ev, 'label'))))));
+    return section(t('sheet.events'), h('ul', { class: 's-rels' }, evs.map((ev) => h('li', null, `${ev.year} · `, link(ev.id, model.eventTitle(ev))))));
   }
 
   function officeBody(e, year) {
@@ -237,7 +237,7 @@ export function createSheet(root, ctx) {
     return [
       h('header', { class: 's-sheet-head' },
         h('p', { class: 's-kicker' }, `${eventKindLabel(ev.kind)} · ${ev.end_year > ev.year ? `${ev.year}–${ev.end_year}` : ev.year}`),
-        h('h2', null, tk(ev, 'label')), ev.description_key ? h('p', null, tk(ev, 'description')) : null,
+        h('h2', null, model.eventTitle(ev)), ev.description_key ? h('p', null, tk(ev, 'description')) : null,
         h('div', { class: 's-actions' }, h('button', { type: 'button', class: 'btn btn-quiet', onclick: () => state.set({ year: ev.year }) }, t('sheet.go_to_year', { year: ev.year })), explainButton(ev.id))),
       explainBox,
       ev.transition ? section(t('sheet.before_after'), h('p', { class: 's-dim' }, tk(ev.transition, 'label')),
@@ -247,7 +247,7 @@ export function createSheet(root, ctx) {
       section(t('sheet.cause_section'), chain.length
         ? h('ol', { class: 's-rels' }, chain.map((id) => h('li', null, `${model.events.get(id)?.year} · `, link(id))))
         : h('p', { class: 's-dim' }, t('sheet.root_event'))),
-      cons.length ? section(t('sheet.consequences'), h('ul', { class: 's-rels' }, cons.map((c) => h('li', null, `${c.year} · `, link(c.id, tk(c, 'label')))))) : null,
+      cons.length ? section(t('sheet.consequences'), h('ul', { class: 's-rels' }, cons.map((c) => h('li', null, `${c.year} · `, link(c.id, model.eventTitle(c)))))) : null,
       section(t('sheet.concerned'), h('ul', { class: 's-rels' }, ev.subject_ids.map((id) => h('li', null, link(id))))),
       provenanceBlock(ev.provenance),
     ];

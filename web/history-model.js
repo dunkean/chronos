@@ -135,9 +135,16 @@ export class Model {
     const e = this.byId.get(id);
     if (e) return e.kind === 'office' ? this.officeName(e) : nameOf(e);
     const ev = this.events.get(id);
-    if (ev) return tk(ev, 'label');
+    if (ev) return this.eventTitle(ev);
     const holder = this.holders.get(id);
     return holder ? nameOf(holder) : id;
+  }
+  // An event label is often only its kind ("Foundation"): name its single subject next to it.
+  eventTitle(ev) {
+    const label = tk(ev, 'label');
+    if (ev.subject_ids.length !== 1 || ev.label_params) return label;
+    const subject = this.byId.get(ev.subject_ids[0]);
+    return subject ? t('event.title_with_subject', { label, subject: this.name(subject.id) }) : label;
   }
   isSynthetic(id) { return !!this.byId.get(id)?.name_synthetic; }
   exists(id, y) {

@@ -74,7 +74,10 @@ export function createTimeline(root, ctx) {
     }
     const label = (txt, ypos, cls = 's-tl-label') => {
       const el = svg('text', { x: 6, y: ypos, class: cls });
-      el.textContent = txt;
+      // The label column is LEFT wide: cut long names with an ellipsis and keep the full name as a tooltip.
+      const MAXC = 31;
+      el.textContent = txt.length > MAXC ? `${txt.slice(0, MAXC - 1)}…` : txt;
+      if (txt.length > MAXC) { const ti = svg('title'); ti.textContent = txt; el.append(ti); }
       return el;
     };
     const bar = (a, b, ypos, fill, opts = {}) => {
@@ -107,11 +110,11 @@ export function createTimeline(root, ctx) {
           const col = EVENT_COLOR[ev.kind] ?? '#6b7d86';
           const cx = x(ev.year);
           const lane = (k++ % 2) * 14;
-          const g = svg('g', { class: 's-tl-ev' + (st.sel === ev.id ? ' is-sel' : ''), tabindex: 0, role: 'button', 'aria-label': `${ev.year}, ${tk(ev, 'label')}` });
+          const g = svg('g', { class: 's-tl-ev' + (st.sel === ev.id ? ' is-sel' : ''), tabindex: 0, role: 'button', 'aria-label': `${ev.year}, ${model.eventTitle(ev)}` });
           if (ev.end_year > ev.year) g.append(svg('rect', { x: cx, y: yy + 33, width: Math.max(3, x(ev.end_year + 1) - cx), height: 10, fill: col, opacity: 0.45, rx: 3 }));
           g.append(svg('line', { x1: cx, x2: cx, y1: yy + 38 - lane - 8, y2: yy + 38, stroke: col, 'stroke-width': 1 }));
           g.append(svg('circle', { cx, cy: yy + 38 - lane - 8, r: 5.5, fill: col }));
-          const ti = svg('title'); ti.textContent = `${ev.year} — ${tk(ev, 'label')}`; g.append(ti);
+          const ti = svg('title'); ti.textContent = `${ev.year} — ${model.eventTitle(ev)}`; g.append(ti);
           s.append(clickable(g, () => state.set({ sel: ev.id })));
         }
         continue;
@@ -182,7 +185,7 @@ export function createTimeline(root, ctx) {
     for (const ev of view.events) {
       tb.append(h('tr', { class: ev.id === st.sel ? 'is-sel' : '' },
         h('td', null, spanText(ev)), h('td', null, eventKindLabel(ev.kind)),
-        h('td', null, h('button', { type: 'button', class: 's-link', onclick: () => state.set({ sel: ev.id }) }, tk(ev, 'label'))),
+        h('td', null, h('button', { type: 'button', class: 's-link', onclick: () => state.set({ sel: ev.id }) }, model.eventTitle(ev))),
         h('td', null, ev.transition ? `${tv(ev.transition.before)} → ${tv(ev.transition.after)}` : '—')));
     }
     table.append(h('table', { class: 's-table' }, h('thead', null, h('tr', null,

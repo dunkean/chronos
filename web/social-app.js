@@ -149,11 +149,13 @@ async function main() {
   }
 
   const mayorOf = (year) => model.tenureAt(view.default_selection.office_id, year)?.person_id ?? '';
+  // The mayor of the year, or the mayoral office itself when nobody holds it that year.
+  const defaultFocus = (year) => mayorOf(year) || view.default_selection.office_id || '';
   $('btn-mayor').addEventListener('click', async () => {
     const year = view.default_selection.year ?? DEFAULT_YEAR;
     await ensureView(year, state.get().site || site);
     const id = mayorOf(year) || view.default_selection.office_id;
-    state.set({ year, sel: id, center: mayorOf(year), mode: 'social', classes: [], fam: [], depth: 1, strength: 0 });
+    state.set({ year, sel: id, center: id, mode: 'social', classes: [], fam: [], depth: 1, strength: 0 });
   });
   $('btn-mayor-year').addEventListener('click', () => {
     const id = mayorOf(ctx.year());
@@ -238,11 +240,20 @@ async function main() {
     if (!fixture && (st.site || site) && (st.site || site) !== view.scope.site_id) {
       // A new site: the view is replaced before anything is drawn.
       await ensureView(year, st.site || site);
+      // Nothing is selected in the new site: open its mayor, as on first load.
+      const id = !st.sel && !st.center ? defaultFocus(year) : '';
+      if (id) { last = { ...last, site: st.site }; state.set({ sel: id, center: id }); return; }
     }
     renderAll();
     if (!fixture) {
       const reloaded = await ensureView(year, st.site || site);
-      if (reloaded) renderAll();
+      if (reloaded) {
+        // The new window may not hold the focused entity any more: fall back to the mayor.
+        const gone = (id) => id && !model.get(id) && !model.events.has(id);
+        const id = gone(st.sel) || gone(st.center) ? defaultFocus(year) : '';
+        if (id) { state.set({ sel: gone(st.sel) ? id : st.sel, center: gone(st.center) ? id : st.center }); return; }
+        renderAll();
+      }
       if (st.center !== last.center || st.sel !== last.sel || year !== last.year || st.depth !== last.depth) {
         await expand(st.center || st.sel);
         if (st.sel && st.sel !== st.center) await expand(st.sel);
@@ -255,7 +266,7 @@ async function main() {
   // First paint: if the URL says nothing, open the mayor route.
   const s0 = state.get();
   if (!s0.sel && !s0.center) {
-    const id = mayorOf(ctx.year());
+    const id = defaultFocus(ctx.year());
     state.set({ sel: id, center: id });
   } else {
     renderAll();
