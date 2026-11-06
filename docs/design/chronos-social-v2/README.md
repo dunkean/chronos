@@ -30,7 +30,7 @@ Le prototype couvre familles et foyers, cercles d’amis, ateliers et fermes, as
 ### 1.3 Limites assumées de la première livraison
 
 - Pas de simulation politique exhaustive individu par individu, de moteur de dialogue ou de génération littéraire des faits.
-- Pas de réécriture Rust préalable de Lineage Lab.
+- Pas de réécriture Rust préalable de Lineage Lab. Le passage à Rust est décidé à terme (D12 du suivi), après S5 et sans date : il sera livré comme nouveau fournisseur versionné, sous le même contrat, avec de nouveaux canons.
 - Pas de généalogie individuelle complète pour chaque habitant sur plusieurs millénaires.
 - Les vies et unions du noyau sont simulées. Les unions et filiations de l’arrière-plan sont des projections approximatives ; ses ménages peuvent migrer dans le domaine grâce au registre prévu au §8.7. Noyau et arrière-plan n’échangent pas de conjoints dans S0–S5. Les mariages avec des individus extérieurs et le suivi exact entre domaines sont exclus avant le lot S7.
 - La projection démographique hybride garde ses limites explicites de profondeur et de biologie. Un profil non pris en charge produit une erreur de capacité dans S0–S5 ; le fournisseur démographique entièrement procédural sera livré en S8. La couche d’attributs sociaux procéduraux est, elle, requise dès S4.

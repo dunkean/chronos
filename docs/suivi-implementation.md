@@ -117,7 +117,7 @@ Statuts : `à faire`, `en cours`, `fait`, `bloqué (raison)`. Chaque tâche fini
 
 ### 7.1 Paliers Chronos (vision §7.6)
 
-Les paliers ci-dessous décrivent le plan antérieur. Pour démarrer l’implémentation sociale, suivre les lots S0–S8 du §7.4 et les arbitrages D6–D11.
+Les paliers ci-dessous décrivent le plan antérieur. Pour démarrer l’implémentation sociale, suivre les lots S0–S8 du §7.4 et les arbitrages D6–D12.
 
 **P0 — Modèle `SocialEntity`** : `à faire`. Preuve de sortie : même démo et mêmes invariants, sur le nouveau modèle.
 
@@ -200,6 +200,8 @@ La spécification est rédigée ; les statuts ci-dessous concernent uniquement l
 | S7 | Liaisons exactes d’acteurs nommés entre domaines | à faire |
 | S8 | Mesures, checkpoints, sélection paresseuse, grands sites, fournisseur démographique procédural, profils mixtes, nouveaux sites dynamiques et formats binaires éventuels | à faire |
 
+Après S5, à planifier : portage de Lineage Lab en Rust (D12), comme nouveau fournisseur démographique sous le même contrat.
+
 Première livraison utilisable : S0–S5. Les contraintes exactes avancées et les liaisons nominatives entre domaines sont des extensions identifiées. La source de vérité des contrats et critères de sortie est [le design](design/chronos-social-v2/README.md).
 
 ## 8. Décisions
@@ -218,6 +220,7 @@ Première livraison utilisable : S0–S5. Les contraintes exactes avancées et l
 | D9 | Domaine local fixe, horizon fixe, worker Python depuis l’hôte et paquets canoniques | choix technique proposé pour implémentation | Préserve le noyau pur et le rejeu |
 | D10 | Styles Magna Urbis regroupés en familles historiques avec variantes ; graphes interactifs et bilans dès le prototype | orientation validée par les commentaires utilisateur du 06/11 | Raccord et choix graphiques proposés dans le dossier |
 | D11 | Frontières statistiques dans S0–S5 ; suivi nominatif exact par contrat de liaison dans S7 | périmètre technique proposé | Limite déclarée, aucune fonctionnalité existante prétendue |
+| D12 | Lineage Lab reste en Python pour S0–S5 ; il devra passer en Rust à terme | **décidé** (Gregory, 06/11/2026) | Migration non planifiée, à placer après S5. Elle n'est pas un prérequis : la démographie reste derrière le contrat de fournisseur. Un moteur Rust sera un nouveau fournisseur versionné, donc de nouveaux canons, sans rejeu à l'identique des mondes Python |
 
 Pour S0–S5, D1/D2/D4 ne bloquent pas le développement : l’atlas et les géométries sont des exports figés, la fixture définit explicitement cellules/routes/sites, et aucun lien d’exécution nouveau avec Magna Urbis n’est requis. Ces décisions restent à résoudre pour les intégrations d’hôte ultérieures, sans inventer une seconde grille dans Chronos.
 
