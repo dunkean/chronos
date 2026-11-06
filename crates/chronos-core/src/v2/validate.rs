@@ -1,9 +1,9 @@
-//! Validation temporelle et des dépendances, sans génération implicite.
+//! Temporal and dependency validation, without implicit generation.
 use super::model::*;
 use std::collections::{BTreeMap, BTreeSet};
 
-/// Rangs intraphase construits par Kahn ; les IDs ne départagent que les
-/// nœuds disponibles. Une dépendance absente ou future est refusée.
+/// Intra-phase ranks built by Kahn's algorithm; IDs only break ties among
+/// available nodes. A missing or future dependency is rejected.
 pub fn causal_ranks(events: &[HistoryEvent]) -> Result<BTreeMap<String, u32>, HistoryError> {
     let mut by_id = BTreeMap::new();
     for e in events {
@@ -17,12 +17,12 @@ pub fn causal_ranks(events: &[HistoryEvent]) -> Result<BTreeMap<String, u32>, Hi
             return Err(event_error(
                 e,
                 ErrorCode::InvalidCausalOrder,
-                "événement dupliqué ou dates invalides",
+                "graph.event_invalid",
             ));
         }
     }
-    // Détecter aussi un cycle traversant plusieurs dates/phases avant de
-    // diagnostiquer une arête future : tout cycle porte le même code public.
+    // Also detect a cycle crossing several dates/phases before diagnosing a
+    // future edge: every cycle carries the same public code.
     let mut global_degree = BTreeMap::new();
     let mut global_children: BTreeMap<&str, BTreeSet<&str>> = BTreeMap::new();
     for e in events {
@@ -32,7 +32,7 @@ pub fn causal_ranks(events: &[HistoryEvent]) -> Result<BTreeMap<String, u32>, Hi
                 return Err(event_error(
                     e,
                     ErrorCode::InvalidCausalOrder,
-                    "cause absente ou dupliquée",
+                    "graph.cause_invalid",
                 ));
             }
             global_children.entry(cause).or_default().insert(&e.id);
@@ -48,7 +48,7 @@ pub fn causal_ranks(events: &[HistoryEvent]) -> Result<BTreeMap<String, u32>, Hi
     while let Some(id) = ready.pop_first() {
         visited += 1;
         for child in global_children.get(id).into_iter().flatten() {
-            let degree = global_degree.get_mut(child).expect("événement référencé");
+            let degree = global_degree.get_mut(child).expect("referenced event");
             *degree -= 1;
             if *degree == 0 {
                 ready.insert(*child);
@@ -59,7 +59,7 @@ pub fn causal_ranks(events: &[HistoryEvent]) -> Result<BTreeMap<String, u32>, Hi
         let id = global_degree
             .iter()
             .find(|(_, d)| **d > 0)
-            .expect("cycle non vide")
+            .expect("non-empty cycle")
             .0;
         return Err(event_error(
             by_id[id],
@@ -83,7 +83,7 @@ pub fn causal_ranks(events: &[HistoryEvent]) -> Result<BTreeMap<String, u32>, Hi
                     return Err(event_error(
                         e,
                         ErrorCode::InvalidCausalOrder,
-                        "cause dupliquée",
+                        "graph.cause_duplicated",
                     ));
                 }
                 let c = by_id.get(cause.as_str()).ok_or_else(|| {
@@ -116,7 +116,7 @@ pub fn causal_ranks(events: &[HistoryEvent]) -> Result<BTreeMap<String, u32>, Hi
             ranks.insert(id.to_owned(), rank);
             rank += 1;
             for child in children.get(id).into_iter().flatten() {
-                let degree = indegree.get_mut(child).expect("nœud du groupe");
+                let degree = indegree.get_mut(child).expect("group node");
                 *degree -= 1;
                 if *degree == 0 {
                     ready.insert(*child);
@@ -141,15 +141,15 @@ fn event_error(e: &HistoryEvent, code: ErrorCode, message: &str) -> HistoryError
     }
 }
 
-/// Composition stricte sur l'ensemble des épisodes ; les appartenances et
-/// affiliations n'ajoutent aucune arête de composition.
+/// Strict composition over the set of episodes; memberships and
+/// affiliations add no composition edge.
 pub fn validate_composition(relations: &[SocialRelation]) -> Result<(), HistoryError> {
     let mut edges: BTreeMap<&ObjectRef, BTreeSet<&ObjectRef>> = BTreeMap::new();
     let mut degree = BTreeMap::new();
     if !super::atlas::unique_ids(relations.iter().map(|r| r.id.as_str())) {
         return Err(HistoryError::new(
             ErrorCode::InvalidCanonicalValue,
-            "identité de relation invalide ou dupliquée",
+            "graph.relation_identity_invalid",
         ));
     }
     for r in relations {
@@ -158,7 +158,7 @@ pub fn validate_composition(relations: &[SocialRelation]) -> Result<(), HistoryE
         if r.weight_bps.is_some_and(|v| v > 10_000) || r.time_cost_bps.is_some_and(|v| v > 10_000) {
             return Err(HistoryError::new(
                 ErrorCode::InvalidCanonicalValue,
-                "poids de relation hors bps",
+                "graph.relation_weight_out_of_bps",
             ));
         }
         if r.predicate != Predicate::ComponentOf {
@@ -167,7 +167,7 @@ pub fn validate_composition(relations: &[SocialRelation]) -> Result<(), HistoryE
         degree.entry(&r.subject).or_insert(0usize);
         degree.entry(&r.object).or_insert(0usize);
         if edges.entry(&r.subject).or_default().insert(&r.object) {
-            *degree.get_mut(&r.object).expect("extrémité") += 1;
+            *degree.get_mut(&r.object).expect("endpoint") += 1;
         }
     }
     let mut ready: BTreeSet<_> = degree
@@ -179,7 +179,7 @@ pub fn validate_composition(relations: &[SocialRelation]) -> Result<(), HistoryE
     while let Some(id) = ready.pop_first() {
         visited += 1;
         for child in edges.get(id).into_iter().flatten() {
-            let d = degree.get_mut(child).expect("extrémité");
+            let d = degree.get_mut(child).expect("endpoint");
             *d -= 1;
             if *d == 0 {
                 ready.insert(*child);
@@ -189,13 +189,13 @@ pub fn validate_composition(relations: &[SocialRelation]) -> Result<(), HistoryE
     if visited != degree.len() {
         return Err(HistoryError::new(
             ErrorCode::CompositionCycle,
-            "cycle de composition stricte",
+            "graph.strict_composition_cycle",
         ));
     }
     Ok(())
 }
 
-/// Événements capables de changer un statut légal (§27.3).
+/// Events able to change a legal standing (§27.3).
 pub const LEGAL_CHANGE_EVENT_KINDS: [&str; 4] = ["edict", "charter", "heresy_trial", "banishment"];
 
 /// Life bounds of a group: `foundation` may open the first standing of a chain and
@@ -204,8 +204,8 @@ pub const LEGAL_CHANGE_EVENT_KINDS: [&str; 4] = ["edict", "charter", "heresy_tri
 pub const SUBJECT_FOUNDATION_EVENT_KIND: &str = "foundation";
 pub const SUBJECT_DISSOLUTION_EVENT_KIND: &str = "dissolution";
 
-/// Statut d'un sujet dans une juridiction à une date. L'absence de
-/// `LegalStanding` vaut `licit` ; une autre juridiction n'a aucun effet (§27.3).
+/// Standing of a subject in a jurisdiction at a date. The absence of a
+/// `LegalStanding` means `licit`; another jurisdiction has no effect (§27.3).
 pub fn legal_status_at(
     standings: &[LegalStanding],
     subject: &ObjectRef,
@@ -220,12 +220,12 @@ pub fn legal_status_at(
         .map_or(LegalStatus::Licit, |s| s.status)
 }
 
-/// Une chaîne par couple sujet/juridiction (§27.3). Seul un segment commençant
-/// à `observed_start` peut ne citer aucune cause : tout autre début est un
-/// changement, y compris un premier segment tardif. Un segment qui finit avant
-/// `world_end` sans successeur immédiat cite son événement de fin. Les causes
-/// sont de type `edict`, `charter`, `heresy_trial` ou `banishment`, sans être
-/// postérieures à la date qu'elles expliquent.
+/// One chain per subject/jurisdiction pair (§27.3). Only a segment starting
+/// at `observed_start` may cite no cause: any other start is a change,
+/// including a late first segment. A segment that ends before `world_end`
+/// without an immediate successor cites its end event. Causes are of type
+/// `edict`, `charter`, `heresy_trial` or `banishment`, and no later than the
+/// date they explain.
 ///
 /// Only exceptions: the subject's foundation for its first standing and its
 /// dissolution for its last one.
@@ -243,7 +243,7 @@ pub fn validate_legal_standings(
     if !super::atlas::unique_ids(standings.iter().map(|s| s.id.as_str())) {
         return Err(HistoryError::new(
             ErrorCode::InvalidLegalStanding,
-            "identité de statut légal invalide ou dupliquée",
+            "legal.identity_invalid",
         ));
     }
     let events: BTreeMap<_, _> = events.iter().map(|e| (e.id.as_str(), e)).collect();
@@ -251,14 +251,14 @@ pub fn validate_legal_standings(
     let check_cause = |s: &LegalStanding, id: &str, date: i32, life_kind: Option<&str>| {
         let event = events
             .get(id)
-            .ok_or_else(|| fail(s, "événement de changement absent"))?;
+            .ok_or_else(|| fail(s, "legal.change_event_missing"))?;
         let subject_life = life_kind == Some(event.kind.as_str())
             && event.year == date
             && event.participants.contains(&s.subject);
         if !subject_life
             && (!LEGAL_CHANGE_EVENT_KINDS.contains(&event.kind.as_str()) || event.year > date)
         {
-            return Err(fail(s, "événement d'un autre type ou postérieur"));
+            return Err(fail(s, "legal.event_wrong_type_or_late"));
         }
         Ok(())
     };
@@ -275,10 +275,10 @@ pub fn validate_legal_standings(
             ObjectRef::Entity(_) | ObjectRef::Activity(_) | ObjectRef::PersonSlot(_)
         ) || !matches!(s.jurisdiction, ObjectRef::Entity(_))
         {
-            return Err(fail(s, "sujet ou juridiction d'un type interdit"));
+            return Err(fail(s, "legal.subject_or_jurisdiction_forbidden"));
         }
         if s.valid.start_year < observed_start || s.valid.end_year > world_end {
-            return Err(fail(s, "statut hors de la période observée"));
+            return Err(fail(s, "legal.outside_observed_period"));
         }
         chains
             .entry((&s.subject, &s.jurisdiction))
@@ -290,7 +290,7 @@ pub fn validate_legal_standings(
         for (i, s) in chain.iter().enumerate() {
             let next_start = chain.get(i + 1).map(|next| next.valid.start_year);
             if next_start.is_some_and(|start| start < s.valid.end_year) {
-                return Err(fail(s, "statuts légaux chevauchants"));
+                return Err(fail(s, "legal.standings_overlap"));
             }
             match &s.cause_event_id {
                 Some(id) => {
@@ -298,7 +298,7 @@ pub fn validate_legal_standings(
                     check_cause(s, id, s.valid.start_year, life)?
                 }
                 None if s.valid.start_year != observed_start => {
-                    return Err(fail(s, "changement de statut sans événement"));
+                    return Err(fail(s, "legal.change_without_event"));
                 }
                 None => {}
             }
@@ -310,7 +310,7 @@ pub fn validate_legal_standings(
                     check_cause(s, id, s.valid.end_year, life)?
                 }
                 None if s.valid.end_year != next_start.unwrap_or(world_end) => {
-                    return Err(fail(s, "fin de statut sans événement"));
+                    return Err(fail(s, "legal.end_without_event"));
                 }
                 None => {}
             }

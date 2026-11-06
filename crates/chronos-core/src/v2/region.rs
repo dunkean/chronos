@@ -1,4 +1,4 @@
-//! Résolution d'exposition sur le catalogue canonique complet du propriétaire.
+//! Exposure resolution over the owner's complete canonical catalogue.
 use super::atlas::{ContactEnd, HistoryAtlas, SettlementAnchor};
 use super::canonical::canonical_value_bytes;
 use super::catalog::ArchetypeDefinition;
@@ -81,8 +81,8 @@ pub struct ImpactContract {
     pub cause: String,
 }
 impl ImpactContract {
-    /// `id` décode en adresse d'impact, fille de `parent_event_id` et portée par
-    /// `owner_scope`. Rend cette adresse, parente des effets.
+    /// `id` decodes to an impact address, child of `parent_event_id` and carried by
+    /// `owner_scope`. Returns this address, parent of the effects.
     pub fn validate(&self) -> Result<SemanticAddress, HistoryError> {
         let fail = |message: &str| HistoryError {
             owner: Some(self.owner_scope.to_string()),
@@ -92,20 +92,20 @@ impl ImpactContract {
         let impact = SemanticAddress::decode(&self.id)
             .ok()
             .filter(|a| a.kind() == AddressKind::Impact)
-            .ok_or_else(|| fail("id non adressé comme impact"))?;
+            .ok_or_else(|| fail("impact.id_not_impact"))?;
         if impact.parent_event().map(|e| e.encode()).as_ref() != Some(&self.parent_event_id) {
-            return Err(fail("impact étranger à son événement parent"));
+            return Err(fail("impact.foreign_parent_event"));
         }
         if impact.owner().as_ref().map(|o| o.scope()) != Some(&self.owner_scope) {
-            return Err(fail("owner_scope différent de l'adresse"));
+            return Err(fail("entity.owner_scope_differs"));
         }
         Ok(impact)
     }
 }
-/// Catalogue complet d'un propriétaire. Il n'a ni champ public ni `Deserialize`
-/// et ne se construit que depuis une source d'autorité du noyau, qui énumère
-/// elle-même les candidats : aucune liste n'est reçue de l'appelant. S0 n'a que
-/// l'atlas ; S2 ajoutera d'autres sources de la même façon.
+/// Complete catalogue of an owner. It has no public field and no `Deserialize`
+/// and is built only from an authoritative core source, which itself enumerates
+/// the candidates: no list is received from the caller. S0 has only the
+/// atlas; S2 will add other sources in the same way.
 ///
 /// ```compile_fail
 /// use chronos_core::v2::region::CompleteCandidateCatalogue;
@@ -118,8 +118,8 @@ pub struct CompleteCandidateCatalogue {
     candidates: BTreeMap<String, TimeSpan>,
 }
 impl CompleteCandidateCatalogue {
-    /// Sites du propriétaire dans l'atlas validé. Un domaine n'est pas connu de
-    /// l'atlas : sa partition appartient à S2.
+    /// Owner's sites in the validated atlas. A domain is not known to the
+    /// atlas: its partition belongs to S2.
     pub fn from_atlas(atlas: &HistoryAtlas, owner: &Owner) -> Result<Self, HistoryError> {
         atlas.validate()?;
         let fail = |code, message: &str| HistoryError {
@@ -139,12 +139,12 @@ impl CompleteCandidateCatalogue {
             OwnerScope::Domain { .. } => {
                 return Err(fail(
                     ErrorCode::UnsupportedCapability,
-                    "catalogue d'un domaine : partition S2",
+                    "target.domain_catalogue_partition",
                 ));
             }
         };
         if !known {
-            return Err(fail(ErrorCode::InvalidAtlas, "propriétaire absent"));
+            return Err(fail(ErrorCode::InvalidAtlas, "target.owner_missing"));
         }
         Ok(Self {
             owner: owner.clone(),
@@ -163,10 +163,10 @@ impl CompleteCandidateCatalogue {
 pub struct TargetImpact {
     pub target_id: String,
     pub event_id: String,
-    /// Effet propre à cette cible, fils de `event_id`.
+    /// Effect specific to this target, child of `event_id`.
     pub effect_id: String,
-    /// Mot aléatoire d'intensité, indépendant de l'exposition ; le profil
-    /// métier qui l'interprétera appartient à S2.
+    /// Random intensity word, independent of the exposure; the business profile
+    /// that will interpret it belongs to S2.
     pub intensity_draw: u64,
 }
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -179,7 +179,7 @@ impl ImpactResolution {
     pub fn for_target(&self, id: &str) -> Option<&TargetImpact> {
         self.targets.iter().find(|t| t.target_id == id)
     }
-    /// Projection seule : aucun tirage ni nouvelle résolution de quota.
+    /// Projection only: no draw and no new quota resolution.
     pub fn project<'a>(&'a self, ids: &BTreeSet<String>) -> Vec<&'a TargetImpact> {
         self.targets
             .iter()
@@ -187,9 +187,9 @@ impl ImpactResolution {
             .collect()
     }
 }
-/// Résout l'exposition sur tout le catalogue. En mode exact, K se calcule sur
-/// les candidats éligibles à `eligibility_time` et retenus par le sélecteur,
-/// jamais sur le catalogue brut : une fraction porte sur ce qui peut être touché.
+/// Resolves exposure over the whole catalogue. In exact mode, K is computed over
+/// the candidates eligible at `eligibility_time` and retained by the selector,
+/// never over the raw catalogue: a fraction applies to what can be affected.
 pub fn resolve_impact(
     seed: u64,
     contract: &ImpactContract,
@@ -211,11 +211,11 @@ pub fn resolve_impact(
     {
         return Err(fail(
             ErrorCode::UnsupportedCapability,
-            "exact démographique réservé à S6",
+            "target.exact_demographic_reserved",
         ));
     }
-    // Contrat et catalogue partagent canon et propriétaire ; les effets en
-    // héritent par leur adresse.
+    // Contract and catalogue share canon and owner; effects inherit them
+    // through their address.
     if !contract.valid.contains(contract.eligibility_time)
         || impact.owner().as_ref() != Some(&catalogue.owner)
         || contract.target != catalogue.target
@@ -230,7 +230,7 @@ pub fn resolve_impact(
     {
         return Err(fail(
             ErrorCode::InvalidImpactContract,
-            "contrat ou catalogue incompatible",
+            "target.contract_or_catalogue_incompatible",
         ));
     }
     if !matches!(contract.mode, ImpactMode::Probability { .. })
@@ -238,14 +238,14 @@ pub fn resolve_impact(
     {
         return Err(fail(
             ErrorCode::BudgetExceeded,
-            "catalogue exact au-delà de 100 000 candidats",
+            "target.catalogue_too_large",
         ));
     }
     if let TargetSelector::Ids(ids) = &contract.selector {
         if ids.iter().any(|id| !catalogue.candidates.contains_key(id)) {
             return Err(fail(
                 ErrorCode::InvalidImpactContract,
-                "sélecteur hors catalogue",
+                "target.selector_outside_catalogue",
             ));
         }
     }
@@ -266,7 +266,7 @@ pub fn resolve_impact(
         if probability_bps > 10_000 {
             return Err(fail(
                 ErrorCode::InvalidImpactContract,
-                "probabilité hors bps",
+                "target.probability_out_of_bps",
             ));
         }
         for id in candidates {
@@ -285,7 +285,10 @@ pub fn resolve_impact(
                 rounding,
             } => {
                 if *denominator == 0 || numerator > denominator {
-                    return Err(fail(ErrorCode::InvalidImpactContract, "fraction invalide"));
+                    return Err(fail(
+                        ErrorCode::InvalidImpactContract,
+                        "target.fraction_invalid",
+                    ));
                 }
                 let product = (candidates.len() as u128) * u128::from(*numerator);
                 match rounding {
@@ -297,7 +300,7 @@ pub fn resolve_impact(
                 if !candidates.contains(&target_ref) {
                     return Err(fail(
                         ErrorCode::ExactImpactInfeasible,
-                        "cible fixe inéligible",
+                        "target.fixed_target_ineligible",
                     ));
                 }
                 selected.push(target_ref);
@@ -308,7 +311,7 @@ pub fn resolve_impact(
         if k > candidates.len() as u128 {
             return Err(fail(
                 ErrorCode::ExactImpactInfeasible,
-                "K dépasse le catalogue éligible",
+                "target.k_exceeds_eligible",
             ));
         }
         if !matches!(contract.mode, ImpactMode::FixedTarget { .. }) {
@@ -1553,8 +1556,8 @@ mod tests {
     fn owner() -> Owner {
         Owner::cell("w", "region")
     }
-    // Construction directe, réservée à ce module : le budget se teste sans
-    // bâtir un atlas de 100 000 sites.
+    // Direct construction, reserved to this module: the budget can be tested without
+    // building an atlas of 100,000 sites.
     fn catalogue(n: usize) -> CompleteCandidateCatalogue {
         CompleteCandidateCatalogue {
             owner: owner(),
@@ -1615,8 +1618,8 @@ mod tests {
     }
     #[test]
     fn exact_count_is_taken_from_eligible_candidates_only() {
-        // Un seul des deux candidats existe à la date : K=2 est infaisable et
-        // une fraction d'un demi se calcule sur un seul éligible.
+        // Only one of the two candidates exists at the date: K=2 is infeasible and
+        // a fraction of one half is computed over a single eligible one.
         let mut full = catalogue(2);
         *full.candidates.values_mut().last().unwrap() = TimeSpan {
             start_year: 1360,

@@ -97,7 +97,7 @@ pub struct MobilityEdge {
     pub bidirectional: bool,
     pub mode: MobilityMode,
 }
-/// Côté local d'un contact : le site d'attache et ce qu'il voit au-delà.
+/// Local side of a contact: the attachment site and what it sees beyond.
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct ContactSiteEnd {
@@ -114,9 +114,9 @@ pub enum ContactEnd {
     Site(ContactSiteEnd),
     External { context_id: String },
 }
-/// Contact à propriétaire unique et à deux extrémités (§2.1, §7.1). Les deux
-/// côtés partagent cet ID ; chaque site d'attache peut y ouvrir son port (§12.2).
-/// Les extrémités sont triées : site avant extérieur, puis par ID.
+/// Contact with a single owner and two endpoints (§2.1, §7.1). Both sides
+/// share this ID; each attachment site may open its port on it (§12.2).
+/// Endpoints are sorted: site before outside, then by ID.
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct ExternalContact {
@@ -126,7 +126,7 @@ pub struct ExternalContact {
     pub valid: TimeSpan,
 }
 impl ExternalContact {
-    /// Extrémité ancrée à ce site, si le contact y aboutit.
+    /// Endpoint anchored at this site, if the contact ends there.
     pub fn site_end(&self, site_id: &str) -> Option<&ContactSiteEnd> {
         self.ends.iter().find_map(|end| match end {
             ContactEnd::Site(side) if side.site_id == site_id => Some(side),
@@ -148,8 +148,8 @@ pub struct HistoryAtlas {
     pub mobility_edges: Vec<MobilityEdge>,
     pub external_contacts: Vec<ExternalContact>,
 }
-/// IDs de catalogue et d'atlas : ASCII imprimable sans espace, comme les champs
-/// d'adresse qu'ils alimentent (§4.1), et au plus 4 096 octets.
+/// Catalogue and atlas IDs: printable ASCII without spaces, like the address
+/// fields they feed (§4.1), and at most 4,096 bytes.
 pub(crate) fn valid_id(id: &str) -> bool {
     !id.is_empty() && id.len() <= 4096 && id.bytes().all(|b| (0x21..=0x7e).contains(&b))
 }
@@ -164,7 +164,7 @@ pub(crate) fn valid_weights(weights: &BTreeMap<String, u32>) -> bool {
             .all(|(id, w)| valid_id(id) && *w <= 1_000_000)
         && weights.values().any(|w| *w > 0)
 }
-/// Épisodes ordonnés contigus, couvrant exactement l'intervalle fourni.
+/// Contiguous ordered episodes, covering exactly the given interval.
 pub(crate) fn covers(spans: impl IntoIterator<Item = TimeSpan>, period: TimeSpan) -> bool {
     let mut cursor = period.start_year;
     for s in spans {
@@ -176,8 +176,8 @@ pub(crate) fn covers(spans: impl IntoIterator<Item = TimeSpan>, period: TimeSpan
     cursor == period.end_year
 }
 impl HistoryAtlas {
-    /// Octets canoniques (§4.2) : listes triées par ID, épisodes d'occupation
-    /// dans leur ordre. Les extrémités d'un contact sont déjà triées par `validate`.
+    /// Canonical bytes (§4.2): lists sorted by ID, occupation episodes in their
+    /// own order. A contact's endpoints are already sorted by `validate`.
     pub fn canonical_bytes(&self) -> Result<Vec<u8>, HistoryError> {
         let mut a = self.clone();
         for cell in &mut a.cells {
@@ -192,8 +192,8 @@ impl HistoryAtlas {
             .sort_by(|x, y| x.contact_id.cmp(&y.contact_id));
         canonical_value_bytes(&a)
     }
-    /// Toute erreur porte l'atlas comme propriétaire et sa date d'ouverture,
-    /// sauf si la contrainte a déjà désigné plus précis (§13).
+    /// Every error carries the atlas as owner and its opening date, unless the
+    /// constraint has already designated something more precise (§13).
     pub fn validate(&self) -> Result<(), HistoryError> {
         self.validate_inner().map_err(|mut e| {
             e.owner.get_or_insert_with(|| self.atlas_id.clone());
@@ -213,7 +213,7 @@ impl HistoryAtlas {
             || !unique_ids(self.mobility_edges.iter().map(|e| e.edge_id.as_str()))
             || !unique_ids(self.external_contacts.iter().map(|c| c.contact_id.as_str()))
         {
-            return Err(bad("identité d'atlas vide, dupliquée ou trop longue"));
+            return Err(bad("atlas.bad_identity"));
         }
         let cells: BTreeMap<_, _> = self.cells.iter().map(|c| (c.cell_id.as_str(), c)).collect();
         let sites: BTreeMap<_, _> = self
@@ -227,7 +227,7 @@ impl HistoryAtlas {
                 .iter()
                 .any(|r| !cells.contains_key(r.as_str()))
         {
-            return Err(bad("région absente"));
+            return Err(bad("atlas.region_missing"));
         }
         for c in &self.cells {
             if c.area_m2 == 0
@@ -238,15 +238,17 @@ impl HistoryAtlas {
                 || !unique_ids(c.neighbors.iter().map(String::as_str))
                 || !unique_ids(c.settlement_summary.site_ids.iter().map(String::as_str))
             {
-                return Err(bad("cellule, surface, bornes ou catalogue invalides"));
+                return Err(bad("atlas.cell_invalid"));
             }
             let mut seen = BTreeSet::from([c.cell_id.as_str()]);
             let mut current = c;
             while let Some(p) = &current.parent_id {
                 if !seen.insert(p) {
-                    return Err(bad("cycle de cellules"));
+                    return Err(bad("atlas.cell_cycle"));
                 }
-                let parent = cells.get(p.as_str()).ok_or_else(|| bad("parent absent"))?;
+                let parent = cells
+                    .get(p.as_str())
+                    .ok_or_else(|| bad("atlas.parent_missing"))?;
                 if current.coordinate_frame != parent.coordinate_frame
                     || !parent
                         .bounds
@@ -255,7 +257,7 @@ impl HistoryAtlas {
                         .bounds
                         .contains(current.bounds.max_x_mm, current.bounds.max_y_mm)
                 {
-                    return Err(bad("enfant hors du référentiel ou des bornes du parent"));
+                    return Err(bad("atlas.child_out_of_bounds"));
                 }
                 current = parent;
             }
@@ -265,7 +267,7 @@ impl HistoryAtlas {
                         .get(n.as_str())
                         .is_some_and(|other| other.neighbors.contains(&c.cell_id))
                 {
-                    return Err(bad("voisinage absent ou non réciproque"));
+                    return Err(bad("atlas.neighbours_invalid"));
                 }
             }
             let expected: BTreeSet<_> = self
@@ -281,22 +283,22 @@ impl HistoryAtlas {
                     .map(String::as_str)
                     .collect()
             {
-                return Err(bad("catalogue de sites incomplet"));
+                return Err(bad("atlas.site_catalogue_incomplete"));
             }
             let total = expected
                 .iter()
                 .try_fold(0u64, |sum, id| {
                     sum.checked_add(sites[id].population_expected_max)
                 })
-                .ok_or_else(|| bad("population agrégée excessive"))?;
+                .ok_or_else(|| bad("atlas.population_excessive"))?;
             if total != c.settlement_summary.population_expected_max {
-                return Err(bad("résumé de population incohérent"));
+                return Err(bad("atlas.population_summary_inconsistent"));
             }
         }
         for s in &self.settlements {
             let c = cells
                 .get(s.cell_id.as_str())
-                .ok_or_else(|| bad("cellule de site absente"))?;
+                .ok_or_else(|| bad("atlas.site_cell_missing"))?;
             if c.coordinate_frame != s.coordinate_frame
                 || !c.bounds.contains(s.x_mm, s.y_mm)
                 || s.foundation_year < -MAX_ABS_YEAR
@@ -311,9 +313,7 @@ impl HistoryAtlas {
                         || !valid_weights(&e.activity_weights)
                 })
             {
-                return Err(bad(
-                    "ancrage, fondation ou épisodes invalides ; sites dynamiques non livrés",
-                ));
+                return Err(bad("atlas.anchor_invalid"));
             }
             if self
                 .region_ids
@@ -322,7 +322,7 @@ impl HistoryAtlas {
                 .count()
                 != 1
             {
-                return Err(bad("site sans région unique"));
+                return Err(bad("atlas.site_region_not_unique"));
             }
         }
         for e in &self.mobility_edges {
@@ -332,13 +332,13 @@ impl HistoryAtlas {
             c.valid.validate(false)?;
             let [first, second] = &c.ends;
             if !self.timeline.encloses(c.valid)
-                // Tri strict : refuse aussi deux fois la même extrémité.
+                // Strict sort: also rejects the same endpoint twice.
                 || first >= second
                 || !matches!(first, ContactEnd::Site(_))
                 || !self.contact_end_is_valid(c, first, second, &sites)
                 || !self.contact_end_is_valid(c, second, first, &sites)
             {
-                return Err(bad("contact extérieur ou voie d'accès invalide"));
+                return Err(bad("atlas.contact_invalid"));
             }
         }
         Ok(())
@@ -363,8 +363,8 @@ impl HistoryAtlas {
                 match &contact.owner_scope {
                     OwnerScope::World => true,
                     OwnerScope::Cell { cell_id } => self.cell_is_within(&s.cell_id, cell_id),
-                    // Un contact relie plusieurs lieux : ni un site ni un domaine,
-                    // que l'atlas ignore, ne peuvent en être le propriétaire unique.
+                    // A contact links several places: neither a site nor a domain, which the
+                    // atlas does not know, can be its single owner.
                     OwnerScope::Site { .. } | OwnerScope::Domain { .. } => false,
                 }
             })
@@ -413,7 +413,7 @@ impl HistoryAtlas {
         }
         best
     }
-    /// Recherche bornée même sur un atlas non validé.
+    /// Bounded search, even on an unvalidated atlas.
     pub fn cell_is_within(&self, cell: &str, ancestor: &str) -> bool {
         let mut current = cell;
         for _ in 0..=self.cells.len() {
@@ -522,7 +522,7 @@ pub(crate) fn validate_mobility_edge(
     {
         Err(HistoryError::new(
             ErrorCode::InvalidAtlas,
-            "liaison de mobilité invalide",
+            "atlas.mobility_link_invalid",
         ))
     } else {
         Ok(())

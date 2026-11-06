@@ -72,6 +72,22 @@ def canon(o):
     return json.dumps(o, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
 
 
+def is_text(o):
+    """Bilingual text: {"en": ..., "fr": ...}, English being the source."""
+    return isinstance(o, dict) and set(o) == {"en", "fr"}
+
+
+def localized(o, lang="fr"):
+    """Replaces every bilingual text by its `lang` string (the frozen baselines hold the French wording)."""
+    if is_text(o):
+        return o[lang]
+    if isinstance(o, dict):
+        return {k: localized(v, lang) for k, v in o.items()}
+    if isinstance(o, list):
+        return [localized(v, lang) for v in o]
+    return o
+
+
 def sha(s):
     return hashlib.sha256(s.encode("utf-8")).hexdigest()
 
@@ -847,12 +863,27 @@ def verify(root):
     need(base[:len(lb["base_archetype_ids"])] == lb["base_archetype_ids"], "base_archetype_ids: anciens identifiants modifies")
     cur_ovl = {o["id"]: o for o in cat["overlay_definitions"]}
     for o in lb["overlay_definitions"]:
-        need(cur_ovl.get(o["id"]) == o, f"ancien overlay modifie ou disparu : {o['id']}")
+        need(localized(cur_ovl.get(o["id"])) == o, f"ancien overlay modifie ou disparu : {o['id']}")
     for s in BASE_SECTIONS:
-        need(sha(canon(cat[s])) == lb["sections_sha256"][s], f"section {s} modifiee (79 raccords, 21 familles et inventaire doivent rester intacts)")
+        need(sha(canon(localized(cat[s]))) == lb["sections_sha256"][s], f"section {s} modifiee (79 raccords, 21 familles et inventaire doivent rester intacts)")
     ed_old = {k: v for k, v in cat["engine_defaults"].items() if k not in S1_ENGINE_KEYS}
-    need(sha(canon(ed_old)) == lb["engine_defaults_without_s1_keys_sha256"], "engine_defaults: valeurs anterieures modifiees")
+    need(sha(canon(localized(ed_old))) == lb["engine_defaults_without_s1_keys_sha256"], "engine_defaults: valeurs anterieures modifiees")
     end_group("anciens identifiants et sections inchangees (53 archetypes, 79 raccords, 21 familles)")
+
+    # ------------------------------------------------ 13. bilingual texts
+    def check_texts(o, path):
+        if isinstance(o, dict) and ("en" in o or "fr" in o) and set(o) <= {"en", "fr"}:
+            need(is_text(o) and all(isinstance(v, str) and v.strip() for v in o.values()), f"texte bilingue incomplet : {path}")
+        elif isinstance(o, dict):
+            for k, v in o.items():
+                check_texts(v, f"{path}/{k}")
+        elif isinstance(o, list):
+            for i, v in enumerate(o):
+                check_texts(v, f"{path}/{i}")
+    check_texts(cat, "")
+    for tag in cat["conduct_tag_definitions"]:
+        need(is_text(tag.get("label")) and is_text(tag.get("description")), f"conduct_tag {tag['id']}: label et description bilingues requis")
+    end_group("textes bilingues {en, fr}")
 
     info.update(defs=defs, aa=aa, cat=cat, cov=cov, fams=fams)
     return (1 if errors else 0), info

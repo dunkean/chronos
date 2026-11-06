@@ -1,4 +1,4 @@
-//! Contrats purs de Chronos social v2, indépendants du moteur v1.
+//! Pure contracts of Chronos social v2, independent of the v1 engine.
 pub mod atlas;
 pub mod canonical;
 pub mod catalog;

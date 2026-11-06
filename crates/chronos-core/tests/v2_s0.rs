@@ -1,4 +1,4 @@
-//! Régressions S0 : seed 42, chronos-social-2, schéma de plan 1.
+//! S0 regressions: seed 42, chronos-social-2, plan schema 1.
 use chronos_core::v2::{
     atlas::*,
     canonical::{canonical_bytes, canonical_list_bytes, CanonicalRecord},
@@ -11,14 +11,14 @@ use chronos_core::v2::{
 use serde_json::{json, Value};
 use std::collections::{BTreeMap, BTreeSet};
 
-/// Nom d'une liste et permutation qui la retourne.
+/// Name of a list and a permutation that reverses it.
 type Permutation<T> = (&'static str, fn(&mut T));
 const WORLD: &str = "canon-s0-seed42";
 const PERIOD: TimeSpan = TimeSpan {
     start_year: 1300,
     end_year: 1400,
 };
-/// Seuils du §27.2, recopiés ici : `engine_defaults.alignment` relève de S1.
+/// Thresholds of §27.2, copied here: `engine_defaults.alignment` belongs to S1.
 const THRESHOLDS: ConductThresholds = ConductThresholds {
     lawless_morality_max_bps: -6000,
     lawless_lawfulness_max_bps: -3000,
@@ -55,7 +55,7 @@ fn fact(
 fn event_id(name: &str) -> String {
     event_address("region", name, 0, 0).encode()
 }
-/// Événement de fixture : son nom est son type, ses causes sont d'autres noms.
+/// Fixture event: its name is its type, its causes are other names.
 fn event(name: &str, year: i32, phase: EventPhase, causes: &[&str]) -> HistoryEvent {
     let address = event_address("region", name, 0, 0);
     let causes = causes.iter().map(|c| event_id(c)).collect();
@@ -83,7 +83,7 @@ fn cell(id: &str, parent: Option<&str>, neighbors: &[&str], sites: Vec<String>) 
         },
     }
 }
-/// Une région et deux cellules filles, six sites dans chacune.
+/// One region and two child cells, six sites in each.
 fn fixture_atlas() -> HistoryAtlas {
     let settlements: Vec<_> = (0..12)
         .map(|i| SettlementAnchor {
@@ -355,8 +355,8 @@ fn owner_scope_has_four_typed_json_forms() {
 fn person_tenure_and_plan_have_one_identity_per_object() {
     let domain = domain_key();
     let person = SemanticAddress::person(&domain, "algo", "17").unwrap();
-    // Toute construction d'une même personne donne le même ID, et l'ancienne
-    // forme à portée jointe n'est plus une adresse.
+    // Every construction of the same person gives the same ID, and the former
+    // joined-scope form is no longer an address.
     assert_eq!(
         person,
         SemanticAddress::from_fields(AddressKind::Person, person.fields().to_vec()).unwrap()
@@ -401,7 +401,7 @@ fn canonical_json_refuses_every_shared_rejection_vector() {
     assert!(!rejections.is_empty());
     for r in rejections {
         let text = r["input_text"].as_str().unwrap();
-        // Refus au décodage du texte ou à la canonisation, jamais d'octets.
+        // Rejection at text decoding or at canonicalization, never bytes.
         if let Ok(value) = serde_json::from_str::<Value>(text) {
             assert!(canonical_bytes(&value).is_err(), "{}", r["name"]);
         }
@@ -445,14 +445,14 @@ fn count_measure_keeps_precision_and_coverage_separate_from_provenance() {
         serde_json::from_value::<CountMeasure>(v.clone()).unwrap(),
         measure
     );
-    // Valeur inconnue : `null` explicite, jamais un champ absent (§4.3).
+    // Unknown value: explicit `null`, never an absent field (§4.3).
     let mut missing = v;
     missing.as_object_mut().unwrap().remove("value");
     assert!(serde_json::from_value::<CountMeasure>(missing).is_err());
 }
-/// Preuve de sortie S0 (§20.2), seed 42, sans fournisseur : accès direct par
-/// cible et projection paginée d'une résolution indépendante donnent les mêmes
-/// faits, sur un événement-cadre, deux batailles filles et une épidémie.
+/// S0 exit proof (§20.2), seed 42, no provider: direct access by target and
+/// paged projection of an independent resolution give the same facts, over
+/// a frame event, two child battles and an epidemic.
 #[test]
 fn direct_event_lookup_matches_projection_without_provider() {
     let atlas = fixture_atlas();
@@ -499,7 +499,7 @@ fn direct_event_lookup_matches_projection_without_provider() {
             .filter(|s| atlas.cell_is_within(&s.cell_id, cell))
             .map(|s| s.site_id.clone())
             .collect();
-        // Accès direct : une question par site, exposé ou non.
+        // Direct access: one question per site, exposed or not.
         let catalogue = CompleteCandidateCatalogue::from_atlas(&atlas, &owner).unwrap();
         let resolution = resolve_impact(42, c, &catalogue).unwrap();
         for id in &ids {
@@ -514,7 +514,7 @@ fn direct_event_lookup_matches_projection_without_provider() {
             "{}",
             c.id
         );
-        // Projection : autre résolution, autre ordre d'atlas, pages inversées.
+        // Projection: another resolution, another atlas order, reversed pages.
         let catalogue = CompleteCandidateCatalogue::from_atlas(&reverse_atlas, &owner).unwrap();
         let resolution = resolve_impact(42, c, &catalogue).unwrap();
         for page in ids.chunks(2).rev() {
@@ -528,7 +528,7 @@ fn direct_event_lookup_matches_projection_without_provider() {
         }
     }
     assert_eq!(direct, projected);
-    // Un effet par cible et par événement, fils de son événement.
+    // One effect per target and per event, child of its event.
     let effects: BTreeSet<_> = direct.values().map(|(id, _)| id).collect();
     assert_eq!(effects.len(), direct.len());
     let draws: BTreeSet<_> = direct.values().map(|(_, draw)| draw).collect();
@@ -541,8 +541,8 @@ fn direct_event_lookup_matches_projection_without_provider() {
         assert_eq!(effect.owner(), parent.owner());
         assert!(by_id.contains_key(event_id.as_str()));
     }
-    // Parent et enfant restent deux faits : un même site touché par les deux
-    // porte deux effets et deux intensités.
+    // Parent and child remain two facts: a site hit by both
+    // carries two effects and two intensities.
     let on_war: BTreeSet<_> = direct
         .keys()
         .filter(|(e, _)| e == &war.encode())
@@ -552,7 +552,7 @@ fn direct_event_lookup_matches_projection_without_provider() {
     let shared = direct
         .iter()
         .find(|((e, site), _)| children.contains(e) && on_war.contains(site))
-        .expect("site exposé au parent et à un enfant");
+        .expect("site exposed to the parent and to a child");
     assert_ne!(&direct[&(war.encode(), shared.0 .1.clone())], shared.1);
     for child in [&battle_north, &battle_south] {
         assert_eq!(by_id[child.encode().as_str()].causes, [war.encode()]);
@@ -592,7 +592,7 @@ fn exact_impact_uses_full_candidate_set() {
     let c = contract(ImpactMode::ExactCount { count: 5 });
     let full = CompleteCandidateCatalogue::from_atlas(&atlas, &region_owner()).unwrap();
     let r = resolve_impact(42, &c, &full).unwrap();
-    // Classement refait ici sur les douze sites : priorité, puis ID.
+    // Ranking redone here over the twelve sites: priority, then ID.
     let mut ranked: Vec<_> = atlas
         .settlements
         .iter()
@@ -609,7 +609,7 @@ fn exact_impact_uses_full_candidate_set() {
     expected.sort();
     let selected: Vec<_> = r.targets.iter().map(|t| t.target_id.clone()).collect();
     assert_eq!(selected, expected);
-    // Toutes les paginations recomposent exactement le même résultat.
+    // All paginations recompose exactly the same result.
     let ids: Vec<_> = atlas
         .settlements
         .iter()
@@ -624,10 +624,10 @@ fn exact_impact_uses_full_candidate_set() {
             paged.extend(hits.into_iter().cloned());
         }
         paged.sort_by(|a, b| a.target_id.cmp(&b.target_id));
-        assert_eq!(paged, r.targets, "pages de {size}");
+        assert_eq!(paged, r.targets, "pages of {size}");
     }
-    // Un atlas tronqué ne produit aucun catalogue : la liste vient de l'autorité,
-    // et un résumé de cellule qui ne colle plus la fait refuser.
+    // A truncated atlas produces no catalogue: the list comes from the authority,
+    // and a cell summary that no longer matches makes it refuse.
     let mut truncated = atlas.clone();
     truncated.settlements.truncate(6);
     assert_eq!(
@@ -664,7 +664,7 @@ fn catalogue_enumerates_candidates_from_the_atlas_for_each_owner() {
             .unwrap_err()
             .code
     };
-    // La partition des domaines relève de S2 : l'atlas n'en sait rien.
+    // The partition of domains belongs to S2: the atlas knows nothing of it.
     assert_eq!(
         refused(&Owner::domain(&domain_key())),
         ErrorCode::UnsupportedCapability
@@ -691,7 +691,7 @@ fn impact_contract_identity_is_bound_to_parent_owner_and_catalogue() {
             ErrorCode::InvalidImpactContract
         );
     };
-    // `id` n'est pas une adresse d'impact, ou pas celle de ce parent.
+    // `id` is not an impact address, or not that of this parent.
     let mut readable = good.clone();
     readable.id = "impact/test/0".into();
     let mut event_as_id = good.clone();
@@ -704,12 +704,12 @@ fn impact_contract_identity_is_bound_to_parent_owner_and_catalogue() {
         assert!(c.validate().is_err());
         refused(c, &full);
     }
-    // Contrat cohérent en lui-même mais d'un autre canon que le catalogue.
+    // Contract consistent in itself but from another canon than the catalogue.
     let foreign = SemanticAddress::event(&Owner::cell("canon-autre", "region"), "war", 1350, 0);
     let foreign = contract_on("impact-0", &foreign.unwrap(), exact.clone());
     foreign.validate().unwrap();
     refused(&foreign, &full);
-    // Contrat cohérent d'un autre propriétaire que le catalogue.
+    // Contract consistent but from another owner than the catalogue.
     let north = event_address("region/north", "battle", 1350, 0);
     let north = contract_on("impact-0", &north, exact);
     north.validate().unwrap();
@@ -718,7 +718,7 @@ fn impact_contract_identity_is_bound_to_parent_owner_and_catalogue() {
     let north_catalogue = CompleteCandidateCatalogue::from_atlas(&atlas, &cell).unwrap();
     resolve_impact(42, &north, &north_catalogue).unwrap();
     refused(&good, &north_catalogue);
-    // Les effets partagent canon et propriétaire avec leur parent.
+    // Effects share canon and owner with their parent.
     for target in resolve_impact(42, &good, &full).unwrap().targets {
         let effect = SemanticAddress::decode(&target.effect_id).unwrap();
         assert_eq!(effect.owner(), Some(region_owner()));
@@ -727,8 +727,8 @@ fn impact_contract_identity_is_bound_to_parent_owner_and_catalogue() {
 }
 #[test]
 fn impact_draws_are_pinned_by_literal_values() {
-    // Oracle : port Python indépendant de keys.rs. Changer `exposure`,
-    // `priority`, `intensity` ou l'ordre des parties fait échouer ce test.
+    // Oracle: independent Python port of keys.rs. Changing `exposure`,
+    // `priority`, `intensity` or the order of the parts makes this test fail.
     let atlas = fixture_atlas();
     let full = CompleteCandidateCatalogue::from_atlas(&atlas, &region_owner()).unwrap();
     let selected = |mode| {
@@ -818,7 +818,7 @@ fn probability_impact_uses_independent_exposure_and_separate_intensity_keys() {
     });
     let full = CompleteCandidateCatalogue::from_atlas(&atlas, &region_owner()).unwrap();
     let result = resolve_impact(42, &c, &full).unwrap();
-    // On vérifie chaque Bernoulli ; aucune assertion de quota sur la somme.
+    // Each Bernoulli is checked; no quota assertion on the sum.
     for s in atlas.settlements {
         let exposed =
             random_semantics_v2::uniform_below(42, &[&c.id, &s.site_id, "exposure"], 0, 10_000)
@@ -1043,8 +1043,8 @@ fn relation_constructor_accepts_every_addressable_object_ref() {
         assert_eq!(&object.address().unwrap(), &parts.object);
         assert_eq!(parts.start, 1300);
     }
-    // Une forme canonique par objet : un office, une personne ou un site
-    // déguisés sous une autre variante sont refusés.
+    // One canonical form per object: an office, a person or a site
+    // disguised under another variant are rejected.
     for invalid in [
         ObjectRef::Entity(office.encode()),
         ObjectRef::Entity(person_id("1")),
@@ -1218,7 +1218,7 @@ fn population_example_identity_is_derived_from_its_domain() {
     assert_eq!(domain.society(), p.demography_society_id);
     assert_eq!(domain.ordinal(), 0);
     assert_eq!(SemanticAddress::plan(&domain).unwrap().encode(), p.plan_id);
-    // Oracle : port Python indépendant de keys.rs.
+    // Oracle: independent Python port of keys.rs.
     assert_eq!(p.seed, "5854947233154073793");
 }
 #[test]
@@ -1290,18 +1290,18 @@ fn plan_is_bound_to_the_canon_and_the_world_horizon() {
     let mut refs = good.clone();
     refs.world_seed += 1;
     invalid_plan(&p, &refs);
-    // Seul le plan change de graine mondiale, références intactes : `seed` reste
-    // cohérent avec les références, seule la comparaison explicite le refuse.
+    // Only the plan changes world seed, references untouched: `seed` stays
+    // consistent with the references, only the explicit comparison rejects it.
     let mut q = p.clone();
     q.world_seed = "43".into();
     invalid_plan(&q, &good);
-    // Horizon plus long ou plus court que le plan : jamais un plan partiel.
+    // Horizon longer or shorter than the plan: never a partial plan.
     for end_year in [1399, 1401] {
         let mut refs = good.clone();
         refs.timeline.end_year = end_year;
         invalid_plan(&p, &refs);
     }
-    // plan_id étranger : autre ordinal, forme lisible, type d'adresse erroné.
+    // Foreign plan_id: another ordinal, readable form, wrong address type.
     let domain = DomainKey::from_id(&p.domain_id).unwrap();
     let other = DomainKey::new(domain.world(), domain.region(), domain.society(), 1).unwrap();
     for plan_id in [
@@ -1313,8 +1313,8 @@ fn plan_is_bound_to_the_canon_and_the_world_horizon() {
         q.plan_id = plan_id;
         invalid_plan(&q, &good);
     }
-    // Domaine cohérent avec le plan_id mais d'un autre monde ou d'un autre
-    // profil, graine recalculée : la cohérence interne ne suffit pas.
+    // Domain consistent with the plan_id but from another world or another
+    // profile, seed recomputed: internal consistency is not enough.
     for foreign in [
         DomainKey::new("canon-autre", domain.region(), domain.society(), 0).unwrap(),
         DomainKey::new(domain.world(), domain.region(), "society/autre", 0).unwrap(),
@@ -1326,8 +1326,8 @@ fn plan_is_bound_to_the_canon_and_the_world_horizon() {
     let mut q = p.clone();
     q.domain_id = "domain/demo/0".into();
     invalid_plan(&q, &good);
-    // Mêmes sites sous un autre ordinal : la partition attendue le refuse, et
-    // elle seule, car ce plan est par ailleurs entièrement cohérent.
+    // Same sites under another ordinal: the expected partition rejects it, and
+    // it alone, because this plan is otherwise fully consistent.
     let mut q = p.clone();
     with_plan_identity(&mut q, &other);
     invalid_plan(&q, &good);
@@ -1335,7 +1335,7 @@ fn plan_is_bound_to_the_canon_and_the_world_horizon() {
     moved.domain_sites =
         BTreeMap::from([(q.domain_id.clone(), good.domain_sites[&p.domain_id].clone())]);
     validate_plan(&q, &moved).unwrap();
-    // Domaine connu mais sites différents, dans un sens ou dans l'autre.
+    // Known domain but different sites, in either direction.
     let mut fewer = good.clone();
     fewer
         .domain_sites
@@ -1360,20 +1360,20 @@ fn capability_error(p: &PopulationPlan, refs: &PlanReferences) {
 fn mixed_society_profiles_are_refused_as_a_capability() {
     let p = example();
     let refs = references(&p);
-    // Variante principale d'un autre profil, y compris sans poids d'épisode.
+    // Main variant of another profile, including without episode weight.
     let mut mixed = refs.clone();
     mixed.culture_variants.insert(
         "bastide".into(),
         variant("agrarian_estates", "society/other"),
     );
     capability_error(&p, &mixed);
-    // Variante secondaire de poids positif d'un épisode.
+    // Secondary variant with positive weight in an episode.
     let mut q = p.clone();
     q.settlements[0].occupation_episodes[0]
         .culture_weights
         .insert("other-culture".into(), 1);
     capability_error(&q, &refs);
-    // Changement culturel porté par un épisode ultérieur.
+    // Cultural change carried by a later episode.
     let mut q = p.clone();
     let site = &mut q.settlements[1];
     let mut later = site.occupation_episodes[0].clone();
@@ -1392,14 +1392,14 @@ fn zero_weight_variant_does_not_need_the_domain_profile() {
         .culture_weights
         .insert("other-culture".into(), 0);
     validate_plan(&q, &refs).unwrap();
-    // Toutes les variantes de poids positif partagent le profil : accepté.
+    // All variants with positive weight share the profile: accepted.
     let mut q = p.clone();
     q.settlements[0].occupation_episodes[0]
         .culture_weights
         .insert("bastide".into(), 500);
     validate_plan(&q, &refs).unwrap();
-    // Même de poids nul, une variante absente du raccord reste une référence
-    // cassée, pas une question de capacité.
+    // Even with zero weight, a variant absent from the binding remains a
+    // broken reference, not a capability question.
     let mut q = p;
     q.settlements[0].occupation_episodes[0]
         .culture_weights
@@ -1425,7 +1425,7 @@ fn principal_variant_must_belong_to_its_declared_family() {
         );
     }
 }
-/// Toutes les listes triées du plan portent au moins deux éléments distincts.
+/// All sorted lists of the plan carry at least two distinct elements.
 fn plan_with_full_lists() -> PopulationPlan {
     let mut p = example();
     let profiles = &mut p.resolved_profiles;
@@ -1494,18 +1494,16 @@ fn plan_canonical_bytes_do_not_depend_on_any_sorted_list_order() {
     let p = plan_with_full_lists();
     let reference = plan_canonical_bytes(&p).unwrap();
     let permutations: [Permutation<PopulationPlan>; 21] = [
-        ("capacités", |p| p.provider.capabilities.reverse()),
+        ("capabilities", |p| p.provider.capabilities.reverse()),
         ("ascendances", |p| p.resolved_profiles.ancestries.reverse()),
         ("classes", |p| p.resolved_profiles.social_classes.reverse()),
-        ("profils extérieurs", |p| {
-            p.resolved_profiles.external.reverse()
-        }),
-        ("parentés", |p| p.resolved_profiles.kinship.reverse()),
+        ("outer profiles", |p| p.resolved_profiles.external.reverse()),
+        ("kinships", |p| p.resolved_profiles.kinship.reverse()),
         ("sites", |p| p.settlements.reverse()),
         ("marqueurs", |p| p.baseline_markers.reverse()),
         ("chocs", |p| p.shocks.reverse()),
-        ("sites d'un choc", |p| p.shocks[0].site_ids.reverse()),
-        ("opérations", |p| p.historical_program.reverse()),
+        ("sites of a shock", |p| p.shocks[0].site_ids.reverse()),
+        ("operations", |p| p.historical_program.reverse()),
         ("personnes admises", |p| {
             for op in &mut p.historical_program {
                 if let HistoricalOperation::AdmitPeople { person_ids, .. } = op {
@@ -1513,24 +1511,24 @@ fn plan_canonical_bytes_do_not_depend_on_any_sorted_list_order() {
                 }
             }
         }),
-        ("rôles", |p| p.role_demands.reverse()),
-        ("statuts d'un rôle", |p| {
+        ("roles", |p| p.role_demands.reverse()),
+        ("statuses of a role", |p| {
             p.role_demands[0].status_ids.reverse()
         }),
-        ("activités d'un rôle", |p| {
+        ("activities of a role", |p| {
             p.role_demands[1].activity_ids.reverse()
         }),
-        ("personnes fixées", |p| p.fixed_people.reverse()),
-        ("parents d'une personne", |p| {
+        ("fixed people", |p| p.fixed_people.reverse()),
+        ("parents of a person", |p| {
             p.fixed_people[0].parent_ids.reverse()
         }),
         ("contraintes", |p| p.exact_constraints.reverse()),
-        ("sites d'une contrainte", |p| {
+        ("sites of a constraint", |p| {
             p.exact_constraints[0].site_ids.reverse()
         }),
         ("ports", |p| p.boundary_ports.reverse()),
         ("routes", |p| p.mobility_edges.reverse()),
-        ("tout à la fois", |p| {
+        ("all at once", |p| {
             p.settlements.reverse();
             p.boundary_ports.reverse();
             p.resolved_profiles.ancestries.reverse();
@@ -1539,7 +1537,7 @@ fn plan_canonical_bytes_do_not_depend_on_any_sorted_list_order() {
     for (name, permute) in permutations {
         let mut q = p.clone();
         permute(&mut q);
-        assert_ne!(q, p, "{name} : liste à un seul élément");
+        assert_ne!(q, p, "{name}: single-element list");
         assert_eq!(plan_canonical_bytes(&q).unwrap(), reference, "{name}");
     }
 }
@@ -1555,7 +1553,7 @@ fn plan_canonical_bytes_exclude_identity_fields_and_keep_ordered_lists() {
     q.plan_id = "plan.autre".into();
     q.plan_fingerprint = "autre".into();
     assert_eq!(plan_canonical_bytes(&q).unwrap(), reference);
-    // Listes triées par octets UTF-8 dans le résultat.
+    // Lists sorted by UTF-8 bytes in the result.
     let ids: Vec<_> = value["resolved_profiles"]["social_classes"]
         .as_array()
         .unwrap()
@@ -1564,11 +1562,11 @@ fn plan_canonical_bytes_exclude_identity_fields_and_keep_ordered_lists() {
         .collect();
     assert_eq!(ids, ["commoner", "elite", "notable", "skilled"]);
     assert_eq!(value["provider"]["capabilities"][0], "candidate_slots_v1");
-    // Un vrai changement de fait change les octets.
+    // A real change of fact changes the bytes.
     let mut q = p.clone();
     q.settlements[0].initial_population += 1;
     assert_ne!(plan_canonical_bytes(&q).unwrap(), reference);
-    // Une liste ordonnée n'est pas retriée : l'ordre des épisodes reste un fait.
+    // An ordered list is not re-sorted: the order of episodes remains a fact.
     let mut q = p;
     let site = &mut q.settlements[0];
     let mut later = site.occupation_episodes[0].clone();
@@ -1651,7 +1649,7 @@ fn kinship_profile_must_match_the_society_profile() {
             "{pointer}"
         );
     }
-    // Majorité commune mais parent encore dépendant.
+    // Common majority age but parent still dependent.
     let mut p = example();
     let refs = references(&p);
     p.resolved_profiles.kinship[0].dependent_age = 21;
@@ -1665,14 +1663,14 @@ fn kinship_profile_must_match_the_society_profile() {
     );
     p.resolved_profiles.kinship[0].min_parent_age = 21;
     validate_plan(&p, &refs).unwrap();
-    // Un second profil incompatible n'est pas masqué par le premier.
+    // A second incompatible profile is not masked by the first.
     let mut other = p.resolved_profiles.kinship[0].clone();
     other.id = "second-profile".into();
     other.dependent_age = 18;
     other.min_parent_age = 18;
     p.resolved_profiles.kinship.push(other);
     assert!(validate_plan(&p, &refs).is_err());
-    // Modèle de ménage inconnu : refusé dès la lecture.
+    // Unknown household model: rejected as soon as read.
     let mut v = example_value();
     v["resolved_profiles"]["kinship"][0]["household_model"] = json!("clan_compound_v1");
     assert!(serde_json::from_value::<PopulationPlan>(v).is_err());
@@ -1713,7 +1711,7 @@ fn second_side_of_a_contact_opens_a_port_under_the_same_contact_id() {
         ContactEnd::Site(site_end(&first)),
         ContactEnd::Site(site_end(&second)),
     ];
-    // Le premier côté garde son port, le second est accepté sous le même ID.
+    // The first side keeps its port, the second is accepted under the same ID.
     validate_plan(&p, &refs).unwrap();
     let mut q = p.clone();
     q.boundary_ports[0] = second.clone();
@@ -1721,13 +1719,13 @@ fn second_side_of_a_contact_opens_a_port_under_the_same_contact_id() {
     let mut q = p.clone();
     q.boundary_ports.push(second.clone());
     validate_plan(&q, &refs).unwrap();
-    // Un port doit reprendre ce que déclare son extrémité.
+    // A port must repeat what its endpoint declares.
     let mut q = p.clone();
     let mut wrong = second.clone();
     wrong.population_expected = 1;
     q.boundary_ports[0] = wrong;
     assert!(validate_plan(&q, &refs).is_err());
-    // Un site qui n'est pas une extrémité n'ouvre aucun port.
+    // A site that is not an endpoint opens no port.
     let contact = refs.contacts.get_mut(&first.contact_id).unwrap();
     contact.ends[1] = ContactEnd::External {
         context_id: first.external_context_id.clone(),
@@ -2046,9 +2044,9 @@ fn atlas_canonical_bytes_do_not_depend_on_any_sorted_list_order() {
     let reference = a.canonical_bytes().unwrap();
     let permutations: [Permutation<HistoryAtlas>; 7] = [
         ("cellules", |a| a.cells.reverse()),
-        ("régions", |a| a.region_ids.reverse()),
+        ("regions", |a| a.region_ids.reverse()),
         ("voisins", |a| a.cells[1].neighbors.reverse()),
-        ("sites d'une cellule", |a| {
+        ("sites of a cell", |a| {
             a.cells[0].settlement_summary.site_ids.reverse()
         }),
         ("sites", |a| a.settlements.reverse()),
@@ -2058,13 +2056,13 @@ fn atlas_canonical_bytes_do_not_depend_on_any_sorted_list_order() {
     for (name, permute) in permutations {
         let mut b = a.clone();
         permute(&mut b);
-        assert_ne!(b, a, "{name} : liste à un seul élément");
+        assert_ne!(b, a, "{name}: single-element list");
         assert_eq!(b.canonical_bytes().unwrap(), reference, "{name}");
     }
     let value: Value = serde_json::from_slice(&reference).unwrap();
     assert_eq!(value["cells"][0]["cell_id"], "region");
     assert_eq!(value["settlements"][11]["site_id"], "site/11");
-    // Un fait change les octets ; une liste ordonnée n'est pas retriée.
+    // A fact changes the bytes; an ordered list is not re-sorted.
     let mut b = a.clone();
     b.settlements[0].initial_population += 1;
     assert_ne!(b.canonical_bytes().unwrap(), reference);
@@ -2095,8 +2093,8 @@ fn external_contact_carries_two_valid_ends() {
     assert!(contact.site_end("site/07").is_some());
     assert!(contact.site_end("site/01").is_none());
     for ends in [
-        // Ordre non canonique, extrémité répétée, aucun site, contexte divergent,
-        // site inconnu.
+        // Non-canonical order, repeated endpoint, no site, diverging context,
+        // unknown site.
         [site_b.clone(), site_a.clone()],
         [site_a.clone(), site_a.clone()],
         [
@@ -2126,7 +2124,7 @@ fn axes(morality: i32, lawfulness: i32) -> AlignmentAxes {
 fn conduct_class_is_derived_from_axes() {
     use ConductClass::*;
     for (morality, lawfulness, class) in [
-        // Chaque frontière du §27.2, de part et d'autre.
+        // Each boundary of §27.2, on both sides.
         (-10_000, -10_000, Lawless),
         (-6000, -3000, Lawless),
         (-5999, -3000, Crooked),
@@ -2147,7 +2145,7 @@ fn conduct_class_is_derived_from_axes() {
             "{morality}/{lawfulness}"
         );
     }
-    // Les seuils sont un paramètre : la fonction n'en fige aucun.
+    // Thresholds are a parameter: the function fixes none.
     let strict = ConductThresholds {
         upright_morality_below_bps: 9000,
         ..THRESHOLDS
@@ -2226,13 +2224,13 @@ fn entity_state_stores_axes_and_tags_but_never_the_conduct_class() {
     let v = serde_json::to_value(&state).unwrap();
     assert!(v.get("conduct_class").is_none());
     assert_eq!(v["visibility"], "covert");
-    // Tags triés par ID, comme toute liste canonique.
+    // Tags sorted by ID, like any canonical list.
     assert_eq!(v["conduct_tags"], json!(["extortion", "violence"]));
     assert_eq!(serde_json::from_value::<EntityState>(v).unwrap(), state);
 }
 #[test]
 fn conduct_tags_are_ids_validated_against_the_received_catalogue() {
-    // Un tag n'est pas figé dans le noyau : le catalogue reçu fait foi.
+    // A tag is not frozen in the core: the received catalogue is authoritative.
     let state = entity_state("e", 1354);
     let without_violence: BTreeSet<_> = ["extortion".to_string()].into();
     assert_eq!(
@@ -2365,14 +2363,14 @@ fn legal_standing_is_relative_to_jurisdiction() {
             year,
         )
     };
-    // Même sujet, même date, deux statuts ; intervalle semi-ouvert.
+    // Same subject, same date, two standings; half-open interval.
     assert_eq!(at("city-a", 1349), Licit);
     assert_eq!(at("city-a", 1350), Proscribed);
     assert_eq!(at("city-b", 1350), Tolerated);
-    // Aucune fiche dans une juridiction, ou hors de la période : licite.
+    // No record in a jurisdiction, or outside the period: licit.
     assert_eq!(at("city-c", 1350), Licit);
     assert_eq!(at("city-a", 1400), Licit);
-    // Sujets légaux admis, juridiction qui gouverne seulement.
+    // Admitted legal subjects, jurisdiction that only governs.
     let rebuilt = |subject: ObjectRef, jurisdiction: ObjectRef| {
         let mut s = standings[2].clone();
         let id = SemanticAddress::standing(&region_owner(), &subject, &jurisdiction, 1300, 0);
@@ -2393,8 +2391,8 @@ fn legal_standing_is_relative_to_jurisdiction() {
     ] {
         refused_standings(&[invalid], &[], "type interdit");
     }
-    // Conduite et légalité restent indépendantes : une résistance proscrite
-    // peut être vertueuse.
+    // Conduct and legality remain independent: a proscribed resistance
+    // may be virtuous.
     assert_eq!(
         conduct_class(axes(8000, -8000), &THRESHOLDS),
         ConductClass::Saintly
@@ -2455,21 +2453,21 @@ fn standing_change_cites_an_event() {
     let events = [edict.clone(), late.clone(), war.clone()];
     let initial = standing("g", "j", Licit, (1300, 1350), None, None);
     for (cause, message) in [
-        (None, "sans événement"),
-        (Some(&absent), "événement absent"),
-        (Some(&late), "événement postérieur"),
-        (Some(&war), "autre type d'événement"),
+        (None, "without event"),
+        (Some(&absent), "missing event"),
+        (Some(&late), "later event"),
+        (Some(&war), "other event type"),
     ] {
         let change = standing("g", "j", Proscribed, (1350, 1400), cause, None);
         refused_standings(&[change, initial.clone()], &events, message);
     }
-    // Deux statuts simultanés dans la même juridiction.
+    // Two simultaneous standings in the same jurisdiction.
     let overlap = standing("g", "j", Proscribed, (1349, 1400), Some(&edict), None);
     let whole = standing("g", "j", Licit, (1300, 1349), None, None);
     let mut overlapping = whole;
     overlapping.valid.end_year = 1350;
     refused_standings(&[overlapping, overlap], &events, "chevauchement");
-    // Une autre juridiction ouvre sa propre chaîne, avec son état initial.
+    // Another jurisdiction opens its own chain, with its initial state.
     let elsewhere = standing("g", "k", Proscribed, (1300, 1400), None, None);
     let whole = standing("g", "j", Licit, (1300, 1400), None, None);
     check_standings(&[whole, elsewhere], &events).unwrap();
@@ -2480,16 +2478,16 @@ fn only_a_segment_starting_at_observed_start_may_have_no_cause() {
     let edict = legal_event("edict", 0, 1350);
     let repeal = legal_event("charter", 1, 1360);
     let events = [edict.clone(), repeal.clone()];
-    // Cas de la relecture : proscrit en 1350, sans cause, licite à nouveau en 1360.
+    // Case from the re-read: proscribed in 1350, no cause, licit again in 1360.
     refused_standings(
         &[standing("g", "j", Proscribed, (1350, 1360), None, None)],
         &events,
-        "premier segment tardif sans cause",
+        "late first segment without cause",
     );
     refused_standings(
         &[standing("g", "j", Proscribed, (1350, 1400), None, None)],
         &events,
-        "premier segment tardif sans cause, jusqu'à la fin du monde",
+        "late first segment without cause, until the end of the world",
     );
     check_standings(
         &[standing(
@@ -2503,16 +2501,16 @@ fn only_a_segment_starting_at_observed_start_may_have_no_cause() {
         &events,
     )
     .unwrap();
-    // Hors de la période observée.
+    // Outside the observed period.
     refused_standings(
         &[standing("g", "j", Licit, (1299, 1400), None, None)],
         &events,
-        "début avant l'observation",
+        "start before the observation",
     );
     refused_standings(
         &[standing("g", "j", Licit, (1300, 1401), None, None)],
         &events,
-        "fin après le monde",
+        "end after the world",
     );
 }
 #[test]
@@ -2530,7 +2528,7 @@ fn a_segment_ending_early_or_before_a_gap_cites_an_end_event() {
         trial.clone(),
         war.clone(),
     ];
-    // Fin avant celle du monde, sans successeur.
+    // End before the world's end, without a successor.
     refused_standings(
         &[standing(
             "g",
@@ -2541,12 +2539,12 @@ fn a_segment_ending_early_or_before_a_gap_cites_an_end_event() {
             None,
         )],
         &events,
-        "fin sans événement",
+        "end without event",
     );
     refused_standings(
         &[standing("g", "j", Licit, (1300, 1360), None, None)],
         &events,
-        "fin sans événement depuis l'état initial",
+        "end without event from the initial state",
     );
     check_standings(
         &[standing(
@@ -2560,7 +2558,7 @@ fn a_segment_ending_early_or_before_a_gap_cites_an_end_event() {
         &events,
     )
     .unwrap();
-    // Trou entre segments.
+    // Gap between segments.
     let after_gap = standing("g", "j", Tolerated, (1370, 1400), Some(&trial), None);
     refused_standings(
         &[
@@ -2568,7 +2566,7 @@ fn a_segment_ending_early_or_before_a_gap_cites_an_end_event() {
             after_gap.clone(),
         ],
         &events,
-        "trou sans événement de fin",
+        "gap without end event",
     );
     check_standings(
         &[
@@ -2578,12 +2576,12 @@ fn a_segment_ending_early_or_before_a_gap_cites_an_end_event() {
         &events,
     )
     .unwrap();
-    // Un événement de fin obéit aux mêmes règles qu'une cause.
+    // An end event obeys the same rules as a cause.
     let absent = legal_event("charter", 9, 1360);
     for (end, message) in [
-        (&absent, "événement de fin absent"),
-        (&later, "événement de fin postérieur"),
-        (&war, "événement de fin d'un autre type"),
+        (&absent, "missing end event"),
+        (&later, "later end event"),
+        (&war, "end event of another type"),
     ] {
         refused_standings(
             &[standing("g", "j", Licit, (1300, 1360), None, Some(end))],
@@ -2634,7 +2632,7 @@ fn social_entity_identity_is_proved_against_its_address() {
     };
     let good = guild_entity("marchands");
     good.validate().unwrap();
-    // Une guilde qui porte une adresse d'événement : le cas de la relecture.
+    // A guild carrying an event address: the case from the re-read.
     let war = event_address("region", "war", 1350, 0);
     refused(&social_entity(
         &war,
@@ -2658,7 +2656,7 @@ fn social_entity_identity_is_proved_against_its_address() {
     let mut person_nature = good.clone();
     person_nature.nature = EntityNature::Person;
     refused(&person_nature);
-    // Slot de groupe : son archétype est dans l'adresse.
+    // Group slot: its archetype is in the address.
     let owner = Owner::domain(&domain_key());
     let slot = SemanticAddress::group(&owner, "base_farm", 1300, 0).unwrap();
     let nature = EntityNature::OrganizedGroup;
@@ -2667,7 +2665,7 @@ fn social_entity_identity_is_proved_against_its_address() {
     let mut other_archetype = group.clone();
     other_archetype.archetype_id = "base_workshop".into();
     refused(&other_archetype);
-    // Personne et ménage appartiennent à leur domaine.
+    // Person and household belong to their domain.
     let person_address = SemanticAddress::decode(&person_id("17")).unwrap();
     let scope = owner.scope().clone();
     let person = social_entity(
@@ -2724,7 +2722,7 @@ fn assert_order_free<T: CanonicalRecord + std::fmt::Debug + PartialEq>(
     for shuffle in shuffles {
         let mut changed = items.clone();
         shuffle(&mut changed[0]);
-        assert_ne!(changed, items, "liste interne à un seul élément");
+        assert_ne!(changed, items, "inner single-element list");
         assert_eq!(canonical_list_bytes(&changed).unwrap(), reference);
     }
     items.reverse();
@@ -2795,7 +2793,7 @@ fn canonical_lists_are_sorted_by_id_and_keep_ordered_episodes() {
     let value: Value = serde_json::from_slice(&bytes).unwrap();
     assert_eq!(value[0]["id"], first.id);
     assert_eq!(value[1]["id"], second.id);
-    // Les épisodes sont des listes ordonnées : leur ordre reste un fait.
+    // Episodes are ordered lists: their order remains a fact.
     let episode = |site: &str, start_year, end_year| ResidenceEpisode {
         site_id: site.into(),
         valid: TimeSpan {
@@ -2829,7 +2827,7 @@ fn name_tree_is_absent_by_default_and_kept_as_opaque_canonical_json() {
         canonical_bytes(&written).unwrap(),
         canonical_bytes(&v).unwrap()
     );
-    // L'absence s'écrit en omettant le champ : `null` aurait une seconde forme.
+    // Absence is written by omitting the field: `null` would be a second form.
     let mut v = entity_value();
     v["name_tree"] = Value::Null;
     assert!(serde_json::from_value::<SocialEntity>(v).is_err());
@@ -2844,8 +2842,8 @@ fn entity_with_a_float_in_its_name_tree_is_refused() {
         let mut v = entity_value();
         v["name_tree"] = tree.clone();
         assert!(serde_json::from_value::<SocialEntity>(v).is_err(), "{tree}");
-        // Même refus en construction directe : aucun chemin ne contourne le
-        // contrôle canonique.
+        // Same rejection under direct construction: no path bypasses the
+        // canonical check.
         assert_eq!(
             NameTree::new(tree).unwrap_err().code,
             ErrorCode::InvalidCanonicalValue

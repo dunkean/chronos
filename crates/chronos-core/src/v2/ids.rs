@@ -1,14 +1,14 @@
-//! Adresses complètes et tirages indexés ; aucun hash ne sert d'identité.
+//! Complete addresses and indexed draws; no hash serves as identity.
 //!
-//! Chaque objet a une seule forme d'adresse : `from_fields` fixe, par type, le
-//! nombre et le rôle de ses champs. Un propriétaire ou un domaine entre toujours
-//! à plat dans l'adresse, par `Owner` ou `DomainKey`, jamais par une chaîne jointe.
+//! Each object has a single address form: `from_fields` fixes, per type, the
+//! number and role of its fields. An owner or a domain always enters the
+//! address flat, through `Owner` or `DomainKey`, never through a joined string.
 use super::model::{string_enum, ErrorCode, HistoryError, ObjectRef, Predicate, MAX_ABS_YEAR};
 use serde::{Deserialize, Serialize};
 
 pub const MAX_ID_CHARS: usize = 4096;
-/// Début base64url de la signature `chr2\0` : point de départ de la recherche
-/// d'un ID ou d'un payload encodé dans un champ. Sa seule présence ne suffit pas.
+/// Start of the base64url form of the `chr2\0` signature: starting point for
+/// the search of an encoded ID or payload inside a field. Its presence alone is not enough.
 const ENCODED_SIGNATURE: &str = "Y2hyMg";
 const OWNER_WORLD: &str = "world";
 const OWNER_CELL: &str = "cell";
@@ -78,8 +78,8 @@ impl AddressKind {
     fn from_prefix(prefix: &str) -> Option<Self> {
         Self::ALL.into_iter().find(|k| k.prefix() == prefix)
     }
-    /// Extrémité d'une relation ou d'un statut, ou cible d'un effet : seuls les
-    /// types qu'un `ObjectRef` peut désigner.
+    /// Endpoint of a relation or a standing, or target of an effect: only the
+    /// types an `ObjectRef` can designate.
     fn from_endpoint_prefix(prefix: &str) -> Result<Self, HistoryError> {
         Self::from_prefix(prefix)
             .filter(|k| {
@@ -94,17 +94,17 @@ impl AddressKind {
                         | Self::Activity
                 )
             })
-            .ok_or_else(|| invalid("type d'extrémité invalide"))
+            .ok_or_else(|| invalid("id.bad_endpoint_type"))
     }
 }
 
-/// Bloc décennal de début (§3.2) : division euclidienne, y compris avant l'an
-/// zéro. `decade_block(-1) == -10`.
+/// Starting decade block (§3.2): Euclidean division, including before year
+/// zero. `decade_block(-1) == -10`.
 pub fn decade_block(year: i32) -> i32 {
     year.div_euclid(10) * 10
 }
 
-/// Domaine démographique : monde, région, profil social et ordinal (§3.1).
+/// Demographic domain: world, region, social profile and ordinal (§3.1).
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct DomainKey {
     world: String,
@@ -128,15 +128,15 @@ impl DomainKey {
         SemanticAddress::domain(&key)?;
         Ok(key)
     }
-    /// Relit un `domain_id` encodé. L'adresse d'un autre type est refusée.
+    /// Reads back an encoded `domain_id`. An address of another type is rejected.
     pub fn from_id(id: &str) -> Result<Self, HistoryError> {
         let address = SemanticAddress::decode(id)?;
         if address.kind != AddressKind::Domain {
-            return Err(invalid("adresse de domaine requise"));
+            return Err(invalid("id.domain_address_required"));
         }
         let ordinal = address.fields[3]
             .parse()
-            .map_err(|_| invalid("ordinal hors u32"))?;
+            .map_err(|_| invalid("id.ordinal_out_of_range"))?;
         Self::new(
             &address.fields[0],
             &address.fields[1],
@@ -166,8 +166,8 @@ impl DomainKey {
     }
 }
 
-/// Portée d'un propriétaire, sans le monde : l'atlas la porte aussi, et il est
-/// une entrée du canon, donc antérieur à tout `canon_id` (§4.2).
+/// Scope of an owner, without the world: the atlas carries it too, and it is
+/// an input of the canon, hence earlier than any `canon_id` (§4.2).
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
 #[serde(tag = "kind", rename_all = "snake_case", deny_unknown_fields)]
 pub enum OwnerScope {
@@ -196,7 +196,7 @@ impl OwnerScope {
         }
     }
 }
-/// Libellé de diagnostic, jamais une identité.
+/// Diagnostic label, never an identity.
 impl std::fmt::Display for OwnerScope {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
@@ -211,9 +211,9 @@ impl std::fmt::Display for OwnerScope {
         }
     }
 }
-/// Propriétaire complet d'un objet : monde et portée. Le type de portée fait
-/// partie de l'adresse : une cellule et un domaine restent deux propriétaires
-/// distincts, même si le nom de la cellule imitait la forme d'un domaine.
+/// Complete owner of an object: world and scope. The scope type is part of
+/// the address: a cell and a domain remain two distinct owners, even if the
+/// cell's name imitated the shape of a domain.
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Owner {
     world: String,
@@ -270,7 +270,7 @@ impl Owner {
         }
         fields
     }
-    /// Relit le propriétaire d'une adresse dont la forme est déjà contrôlée.
+    /// Reads back the owner of an address whose shape is already checked.
     fn from_flat_fields(fields: &[String]) -> Option<Self> {
         let scope = match fields.get(1)?.as_str() {
             OWNER_WORLD => OwnerScope::World,
@@ -287,7 +287,7 @@ impl Owner {
     }
 }
 
-/// Lecture d'une adresse de relation ou de statut légal.
+/// Reading of a relation or legal standing address.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct LinkParts {
     pub owner: Owner,
@@ -328,12 +328,12 @@ fn invalid(message: &str) -> HistoryError {
     HistoryError::new(ErrorCode::InvalidAddress, message)
 }
 
-/// Rôle d'un champ dans la forme unique d'une adresse.
+/// Role of a field in the single form of an address.
 #[derive(Clone, Copy)]
 enum Slot {
     Text,
     Literal(&'static str),
-    /// Année de début d'un bloc décennal.
+    /// Start year of a decade block.
     Block,
     Year,
     Ordinal,
@@ -346,18 +346,16 @@ fn owner_slots(fields: &[String]) -> Result<&'static [Slot], HistoryError> {
         Some(OWNER_CELL) => Ok(&[Text, Literal(OWNER_CELL), Text]),
         Some(OWNER_SITE) => Ok(&[Text, Literal(OWNER_SITE), Text]),
         Some(OWNER_DOMAIN) => Ok(&[Text, Literal(OWNER_DOMAIN), Text, Text, Ordinal]),
-        _ => Err(invalid("type de propriétaire inconnu")),
+        _ => Err(invalid("id.unknown_owner_type")),
     }
 }
 fn bounded_year(field: &str) -> Result<i64, HistoryError> {
-    let n: i64 = field
-        .parse()
-        .map_err(|_| invalid("entier d'adresse invalide"))?;
+    let n: i64 = field.parse().map_err(|_| invalid("id.bad_integer"))?;
     if n.to_string() != field {
-        return Err(invalid("entier d'adresse non canonique"));
+        return Err(invalid("id.integer_not_canonical"));
     }
     if !(-i64::from(MAX_ABS_YEAR)..=i64::from(MAX_ABS_YEAR)).contains(&n) {
-        return Err(invalid("année ou bloc hors de ±100 000"));
+        return Err(invalid("id.year_out_of_range"));
     }
     Ok(n)
 }
@@ -365,19 +363,21 @@ fn check_slot(field: &str, slot: Slot) -> Result<(), HistoryError> {
     match slot {
         Text => {}
         Literal(value) if field == value => {}
-        Literal(_) => return Err(invalid("champ littéral inattendu")),
+        Literal(_) => return Err(invalid("id.unexpected_literal")),
         Year => {
             bounded_year(field)?;
         }
         Block => {
             if bounded_year(field)?.rem_euclid(10) != 0 {
-                return Err(invalid("origin_block non aligné sur la décennie"));
+                return Err(invalid("id.origin_block_misaligned"));
             }
         }
         Ordinal => {
-            let n: u32 = field.parse().map_err(|_| invalid("ordinal hors u32"))?;
+            let n: u32 = field
+                .parse()
+                .map_err(|_| invalid("id.ordinal_out_of_range"))?;
             if n.to_string() != field {
-                return Err(invalid("entier d'adresse non canonique"));
+                return Err(invalid("id.integer_not_canonical"));
             }
         }
     }
@@ -385,14 +385,14 @@ fn check_slot(field: &str, slot: Slot) -> Result<(), HistoryError> {
 }
 fn check_slots(fields: &[String], slots: &[Slot]) -> Result<(), HistoryError> {
     if fields.len() != slots.len() {
-        return Err(invalid("nombre de champs d'adresse invalide"));
+        return Err(invalid("id.bad_field_count"));
     }
     fields
         .iter()
         .zip(slots)
         .try_for_each(|(field, slot)| check_slot(field, *slot))
 }
-/// Forme des types à nombre de champs fixe, propriétaire compris.
+/// Form of the types with a fixed number of fields, owner included.
 fn fixed_slots(kind: AddressKind, fields: &[String]) -> Result<Vec<Slot>, HistoryError> {
     let (head, tail): (&[Slot], &[Slot]) = match kind {
         AddressKind::Entity => (owner_slots(fields)?, &[Text, Block, Text]),
@@ -407,7 +407,7 @@ fn fixed_slots(kind: AddressKind, fields: &[String]) -> Result<Vec<Slot>, Histor
             owner_slots(fields)?,
             &[Literal("transfer"), Text, Text, Year, Ordinal],
         ),
-        // L'office d'un mandat est une entité de type `office`, à plat.
+        // The office of a tenure is an entity of type `office`, flat.
         AddressKind::Tenure => (
             owner_slots(fields)?,
             &[Literal("office"), Block, Text, Ordinal],
@@ -427,22 +427,20 @@ fn predicate_name(predicate: Predicate) -> Result<String, HistoryError> {
     serde_json::to_value(predicate)
         .ok()
         .and_then(|v| v.as_str().map(String::from))
-        .ok_or_else(|| invalid("prédicat non sérialisable"))
+        .ok_or_else(|| invalid("id.predicate_not_serializable"))
 }
 
 impl SemanticAddress {
-    /// Seule porte d'entrée, y compris depuis `decode` et serde. Champs ASCII
-    /// imprimables sans espaces ; aucun ID ou payload encodé, à aucune position.
+    /// Single entry point, including from `decode` and serde. Printable ASCII
+    /// fields without spaces; no encoded ID or payload, at any position.
     pub fn from_fields(kind: AddressKind, fields: Vec<String>) -> Result<Self, HistoryError> {
         check_structure(kind, &fields)?;
         if fields.iter().any(|f| embeds_address(f)) {
-            return Err(invalid(
-                "ID parent encodé : utiliser ses champs sémantiques",
-            ));
+            return Err(invalid("id.encoded_parent"));
         }
         let address = Self { kind, fields };
         if address.encoded_len() > MAX_ID_CHARS {
-            return Err(invalid("ID au-delà de 4 096 caractères"));
+            return Err(invalid("id.too_long"));
         }
         Ok(address)
     }
@@ -484,11 +482,11 @@ impl SemanticAddress {
             [algorithm.into(), local.into()],
         )
     }
-    /// `office` est l'adresse d'une entité de type `office` : ses champs sont
-    /// repris à plat, jamais son ID encodé.
+    /// `office` is the address of an entity of type `office`: its fields are
+    /// taken flat, never its encoded ID.
     pub fn tenure(office: &Self, ordinal: u32) -> Result<Self, HistoryError> {
         if office.kind != AddressKind::Entity {
-            return Err(invalid("adresse d'entité office requise"));
+            return Err(invalid("id.office_address_required"));
         }
         let mut fields = office.fields.clone();
         fields.push(ordinal.to_string());
@@ -506,24 +504,24 @@ impl SemanticAddress {
             [kind.into(), block.to_string(), ordinal.to_string()],
         )
     }
-    /// Contrat d'impact, fils de son événement parent.
+    /// Impact contract, child of its parent event.
     pub fn impact(event: &Self, slot: &str) -> Result<Self, HistoryError> {
         if event.kind != AddressKind::Event {
-            return Err(invalid("adresse d'événement requise"));
+            return Err(invalid("id.event_address_required"));
         }
         let mut fields = event.fields.clone();
         fields.push(slot.into());
         Self::from_fields(AddressKind::Impact, fields)
     }
-    /// Exposition d'une cible à un contrat : fille du contrat, unique par cible.
+    /// Exposure of a target to a contract: child of the contract, unique per target.
     /// The target enters flat, without its world. No annual dimension: the local
     /// episodes of the timing profile (§7.2) are its sub-slots.
     pub fn effect(impact: &Self, target: &Self) -> Result<Self, HistoryError> {
         if impact.kind != AddressKind::Impact {
-            return Err(invalid("adresse d'impact requise"));
+            return Err(invalid("id.impact_address_required"));
         }
         if target.fields[0] != impact.fields[0] {
-            return Err(invalid("cible d'un autre canon"));
+            return Err(invalid("id.foreign_canon_target"));
         }
         let mut fields = impact.fields.clone();
         fields.push(target.kind.prefix().into());
@@ -540,7 +538,7 @@ impl SemanticAddress {
         fields.push(slot.into());
         Self::from_fields(AddressKind::Episode, fields)
     }
-    /// Événement parent d'une adresse d'impact.
+    /// Parent event of an impact address.
     pub fn parent_event(&self) -> Option<Self> {
         if self.kind != AddressKind::Impact {
             return None;
@@ -616,9 +614,9 @@ impl SemanticAddress {
     pub fn domain(domain: &DomainKey) -> Result<Self, HistoryError> {
         Self::in_domain(AddressKind::Domain, domain, [])
     }
-    /// Relation entre deux `ObjectRef` adressables. Le préfixe commun des
-    /// extrémités est écrit une seule fois ; chaque segment porte son nombre de
-    /// champs, et les types des extrémités restent explicites.
+    /// Relation between two addressable `ObjectRef`s. The common prefix of the
+    /// endpoints is written once; each segment carries its number of fields, and
+    /// the endpoint types stay explicit.
     pub fn relation(
         owner: &Owner,
         predicate: Predicate,
@@ -641,7 +639,7 @@ impl SemanticAddress {
             ordinal,
         )
     }
-    /// Statut légal (§27.3) : même forme qu'une relation, sans prédicat.
+    /// Legal standing (§27.3): same shape as a relation, without a predicate.
     pub fn standing(
         owner: &Owner,
         subject: &ObjectRef,
@@ -671,7 +669,7 @@ impl SemanticAddress {
     ) -> Result<Self, HistoryError> {
         let (subject, object) = (subject.address()?, object.address()?);
         if subject.fields[0] != owner.world() || object.fields[0] != owner.world() {
-            return Err(invalid("lien entre deux canons"));
+            return Err(invalid("id.cross_canon_link"));
         }
         let common = subject
             .fields
@@ -694,8 +692,8 @@ impl SemanticAddress {
         fields.extend([start.to_string(), ordinal.to_string()]);
         Self::from_fields(kind, fields)
     }
-    /// Propriétaire de l'adresse : son domaine pour une personne, un ménage, un
-    /// plan ou un domaine ; aucun pour un site ou une activité, qui sont du monde.
+    /// Owner of the address: its domain for a person, a household, a plan or a
+    /// domain; none for a site or an activity, which belong to the world.
     pub fn owner(&self) -> Option<Owner> {
         match self.kind {
             AddressKind::Person
@@ -714,7 +712,7 @@ impl SemanticAddress {
             _ => Owner::from_flat_fields(&self.fields),
         }
     }
-    /// Champs qui suivent le propriétaire.
+    /// Fields that follow the owner.
     pub fn owned_tail(&self) -> &[String] {
         let start = match self.kind {
             AddressKind::Person
@@ -726,7 +724,7 @@ impl SemanticAddress {
         };
         &self.fields[start..]
     }
-    /// Lecture d'une relation ou d'un statut légal.
+    /// Reading of a relation or a legal standing.
     pub fn link(&self) -> Option<LinkParts> {
         matches!(self.kind, AddressKind::Relation | AddressKind::Standing)
             .then(|| parse_link(self.kind, &self.fields).ok())
@@ -746,59 +744,59 @@ impl SemanticAddress {
     }
     pub fn decode(id: &str) -> Result<Self, HistoryError> {
         if id.len() > MAX_ID_CHARS {
-            return Err(invalid("ID au-delà de 4 096 caractères"));
+            return Err(invalid("id.too_long"));
         }
         let (prefix, payload) = id
             .split_once('.')
-            .ok_or_else(|| invalid("préfixe absent"))?;
-        let kind = AddressKind::from_prefix(prefix).ok_or_else(|| invalid("type inconnu"))?;
+            .ok_or_else(|| invalid("id.prefix_missing"))?;
+        let kind = AddressKind::from_prefix(prefix).ok_or_else(|| invalid("id.unknown_type"))?;
         let bytes = base64_decode(payload)?;
         if !bytes.starts_with(b"chr2\0") {
-            return Err(invalid("signature chr2 absente"));
+            return Err(invalid("id.signature_missing"));
         }
         let mut fields = Vec::new();
         let mut pos = 5;
         while pos < bytes.len() {
             let length = bytes
                 .get(pos..pos + 4)
-                .ok_or_else(|| invalid("longueur tronquée"))?;
-            let length = u32::from_le_bytes(length.try_into().expect("quatre octets")) as usize;
+                .ok_or_else(|| invalid("id.length_truncated"))?;
+            let length = u32::from_le_bytes(length.try_into().expect("four bytes")) as usize;
             pos += 4;
             let end = pos
                 .checked_add(length)
-                .ok_or_else(|| invalid("longueur excessive"))?;
+                .ok_or_else(|| invalid("id.length_excessive"))?;
             let field = std::str::from_utf8(
                 bytes
                     .get(pos..end)
-                    .ok_or_else(|| invalid("champ tronqué"))?,
+                    .ok_or_else(|| invalid("id.field_truncated"))?,
             )
-            .map_err(|_| invalid("UTF-8 invalide"))?;
+            .map_err(|_| invalid("id.invalid_utf8"))?;
             fields.push(field.to_owned());
             pos = end;
         }
         let address = Self::from_fields(kind, fields)?;
         if address.encode() != id {
-            return Err(invalid("base64url non canonique"));
+            return Err(invalid("id.base64url_not_canonical"));
         }
         Ok(address)
     }
 }
-/// Propriétaire, littéral, prédicat fermé s'il y en a un, types des extrémités,
-/// puis trois segments comptés : préfixe commun, reste du sujet, reste de l'objet.
+/// Owner, literal, closed predicate if any, endpoint types, then three counted
+/// segments: common prefix, rest of the subject, rest of the object.
 fn parse_link(kind: AddressKind, fields: &[String]) -> Result<LinkParts, HistoryError> {
     let owner = owner_slots(fields)?;
     let with_predicate = kind == AddressKind::Relation;
     let head = owner.len() + if with_predicate { 4 } else { 3 };
     let header = fields
         .get(..head)
-        .ok_or_else(|| invalid("relation tronquée"))?;
+        .ok_or_else(|| invalid("id.relation_truncated"))?;
     check_slots(&header[..owner.len()], owner)?;
     check_slot(&header[owner.len()], Literal(kind.prefix()))?;
     let predicate = if with_predicate {
         let name = header[owner.len() + 1].as_str();
         Some(
             serde_json::from_value::<Predicate>(name.into())
-                .map_err(|_| invalid("prédicat inconnu"))?,
+                .map_err(|_| invalid("id.unknown_predicate"))?,
         )
     } else {
         None
@@ -809,17 +807,17 @@ fn parse_link(kind: AddressKind, fields: &[String]) -> Result<LinkParts, History
     let mut segment = || -> Result<&[String], HistoryError> {
         let count = fields
             .get(pos)
-            .ok_or_else(|| invalid("relation tronquée"))?;
+            .ok_or_else(|| invalid("id.relation_truncated"))?;
         let n: usize = count
             .parse()
-            .map_err(|_| invalid("longueur de segment invalide"))?;
-        // Garde avant toute addition : `n` vient d'un ID non fiable.
+            .map_err(|_| invalid("id.bad_segment_length"))?;
+        // Guard before any addition: `n` comes from an untrusted ID.
         if n.to_string() != *count || n > fields.len() {
-            return Err(invalid("segment non canonique"));
+            return Err(invalid("id.segment_not_canonical"));
         }
         let end = pos + 1 + n;
         if end > fields.len() {
-            return Err(invalid("segments de relation invalides"));
+            return Err(invalid("id.bad_relation_segments"));
         }
         let values = &fields[pos + 1..end];
         pos = end;
@@ -829,10 +827,10 @@ fn parse_link(kind: AddressKind, fields: &[String]) -> Result<LinkParts, History
     let subject_rest = segment()?;
     let object_rest = segment()?;
     if pos + 2 != fields.len() {
-        return Err(invalid("segments de relation invalides"));
+        return Err(invalid("id.bad_relation_segments"));
     }
     if !subject_rest.is_empty() && subject_rest.first() == object_rest.first() {
-        return Err(invalid("préfixe commun non maximal"));
+        return Err(invalid("id.prefix_not_maximal"));
     }
     let endpoint = |rest: &[String]| [std::slice::from_ref(&fields[0]), common, rest].concat();
     let (subject, object) = (endpoint(subject_rest), endpoint(object_rest));
@@ -841,7 +839,7 @@ fn parse_link(kind: AddressKind, fields: &[String]) -> Result<LinkParts, History
     check_slot(&fields[pos], Year)?;
     check_slot(&fields[pos + 1], Ordinal)?;
     Ok(LinkParts {
-        owner: Owner::from_flat_fields(fields).ok_or_else(|| invalid("propriétaire illisible"))?,
+        owner: Owner::from_flat_fields(fields).ok_or_else(|| invalid("id.unreadable_owner"))?,
         predicate,
         subject: SemanticAddress {
             kind: subject_kind,
@@ -853,34 +851,34 @@ fn parse_link(kind: AddressKind, fields: &[String]) -> Result<LinkParts, History
         },
         start: fields[pos]
             .parse()
-            .map_err(|_| invalid("année de lien invalide"))?,
+            .map_err(|_| invalid("id.bad_link_year"))?,
         ordinal: fields[pos + 1]
             .parse()
-            .map_err(|_| invalid("ordinal hors u32"))?,
+            .map_err(|_| invalid("id.ordinal_out_of_range"))?,
     })
 }
-/// Champs du contrat parent, puis cible typée.
+/// Fields of the parent contract, then typed target.
 fn validate_effect_fields(fields: &[String]) -> Result<(), HistoryError> {
     let impact_end = owner_slots(fields)?.len() + 4;
     let impact = fields
         .get(..impact_end)
-        .ok_or_else(|| invalid("effet tronqué"))?;
+        .ok_or_else(|| invalid("id.effect_truncated"))?;
     check_structure(AddressKind::Impact, impact)?;
     let [target_kind, target @ ..] = &fields[impact_end..] else {
-        return Err(invalid("effet tronqué"));
+        return Err(invalid("id.effect_truncated"));
     };
     let kind = AddressKind::from_endpoint_prefix(target_kind)?;
     check_structure(kind, &[std::slice::from_ref(&fields[0]), target].concat())
 }
-/// Forme d'une adresse, sans recherche d'ID imbriqué : c'est aussi le critère
-/// de reconnaissance d'un payload, qui ne doit pas se rappeler lui-même.
+/// Shape of an address, without searching for a nested ID: it is also the
+/// criterion for recognizing a payload, which must not recall itself.
 fn check_structure(kind: AddressKind, fields: &[String]) -> Result<(), HistoryError> {
     if fields.is_empty()
         || fields
             .iter()
             .any(|s| s.is_empty() || !s.bytes().all(|b| (0x21..=0x7e).contains(&b)))
     {
-        return Err(invalid("champs d'adresse non normalisés"));
+        return Err(invalid("id.fields_not_normalized"));
     }
     match kind {
         AddressKind::Relation | AddressKind::Standing => parse_link(kind, fields).map(|_| ()),
@@ -889,9 +887,9 @@ fn check_structure(kind: AddressKind, fields: &[String]) -> Result<(), HistoryEr
         _ => check_slots(fields, &fixed_slots(kind, fields)?),
     }
 }
-/// Vrai si une sous-chaîne du champ décode en adresse complète. Un payload peut
-/// être suivi de caractères de l'alphabet base64url : chaque coupe sur une fin
-/// de champ est essayée, et seule une coupe canonique compte.
+/// True if a substring of the field decodes to a complete address. A payload may
+/// be followed by characters of the base64url alphabet: every cut at a field
+/// end is tried, and only a canonical cut counts.
 fn embeds_address(field: &str) -> bool {
     field.match_indices(ENCODED_SIGNATURE).any(|(start, _)| {
         let rest = &field[start..];
@@ -912,7 +910,7 @@ fn starts_with_address(run: &str) -> bool {
     let mut fields = Vec::new();
     let mut pos = 5;
     while let Some(length) = bytes.get(pos..pos + 4) {
-        let length = u32::from_le_bytes(length.try_into().expect("quatre octets")) as usize;
+        let length = u32::from_le_bytes(length.try_into().expect("four bytes")) as usize;
         let field = (pos + 4)
             .checked_add(length)
             .and_then(|end| bytes.get(pos + 4..end))
@@ -952,15 +950,15 @@ fn base64_encode(bytes: &[u8]) -> String {
 }
 fn base64_decode(s: &str) -> Result<Vec<u8>, HistoryError> {
     if s.len() % 4 == 1 {
-        return Err(invalid("longueur base64url invalide"));
+        return Err(invalid("id.bad_base64url_length"));
     }
     let (out, padding) = base64_unpack(s)?;
     if padding != 0 {
-        return Err(invalid("bits de bourrage non nuls"));
+        return Err(invalid("id.nonzero_padding"));
     }
     Ok(out)
 }
-/// Octets entiers de la chaîne et valeur de ses bits de fin.
+/// Whole bytes of the string and the value of its trailing bits.
 fn base64_unpack(s: &str) -> Result<(Vec<u8>, u32), HistoryError> {
     let mut out = Vec::new();
     let mut buffer = 0u32;
@@ -969,7 +967,7 @@ fn base64_unpack(s: &str) -> Result<(Vec<u8>, u32), HistoryError> {
         let v = BASE64
             .iter()
             .position(|c| *c == b)
-            .ok_or_else(|| invalid("alphabet base64url invalide"))?;
+            .ok_or_else(|| invalid("id.bad_base64url_alphabet"))?;
         buffer = (buffer << 6) | v as u32;
         bits += 6;
         if bits >= 8 {
@@ -980,8 +978,8 @@ fn base64_unpack(s: &str) -> Result<(Vec<u8>, u32), HistoryError> {
     Ok((out, buffer & ((1 << bits) - 1)))
 }
 
-/// Point d'entrée unique des décisions aléatoires v2. Sous-compteurs et essais
-/// de rejet sont des champs explicites, jamais un état global consommé.
+/// Single entry point of v2 random decisions. Sub-counters and rejection
+/// attempts are explicit fields, never a consumed global state.
 pub mod random_semantics_v2 {
     use super::{ErrorCode, HistoryError};
     pub fn domain_seed(world_seed: u64, domain_id: &str, provider_algorithm: &str) -> u64 {
@@ -993,8 +991,8 @@ pub mod random_semantics_v2 {
     pub fn draw(seed: u64, parts: &[&str], subcounter: u64, rejection: u64) -> u64 {
         let sub = subcounter.to_string();
         let retry = rejection.to_string();
-        // ASCII élimine le séparateur 0xff du mélangeur v1. Le nombre de
-        // champs empêche toute confusion avec les sous-compteurs suffixés.
+        // ASCII rules out the 0xff separator of the v1 mixer. The number of
+        // fields prevents any confusion with suffixed sub-counters.
         let count = parts.len().to_string();
         let encoded: Vec<_> = parts.iter().map(|s| base64_part(s.as_bytes())).collect();
         let mut key = vec!["random_semantics_v2", count.as_str()];
@@ -1005,7 +1003,7 @@ pub mod random_semantics_v2 {
     fn base64_part(bytes: &[u8]) -> String {
         super::base64_encode(bytes)
     }
-    /// Uniforme exact sur [0, upper), y compris les bornes non puissances de 2.
+    /// Exact uniform on [0, upper), including bounds that are not powers of 2.
     pub fn uniform_below(
         seed: u64,
         parts: &[&str],
@@ -1015,7 +1013,7 @@ pub mod random_semantics_v2 {
         if upper == 0 {
             return Err(HistoryError::new(
                 ErrorCode::InvalidCanonicalValue,
-                "borne uniforme nulle",
+                "id.uniform_bound_zero",
             ));
         }
         let threshold = upper.wrapping_neg() % upper;
@@ -1027,7 +1025,7 @@ pub mod random_semantics_v2 {
         }
         Err(HistoryError::new(
             ErrorCode::BudgetExceeded,
-            "compteur de rejet épuisé",
+            "id.rejection_counter_exhausted",
         ))
     }
 }
@@ -1085,7 +1083,7 @@ mod tests {
     }
     #[test]
     fn every_object_has_a_single_address_form() {
-        // Anciennes formes aplaties ou jointes, toutes refusées.
+        // Former flattened or joined forms, all rejected.
         for (kind, old) in [
             (
                 AddressKind::Person,
@@ -1262,8 +1260,8 @@ mod tests {
         let relation = SemanticAddress::relation(&owner, Predicate::Trusts, &a, &b, 0, 0).unwrap();
         let nested = ObjectRef::Entity(relation.encode());
         assert!(SemanticAddress::relation(&owner, Predicate::Trusts, &nested, &b, 0, 0).is_err());
-        // Même relation écrite à la main : préfixe maximal accepté, préfixe
-        // raccourci refusé pour le même contenu.
+        // Same relation written by hand: maximal prefix accepted, shortened
+        // prefix rejected for the same content.
         let head = ["w", "cell", "r", "relation", "trusts", "person", "person"];
         let maximal = [
             &head[..],
@@ -1287,7 +1285,7 @@ mod tests {
     }
     #[test]
     fn relation_endpoints_are_object_refs_only() {
-        // Un événement n'est pas une extrémité, même à la main.
+        // An event is not an endpoint, even by hand.
         let forged = forge(
             "relation",
             &[
@@ -1317,7 +1315,7 @@ mod tests {
         let flat = SemanticAddress::effect(&impact, &group).unwrap();
         assert!(!flat.fields().contains(&group.encode()));
         assert_eq!(SemanticAddress::decode(&flat.encode()).unwrap(), flat);
-        // Autre canon, type d'adresse erroné : refusés.
+        // Another canon, wrong address type: rejected.
         let foreign = SemanticAddress::site("v", "site/a").unwrap();
         assert!(SemanticAddress::effect(&impact, &foreign).is_err());
         assert!(SemanticAddress::effect(&event, &site).is_err());
@@ -1366,7 +1364,7 @@ mod tests {
     }
     #[test]
     fn domain_seed_is_pinned_by_a_literal_value() {
-        // Oracle : port Python indépendant de keys.rs, seed 42.
+        // Oracle: independent Python port of keys.rs, seed 42.
         assert_eq!(
             random_semantics_v2::domain_seed(42, "d", "a"),
             816947332546134861
@@ -1463,7 +1461,7 @@ mod tests {
             format!("x-{id}-y"),
             format!("x-{payload}-y"),
             format!("{id}/suffixe"),
-            // Double imbrication : la signature interne est réencodée.
+            // Double nesting: the inner signature is re-encoded.
             SemanticAddress::event(&Owner::cell("v", "r"), "k", 0, 0)
                 .map(|e| forge("event", &["w", "cell", "r", &e.encode(), "0", "0"]))
                 .unwrap(),

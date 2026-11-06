@@ -8,7 +8,10 @@
     "culture_count": 79,
     "inspected_on": "2026-11-06"
   },
-  "interpretation": "Familles de paramètres de worldbuilding partageables. Elles ne déclarent aucune équivalence historique, ethnique ou biologique. Les variantes conservent les identifiants Magna Urbis.",
+  "interpretation": {
+    "en": "Shareable worldbuilding parameter families. They declare no historical, ethnic or biological equivalence. Variants keep the Magna Urbis identifiers.",
+    "fr": "Familles de paramètres de worldbuilding partageables. Elles ne déclarent aucune équivalence historique, ethnique ou biologique. Les variantes conservent les identifiants Magna Urbis."
+  },
   "resolution_order": [
     "engine_defaults",
     "history_family",
@@ -20,7 +23,10 @@
   "families": [
     {
       "id": "agrarian_estates",
-      "label": "Domaines agraires et autorités territoriales",
+      "label": {
+        "en": "Agrarian estates and territorial authorities",
+        "fr": "Domaines agraires et autorités territoriales"
+      },
       "common_groups": [
         "landed_house",
         "village_council",
@@ -37,7 +43,10 @@
     },
     {
       "id": "mercantile_communes",
-      "label": "Communes et réseaux marchands",
+      "label": {
+        "en": "Communes and merchant networks",
+        "fr": "Communes et réseaux marchands"
+      },
       "common_groups": [
         "merchant_house",
         "craft_guild",
@@ -54,7 +63,10 @@
     },
     {
       "id": "urban_administrations",
-      "label": "Administrations et quartiers urbains",
+      "label": {
+        "en": "Urban administrations and districts",
+        "fr": "Administrations et quartiers urbains"
+      },
       "common_groups": [
         "administration",
         "ward_community",
@@ -71,7 +83,10 @@
     },
     {
       "id": "courts_and_bazaars",
-      "label": "Cours et réseaux de marchés",
+      "label": {
+        "en": "Courts and market networks",
+        "fr": "Cours et réseaux de marchés"
+      },
       "common_groups": [
         "court",
         "merchant_house",
@@ -88,7 +103,10 @@
     },
     {
       "id": "temple_centres",
-      "label": "Institutions rituelles et centres de savoir",
+      "label": {
+        "en": "Ritual institutions and centres of learning",
+        "fr": "Institutions rituelles et centres de savoir"
+      },
       "common_groups": [
         "ritual_institution",
         "school",
@@ -105,7 +123,10 @@
     },
     {
       "id": "fortified_houses",
-      "label": "Maisons et territoires fortifiés",
+      "label": {
+        "en": "Fortified houses and territories",
+        "fr": "Maisons et territoires fortifiés"
+      },
       "common_groups": [
         "territorial_house",
         "retinue",
@@ -122,7 +143,10 @@
     },
     {
       "id": "clan_assemblies",
-      "label": "Maisons et assemblées communautaires",
+      "label": {
+        "en": "Communal houses and assemblies",
+        "fr": "Maisons et assemblées communautaires"
+      },
       "common_groups": [
         "kin_group",
         "local_assembly",
@@ -139,7 +163,10 @@
     },
     {
       "id": "mobile_camps",
-      "label": "Campements et réseaux mobiles",
+      "label": {
+        "en": "Encampments and mobile networks",
+        "fr": "Campements et réseaux mobiles"
+      },
       "common_groups": [
         "mobile_household",
         "travel_party",
@@ -156,7 +183,10 @@
     },
     {
       "id": "compound_courts",
-      "label": "Communautés de concessions et cours",
+      "label": {
+        "en": "Concession communities and courts",
+        "fr": "Communautés de concessions et cours"
+      },
       "common_groups": [
         "household_compound",
         "court",
@@ -173,7 +203,10 @@
     },
     {
       "id": "maritime_networks",
-      "label": "Réseaux maritimes et communautés littorales",
+      "label": {
+        "en": "Maritime networks and coastal communities",
+        "fr": "Réseaux maritimes et communautés littorales"
+      },
       "common_groups": [
         "crew",
         "merchant_house",
@@ -190,7 +223,10 @@
     },
     {
       "id": "communal_houses",
-      "label": "Maisons collectives et communautés locales",
+      "label": {
+        "en": "Collective houses and local communities",
+        "fr": "Maisons collectives et communautés locales"
+      },
       "common_groups": [
         "communal_house",
         "local_assembly",
@@ -207,7 +243,10 @@
     },
     {
       "id": "redistributive_centres",
-      "label": "Centres de redistribution et communautés productrices",
+      "label": {
+        "en": "Redistribution centres and producer communities",
+        "fr": "Centres de redistribution et communautés productrices"
+      },
       "common_groups": [
         "redistributive_institution",
         "productive_community",
@@ -224,7 +263,10 @@
     },
     {
       "id": "oasis_networks",
-      "label": "Oasis et réseaux caravaniers",
+      "label": {
+        "en": "Oases and caravan networks",
+        "fr": "Oasis et réseaux caravaniers"
+      },
       "common_groups": [
         "caravan",
         "water_association",
@@ -241,7 +283,10 @@
     },
     {
       "id": "craft_holds",
-      "label": "Communautés d'ateliers et places fortes",
+      "label": {
+        "en": "Workshop communities and strongholds",
+        "fr": "Communautés d'ateliers et places fortes"
+      },
       "common_groups": [
         "craft_house",
         "workshop",
@@ -258,7 +303,10 @@
     },
     {
       "id": "forest_houses",
-      "label": "Maisons et communautés forestières",
+      "label": {
+        "en": "Forest houses and communities",
+        "fr": "Maisons et communautés forestières"
+      },
       "common_groups": [
         "forest_house",
         "resource_group",
@@ -275,7 +323,10 @@
     },
     {
       "id": "underground_factions",
-      "label": "Maisons et factions souterraines",
+      "label": {
+        "en": "Underground houses and factions",
+        "fr": "Maisons et factions souterraines"
+      },
       "common_groups": [
         "house_faction",
         "neighborhood",
@@ -292,7 +343,10 @@
     },
     {
       "id": "retinue_clans",
-      "label": "Clans et groupes de compagnonnage armé",
+      "label": {
+        "en": "Clans and armed fellowship groups",
+        "fr": "Clans et groupes de compagnonnage armé"
+      },
       "common_groups": [
         "kin_group",
         "retinue",
@@ -309,7 +363,10 @@
     },
     {
       "id": "colony_networks",
-      "label": "Colonies et communautés à reproduction paramétrable",
+      "label": {
+        "en": "Colonies and communities with configurable reproduction",
+        "fr": "Colonies et communautés à reproduction paramétrable"
+      },
       "common_groups": [
         "local_colony",
         "resource_group",
@@ -326,7 +383,10 @@
     },
     {
       "id": "wetland_communities",
-      "label": "Communautés des zones humides",
+      "label": {
+        "en": "Wetland communities",
+        "fr": "Communautés des zones humides"
+      },
       "common_groups": [
         "local_community",
         "resource_group",
@@ -343,7 +403,10 @@
     },
     {
       "id": "market_towns",
-      "label": "Villes de marché et réseaux régionaux",
+      "label": {
+        "en": "Market towns and regional networks",
+        "fr": "Villes de marché et réseaux régionaux"
+      },
       "common_groups": [
         "market_association",
         "civic_council",
@@ -360,7 +423,10 @@
     },
     {
       "id": "hill_courts",
-      "label": "Cours et habitats anciens de hauteur",
+      "label": {
+        "en": "Courts and ancient highland settlements",
+        "fr": "Cours et habitats anciens de hauteur"
+      },
       "common_groups": [
         "court",
         "neighborhood",
@@ -1327,7 +1393,10 @@
       "term_years": 5,
       "time_cost_bps": 2500
     },
-    "profile_merge": "Les scalaires sont remplacés ; les listes fusionnent par ID avec retrait explicite ; les poids sont remplacés puis normalisés selon resolution_order.",
+    "profile_merge": {
+      "en": "Scalars are replaced; lists merge by ID with explicit removal; weights are replaced then normalized following resolution_order.",
+      "fr": "Les scalaires sont remplacés ; les listes fusionnent par ID avec retrait explicite ; les poids sont remplacés puis normalisés selon resolution_order."
+    },
     "friend_circle_lifetime_year_weights": {
       "1": 2000,
       "3": 2000,
@@ -1450,18 +1519,45 @@
         "high_fantasy": 2
       },
       "activation_rule": "archetype.setting <= world.setting_profile selon `rank`",
-      "overlay_rule": "Un overlay portant `world_activation_min_setting` est actif au niveau du monde dès que setting_profile l'atteint, sans dépendre des 79 raccords ; un overlay de variante peut aussi l'activer localement. Un overlay ne réactive jamais un archétype dont le `setting` dépasse celui du monde."
+      "overlay_rule": {
+        "en": "An overlay carrying `world_activation_min_setting` is active at world level as soon as setting_profile reaches it, without depending on the 79 bindings; a variant overlay can also activate it locally. An overlay never reactivates an archetype whose `setting` exceeds the world's.",
+        "fr": "Un overlay portant `world_activation_min_setting` est actif au niveau du monde dès que setting_profile l'atteint, sans dépendre des 79 raccords ; un overlay de variante peut aussi l'activer localement. Un overlay ne réactive jamais un archétype dont le `setting` dépasse celui du monde."
+      }
     },
     "availability_model": {
       "parameters_status": "worldbuilding_starting_values_not_calibrated",
-      "eligibility": "Un archétype non-vue est éligible sur un site si : adultes attendus >= min_expected_adults ; site_tags_any vide ou intersectant les étiquettes du site ; setting <= setting_profile ; requires_overlay_any vide ou un de ces overlays actif.",
-      "weight_rule": "Poids effectif = weight x 2 si l'archétype est dans common_groups de la famille, x weight_multiplier d'un overlay actif.",
-      "activity_unit": "Travailleurs attendus de l'activité x part de l'archétype parmi les types éligibles de cette activité, divisés par la taille moyenne propre de l'archétype (size.mean).",
-      "shared_class_stock": "Les archétypes de classe association, community ou friend_circle sans stock_per_1000_adults se partagent le stock de leur classe (§23.1) au prorata de leur poids ; la classe community garde un minimum de un par site actif.",
-      "own_stock": "Un archétype avec stock_per_1000_adults déclare un stock propre, additionnel au stock de sa classe ; le stock est décimal à une décimale et converti en dixièmes entiers par le noyau avant calcul. min_per_site relève le nombre attendu quand l'archétype est éligible.",
-      "site_threshold_anchor": "Ancre secondaire unique (max_per_site = 1) qui naît quand le site atteint min_expected_adults et reste continue ensuite (§25.1).",
-      "event_born": "Un stock propre nul avec birth_events décrit une association née d'un événement explicite, jamais tirée.",
-      "scale_note": "Valeurs de worldbuilding, à évaluer dans les bilans. Les étiquettes de site viennent de SettlementAnchor.site_tags, à ajouter par S0 et S2."
+      "eligibility": {
+        "en": "A non-view archetype is eligible on a site if: expected adults >= min_expected_adults; site_tags_any is empty or intersects the site's tags; setting <= setting_profile; requires_overlay_any is empty or one of those overlays is active.",
+        "fr": "Un archétype non-vue est éligible sur un site si : adultes attendus >= min_expected_adults ; site_tags_any vide ou intersectant les étiquettes du site ; setting <= setting_profile ; requires_overlay_any vide ou un de ces overlays actif."
+      },
+      "weight_rule": {
+        "en": "Effective weight = weight x 2 if the archetype is in the family's common_groups, x weight_multiplier of an active overlay.",
+        "fr": "Poids effectif = weight x 2 si l'archétype est dans common_groups de la famille, x weight_multiplier d'un overlay actif."
+      },
+      "activity_unit": {
+        "en": "Expected workers of the activity x the archetype's share among the eligible types of that activity, divided by the archetype's own mean size (size.mean).",
+        "fr": "Travailleurs attendus de l'activité x part de l'archétype parmi les types éligibles de cette activité, divisés par la taille moyenne propre de l'archétype (size.mean)."
+      },
+      "shared_class_stock": {
+        "en": "Archetypes of class association, community or friend_circle without stock_per_1000_adults share the stock of their class (§23.1) in proportion to their weight; the community class keeps a minimum of one per active site.",
+        "fr": "Les archétypes de classe association, community ou friend_circle sans stock_per_1000_adults se partagent le stock de leur classe (§23.1) au prorata de leur poids ; la classe community garde un minimum de un par site actif."
+      },
+      "own_stock": {
+        "en": "An archetype with stock_per_1000_adults declares its own stock, additional to its class stock; the stock is a one-decimal value converted to integer tenths by the core before computation. min_per_site raises the expected count when the archetype is eligible.",
+        "fr": "Un archétype avec stock_per_1000_adults déclare un stock propre, additionnel au stock de sa classe ; le stock est décimal à une décimale et converti en dixièmes entiers par le noyau avant calcul. min_per_site relève le nombre attendu quand l'archétype est éligible."
+      },
+      "site_threshold_anchor": {
+        "en": "Single secondary anchor (max_per_site = 1) that is born when the site reaches min_expected_adults and stays continuous afterwards (§25.1).",
+        "fr": "Ancre secondaire unique (max_per_site = 1) qui naît quand le site atteint min_expected_adults et reste continue ensuite (§25.1)."
+      },
+      "event_born": {
+        "en": "A zero own stock with birth_events describes an association born of an explicit event, never drawn.",
+        "fr": "Un stock propre nul avec birth_events décrit une association née d'un événement explicite, jamais tirée."
+      },
+      "scale_note": {
+        "en": "Worldbuilding values, to be assessed in the balance reports. Site tags come from SettlementAnchor.site_tags, to be added by S0 and S2.",
+        "fr": "Valeurs de worldbuilding, à évaluer dans les bilans. Les étiquettes de site viennent de SettlementAnchor.site_tags, à ajouter par S0 et S2."
+      }
     },
     "alignment": {
       "parameters_status": "worldbuilding_starting_values_not_calibrated",
@@ -1525,13 +1621,19 @@
           "draws": 3,
           "bound_bps": 1500
         },
-        "rule": "Axe = base culturelle + latent familial (somme de 3 tirages uniformes entiers dans [-1500, 1500], clé de famille du §8.4) + écart individuel stable (3 tirages dans [-1500, 1500]), puis borné aux axes."
+        "rule": {
+          "en": "Axis = cultural base + family latent (sum of 3 uniform integer draws in [-1500, 1500], family key of §8.4) + stable individual offset (3 draws in [-1500, 1500]), then clamped to the axes.",
+          "fr": "Axe = base culturelle + latent familial (somme de 3 tirages uniformes entiers dans [-1500, 1500], clé de famille du §8.4) + écart individuel stable (3 tirages dans [-1500, 1500]), puis borné aux axes."
+        }
       },
       "organization_axis_draws": {
         "substream": "alignment/v1",
         "draws_per_axis": 3,
         "per_draw_bound": "floor(spread_bps / 2)",
-        "rule": "Écart de slot = somme de 3 tirages entiers uniformes dans [-floor(spread/2), +floor(spread/2)], où spread vient de `archetype_alignment`. Axe = base de l'archétype + écart de slot, puis borné. Les vues (lineage_view, household_view) ont un écart nul : leur alignement est une lecture sans tirage."
+        "rule": {
+          "en": "Slot offset = sum of 3 uniform integer draws in [-floor(spread/2), +floor(spread/2)], where spread comes from `archetype_alignment`. Axis = archetype base + slot offset, then clamped. Views (lineage_view, household_view) have a zero offset: their alignment is a reading without any draw.",
+          "fr": "Écart de slot = somme de 3 tirages entiers uniformes dans [-floor(spread/2), +floor(spread/2)], où spread vient de `archetype_alignment`. Axe = base de l'archétype + écart de slot, puis borné. Les vues (lineage_view, household_view) ont un écart nul : leur alignement est une lecture sans tirage."
+        }
       },
       "legal_status_thresholds": {
         "conformity_proscribed_at_or_below_bps": -5000,
@@ -1540,14 +1642,29 @@
       },
       "conformity": {
         "status": "proposed_by_S1_not_fixed_by_spec",
-        "formula": "conformity_bps = clamp(10 x (pire poids constitutif + min(200, floor(meilleure vertu / 2))), -10000, 10000) sur les `defining_tags` ; sans poids négatif, 10 x meilleure vertu ; sans tag constitutif, 0.",
+        "formula": {
+          "en": "conformity_bps = clamp(10 x (worst defining weight + min(200, floor(best virtue / 2))), -10000, 10000) over the `defining_tags`; with no negative weight, 10 x best virtue; with no defining tag, 0.",
+          "fr": "conformity_bps = clamp(10 x (pire poids constitutif + min(200, floor(meilleure vertu / 2))), -10000, 10000) sur les `defining_tags` ; sans poids négatif, 10 x meilleure vertu ; sans tag constitutif, 0."
+        },
         "scale": 10,
         "attenuation_cap": 200,
         "attenuation_divisor": 2,
-        "rounding": "division euclidienne (plancher pour un diviseur positif)",
-        "risk_tags": "Les `risk_tags` (corruption, exploitation) mesurent un risque de dérive et n'entrent jamais dans la conformité.",
-        "jurisdiction_organs": "Les archétypes `jurisdiction_organ` sont exemptés : la juridiction ne proscrit pas ses propres organes.",
-        "weight_source": "Poids effectif d'un tag = poids du profil de culte de la juridiction s'il en définit un, sinon poids de la famille.",
+        "rounding": {
+          "en": "Euclidean division (floor for a positive divisor)",
+          "fr": "division euclidienne (plancher pour un diviseur positif)"
+        },
+        "risk_tags": {
+          "en": "The `risk_tags` (corruption, exploitation) measure a risk of drift and never enter conformity.",
+          "fr": "Les `risk_tags` (corruption, exploitation) mesurent un risque de dérive et n'entrent jamais dans la conformité."
+        },
+        "jurisdiction_organs": {
+          "en": "`jurisdiction_organ` archetypes are exempt: a jurisdiction does not proscribe its own organs.",
+          "fr": "Les archétypes `jurisdiction_organ` sont exemptés : la juridiction ne proscrit pas ses propres organes."
+        },
+        "weight_source": {
+          "en": "Effective weight of a tag = weight in the jurisdiction's cult profile if it defines one, otherwise the family's weight.",
+          "fr": "Poids effectif d'un tag = poids du profil de culte de la juridiction s'il en définit un, sinon poids de la famille."
+        },
         "value_weight_bounds": {
           "min": -1000,
           "max": 1000
@@ -1557,7 +1674,10 @@
         "form": "multiplicative",
         "floor_per_mille": 100,
         "divisor": 20,
-        "rule": "alignment_fit = max(100, 1000 - floor((|d_morality| + |d_lawfulness|) / 20)) ; poids final = floor(poids du §23.2 x alignment_fit / 1000)"
+        "rule": {
+          "en": "alignment_fit = max(100, 1000 - floor((|d_morality| + |d_lawfulness|) / 20)); final weight = floor(weight of §23.2 x alignment_fit / 1000)",
+          "fr": "alignment_fit = max(100, 1000 - floor((|d_morality| + |d_lawfulness|) / 20)) ; poids final = floor(poids du §23.2 x alignment_fit / 1000)"
+        }
       },
       "visibility_values": [
         "open",
@@ -1581,7 +1701,10 @@
         0,
         10000
       ],
-      "meaning": "Probabilité de suivre l’affinité d’activité familiale pour les attributs sociaux procéduraux manquants."
+      "meaning": {
+        "en": "Probability of following the family activity affinity for missing procedural social attributes.",
+        "fr": "Probabilité de suivre l’affinité d’activité familiale pour les attributs sociaux procéduraux manquants."
+      }
     },
     "status_inheritance_bps": {
       "unit": "bps",
@@ -1589,7 +1712,10 @@
         0,
         10000
       ],
-      "meaning": "Probabilité de suivre l’affinité familiale de statut ; les valeurs déjà établies du noyau sont conservées."
+      "meaning": {
+        "en": "Probability of following the family status affinity; values already established by the core are kept.",
+        "fr": "Probabilité de suivre l’affinité familiale de statut ; les valeurs déjà établies du noyau sont conservées."
+      }
     },
     "kin_recruitment_bonus": {
       "unit": "integer_score",
@@ -1605,7 +1731,10 @@
         0,
         100
       ],
-      "formula": "Stock actif = formal_associations_per_1000_adults * adultes_attendus / 1000 * poids / 50"
+      "formula": {
+        "en": "Active stock = formal_associations_per_1000_adults * expected_adults / 1000 * weight / 50",
+        "fr": "Stock actif = formal_associations_per_1000_adults * adultes_attendus / 1000 * poids / 50"
+      }
     },
     "geographic_mobility_multiplier_ppm": {
       "unit": "ppm",
@@ -1613,7 +1742,10 @@
         0,
         10000000
       ],
-      "formula": "Effective domain baseline migration rate = base rate * multiplier / 1000000; a domain resolves one society profile in S3."
+      "formula": {
+        "en": "Effective domain baseline migration rate = base rate * multiplier / 1000000; a domain resolves one society profile in S3.",
+        "fr": "Taux de migration de base effectif du domaine = taux de base * multiplicateur / 1000000 ; un domaine résout un profil de société en S3."
+      }
     },
     "cohesion_mean_bps": {
       "unit": "bps",
@@ -1621,11 +1753,17 @@
         0,
         10000
       ],
-      "meaning": "Cohésion initiale moyenne avant les événements explicites ; aucun parcours annuel de tous les agents."
+      "meaning": {
+        "en": "Mean initial cohesion before explicit events; no yearly pass over all agents.",
+        "fr": "Cohésion initiale moyenne avant les événements explicites ; aucun parcours annuel de tous les agents."
+      }
     },
     "friend_circles_per_1000_adults": {
       "unit": "expected_active_stock_per_1000_adults",
-      "formula": "Births per 10-year block = active stock * 10 / mean_lifetime_years; bootstrap initializes active stock."
+      "formula": {
+        "en": "Births per 10-year block = active stock * 10 / mean_lifetime_years; bootstrap initializes active stock.",
+        "fr": "Naissances par bloc de 10 ans = stock actif * 10 / durée_de_vie_moyenne_en_années ; l'amorçage initialise le stock actif."
+      }
     },
     "setting_profile": {
       "unit": "enum",
@@ -1634,7 +1772,10 @@
         "low_fantasy",
         "high_fantasy"
       ],
-      "meaning": "Réglage de fantastique du monde, obligatoire dans WorldSpecV2 (§2.1). Ordre historical < low_fantasy < high_fantasy. Un archétype est actif seulement si son `setting` est inférieur ou égal au réglage du monde ; un monde historique n'active aucun archétype fantastique. Les overlays à `world_activation_min_setting` s'activent au niveau du monde, sans dépendre des 79 raccords."
+      "meaning": {
+        "en": "World fantasy setting, mandatory in WorldSpecV2 (§2.1). Order historical < low_fantasy < high_fantasy. An archetype is active only if its `setting` is less than or equal to the world's setting; a historical world activates no fantasy archetype. Overlays with `world_activation_min_setting` activate at world level, without depending on the 79 bindings.",
+        "fr": "Réglage de fantastique du monde, obligatoire dans WorldSpecV2 (§2.1). Ordre historical < low_fantasy < high_fantasy. Un archétype est actif seulement si son `setting` est inférieur ou égal au réglage du monde ; un monde historique n'active aucun archétype fantastique. Les overlays à `world_activation_min_setting` s'activent au niveau du monde, sans dépendre des 79 raccords."
+      }
     }
   },
   "archetype_definitions": [
@@ -5605,70 +5746,100 @@
       "id": "aquatic_access",
       "role": "spatial_or_material_tag",
       "social_effects": "none_unless_explicitly_overridden",
-      "description": "Tag de variante déclaré ; il ne déduit automatiquement ni biologie, ni règle juridique, ni titre.",
+      "description": {
+        "en": "Declared variant tag; it does not automatically imply any biology, legal rule or title.",
+        "fr": "Tag de variante déclaré ; il ne déduit automatiquement ni biologie, ni règle juridique, ni titre."
+      },
       "archetype_ids": []
     },
     {
       "id": "canal_craft",
       "role": "spatial_or_material_tag",
       "social_effects": "none_unless_explicitly_overridden",
-      "description": "Tag de variante déclaré ; il ne déduit automatiquement ni biologie, ni règle juridique, ni titre.",
+      "description": {
+        "en": "Declared variant tag; it does not automatically imply any biology, legal rule or title.",
+        "fr": "Tag de variante déclaré ; il ne déduit automatiquement ni biologie, ni règle juridique, ni titre."
+      },
       "archetype_ids": []
     },
     {
       "id": "cold_seasonality",
       "role": "spatial_or_material_tag",
       "social_effects": "none_unless_explicitly_overridden",
-      "description": "Tag de variante déclaré ; il ne déduit automatiquement ni biologie, ni règle juridique, ni titre.",
+      "description": {
+        "en": "Declared variant tag; it does not automatically imply any biology, legal rule or title.",
+        "fr": "Tag de variante déclaré ; il ne déduit automatiquement ni biologie, ni règle juridique, ni titre."
+      },
       "archetype_ids": []
     },
     {
       "id": "compact_communal_housing",
       "role": "spatial_or_material_tag",
       "social_effects": "none_unless_explicitly_overridden",
-      "description": "Tag de variante déclaré ; il ne déduit automatiquement ni biologie, ni règle juridique, ni titre.",
+      "description": {
+        "en": "Declared variant tag; it does not automatically imply any biology, legal rule or title.",
+        "fr": "Tag de variante déclaré ; il ne déduit automatiquement ni biologie, ni règle juridique, ni titre."
+      },
       "archetype_ids": []
     },
     {
       "id": "forest_access",
       "role": "spatial_or_material_tag",
       "social_effects": "none_unless_explicitly_overridden",
-      "description": "Tag de variante déclaré ; il ne déduit automatiquement ni biologie, ni règle juridique, ni titre.",
+      "description": {
+        "en": "Declared variant tag; it does not automatically imply any biology, legal rule or title.",
+        "fr": "Tag de variante déclaré ; il ne déduit automatiquement ni biologie, ni règle juridique, ni titre."
+      },
       "archetype_ids": []
     },
     {
       "id": "fungal_ecology",
       "role": "spatial_or_material_tag",
       "social_effects": "none_unless_explicitly_overridden",
-      "description": "Tag de variante déclaré ; il ne déduit automatiquement ni biologie, ni règle juridique, ni titre.",
+      "description": {
+        "en": "Declared variant tag; it does not automatically imply any biology, legal rule or title.",
+        "fr": "Tag de variante déclaré ; il ne déduit automatiquement ni biologie, ni règle juridique, ni titre."
+      },
       "archetype_ids": []
     },
     {
       "id": "highland_routes",
       "role": "spatial_or_material_tag",
       "social_effects": "none_unless_explicitly_overridden",
-      "description": "Tag de variante déclaré ; il ne déduit automatiquement ni biologie, ni règle juridique, ni titre.",
+      "description": {
+        "en": "Declared variant tag; it does not automatically imply any biology, legal rule or title.",
+        "fr": "Tag de variante déclaré ; il ne déduit automatiquement ni biologie, ni règle juridique, ni titre."
+      },
       "archetype_ids": []
     },
     {
       "id": "lagoon_transport",
       "role": "spatial_or_material_tag",
       "social_effects": "none_unless_explicitly_overridden",
-      "description": "Tag de variante déclaré ; il ne déduit automatiquement ni biologie, ni règle juridique, ni titre.",
+      "description": {
+        "en": "Declared variant tag; it does not automatically imply any biology, legal rule or title.",
+        "fr": "Tag de variante déclaré ; il ne déduit automatiquement ni biologie, ni règle juridique, ni titre."
+      },
       "archetype_ids": []
     },
     {
       "id": "large_body_admission",
       "role": "spatial_or_material_tag",
       "social_effects": "none_unless_explicitly_overridden",
-      "description": "Tag de variante déclaré ; il ne déduit automatiquement ni biologie, ni règle juridique, ni titre.",
+      "description": {
+        "en": "Declared variant tag; it does not automatically imply any biology, legal rule or title.",
+        "fr": "Tag de variante déclaré ; il ne déduit automatiquement ni biologie, ni règle juridique, ni titre."
+      },
       "archetype_ids": []
     },
     {
       "id": "magical_institutions",
       "role": "enable_optional_magic_archetype",
       "social_effects": "enable_optional_archetypes",
-      "description": "Tag de variante déclaré ; il ne déduit automatiquement ni biologie, ni règle juridique, ni titre.",
+      "description": {
+        "en": "Declared variant tag; it does not automatically imply any biology, legal rule or title.",
+        "fr": "Tag de variante déclaré ; il ne déduit automatiquement ni biologie, ni règle juridique, ni titre."
+      },
       "archetype_ids": [
         "magical_school"
       ]
@@ -5677,7 +5848,10 @@
       "id": "mortuary_institutions",
       "role": "enable_optional_mortuary_archetype",
       "social_effects": "enable_optional_archetypes",
-      "description": "Tag de variante déclaré ; il ne déduit automatiquement ni biologie, ni règle juridique, ni titre.",
+      "description": {
+        "en": "Declared variant tag; it does not automatically imply any biology, legal rule or title.",
+        "fr": "Tag de variante déclaré ; il ne déduit automatiquement ni biologie, ni règle juridique, ni titre."
+      },
       "archetype_ids": [
         "mortuary_confraternity"
       ]
@@ -5686,91 +5860,130 @@
       "id": "pastoral_mobility",
       "role": "spatial_or_material_tag",
       "social_effects": "none_unless_explicitly_overridden",
-      "description": "Tag de variante déclaré ; il ne déduit automatiquement ni biologie, ni règle juridique, ni titre.",
+      "description": {
+        "en": "Declared variant tag; it does not automatically imply any biology, legal rule or title.",
+        "fr": "Tag de variante déclaré ; il ne déduit automatiquement ni biologie, ni règle juridique, ni titre."
+      },
       "archetype_ids": []
     },
     {
       "id": "planned_foundation",
       "role": "spatial_or_material_tag",
       "social_effects": "none_unless_explicitly_overridden",
-      "description": "Tag de variante déclaré ; il ne déduit automatiquement ni biologie, ni règle juridique, ni titre.",
+      "description": {
+        "en": "Declared variant tag; it does not automatically imply any biology, legal rule or title.",
+        "fr": "Tag de variante déclaré ; il ne déduit automatiquement ni biologie, ni règle juridique, ni titre."
+      },
       "archetype_ids": []
     },
     {
       "id": "reproduction_profile_required",
       "role": "require_explicit_ancestry_profile",
       "social_effects": "none_unless_explicitly_overridden",
-      "description": "Tag de variante déclaré ; il ne déduit automatiquement ni biologie, ni règle juridique, ni titre.",
+      "description": {
+        "en": "Declared variant tag; it does not automatically imply any biology, legal rule or title.",
+        "fr": "Tag de variante déclaré ; il ne déduit automatiquement ni biologie, ni règle juridique, ni titre."
+      },
       "archetype_ids": []
     },
     {
       "id": "river_corridor",
       "role": "spatial_or_material_tag",
       "social_effects": "none_unless_explicitly_overridden",
-      "description": "Tag de variante déclaré ; il ne déduit automatiquement ni biologie, ni règle juridique, ni titre.",
+      "description": {
+        "en": "Declared variant tag; it does not automatically imply any biology, legal rule or title.",
+        "fr": "Tag de variante déclaré ; il ne déduit automatiquement ni biologie, ni règle juridique, ni titre."
+      },
       "archetype_ids": []
     },
     {
       "id": "seasonal_mobility",
       "role": "spatial_or_material_tag",
       "social_effects": "none_unless_explicitly_overridden",
-      "description": "Tag de variante déclaré ; il ne déduit automatiquement ni biologie, ni règle juridique, ni titre.",
+      "description": {
+        "en": "Declared variant tag; it does not automatically imply any biology, legal rule or title.",
+        "fr": "Tag de variante déclaré ; il ne déduit automatiquement ni biologie, ni règle juridique, ni titre."
+      },
       "archetype_ids": []
     },
     {
       "id": "stone_enclosures",
       "role": "spatial_or_material_tag",
       "social_effects": "none_unless_explicitly_overridden",
-      "description": "Tag de variante déclaré ; il ne déduit automatiquement ni biologie, ni règle juridique, ni titre.",
+      "description": {
+        "en": "Declared variant tag; it does not automatically imply any biology, legal rule or title.",
+        "fr": "Tag de variante déclaré ; il ne déduit automatiquement ni biologie, ni règle juridique, ni titre."
+      },
       "archetype_ids": []
     },
     {
       "id": "subterranean_access",
       "role": "spatial_or_material_tag",
       "social_effects": "none_unless_explicitly_overridden",
-      "description": "Tag de variante déclaré ; il ne déduit automatiquement ni biologie, ni règle juridique, ni titre.",
+      "description": {
+        "en": "Declared variant tag; it does not automatically imply any biology, legal rule or title.",
+        "fr": "Tag de variante déclaré ; il ne déduit automatiquement ni biologie, ni règle juridique, ni titre."
+      },
       "archetype_ids": []
     },
     {
       "id": "terrace_agriculture",
       "role": "spatial_or_material_tag",
       "social_effects": "none_unless_explicitly_overridden",
-      "description": "Tag de variante déclaré ; il ne déduit automatiquement ni biologie, ni règle juridique, ni titre.",
+      "description": {
+        "en": "Declared variant tag; it does not automatically imply any biology, legal rule or title.",
+        "fr": "Tag de variante déclaré ; il ne déduit automatiquement ni biologie, ni règle juridique, ni titre."
+      },
       "archetype_ids": []
     },
     {
       "id": "tidal_seasonality",
       "role": "spatial_or_material_tag",
       "social_effects": "none_unless_explicitly_overridden",
-      "description": "Tag de variante déclaré ; il ne déduit automatiquement ni biologie, ni règle juridique, ni titre.",
+      "description": {
+        "en": "Declared variant tag; it does not automatically imply any biology, legal rule or title.",
+        "fr": "Tag de variante déclaré ; il ne déduit automatiquement ni biologie, ni règle juridique, ni titre."
+      },
       "archetype_ids": []
     },
     {
       "id": "vertical_households",
       "role": "spatial_or_material_tag",
       "social_effects": "none_unless_explicitly_overridden",
-      "description": "Tag de variante déclaré ; il ne déduit automatiquement ni biologie, ni règle juridique, ni titre.",
+      "description": {
+        "en": "Declared variant tag; it does not automatically imply any biology, legal rule or title.",
+        "fr": "Tag de variante déclaré ; il ne déduit automatiquement ni biologie, ni règle juridique, ni titre."
+      },
       "archetype_ids": []
     },
     {
       "id": "water_access",
       "role": "spatial_or_material_tag",
       "social_effects": "none_unless_explicitly_overridden",
-      "description": "Tag de variante déclaré ; il ne déduit automatiquement ni biologie, ni règle juridique, ni titre.",
+      "description": {
+        "en": "Declared variant tag; it does not automatically imply any biology, legal rule or title.",
+        "fr": "Tag de variante déclaré ; il ne déduit automatiquement ni biologie, ni règle juridique, ni titre."
+      },
       "archetype_ids": []
     },
     {
       "id": "wetland_access",
       "role": "spatial_or_material_tag",
       "social_effects": "none_unless_explicitly_overridden",
-      "description": "Tag de variante déclaré ; il ne déduit automatiquement ni biologie, ni règle juridique, ni titre.",
+      "description": {
+        "en": "Declared variant tag; it does not automatically imply any biology, legal rule or title.",
+        "fr": "Tag de variante déclaré ; il ne déduit automatiquement ni biologie, ni règle juridique, ni titre."
+      },
       "archetype_ids": []
     },
     {
       "id": "arcane_orders",
       "role": "enable_optional_fantasy_archetypes",
       "social_effects": "enable_optional_archetypes",
-      "description": "Active les ordres, ateliers et autorités de pratique magique organisée. Actif au niveau du monde dès `low_fantasy` ; chaque archétype garde son propre `setting`.",
+      "description": {
+        "en": "Enables orders, workshops and authorities of organized magical practice. Active at world level from `low_fantasy`; each archetype keeps its own `setting`.",
+        "fr": "Active les ordres, ateliers et autorités de pratique magique organisée. Actif au niveau du monde dès `low_fantasy` ; chaque archétype garde son propre `setting`."
+      },
       "archetype_ids": [
         "magical_school",
         "mage_order",
@@ -5784,7 +5997,10 @@
       "id": "forbidden_arts",
       "role": "enable_optional_fantasy_archetypes",
       "social_effects": "enable_optional_archetypes",
-      "description": "Active les groupes liés aux arts interdits (nécromanciens, cultes infernaux). Actif au niveau du monde dès `low_fantasy`.",
+      "description": {
+        "en": "Enables groups tied to forbidden arts (necromancers, infernal cults). Active at world level from `low_fantasy`.",
+        "fr": "Active les groupes liés aux arts interdits (nécromanciens, cultes infernaux). Actif au niveau du monde dès `low_fantasy`."
+      },
       "archetype_ids": [
         "necromancers_circle",
         "infernal_cult"
@@ -5795,7 +6011,10 @@
       "id": "wild_lore",
       "role": "enable_optional_fantasy_archetypes",
       "social_effects": "enable_optional_archetypes",
-      "description": "Active cercles de sorcières, druides, chasseurs de monstres, compagnies d'aventuriers et gardiens de sites anciens. Actif au niveau du monde dès `low_fantasy`.",
+      "description": {
+        "en": "Enables witch circles, druids, monster hunters, adventuring companies and guardians of ancient sites. Active at world level from `low_fantasy`.",
+        "fr": "Active cercles de sorcières, druides, chasseurs de monstres, compagnies d'aventuriers et gardiens de sites anciens. Actif au niveau du monde dès `low_fantasy`."
+      },
       "archetype_ids": [
         "witch_coven",
         "druid_circle",
@@ -5809,7 +6028,10 @@
       "id": "sacred_arts",
       "role": "enable_optional_fantasy_archetypes",
       "social_effects": "enable_optional_archetypes",
-      "description": "Active les ordres dont les pouvoirs surnaturels servent le bien. Actif au niveau du monde dès `low_fantasy`.",
+      "description": {
+        "en": "Enables orders whose supernatural powers serve the good. Active at world level from `low_fantasy`.",
+        "fr": "Active les ordres dont les pouvoirs surnaturels servent le bien. Actif au niveau du monde dès `low_fantasy`."
+      },
       "archetype_ids": [
         "holy_order"
       ],
@@ -5819,7 +6041,10 @@
       "id": "otherworld_courts",
       "role": "enable_optional_fantasy_archetypes",
       "social_effects": "enable_optional_archetypes",
-      "description": "Active les cours de puissances surnaturelles déclarées (féeriques, draconiques). Les membres exigent un profil d'ascendance explicite fourni par l'auteur. Actif au niveau du monde dès `high_fantasy`.",
+      "description": {
+        "en": "Enables the courts of declared supernatural powers (fey, draconic). Members require an explicit ancestry profile supplied by the author. Active at world level from `high_fantasy`.",
+        "fr": "Active les cours de puissances surnaturelles déclarées (féeriques, draconiques). Les membres exigent un profil d'ascendance explicite fourni par l'auteur. Actif au niveau du monde dès `high_fantasy`."
+      },
       "archetype_ids": [
         "fey_court",
         "dragon_court"
@@ -5830,7 +6055,10 @@
       "id": "nonhuman_presence",
       "role": "enable_optional_fantasy_archetypes",
       "social_effects": "enable_optional_archetypes",
-      "description": "Active les enclaves dont les membres relèvent d'un profil d'ascendance explicite. Aucun alignement n'en est déduit : seule la conduite compte. Actif au niveau du monde dès `high_fantasy`.",
+      "description": {
+        "en": "Enables enclaves whose members belong to an explicit ancestry profile. No alignment is inferred from it: only conduct counts. Active at world level from `high_fantasy`.",
+        "fr": "Active les enclaves dont les membres relèvent d'un profil d'ascendance explicite. Aucun alignement n'en est déduit : seule la conduite compte. Actif au niveau du monde dès `high_fantasy`."
+      },
       "archetype_ids": [
         "nonhuman_enclave"
       ],
@@ -5840,7 +6068,10 @@
       "id": "monstrous_threat",
       "role": "scale_optional_archetype",
       "social_effects": "scale_archetype",
-      "description": "Fait de `raiding_band` une grande horde : taille et poids multipliés, sans exigence d'ascendance. La horde se définit par sa conduite de pillage, jamais par l'espèce de ses membres. Actif au niveau du monde dès `low_fantasy`.",
+      "description": {
+        "en": "Makes `raiding_band` a great horde: size and weight multiplied, with no ancestry requirement. The horde is defined by its raiding conduct, never by the species of its members. Active at world level from `low_fantasy`.",
+        "fr": "Fait de `raiding_band` une grande horde : taille et poids multipliés, sans exigence d'ascendance. La horde se définit par sa conduite de pillage, jamais par l'espèce de ses membres. Actif au niveau du monde dès `low_fantasy`."
+      },
       "archetype_ids": [],
       "world_activation_min_setting": "low_fantasy",
       "archetype_modifiers": {
@@ -7118,67 +7349,115 @@
   "site_tag_definitions": [
     {
       "id": "rural",
-      "description": "Établissement rural, hors enceinte."
+      "description": {
+        "en": "Rural settlement, outside any enclosure.",
+        "fr": "Établissement rural, hors enceinte."
+      }
     },
     {
       "id": "coastal",
-      "description": "Accès à la mer ou à un grand lac."
+      "description": {
+        "en": "Access to the sea or a large lake.",
+        "fr": "Accès à la mer ou à un grand lac."
+      }
     },
     {
       "id": "river",
-      "description": "Accès à une rivière navigable ou à un point d'eau important."
+      "description": {
+        "en": "Access to a navigable river or an important water source.",
+        "fr": "Accès à une rivière navigable ou à un point d'eau important."
+      }
     },
     {
       "id": "port",
-      "description": "Port organisé, avec quais et armement."
+      "description": {
+        "en": "Organized port, with quays and shipbuilding.",
+        "fr": "Port organisé, avec quais et armement."
+      }
     },
     {
       "id": "crossroads",
-      "description": "Croisement de routes marchandes ou de pèlerinage."
+      "description": {
+        "en": "Crossing of trade or pilgrimage routes.",
+        "fr": "Croisement de routes marchandes ou de pèlerinage."
+      }
     },
     {
       "id": "walled",
-      "description": "Enceinte fortifiée."
+      "description": {
+        "en": "Fortified enclosure.",
+        "fr": "Enceinte fortifiée."
+      }
     },
     {
       "id": "frontier",
-      "description": "Marche ou frontière contestée."
+      "description": {
+        "en": "Contested march or frontier.",
+        "fr": "Marche ou frontière contestée."
+      }
     },
     {
       "id": "mineral",
-      "description": "Gisement, carrière ou ressource minérale exploitable."
+      "description": {
+        "en": "Deposit, quarry or exploitable mineral resource.",
+        "fr": "Gisement, carrière ou ressource minérale exploitable."
+      }
     },
     {
       "id": "saltpan",
-      "description": "Marais salants ou source salée exploitée."
+      "description": {
+        "en": "Salt marshes or exploited salt spring.",
+        "fr": "Marais salants ou source salée exploitée."
+      }
     },
     {
       "id": "forest",
-      "description": "Massif forestier exploité ou proche."
+      "description": {
+        "en": "Exploited or nearby forest massif.",
+        "fr": "Massif forestier exploité ou proche."
+      }
     },
     {
       "id": "pasture",
-      "description": "Pâturages étendus ou transhumance."
+      "description": {
+        "en": "Extensive pastures or transhumance.",
+        "fr": "Pâturages étendus ou transhumance."
+      }
     },
     {
       "id": "lordly_seat",
-      "description": "Siège d'un seigneur ou d'une cour locale."
+      "description": {
+        "en": "Seat of a lord or a local court.",
+        "fr": "Siège d'un seigneur ou d'une cour locale."
+      }
     },
     {
       "id": "capital",
-      "description": "Capitale d'une polity."
+      "description": {
+        "en": "Capital of a polity.",
+        "fr": "Capitale d'une polity."
+      }
     },
     {
       "id": "shrine",
-      "description": "Sanctuaire, centre de pèlerinage ou siège religieux majeur."
+      "description": {
+        "en": "Sanctuary, pilgrimage centre or major religious seat.",
+        "fr": "Sanctuaire, centre de pèlerinage ou siège religieux majeur."
+      }
     },
     {
       "id": "ancient_site",
-      "description": "Ruine, tertre ou lieu ancien marqué par l'hôte spatial."
+      "description": {
+        "en": "Ruin, mound or ancient place marked by the spatial host.",
+        "fr": "Ruine, tertre ou lieu ancien marqué par l'hôte spatial."
+      }
     },
     {
       "id": "multicultural",
-      "description": "Site où plusieurs cultures ou cultes cohabitent."
+      "description": {
+        "en": "Site where several cultures or cults coexist.",
+        "fr": "Site où plusieurs cultures ou cultes cohabitent."
+      }
     }
   ],
   "birth_event_definitions": [
@@ -7198,344 +7477,602 @@
   "conduct_tag_definitions": [
     {
       "id": "violence",
-      "label": "Violence",
-      "description": "Recours à la force physique contre autrui.",
+      "label": {
+        "en": "Violence",
+        "fr": "Violence"
+      },
+      "description": {
+        "en": "Use of physical force against others.",
+        "fr": "Recours à la force physique contre autrui."
+      },
       "role": "conduct",
       "weight_min": -1000,
       "weight_max": 300
     },
     {
       "id": "extortion",
-      "label": "Extorsion",
-      "description": "Protection forcée, rançonnement, chantage.",
+      "label": {
+        "en": "Extortion",
+        "fr": "Extorsion"
+      },
+      "description": {
+        "en": "Forced protection, racketeering, blackmail.",
+        "fr": "Protection forcée, rançonnement, chantage."
+      },
       "role": "conduct",
       "weight_min": -1000,
       "weight_max": -600
     },
     {
       "id": "theft",
-      "label": "Vol",
-      "description": "Prise de biens sans consentement, brigandage, recel.",
+      "label": {
+        "en": "Theft",
+        "fr": "Vol"
+      },
+      "description": {
+        "en": "Taking goods without consent, banditry, fencing.",
+        "fr": "Prise de biens sans consentement, brigandage, recel."
+      },
       "role": "conduct",
       "weight_min": -1000,
       "weight_max": -600
     },
     {
       "id": "smuggling",
-      "label": "Contrebande",
-      "description": "Commerce de biens interdits ou soustraits aux droits.",
+      "label": {
+        "en": "Smuggling",
+        "fr": "Contrebande"
+      },
+      "description": {
+        "en": "Trade in forbidden goods or goods withheld from duties.",
+        "fr": "Commerce de biens interdits ou soustraits aux droits."
+      },
       "role": "conduct",
       "weight_min": -1000,
       "weight_max": 300
     },
     {
       "id": "fraud",
-      "label": "Fraude",
-      "description": "Falsification, tromperie, faux document ou fausse monnaie.",
+      "label": {
+        "en": "Fraud",
+        "fr": "Fraude"
+      },
+      "description": {
+        "en": "Forgery, deception, false documents or counterfeit coin.",
+        "fr": "Falsification, tromperie, faux document ou fausse monnaie."
+      },
       "role": "conduct",
       "weight_min": -1000,
       "weight_max": -500
     },
     {
       "id": "slavery",
-      "label": "Esclavage",
-      "description": "Possession ou commerce de personnes.",
+      "label": {
+        "en": "Slavery",
+        "fr": "Esclavage"
+      },
+      "description": {
+        "en": "Ownership of or trade in persons.",
+        "fr": "Possession ou commerce de personnes."
+      },
       "role": "conduct",
       "weight_min": -1000,
       "weight_max": 300
     },
     {
       "id": "assassination",
-      "label": "Assassinat",
-      "description": "Meurtre commandité.",
+      "label": {
+        "en": "Assassination",
+        "fr": "Assassinat"
+      },
+      "description": {
+        "en": "Contract killing.",
+        "fr": "Meurtre commandité."
+      },
       "role": "conduct",
       "weight_min": -1000,
       "weight_max": -750
     },
     {
       "id": "piracy",
-      "label": "Piraterie",
-      "description": "Prise de navires et de cargaisons en mer.",
+      "label": {
+        "en": "Piracy",
+        "fr": "Piraterie"
+      },
+      "description": {
+        "en": "Seizure of ships and cargoes at sea.",
+        "fr": "Prise de navires et de cargaisons en mer."
+      },
       "role": "conduct",
       "weight_min": -1000,
       "weight_max": -600
     },
     {
       "id": "raiding",
-      "label": "Pillage",
-      "description": "Razzia et pillage de populations ou de convois.",
+      "label": {
+        "en": "Plunder",
+        "fr": "Pillage"
+      },
+      "description": {
+        "en": "Raiding and plundering of populations or convoys.",
+        "fr": "Razzia et pillage de populations ou de convois."
+      },
       "role": "conduct",
       "weight_min": -1000,
       "weight_max": 300
     },
     {
       "id": "corruption",
-      "label": "Corruption",
-      "description": "Détournement d'une charge ou d'une règle contre avantage.",
+      "label": {
+        "en": "Corruption",
+        "fr": "Corruption"
+      },
+      "description": {
+        "en": "Diversion of an office or a rule for advantage.",
+        "fr": "Détournement d'une charge ou d'une règle contre avantage."
+      },
       "role": "risk",
       "weight_min": -1000,
       "weight_max": 300
     },
     {
       "id": "usury",
-      "label": "Usure",
-      "description": "Prêt à intérêt, sa valeur étant discutée selon les cultures.",
+      "label": {
+        "en": "Usury",
+        "fr": "Usure"
+      },
+      "description": {
+        "en": "Lending at interest, its worth being debated across cultures.",
+        "fr": "Prêt à intérêt, sa valeur étant discutée selon les cultures."
+      },
       "role": "conduct",
       "weight_min": -450,
       "weight_max": 300
     },
     {
       "id": "charity",
-      "label": "Charité",
-      "description": "Don et secours aux démunis sans contrepartie.",
+      "label": {
+        "en": "Charity",
+        "fr": "Charité"
+      },
+      "description": {
+        "en": "Giving and relief to the destitute without return.",
+        "fr": "Don et secours aux démunis sans contrepartie."
+      },
       "role": "conduct",
       "weight_min": 0,
       "weight_max": 1000
     },
     {
       "id": "hospitality",
-      "label": "Hospitalité",
-      "description": "Accueil du voyageur et de l'étranger.",
+      "label": {
+        "en": "Hospitality",
+        "fr": "Hospitalité"
+      },
+      "description": {
+        "en": "Welcoming the traveller and the stranger.",
+        "fr": "Accueil du voyageur et de l'étranger."
+      },
       "role": "conduct",
       "weight_min": 0,
       "weight_max": 1000
     },
     {
       "id": "healing",
-      "label": "Soin",
-      "description": "Soins aux malades et aux blessés.",
+      "label": {
+        "en": "Care",
+        "fr": "Soin"
+      },
+      "description": {
+        "en": "Care for the sick and wounded.",
+        "fr": "Soins aux malades et aux blessés."
+      },
       "role": "conduct",
       "weight_min": 0,
       "weight_max": 1000
     },
     {
       "id": "piety",
-      "label": "Piété",
-      "description": "Pratique et service d'un culte.",
+      "label": {
+        "en": "Piety",
+        "fr": "Piété"
+      },
+      "description": {
+        "en": "Practice and service of a cult.",
+        "fr": "Pratique et service d'un culte."
+      },
       "role": "conduct",
       "weight_min": 0,
       "weight_max": 1000
     },
     {
       "id": "asceticism",
-      "label": "Ascèse",
-      "description": "Renoncement, pauvreté volontaire, retraite.",
+      "label": {
+        "en": "Asceticism",
+        "fr": "Ascèse"
+      },
+      "description": {
+        "en": "Renunciation, voluntary poverty, retreat.",
+        "fr": "Renoncement, pauvreté volontaire, retraite."
+      },
       "role": "conduct",
       "weight_min": 0,
       "weight_max": 1000
     },
     {
       "id": "heresy",
-      "label": "Hétérodoxie",
-      "description": "Divergence doctrinale par rapport au culte dominant.",
+      "label": {
+        "en": "Heterodoxy",
+        "fr": "Hétérodoxie"
+      },
+      "description": {
+        "en": "Doctrinal divergence from the dominant cult.",
+        "fr": "Divergence doctrinale par rapport au culte dominant."
+      },
       "role": "conduct",
       "weight_min": -1000,
       "weight_max": 300
     },
     {
       "id": "blasphemy",
-      "label": "Blasphème",
-      "description": "Offense publique à ce qu'une culture tient pour sacré.",
+      "label": {
+        "en": "Blasphemy",
+        "fr": "Blasphème"
+      },
+      "description": {
+        "en": "Public offence against what a culture holds sacred.",
+        "fr": "Offense publique à ce qu'une culture tient pour sacré."
+      },
       "role": "conduct",
       "weight_min": -1000,
       "weight_max": 300
     },
     {
       "id": "sorcery",
-      "label": "Sorcellerie",
-      "description": "Pratique d'arts occultes ou magiques.",
+      "label": {
+        "en": "Sorcery",
+        "fr": "Sorcellerie"
+      },
+      "description": {
+        "en": "Practice of occult or magical arts.",
+        "fr": "Pratique d'arts occultes ou magiques."
+      },
       "role": "conduct",
       "weight_min": -450,
       "weight_max": 300
     },
     {
       "id": "necromancy",
-      "label": "Nécromancie",
-      "description": "Commerce avec les morts et usage de leurs restes.",
+      "label": {
+        "en": "Necromancy",
+        "fr": "Nécromancie"
+      },
+      "description": {
+        "en": "Dealings with the dead and use of their remains.",
+        "fr": "Commerce avec les morts et usage de leurs restes."
+      },
       "role": "conduct",
       "weight_min": -1000,
       "weight_max": -700
     },
     {
       "id": "infernal_pact",
-      "label": "Pacte infernal",
-      "description": "Marché avec une puissance hostile ou interdite.",
+      "label": {
+        "en": "Infernal pact",
+        "fr": "Pacte infernal"
+      },
+      "description": {
+        "en": "Bargain with a hostile or forbidden power.",
+        "fr": "Marché avec une puissance hostile ou interdite."
+      },
       "role": "conduct",
       "weight_min": -1000,
       "weight_max": -700
     },
     {
       "id": "secrecy",
-      "label": "Secret",
-      "description": "Existence ou activités cachées.",
+      "label": {
+        "en": "Secrecy",
+        "fr": "Secret"
+      },
+      "description": {
+        "en": "Hidden existence or activities.",
+        "fr": "Existence ou activités cachées."
+      },
       "role": "conduct",
       "weight_min": -1000,
       "weight_max": 300
     },
     {
       "id": "espionage",
-      "label": "Espionnage",
-      "description": "Collecte clandestine de renseignements.",
+      "label": {
+        "en": "Espionage",
+        "fr": "Espionnage"
+      },
+      "description": {
+        "en": "Clandestine gathering of intelligence.",
+        "fr": "Collecte clandestine de renseignements."
+      },
       "role": "conduct",
       "weight_min": -1000,
       "weight_max": 300
     },
     {
       "id": "oathkeeping",
-      "label": "Serment",
-      "description": "Fidélité à la parole donnée, loyauté, vassalité.",
+      "label": {
+        "en": "Oath",
+        "fr": "Serment"
+      },
+      "description": {
+        "en": "Fidelity to one's word, loyalty, vassalage.",
+        "fr": "Fidélité à la parole donnée, loyauté, vassalité."
+      },
       "role": "conduct",
       "weight_min": 0,
       "weight_max": 1000
     },
     {
       "id": "justice",
-      "label": "Justice",
-      "description": "Arbitrage et application de règles reconnues.",
+      "label": {
+        "en": "Justice",
+        "fr": "Justice"
+      },
+      "description": {
+        "en": "Arbitration and enforcement of recognized rules.",
+        "fr": "Arbitrage et application de règles reconnues."
+      },
       "role": "conduct",
       "weight_min": 0,
       "weight_max": 1000
     },
     {
       "id": "punishment",
-      "label": "Châtiment",
-      "description": "Peines, détention, exécution.",
+      "label": {
+        "en": "Punishment",
+        "fr": "Châtiment"
+      },
+      "description": {
+        "en": "Penalties, detention, execution.",
+        "fr": "Peines, détention, exécution."
+      },
       "role": "conduct",
       "weight_min": -450,
       "weight_max": 300
     },
     {
       "id": "coercion",
-      "label": "Contrainte",
-      "description": "Emprise sur les membres, interdiction de partir, intimidation.",
+      "label": {
+        "en": "Coercion",
+        "fr": "Contrainte"
+      },
+      "description": {
+        "en": "Hold over members, ban on leaving, intimidation.",
+        "fr": "Emprise sur les membres, interdiction de partir, intimidation."
+      },
       "role": "conduct",
       "weight_min": -1000,
       "weight_max": 300
     },
     {
       "id": "mercenary_service",
-      "label": "Service soldé",
-      "description": "Violence ou expertise louée à un commanditaire.",
+      "label": {
+        "en": "Paid service",
+        "fr": "Service soldé"
+      },
+      "description": {
+        "en": "Violence or expertise hired out to a client.",
+        "fr": "Violence ou expertise louée à un commanditaire."
+      },
       "role": "conduct",
       "weight_min": -450,
       "weight_max": 300
     },
     {
       "id": "exploitation",
-      "label": "Exploitation",
-      "description": "Extraction de travail ou de rente au détriment des dépendants.",
+      "label": {
+        "en": "Exploitation",
+        "fr": "Exploitation"
+      },
+      "description": {
+        "en": "Extraction of labour or rent to the detriment of dependants.",
+        "fr": "Extraction de travail ou de rente au détriment des dépendants."
+      },
       "role": "risk",
       "weight_min": -1000,
       "weight_max": 300
     },
     {
       "id": "solidarity",
-      "label": "Solidarité",
-      "description": "Entraide entre membres.",
+      "label": {
+        "en": "Solidarity",
+        "fr": "Solidarité"
+      },
+      "description": {
+        "en": "Mutual aid among members.",
+        "fr": "Entraide entre membres."
+      },
       "role": "conduct",
       "weight_min": 0,
       "weight_max": 1000
     },
     {
       "id": "learning",
-      "label": "Savoir",
-      "description": "Étude, enseignement, conservation des connaissances.",
+      "label": {
+        "en": "Knowledge",
+        "fr": "Savoir"
+      },
+      "description": {
+        "en": "Study, teaching, preservation of knowledge.",
+        "fr": "Étude, enseignement, conservation des connaissances."
+      },
       "role": "conduct",
       "weight_min": 0,
       "weight_max": 1000
     },
     {
       "id": "craft_standards",
-      "label": "Règle de métier",
-      "description": "Contrôle de la qualité et de la formation.",
+      "label": {
+        "en": "Craft rule",
+        "fr": "Règle de métier"
+      },
+      "description": {
+        "en": "Control of quality and training.",
+        "fr": "Contrôle de la qualité et de la formation."
+      },
       "role": "conduct",
       "weight_min": 0,
       "weight_max": 1000
     },
     {
       "id": "rebellion",
-      "label": "Rébellion",
-      "description": "Opposition organisée à une autorité.",
+      "label": {
+        "en": "Rebellion",
+        "fr": "Rébellion"
+      },
+      "description": {
+        "en": "Organized opposition to an authority.",
+        "fr": "Opposition organisée à une autorité."
+      },
       "role": "conduct",
       "weight_min": -1000,
       "weight_max": 300
     },
     {
       "id": "gambling",
-      "label": "Jeu",
-      "description": "Jeux d'argent et paris.",
+      "label": {
+        "en": "Gambling",
+        "fr": "Jeu"
+      },
+      "description": {
+        "en": "Gambling and betting.",
+        "fr": "Jeux d'argent et paris."
+      },
       "role": "conduct",
       "weight_min": -450,
       "weight_max": 300
     },
     {
       "id": "stewardship",
-      "label": "Intendance",
-      "description": "Protection des ressources, des lieux et des cycles naturels.",
+      "label": {
+        "en": "Stewardship",
+        "fr": "Intendance"
+      },
+      "description": {
+        "en": "Protection of resources, places and natural cycles.",
+        "fr": "Protection des ressources, des lieux et des cycles naturels."
+      },
       "role": "conduct",
       "weight_min": 0,
       "weight_max": 1000
     },
     {
       "id": "monster_slaying",
-      "label": "Chasse aux monstres",
-      "description": "Traque de prédateurs réputés surnaturels.",
+      "label": {
+        "en": "Monster hunting",
+        "fr": "Chasse aux monstres"
+      },
+      "description": {
+        "en": "Hunting of predators held to be supernatural.",
+        "fr": "Traque de prédateurs réputés surnaturels."
+      },
       "role": "conduct",
       "weight_min": 0,
       "weight_max": 1000
     },
     {
       "id": "mendicancy",
-      "label": "Mendicité",
-      "description": "Vie d'aumône, volontaire ou organisée.",
+      "label": {
+        "en": "Begging",
+        "fr": "Mendicité"
+      },
+      "description": {
+        "en": "Life on alms, voluntary or organized.",
+        "fr": "Vie d'aumône, volontaire ou organisée."
+      },
       "role": "conduct",
       "weight_min": -450,
       "weight_max": 300
     },
     {
       "id": "revelry",
-      "label": "Liesse",
-      "description": "Fêtes, spectacle, sociabilité bruyante.",
+      "label": {
+        "en": "Revelry",
+        "fr": "Liesse"
+      },
+      "description": {
+        "en": "Festivals, shows, boisterous sociability.",
+        "fr": "Fêtes, spectacle, sociabilité bruyante."
+      },
       "role": "conduct",
       "weight_min": 0,
       "weight_max": 1000
     },
     {
       "id": "fair_dealing",
-      "label": "Loyauté en affaires",
-      "description": "Respect des contrats, poids et mesures honnêtes.",
+      "label": {
+        "en": "Business loyalty",
+        "fr": "Loyauté en affaires"
+      },
+      "description": {
+        "en": "Respect for contracts, honest weights and measures.",
+        "fr": "Respect des contrats, poids et mesures honnêtes."
+      },
       "role": "conduct",
       "weight_min": 0,
       "weight_max": 1000
     },
     {
       "id": "hoarding",
-      "label": "Thésaurisation",
-      "description": "Accumulation de richesses ou de réserves sans redistribution.",
+      "label": {
+        "en": "Hoarding",
+        "fr": "Thésaurisation"
+      },
+      "description": {
+        "en": "Accumulation of wealth or reserves without redistribution.",
+        "fr": "Accumulation de richesses ou de réserves sans redistribution."
+      },
       "role": "conduct",
       "weight_min": -450,
       "weight_max": 300
     },
     {
       "id": "prostitution",
-      "label": "Prostitution",
-      "description": "Commerce sexuel, toléré, réglementé ou interdit selon les cultures.",
+      "label": {
+        "en": "Prostitution",
+        "fr": "Prostitution"
+      },
+      "description": {
+        "en": "Sexual commerce, tolerated, regulated or forbidden depending on cultures.",
+        "fr": "Commerce sexuel, toléré, réglementé ou interdit selon les cultures."
+      },
       "role": "conduct",
       "weight_min": -450,
       "weight_max": 300
     },
     {
       "id": "alien_custom",
-      "label": "Coutume étrangère",
-      "description": "Pratiques perçues comme étrangères à la culture hôte.",
+      "label": {
+        "en": "Foreign custom",
+        "fr": "Coutume étrangère"
+      },
+      "description": {
+        "en": "Practices perceived as foreign to the host culture.",
+        "fr": "Pratiques perçues comme étrangères à la culture hôte."
+      },
       "role": "conduct",
       "weight_min": -450,
       "weight_max": 300
     },
     {
       "id": "impure_trade",
-      "label": "Métier impur",
-      "description": "Métier jugé souillant : équarrissage, exécution, ensevelissement.",
+      "label": {
+        "en": "Impure trade",
+        "fr": "Métier impur"
+      },
+      "description": {
+        "en": "Trade judged defiling: knacker work, execution, burial.",
+        "fr": "Métier jugé souillant : équarrissage, exécution, ensevelissement."
+      },
       "role": "conduct",
       "weight_min": -450,
       "weight_max": 300
@@ -7544,7 +8081,10 @@
   "conduct_tag_catalogue_status": "closed_catalogue_extension_requires_new_catalogue_version",
   "cult_value_profiles": {
     "scriptural_church": {
-      "label": "Culte à doctrine écrite et clergé séculier",
+      "label": {
+        "en": "Cult with written doctrine and secular clergy",
+        "fr": "Culte à doctrine écrite et clergé séculier"
+      },
       "parameters_status": "initial_template_not_historical_calibration",
       "weights": {
         "heresy": -900,
@@ -7562,7 +8102,10 @@
       }
     },
     "temple_state_cult": {
-      "label": "Culte civique à temple dominant",
+      "label": {
+        "en": "Civic cult with a dominant temple",
+        "fr": "Culte civique à temple dominant"
+      },
       "parameters_status": "initial_template_not_historical_calibration",
       "weights": {
         "heresy": -600,
@@ -7580,7 +8123,10 @@
       }
     },
     "ancestral_tradition": {
-      "label": "Tradition ancestrale sans clergé séparé",
+      "label": {
+        "en": "Ancestral tradition without a separate clergy",
+        "fr": "Tradition ancestrale sans clergé séparé"
+      },
       "parameters_status": "initial_template_not_historical_calibration",
       "weights": {
         "heresy": -150,
@@ -7598,7 +8144,10 @@
       }
     },
     "nature_tradition": {
-      "label": "Tradition de la nature et des cycles",
+      "label": {
+        "en": "Tradition of nature and cycles",
+        "fr": "Tradition de la nature et des cycles"
+      },
       "parameters_status": "initial_template_not_historical_calibration",
       "weights": {
         "heresy": -100,
@@ -7616,7 +8165,10 @@
       }
     },
     "mystery_tradition": {
-      "label": "Tradition initiatique à degrés",
+      "label": {
+        "en": "Initiatory tradition with degrees",
+        "fr": "Tradition initiatique à degrés"
+      },
       "parameters_status": "initial_template_not_historical_calibration",
       "weights": {
         "heresy": -400,
@@ -7634,7 +8186,10 @@
       }
     },
     "pluralist_custom": {
-      "label": "Coutume pluraliste sans orthodoxie",
+      "label": {
+        "en": "Pluralist custom without orthodoxy",
+        "fr": "Coutume pluraliste sans orthodoxie"
+      },
       "parameters_status": "initial_template_not_historical_calibration",
       "weights": {
         "heresy": -50,
@@ -10650,8 +11205,14 @@
   },
   "name_kind_catalogue": {
     "owner": "namebench",
-    "note": "Namebench possède les kinds ; Chronos liste ici ceux qu'il demande. Le kind ne dépend ni de la famille culturelle ni de la classe morale (le ton est passé à part). Un nom de repli reste `synthetic`. Le régime est la lecture de Chronos du §7 de la spec Namebench, à confirmer.",
-    "fallback_rule": "Un kind pointé se replie sur son parent en retirant le dernier segment (`organization.office.prison` puis `organization.office`) tant que Namebench ne le connaît pas.",
+    "note": {
+      "en": "Namebench owns the kinds; Chronos lists here those it requests. The kind depends neither on the cultural family nor on the moral class (the tone is passed separately). A fallback name remains `synthetic`. The regime is Chronos's reading of §7 of the Namebench spec, to be confirmed.",
+      "fr": "Namebench possède les kinds ; Chronos liste ici ceux qu'il demande. Le kind ne dépend ni de la famille culturelle ni de la classe morale (le ton est passé à part). Un nom de repli reste `synthetic`. Le régime est la lecture de Chronos du §7 de la spec Namebench, à confirmer."
+    },
+    "fallback_rule": {
+      "en": "A requested kind falls back to its parent by removing the last segment (`organization.office.prison` then `organization.office`) as long as Namebench does not know it.",
+      "fr": "Un kind pointé se replie sur son parent en retirant le dernier segment (`organization.office.prison` puis `organization.office`) tant que Namebench ne le connaît pas."
+    },
     "kinds": [
       {
         "kind": "organization.household",
@@ -10815,7 +11376,10 @@
         "kind": "organization.workshop",
         "origin": "proposed_to_namebench",
         "regime": "descriptive",
-        "expected_shape": "métier ou produit plus propriétaire ou lieu : Atelier des Verriers de X",
+        "expected_shape": {
+          "en": "trade or product plus owner or place: Glassmakers' Workshop of X",
+          "fr": "métier ou produit plus propriétaire ou lieu : Atelier des Verriers de X"
+        },
         "archetype_ids": [
           "alchemists_lodge",
           "base_workshop",
@@ -10827,7 +11391,10 @@
         "kind": "organization.crew",
         "origin": "proposed_to_namebench",
         "regime": "emblematic",
-        "expected_shape": "nom de navire ou d'équipage : La Mouette, équipage de X",
+        "expected_shape": {
+          "en": "ship or crew name: The Gull, crew of X",
+          "fr": "nom de navire ou d'équipage : La Mouette, équipage de X"
+        },
         "archetype_ids": [
           "crew",
           "fishing_crew",
@@ -10838,7 +11405,10 @@
         "kind": "organization.band",
         "origin": "proposed_to_namebench",
         "regime": "emblematic",
-        "expected_shape": "bande armée à épithète ou à chef : la Bande du Gué, les Loups de X",
+        "expected_shape": {
+          "en": "armed band with an epithet or a leader: the Ford Band, the Wolves of X",
+          "fr": "bande armée à épithète ou à chef : la Bande du Gué, les Loups de X"
+        },
         "archetype_ids": [
           "bandit_band",
           "outlaw_company",
@@ -10849,7 +11419,10 @@
         "kind": "organization.military_unit",
         "origin": "proposed_to_namebench",
         "regime": "institutional",
-        "expected_shape": "corps armé rattaché à un lieu ou à un seigneur : Milice de X, Garnison de X",
+        "expected_shape": {
+          "en": "armed body attached to a place or a lord: Militia of X, Garrison of X",
+          "fr": "corps armé rattaché à un lieu ou à un seigneur : Milice de X, Garnison de X"
+        },
         "archetype_ids": [
           "garrison",
           "militia"
@@ -10859,7 +11432,10 @@
         "kind": "organization.office",
         "origin": "proposed_to_namebench",
         "regime": "institutional",
-        "expected_shape": "charge ou service plus juridiction : Prévôté de X, Geôle de X, Ambassade de X",
+        "expected_shape": {
+          "en": "office or service plus jurisdiction: Provostship of X, Gaol of X, Embassy of X",
+          "fr": "charge ou service plus juridiction : Prévôté de X, Geôle de X, Ambassade de X"
+        },
         "archetype_ids": [
           "administration",
           "base_local_institution",
@@ -10870,7 +11446,10 @@
         "kind": "organization.tribunal",
         "origin": "proposed_to_namebench",
         "regime": "institutional",
-        "expected_shape": "juridiction plus lieu ou autorité : Tribunal de X, Tribunal doctrinal de X",
+        "expected_shape": {
+          "en": "jurisdiction plus place or authority: Court of X, Doctrinal Court of X",
+          "fr": "juridiction plus lieu ou autorité : Tribunal de X, Tribunal doctrinal de X"
+        },
         "archetype_ids": [
           "law_court"
         ]
@@ -10879,7 +11458,10 @@
         "kind": "organization.court",
         "origin": "proposed_to_namebench",
         "regime": "institutional",
-        "expected_shape": "cour attachée à un titre, un lieu ou une lignée : Cour de X",
+        "expected_shape": {
+          "en": "court attached to a title, a place or a lineage: Court of X",
+          "fr": "cour attachée à un titre, un lieu ou une lignée : Cour de X"
+        },
         "archetype_ids": [
           "court",
           "dragon_court",
@@ -10890,7 +11472,10 @@
         "kind": "organization.domain",
         "origin": "proposed_to_namebench",
         "regime": "institutional",
-        "expected_shape": "seigneurie nommée d'après son lieu ou son détenteur : Seigneurie de X",
+        "expected_shape": {
+          "en": "lordship named after its place or its holder: Lordship of X",
+          "fr": "seigneurie nommée d'après son lieu ou son détenteur : Seigneurie de X"
+        },
         "archetype_ids": [
           "lordship"
         ]
@@ -10899,7 +11484,10 @@
         "kind": "organization.cult",
         "origin": "proposed_to_namebench",
         "regime": "emblematic",
-        "expected_shape": "communauté dévotionnelle sous une dédicace : Église Saint-X, Culte de X, Cercle de X",
+        "expected_shape": {
+          "en": "devotional community under a dedication: Church of Saint X, Cult of X, Circle of X",
+          "fr": "communauté dévotionnelle sous une dédicace : Église Saint-X, Culte de X, Cercle de X"
+        },
         "archetype_ids": [
           "ancestral_cult",
           "base_religious_community",
@@ -10912,7 +11500,10 @@
         "kind": "organization.monastery",
         "origin": "proposed_to_namebench",
         "regime": "emblematic",
-        "expected_shape": "maison de vie religieuse sous une règle et une dédicace : Abbaye Saint-X, Ermitage de X",
+        "expected_shape": {
+          "en": "house of religious life under a rule and a dedication: Abbey of Saint X, Hermitage of X",
+          "fr": "maison de vie religieuse sous une règle et une dédicace : Abbaye Saint-X, Ermitage de X"
+        },
         "archetype_ids": [
           "hermitage",
           "monastery"
@@ -10922,7 +11513,10 @@
         "kind": "organization.hospital",
         "origin": "proposed_to_namebench",
         "regime": "emblematic",
-        "expected_shape": "maison de soin sous une dédicace : Hôtel-Dieu de X, Léproserie Saint-Lazare",
+        "expected_shape": {
+          "en": "house of care under a dedication: Hotel-Dieu of X, Leper house of Saint Lazarus",
+          "fr": "maison de soin sous une dédicace : Hôtel-Dieu de X, Léproserie Saint-Lazare"
+        },
         "archetype_ids": [
           "hospital_house"
         ]
@@ -10931,7 +11525,10 @@
         "kind": "organization.troupe",
         "origin": "proposed_to_namebench",
         "regime": "emblematic",
-        "expected_shape": "nom de scène ou de spectacle : Les Comédiens de X",
+        "expected_shape": {
+          "en": "stage or show name: The Players of X",
+          "fr": "nom de scène ou de spectacle : Les Comédiens de X"
+        },
         "archetype_ids": [
           "itinerant_troupe"
         ]
@@ -10940,7 +11537,10 @@
         "kind": "organization.tavern",
         "origin": "proposed_to_namebench",
         "regime": "emblematic",
-        "expected_shape": "enseigne : Au Cheval Blanc, auberge de X",
+        "expected_shape": {
+          "en": "sign: At the White Horse, inn of X",
+          "fr": "enseigne : Au Cheval Blanc, auberge de X"
+        },
         "archetype_ids": [
           "tavern_house"
         ]
@@ -10949,7 +11549,10 @@
         "kind": "organization.circle",
         "origin": "proposed_to_namebench",
         "regime": "descriptive",
-        "expected_shape": "cercle informel, souvent sans nom ; sinon surnom donné par les membres ou le voisinage",
+        "expected_shape": {
+          "en": "informal circle, often unnamed; otherwise a nickname given by its members or the neighbourhood",
+          "fr": "cercle informel, souvent sans nom ; sinon surnom donné par les membres ou le voisinage"
+        },
         "archetype_ids": [
           "base_friend_circle",
           "companionship",
@@ -10963,7 +11566,10 @@
         "kind": "organization.circle.coven",
         "parent": "organization.circle",
         "regime": "descriptive",
-        "expected_shape": "cercle fermé de praticiens, souvent nommé par le voisinage",
+        "expected_shape": {
+          "en": "closed circle of practitioners, often named by the neighbourhood",
+          "fr": "cercle fermé de praticiens, souvent nommé par le voisinage"
+        },
         "archetype_ids": [
           "witch_coven"
         ]
@@ -10972,7 +11578,10 @@
         "kind": "organization.community.caste",
         "parent": "organization.community",
         "regime": "descriptive",
-        "expected_shape": "groupe héréditaire d'un métier jugé impur : métier et lieu",
+        "expected_shape": {
+          "en": "hereditary group of a trade judged impure: trade and place",
+          "fr": "groupe héréditaire d'un métier jugé impur : métier et lieu"
+        },
         "archetype_ids": [
           "stigmatized_caste"
         ]
@@ -10981,7 +11590,10 @@
         "kind": "organization.community.nation",
         "parent": "organization.community",
         "regime": "emblematic",
-        "expected_shape": "nation étrangère installée : endonyme déclaré et cité d'accueil",
+        "expected_shape": {
+          "en": "settled foreign nation: declared endonym and host city",
+          "fr": "nation étrangère installée : endonyme déclaré et cité d'accueil"
+        },
         "archetype_ids": [
           "foreign_merchant_nation"
         ]
@@ -10990,7 +11602,10 @@
         "kind": "organization.community.parish",
         "parent": "organization.community",
         "regime": "institutional",
-        "expected_shape": "paroisse : dédicace et lieu",
+        "expected_shape": {
+          "en": "parish: dedication and place",
+          "fr": "paroisse : dédicace et lieu"
+        },
         "archetype_ids": [
           "parish_community"
         ]
@@ -10999,7 +11614,10 @@
         "kind": "organization.company.free_company",
         "parent": "organization.company",
         "regime": "emblematic",
-        "expected_shape": "compagnie soldée ou contractuelle : nom d'un capitaine, d'un emblème ou d'un fait d'armes",
+        "expected_shape": {
+          "en": "hired or contract company: name of a captain, an emblem or a feat of arms",
+          "fr": "compagnie soldée ou contractuelle : nom d'un capitaine, d'un emblème ou d'un fait d'armes"
+        },
         "archetype_ids": [
           "adventuring_company",
           "mercenary_company",
@@ -11011,7 +11629,10 @@
         "kind": "organization.company.league",
         "parent": "organization.company",
         "regime": "emblematic",
-        "expected_shape": "ligue ou hanse nommée d'après une région ou une cité",
+        "expected_shape": {
+          "en": "league or hanse named after a region or a city",
+          "fr": "ligue ou hanse nommée d'après une région ou une cité"
+        },
         "archetype_ids": [
           "merchant_league"
         ]
@@ -11020,7 +11641,10 @@
         "kind": "organization.confraternity.festive",
         "parent": "organization.confraternity",
         "regime": "emblematic",
-        "expected_shape": "société festive aux noms très emblématiques",
+        "expected_shape": {
+          "en": "festive society with highly emblematic names",
+          "fr": "société festive aux noms très emblématiques"
+        },
         "archetype_ids": [
           "festive_society"
         ]
@@ -11029,7 +11653,10 @@
         "kind": "organization.confraternity.foundation",
         "parent": "organization.confraternity",
         "regime": "emblematic",
-        "expected_shape": "fondation pieuse : nom du fondateur ou de l'intention",
+        "expected_shape": {
+          "en": "pious foundation: name of the founder or of the intention",
+          "fr": "fondation pieuse : nom du fondateur ou de l'intention"
+        },
         "archetype_ids": [
           "pious_foundation"
         ]
@@ -11038,7 +11665,10 @@
         "kind": "organization.confraternity.youth",
         "parent": "organization.confraternity",
         "regime": "emblematic",
-        "expected_shape": "abbaye ou classe d'âge de jeunesse, titre de fête et lieu",
+        "expected_shape": {
+          "en": "abbey or youth age class, festival title and place",
+          "fr": "abbaye ou classe d'âge de jeunesse, titre de fête et lieu"
+        },
         "archetype_ids": [
           "youth_abbey"
         ]
@@ -11047,7 +11677,10 @@
         "kind": "organization.council.chapter",
         "parent": "organization.council",
         "regime": "institutional",
-        "expected_shape": "chapitre de chanoines : cathédrale et lieu",
+        "expected_shape": {
+          "en": "chapter of canons: cathedral and place",
+          "fr": "chapitre de chanoines : cathédrale et lieu"
+        },
         "archetype_ids": [
           "cathedral_chapter"
         ]
@@ -11056,7 +11689,10 @@
         "kind": "organization.cult.clergy",
         "parent": "organization.cult",
         "regime": "institutional",
-        "expected_shape": "clergé de paroisse ou de mission : dédicace et lieu",
+        "expected_shape": {
+          "en": "parish or mission clergy: dedication and place",
+          "fr": "clergé de paroisse ou de mission : dédicace et lieu"
+        },
         "archetype_ids": [
           "secular_clergy"
         ]
@@ -11065,7 +11701,10 @@
         "kind": "organization.cult.movement",
         "parent": "organization.cult",
         "regime": "emblematic",
-        "expected_shape": "mouvement hétérodoxe : nom de doctrine ou de prédicateur",
+        "expected_shape": {
+          "en": "heterodox movement: name of a doctrine or a preacher",
+          "fr": "mouvement hétérodoxe : nom de doctrine ou de prédicateur"
+        },
         "archetype_ids": [
           "heterodox_movement"
         ]
@@ -11074,7 +11713,10 @@
         "kind": "organization.cult.sect",
         "parent": "organization.cult",
         "regime": "emblematic",
-        "expected_shape": "secte ou culte fermé : nom de chef, de pacte ou de rite",
+        "expected_shape": {
+          "en": "sect or closed cult: name of a leader, a pact or a rite",
+          "fr": "secte ou culte fermé : nom de chef, de pacte ou de rite"
+        },
         "archetype_ids": [
           "closed_sect",
           "infernal_cult"
@@ -11084,7 +11726,10 @@
         "kind": "organization.military_unit.fleet",
         "parent": "organization.military_unit",
         "regime": "emblematic",
-        "expected_shape": "flotte ou escadre nommée d'après une puissance, un port ou un amiral",
+        "expected_shape": {
+          "en": "fleet or squadron named after a power, a port or an admiral",
+          "fr": "flotte ou escadre nommée d'après une puissance, un port ou un amiral"
+        },
         "archetype_ids": [
           "war_fleet"
         ]
@@ -11093,7 +11738,10 @@
         "kind": "organization.monastery.beguinage",
         "parent": "organization.monastery",
         "regime": "emblematic",
-        "expected_shape": "béguinage : dédicace et lieu",
+        "expected_shape": {
+          "en": "beguinage: dedication and place",
+          "fr": "béguinage : dédicace et lieu"
+        },
         "archetype_ids": [
           "beguine_house"
         ]
@@ -11102,7 +11750,10 @@
         "kind": "organization.office.arcane",
         "parent": "organization.office",
         "regime": "institutional",
-        "expected_shape": "autorité de régulation magique : juridiction et objet réglementé",
+        "expected_shape": {
+          "en": "magical regulatory authority: jurisdiction and regulated object",
+          "fr": "autorité de régulation magique : juridiction et objet réglementé"
+        },
         "archetype_ids": [
           "arcane_authority"
         ]
@@ -11111,7 +11762,10 @@
         "kind": "organization.office.embassy",
         "parent": "organization.office",
         "regime": "institutional",
-        "expected_shape": "ambassade ou mission : puissance représentée et lieu d'accueil",
+        "expected_shape": {
+          "en": "embassy or mission: represented power and host place",
+          "fr": "ambassade ou mission : puissance représentée et lieu d'accueil"
+        },
         "archetype_ids": [
           "embassy"
         ]
@@ -11120,7 +11774,10 @@
         "kind": "organization.office.prison",
         "parent": "organization.office",
         "regime": "institutional",
-        "expected_shape": "geôle ou prison : lieu et autorité de garde",
+        "expected_shape": {
+          "en": "gaol or prison: place and guarding authority",
+          "fr": "geôle ou prison : lieu et autorité de garde"
+        },
         "archetype_ids": [
           "prison"
         ]
@@ -11129,7 +11786,10 @@
         "kind": "organization.office.watch",
         "parent": "organization.office",
         "regime": "institutional",
-        "expected_shape": "guet ou veille : quartier, lieu ou autorité",
+        "expected_shape": {
+          "en": "watch or vigil: district, place or authority",
+          "fr": "guet ou veille : quartier, lieu ou autorité"
+        },
         "archetype_ids": [
           "town_watch"
         ]
@@ -11138,7 +11798,10 @@
         "kind": "organization.tavern.bathhouse",
         "parent": "organization.tavern",
         "regime": "emblematic",
-        "expected_shape": "établissement de bains : enseigne",
+        "expected_shape": {
+          "en": "bathhouse: sign",
+          "fr": "établissement de bains : enseigne"
+        },
         "archetype_ids": [
           "bathhouse_brothel"
         ]
@@ -11147,7 +11810,10 @@
         "kind": "organization.tribunal.inquisition",
         "parent": "organization.tribunal",
         "regime": "institutional",
-        "expected_shape": "tribunal doctrinal : juridiction ecclésiale et lieu",
+        "expected_shape": {
+          "en": "doctrinal court: ecclesiastical jurisdiction and place",
+          "fr": "tribunal doctrinal : juridiction ecclésiale et lieu"
+        },
         "archetype_ids": [
           "inquisition"
         ]
@@ -11156,7 +11822,10 @@
         "kind": "organization.workshop.arcane",
         "parent": "organization.workshop",
         "regime": "descriptive",
-        "expected_shape": "atelier d'enchantement nommé d'après son maître ou son lieu",
+        "expected_shape": {
+          "en": "enchantment workshop named after its master or its place",
+          "fr": "atelier d'enchantement nommé d'après son maître ou son lieu"
+        },
         "archetype_ids": [
           "enchanters_workshop"
         ]
@@ -11165,7 +11834,10 @@
         "kind": "organization.workshop.service",
         "parent": "organization.workshop",
         "regime": "descriptive",
-        "expected_shape": "unité de services nommée d'après son propriétaire ou son lieu",
+        "expected_shape": {
+          "en": "service unit named after its owner or its place",
+          "fr": "unité de services nommée d'après son propriétaire ou son lieu"
+        },
         "archetype_ids": [
           "base_service_unit",
           "service_group"
@@ -11175,7 +11847,10 @@
         "kind": "organization.workshop.worksite",
         "parent": "organization.workshop",
         "regime": "descriptive",
-        "expected_shape": "chantier, mine, forêt ou rive nommé d'après son lieu et son ressort",
+        "expected_shape": {
+          "en": "worksite, mine, forest or bank named after its place and its district",
+          "fr": "chantier, mine, forêt ou rive nommé d'après son lieu et son ressort"
+        },
         "archetype_ids": [
           "mining_crew",
           "productive_community",

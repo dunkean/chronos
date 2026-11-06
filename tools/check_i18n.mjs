@@ -63,6 +63,18 @@ const dataUsed = (node) => {
 };
 dataUsed(fixture);
 
+// Diagnostics: every stable code raised by the Rust v2 core has a `diagnostics.` message, and no message is orphaned.
+const diagNamespaces = ['address', 'alignment', 'atlas', 'canon', 'canonical', 'catalogue', 'domain', 'entity', 'event', 'graph', 'id', 'impact', 'interval',
+  'legal', 'name_tree', 'object_ref', 'person_table', 'plan', 'region', 'relation', 'target'];
+const v2src = path.join(root, 'crates', 'chronos-core', 'src', 'v2');
+const codes = new Set();
+for (const f of fs.readdirSync(v2src).filter((n) => n.endsWith('.rs'))) {
+  const src = fs.readFileSync(path.join(v2src, f), 'utf8');
+  for (const m of src.matchAll(/"([a-z0-9_]+(?:\.[a-z0-9_]+)+)"/g)) if (diagNamespaces.includes(m[1].split('.')[0])) codes.add(m[1]);
+}
+for (const c of codes) used.add(`diagnostics.${c}`);
+for (const k of Object.keys(en)) if (k.startsWith('diagnostics.') && !codes.has(k.slice('diagnostics.'.length))) errors.push(`diagnostic never raised: ${k}`);
+
 for (const k of used) {
   if (!(k in en)) errors.push(`used but missing in en: ${k}`);
   if (!(k in fr)) errors.push(`used but missing in fr: ${k}`);
