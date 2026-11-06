@@ -417,6 +417,7 @@ impl RegionRun<'_> {
             weight_bps: None,
             time_cost_bps: None,
             cause_event_id,
+            end_cause_event_id: None,
             provenance: fact_provenance(self.atlas, "general/relation/v1"),
             rule_id: "general/relation/v1".into(),
         });

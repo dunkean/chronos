@@ -11,7 +11,10 @@ use super::model::{
 use super::offices::{mayor_office, resolve_office, OfficeStatus, TenureEnd, TenureMode};
 use super::population::{parse_population_result, PopulationResult};
 use super::region::{plan_region, RegionPlan};
-use super::social::{build_from_result, memberships_of, project_window, GroupRecord, SocialPacket};
+use super::social::{
+    build_from_result, membership_relation, memberships_of, project_window, GroupRecord,
+    MembershipEnd, SocialPacket,
+};
 use serde_json::{json, Value};
 use std::collections::{BTreeMap, BTreeSet};
 
@@ -631,7 +634,7 @@ fn cohesion_can_cross_split_threshold() {
             .memberships
             .iter()
             .filter(|m| m.group == source as u32 && m.valid.end_year == year)
-            .filter(|m| m.closed_by == Some(super::social::MembershipEnd::Split))
+            .filter(|m| m.closed_by == Some(MembershipEnd::Split))
             .count();
         assert_eq!(moved, moved_out);
         assert!(packet
@@ -653,4 +656,213 @@ fn every_site_has_its_anchor_and_a_vacancy_is_a_valid_result() {
         assert!(view.holder.is_none());
     }
     assert!(packet.groups.iter().all(|g| g.entity.name_tree.is_none()));
+}
+
+#[test]
+fn relation_id_is_independent_of_the_window() {
+    let world = world();
+    let site = world.site(0);
+    let packet = packet(&world, &village(&site, 150));
+    let span = TimeSpan {
+        start_year: 1350,
+        end_year: 1360,
+    };
+    let window = project_window(&packet, span);
+    let full: BTreeMap<_, _> = packet
+        .memberships
+        .iter()
+        .map(|m| ((m.group, m.person_slot, m.opened_year), m))
+        .collect();
+    let clipped: Vec<_> = window
+        .memberships
+        .iter()
+        .filter(|m| m.opened_year < span.start_year)
+        .collect();
+    assert!(!clipped.is_empty(), "the window must cut some relations");
+    for shown in clipped {
+        assert_eq!(shown.valid.start_year, span.start_year);
+        let original = full[&(shown.group, shown.person_slot, shown.opened_year)];
+        let from_window = membership_relation(&packet, shown).unwrap();
+        let from_full = membership_relation(&packet, original).unwrap();
+        assert_eq!(from_window.id, from_full.id);
+        assert_eq!(
+            from_window.valid, shown.valid,
+            "only the interval is clipped"
+        );
+        from_full.validate().unwrap();
+    }
+}
+
+#[test]
+fn closing_event_is_not_the_cause_of_a_relation() {
+    let mut world = world();
+    let site = world.site(0);
+    let mut shock = world.region.shocks[0].clone();
+    shock.site_id = site.clone();
+    shock.valid = TimeSpan {
+        start_year: 1310,
+        end_year: 1345,
+    };
+    world.region.shocks = (0..3)
+        .map(|i| {
+            let mut shock = shock.clone();
+            shock.source_event_id = format!("crisis-{i}");
+            shock
+        })
+        .collect();
+    let packet = packet(&world, &village(&site, 400));
+    let year_of = |id: &str| packet.events.iter().find(|e| e.id == id).unwrap().year;
+    let mut closed = 0;
+    let mut opened = 0;
+    for membership in &packet.memberships {
+        let relation = membership_relation(&packet, membership).unwrap();
+        if let Some(cause) = &relation.cause_event_id {
+            assert_eq!(year_of(cause), membership.opened_year);
+            opened += 1;
+        }
+        if let Some(end) = &relation.end_cause_event_id {
+            assert_eq!(year_of(end), membership.valid.end_year);
+            assert_ne!(relation.cause_event_id.as_ref(), Some(end));
+            closed += 1;
+        }
+    }
+    assert!(
+        closed > 0 && opened > 0,
+        "preemptions, then split transfers"
+    );
+}
+
+/// Both charges end in 1305: the lower one must not hold its holder back from the
+/// mayoralty, which is assigned first (§7.3).
+#[test]
+fn all_charges_close_before_any_is_assigned() {
+    let world = world();
+    let site = world.site(0);
+    let people = [adult(1270, &site), adult(1271, &site)];
+    let free = packet(&world, &people);
+    let office = mayor_office(&free, &site).unwrap().office_id.clone();
+    let mayor = holders(&free, &office)[0].2.unwrap();
+    let other = 1 - mayor;
+    let lower = free
+        .tenures
+        .iter()
+        .find(|t| t.person_slot == Some(other) && t.valid.start_year == START)
+        .unwrap();
+    assert_eq!(
+        lower.valid.end_year, 1305,
+        "the other charge ends the same year"
+    );
+    let mut mortal = people.to_vec();
+    mortal[mayor as usize].death = Some(1305);
+    let packet = packet(&world, &mortal);
+    let view = resolve_office(&packet, &office, 1305).unwrap();
+    assert_eq!(view.status, OfficeStatus::Held, "no artificial vacancy");
+    assert_eq!(view.tenure.unwrap().person_slot, Some(other));
+    let selection = packet.events.iter().find(|e| e.kind == "office_selection");
+    assert_eq!(selection.map(|e| e.phase as u8), Some(60));
+}
+
+#[test]
+fn split_offices_are_filled_the_same_year() {
+    let mut world = world();
+    let site = world.site(0);
+    let mut shock = world.region.shocks[0].clone();
+    shock.site_id = site.clone();
+    shock.valid = TimeSpan {
+        start_year: 1310,
+        end_year: 1345,
+    };
+    world.region.shocks = (0..3)
+        .map(|i| {
+            let mut shock = shock.clone();
+            shock.source_event_id = format!("crisis-{i}");
+            shock
+        })
+        .collect();
+    let packet = packet(&world, &village(&site, 400));
+    let mut checked = 0;
+    for child in packet.groups.iter().filter(|g| g.split_from.is_some()) {
+        for office in packet
+            .offices
+            .iter()
+            .filter(|o| o.organization_id == child.entity.id)
+        {
+            let year = child.entity.existence.start_year;
+            let first = packet
+                .tenures
+                .iter()
+                .find(|t| t.office_id == office.office_id)
+                .unwrap();
+            assert_eq!(first.valid.start_year, year);
+            checked += 1;
+        }
+    }
+    assert!(checked > 0, "a split association has a head");
+}
+
+#[test]
+fn holder_is_never_recruited_into_a_group_that_bars_his_charge() {
+    let mut world = world();
+    let site = world.site(0);
+    let catalogue = world.canon.catalogue.clone();
+    let open_group = world
+        .region
+        .groups
+        .iter()
+        .find(|g| {
+            let traits = &catalogue.archetype_alignment[&g.entity.archetype_id];
+            g.site_id == site
+                && traits.default_visibility == Visibility::Open
+                && !traits.jurisdiction_organ
+                && g.entity.existence.contains(1340)
+        })
+        .map(|g| g.entity.id.clone())
+        .expect("an open group on the site");
+    let subject = ObjectRef::Entity(open_group.clone());
+    let mut spans = Vec::new();
+    for standing in &mut world.region.standings {
+        if standing.subject == subject {
+            standing.status = LegalStatus::Proscribed;
+            spans.push((standing.jurisdiction.clone(), standing.valid));
+        }
+    }
+    let packet = packet(&world, &village(&site, 220));
+    let index = packet
+        .groups
+        .iter()
+        .position(|g| g.entity.id == open_group)
+        .unwrap() as u32;
+    let bound: BTreeSet<&str> = packet
+        .offices
+        .iter()
+        .filter(|o| o.requirements.jurisdiction_bound)
+        .map(|o| o.office_id.as_str())
+        .collect();
+    let members: Vec<_> = packet
+        .memberships
+        .iter()
+        .filter(|m| m.group == index)
+        .collect();
+    assert!(!members.is_empty());
+    for tenure in packet
+        .tenures
+        .iter()
+        .filter(|t| bound.contains(t.office_id.as_str()))
+    {
+        for year in tenure.valid.start_year..tenure.valid.end_year {
+            let office = packet
+                .offices
+                .iter()
+                .find(|o| o.office_id == tenure.office_id)
+                .unwrap();
+            let rules = world.canon.controller_at(&office.site_id, year).unwrap();
+            let proscribes = spans.iter().any(|(j, span)| {
+                *j == ObjectRef::Entity(rules.entity.id.clone()) && span.contains(year)
+            });
+            let both = members
+                .iter()
+                .any(|m| Some(m.person_slot) == tenure.person_slot && m.valid.contains(year));
+            assert!(!(proscribes && both), "{year}");
+        }
+    }
 }

@@ -504,6 +504,7 @@
  "membership_end.death": "Death",
  "membership_end.departure": "Departure",
  "membership_end.dissolution": "Dissolution",
+ "membership_end.ineligible": "Loss of eligibility",
  "membership_end.preempted": "Preempted by a charge",
  "membership_end.split": "Split",
  "name_kind.organization.band": "Band",

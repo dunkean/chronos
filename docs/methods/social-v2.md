@@ -481,11 +481,16 @@ association, community and friend-circle stocks, with bootstrap ages and block f
 Friend circles use the catalogue's duration and size tables. Households and lineages stay views:
 `household_of`, `family_of`, `site_views`, and `person_record` for the §5 `PersonRecord`.
 
-**Year.** Close commitments (death, departure, dissolution, capacity), offices at phase 50,
-cohesion and splits at phase 55, then jobs, other time-budgeted groups, overlapping affiliations
-and circles. Each draw is keyed by `(request_id, year, vacancy_ordinal, draw_ordinal)`. Weights
+**Year.** Phase 50 closes commitments (death, departure, dissolution, capacity, barred seats) and
+every tenure that ended. Phase 55 runs cohesion and splits. Phase 60 assigns offices, those a split
+just created included, then jobs, other time-budgeted groups and overlapping affiliations, and last
+circles. Each draw is keyed by `(request_id, year, vacancy_ordinal, draw_ordinal)`. Weights
 are those of §23.2 with the multiplicative `alignment_fit`. Network uses the published state Y−1.
 Circles create `trusts` links, one per member, never a clique.
+
+**Relations.** `Membership.opened_year` keeps the start of the full fact, so a clipped membership
+gives the same relation ID in every window; only `valid` follows the window. `cause_event_id` says
+what opened a relation (a split, for a transferred member) and `end_cause_event_id` what closed it.
 
 **Offices.** A site anchor has a head (`mayor`) and a collective body; a secondary anchor and an
 association have a head. A term ends, a holder dies, leaves or loses eligibility, and the mandate
@@ -496,8 +501,9 @@ and traced by `employment_preemption`.
 **Legality.** S4 groups get standing chains like S2 groups, and cite `foundation`, `dissolution`
 and the control `charter`. `in_conflict_with` is derived from open proscribed standings. A
 proscribed person or a known member of an open proscribed group is barred from offices of that
-jurisdiction, and from its bodies. The private head of a group is not an office of the
-jurisdiction.
+jurisdiction, and from its bodies. Conversely, an open proscribed group never recruits a holder of
+an office or seat of the jurisdiction that proscribes it. The private head of a group is not an
+office of the jurisdiction.
 
 **Names.** `GroupRecord.name` is a declared `synthetic` fallback with the archetype's exact
 `name_profile` kind and founding tone. `name_tree` stays absent and Namebench is not called.
@@ -529,6 +535,11 @@ no `claimed` or `regent` case yet. Status and activity are fixed for life. Weigh
 `crates/chronos-app/tests/v2_s4.rs` runs both demo domains on the real worker, skipping with a
 message without `CHRONOS_PYTHON` and `CHRONOS_LINEAGE_SRC`. `chronos-app v2 social` prints groups
 by class and conduct class, vacancies and mayors.
+
+Measured on 2026-11-06 on the demo fixture, world seed 11, fertility peak 4000, one run: no vacancy,
+because the smallest pool any selection saw has 35 candidates, and one split, a friend circle in
+1392. With two sites reduced to 8 initial inhabitants, the real worker gives 21 vacant office-years.
+A vacancy needs a site without an eligible adult; these figures say nothing about other seeds.
 
 ## Proposed, not implemented
 
@@ -1033,11 +1044,17 @@ partagés d'associations, communautés et cercles d'amis, avec âges de bootstra
 en S2. Les cercles utilisent les tables de durée et de taille du catalogue. Foyers et lignages restent
 des vues : `household_of`, `family_of`, `site_views`, et `person_record` pour le `PersonRecord` du §5.
 
-**Année.** Fermer les engagements (décès, départ, dissolution, capacité), offices en phase 50,
-cohésion et scissions en phase 55, puis emplois, autres groupes à budget de temps, affiliations
-superposables et cercles. Chaque tirage a pour clé `(request_id, année, vacancy_ordinal, draw_ordinal)`.
+**Année.** La phase 50 ferme les engagements (décès, départ, dissolution, capacité, sièges interdits)
+et tous les mandats terminés. La phase 55 traite cohésion et scissions. La phase 60 attribue les
+offices, y compris ceux qu'une scission vient de créer, puis emplois, autres groupes à budget de
+temps et affiliations superposables, et enfin les cercles. Chaque tirage a pour clé `(request_id, année, vacancy_ordinal, draw_ordinal)`.
 Les poids sont ceux du §23.2, avec `alignment_fit` multiplicatif. Le réseau lit l'état publié Y−1.
 Les cercles créent des liens `trusts`, un par membre, jamais une clique.
+
+**Relations.** `Membership.opened_year` garde le début du fait complet : une appartenance tronquée
+donne le même ID de relation dans toute fenêtre, et seul `valid` suit la fenêtre. `cause_event_id` dit
+ce qui a ouvert une relation (une scission, pour un membre transféré), `end_cause_event_id` ce qui l'a
+fermée.
 
 **Offices.** Une ancre de site a un chef (`mayor`) et un corps collectif ; une ancre secondaire et une
 association ont un chef. Une échéance, un décès, un départ ou une perte d'éligibilité ferment le mandat
@@ -1048,7 +1065,9 @@ porte `initial_observed_binding` et aucun événement. Un emploi à plein temps 
 **Légalité.** Les groupes de S4 ont des chaînes de statuts comme ceux de S2 et citent `foundation`,
 `dissolution` et la `charter` de contrôle. `in_conflict_with` se déduit des statuts proscrits de groupes
 ouverts. Une personne proscrite ou un membre connu d'un groupe ouvert proscrit est écarté des offices de
-cette juridiction et de ses corps. Le chef privé d'un groupe n'est pas un office de la juridiction.
+cette juridiction et de ses corps. À l'inverse, un groupe ouvert proscrit ne recrute jamais le titulaire
+d'un office ou d'un siège de la juridiction qui le proscrit. Le chef privé d'un groupe n'est pas un office
+de la juridiction.
 
 **Noms.** `GroupRecord.name` est un repli déclaré `synthetic`, avec le kind exact de `name_profile` et le
 ton de fondation. `name_tree` reste absent et Namebench n'est pas appelé.
@@ -1081,6 +1100,12 @@ vie. Les poids ne sont pas réglés.
 `crates/chronos-app/tests/v2_s4.rs` exécute les deux domaines de démonstration sur le vrai worker, et
 s'ignore avec un message sans `CHRONOS_PYTHON` et `CHRONOS_LINEAGE_SRC`. `chronos-app v2 social` affiche
 les groupes par classe et classe de conduite, les vacances et les maires.
+
+Mesuré le 2026-11-06 sur la fixture de démonstration, seed de monde 11, pic de fécondité 4000, un seul
+lancement : aucune vacance, car le plus petit vivier vu par une sélection compte 35 candidats, et une
+scission, celle d'un cercle d'amis en 1392. Avec deux sites réduits à 8 habitants initiaux, le vrai worker
+donne 21 années-offices vacantes. Une vacance exige un site sans adulte éligible ; ces chiffres ne disent
+rien des autres seeds.
 
 ## Proposé, non implémenté
 

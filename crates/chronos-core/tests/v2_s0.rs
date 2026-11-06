@@ -955,6 +955,7 @@ fn link(subject: ObjectRef, predicate: Predicate, object: ObjectRef) -> SocialRe
         weight_bps: None,
         time_cost_bps: None,
         cause_event_id: None,
+        end_cause_event_id: None,
         provenance: provenance(),
         rule_id: "test-1".into(),
     }

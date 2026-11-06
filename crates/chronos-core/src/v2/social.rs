@@ -108,7 +108,8 @@ string_enum!(MembershipEnd {
     Capacity,
     Preempted,
     Dissolution,
-    Split
+    Split,
+    Ineligible
 });
 /// Declared fallback until the Namebench pack exists (§23.3). `name_tree` stays
 /// absent; the view renders this from `kind`, `site_id` and `ordinal`. `tone` is the
@@ -143,12 +144,18 @@ pub struct Membership {
     pub group: u32,
     pub person_slot: u32,
     pub predicate: Predicate,
+    /// Start of the full fact. `valid` may be clipped by a window; the relation ID
+    /// always comes from this year.
+    pub opened_year: i32,
     pub valid: TimeSpan,
     pub time_cost_bps: u16,
     pub vacancy_ordinal: u32,
     pub draw_ordinal: u32,
     pub candidates: u32,
     pub closed_by: Option<MembershipEnd>,
+    /// Event that opened the link: a split for a transferred member, none for an
+    /// ordinary recruitment.
+    pub opening_event_id: Option<String>,
     pub closing_event_id: Option<String>,
 }
 /// Dated affinity inside a circle: a circle never makes everyone friends (§5.2).
@@ -1454,6 +1461,58 @@ impl<'a> Run<'a> {
             self.rt[group].open = kept;
         }
     }
+    /// A body of the jurisdiction refuses its outlaws like its offices do (§27.5): a
+    /// seat closes at the boundary where its holder becomes one.
+    fn close_barred_seats(&mut self, year: i32) {
+        for group in 0..self.groups.len() {
+            if self.groups[group].entity.kind != INSTITUTION || self.rt[group].open.is_empty() {
+                continue;
+            }
+            let Some(jurisdiction) = self.jurisdiction_at(self.rt[group].site, year) else {
+                continue;
+            };
+            let barred = self.ineligible_in(jurisdiction, year);
+            let open = std::mem::take(&mut self.rt[group].open);
+            let mut kept = Vec::with_capacity(open.len());
+            for m in open {
+                if barred.contains(&self.memberships[m as usize].person_slot) {
+                    self.end_membership(m as usize, year, MembershipEnd::Ineligible, None);
+                } else {
+                    kept.push(m);
+                }
+            }
+            self.rt[group].open = kept;
+        }
+    }
+    /// Who cannot enter this group without losing a charge: holders of offices and
+    /// seats of a jurisdiction that proscribes it. A covert group stays open to them.
+    fn charge_conflicts(&self, group: usize, year: i32) -> BTreeSet<u32> {
+        let mut holders = BTreeSet::new();
+        if self.groups[group].visibility != Visibility::Open {
+            return holders;
+        }
+        for (_, jurisdiction, _) in self
+            .proscribed
+            .iter()
+            .filter(|(g, _, span)| *g == group && span.contains(year))
+        {
+            let rules = |site: usize| self.jurisdiction_at(site, year) == Some(jurisdiction);
+            for (office, def) in self.offices.iter().enumerate() {
+                let site = self.site_index[def.requirements.residence_site_id.as_str()];
+                if def.requirements.jurisdiction_bound && rules(site) {
+                    let tenure = self.open_tenure[office].map(|t| &self.tenures[t]);
+                    holders.extend(tenure.and_then(|t| t.person_slot));
+                }
+            }
+            for (body, record) in self.groups.iter().enumerate() {
+                if record.entity.kind == INSTITUTION && rules(self.rt[body].site) {
+                    let seats = self.rt[body].open.iter();
+                    holders.extend(seats.map(|m| self.memberships[*m as usize].person_slot));
+                }
+            }
+        }
+        holders
+    }
     fn in_reach(&self, group: usize, site: usize) -> bool {
         let rt = &self.rt[group];
         if rt.wide {
@@ -1728,7 +1787,7 @@ impl<'a> Run<'a> {
                 kind: "employment_preemption",
                 year,
                 end_year: None,
-                phase: EventPhase::InstitutionsAndVacancies,
+                phase: EventPhase::Assignments,
                 causes: vec![],
                 participants: vec![
                     ObjectRef::PersonSlot(self.people[index].person_id.clone()),
@@ -1789,7 +1848,7 @@ impl<'a> Run<'a> {
                 },
                 year,
                 end_year: None,
-                phase: EventPhase::InstitutionsAndVacancies,
+                phase: EventPhase::Assignments,
                 causes: vec![],
                 participants,
                 provenance,
@@ -1842,17 +1901,17 @@ impl<'a> Run<'a> {
         self.tenure_count[office] += 1;
         Ok(())
     }
-    /// One annual step of a personal office (§9.2): close first, keep what still holds,
-    /// then look once for a holder. A vacancy stays open until a candidate exists.
-    fn step_office(&mut self, office: usize, year: i32) -> Result<(), HistoryError> {
+    /// Phase 50 for one office: what no longer holds closes at this boundary, so that
+    /// no selection of the year sees a charge that is about to end.
+    fn close_office(&mut self, office: usize, year: i32) {
         let def = &self.offices[office];
         if def.collective || year < def.observed_from {
-            return Ok(());
+            return;
         }
         let term = def.term_years;
         if !def.valid.contains(year) {
             self.end_tenure(office, year, TenureEnd::Dissolution);
-            return Ok(());
+            return;
         }
         if let Some(index) = self.open_tenure[office] {
             let tenure = &self.tenures[index];
@@ -1860,10 +1919,22 @@ impl<'a> Run<'a> {
             if let Some(slot) = tenure.person_slot {
                 let problem = self.holder_problem(office, slot, year);
                 let expired = term.is_some_and(|t| year >= started + t as i32);
-                match problem.or(expired.then_some(TenureEnd::TermEnd)) {
-                    Some(reason) => self.end_tenure(office, year, reason),
-                    None => return Ok(()),
+                if let Some(reason) = problem.or(expired.then_some(TenureEnd::TermEnd)) {
+                    self.end_tenure(office, year, reason);
                 }
+            }
+        }
+    }
+    /// Phase 60 for one office, before any other recruitment: one look for a holder. A
+    /// vacancy opens at the boundary and stays open until a candidate exists (§9.2).
+    fn assign_office(&mut self, office: usize, year: i32) -> Result<(), HistoryError> {
+        let def = &self.offices[office];
+        if def.collective || year < def.observed_from || !def.valid.contains(year) {
+            return Ok(());
+        }
+        if let Some(index) = self.open_tenure[office] {
+            if self.tenures[index].person_slot.is_some() {
+                return Ok(());
             }
         }
         let selected = self.select_holder(office, year)?;
@@ -2033,7 +2104,7 @@ impl<'a> Run<'a> {
                 (record.predicate, record.time_cost_bps)
             };
             self.end_membership(m, year, MembershipEnd::Split, Some(split.clone()));
-            self.join(new_group, *slot, year, predicate, cost, None);
+            self.join(new_group, *slot, year, predicate, cost, Err(split.clone()));
         }
         self.groups[group].target_members = self.groups[group]
             .target_members
@@ -2076,6 +2147,7 @@ impl<'a> Run<'a> {
             weight_bps: None,
             time_cost_bps: None,
             cause_event_id,
+            end_cause_event_id: None,
             provenance: self.provenance(SOCIAL_RULE),
             rule_id: SOCIAL_RULE.into(),
         });
@@ -2091,14 +2163,19 @@ impl<'a> Run<'a> {
         year: i32,
         predicate: Predicate,
         cost: u16,
-        draw: Option<(u32, u32, u32)>,
+        opening: Result<(u32, u32, u32), String>,
     ) {
+        let (draw, opening_event_id) = match opening {
+            Ok(draw) => (Some(draw), None),
+            Err(event) => (None, Some(event)),
+        };
         let (vacancy_ordinal, draw_ordinal, candidates) = draw.unwrap_or((0, 0, 0));
         let index = self.memberships.len() as u32;
         self.memberships.push(Membership {
             group: group as u32,
             person_slot: slot,
             predicate,
+            opened_year: year,
             valid: TimeSpan {
                 start_year: year,
                 end_year: self.horizon,
@@ -2108,6 +2185,7 @@ impl<'a> Run<'a> {
             draw_ordinal,
             candidates,
             closed_by: None,
+            opening_event_id,
             closing_event_id: None,
         });
         self.rt[group].open.push(index);
@@ -2182,6 +2260,7 @@ impl<'a> Run<'a> {
             Some(j) => self.ineligible_in(j, year),
             None => Rc::default(),
         };
+        let charged = self.charge_conflicts(group, year);
         self.stamp_value += 1;
         let stamp = self.stamp_value;
         for m in &self.rt[group].open {
@@ -2209,6 +2288,7 @@ impl<'a> Run<'a> {
                     && (!worker || self.people[i].workforce)
                     && (cost == 0 || self.capacity_at(*slot, year) >= self.committed[i] + cost)
                     && !barred.contains(slot)
+                    && !charged.contains(slot)
                 {
                     pool.push((*slot, *days));
                 }
@@ -2248,7 +2328,7 @@ impl<'a> Run<'a> {
         for draw in draws {
             let slot = pool[draw.index].0;
             let proof = (vacancy, draw.draw_ordinal, pool.len() as u32);
-            self.join(group, slot, year, predicate, cost, Some(proof));
+            self.join(group, slot, year, predicate, cost, Ok(proof));
             if circle {
                 self.add_trust(group, slot, year)?;
             }
@@ -2360,12 +2440,16 @@ impl<'a> Run<'a> {
         for year in self.start..self.horizon {
             self.ineligible.clear();
             self.close_commitments(year);
+            self.close_barred_seats(year);
             for i in 0..self.office_order.len() {
-                let office = self.office_order[i];
-                self.step_office(office, year)?;
+                self.close_office(self.office_order[i], year);
             }
             self.run_cohesion(year)?;
-            // A split changes the order: the list is reread by position on purpose.
+            // Splits move members and add offices: they are filled the same year.
+            self.ineligible.clear();
+            for i in 0..self.office_order.len() {
+                self.assign_office(self.office_order[i], year)?;
+            }
             for i in 0..self.fill_order.len() {
                 let group = self.fill_order[i];
                 self.fill(group, year)?;
@@ -2557,6 +2641,7 @@ impl<'a> Run<'a> {
                 weight_bps: None,
                 time_cost_bps: Some(office.time_cost_bps),
                 cause_event_id: tenure.cause_event_id.clone(),
+                end_cause_event_id: None,
                 provenance: fact_provenance(&inputs.atlas, SOCIAL_RULE),
                 rule_id: SOCIAL_RULE.into(),
             });
@@ -2722,7 +2807,8 @@ pub fn build_social_prefix(
 
 // --- Readings of a packet: they draw nothing ---
 
-/// Addressed fact of a compact membership (§5).
+/// Addressed fact of a compact membership (§5). A clipped membership keeps the ID of
+/// the full fact: only the interval it shows follows the window.
 pub fn membership_relation(
     packet: &SocialPacket,
     membership: &Membership,
@@ -2740,7 +2826,7 @@ pub fn membership_relation(
         membership.predicate,
         &subject,
         &object,
-        membership.valid.start_year,
+        membership.opened_year,
         0,
     )?;
     Ok(SocialRelation {
@@ -2752,7 +2838,8 @@ pub fn membership_relation(
         role_id: None,
         weight_bps: None,
         time_cost_bps: Some(membership.time_cost_bps),
-        cause_event_id: membership.closing_event_id.clone(),
+        cause_event_id: membership.opening_event_id.clone(),
+        end_cause_event_id: membership.closing_event_id.clone(),
         provenance: group.entity.provenance.clone(),
         rule_id: SOCIAL_RULE.into(),
     })
@@ -2939,6 +3026,13 @@ pub struct SocialYearSummary {
     pub personal_offices: u64,
 }
 #[derive(Clone, Debug, PartialEq, Eq, Serialize)]
+pub struct SplitSummary {
+    pub year: i32,
+    pub archetype_id: String,
+    pub site_id: String,
+    pub moved_members: u64,
+}
+#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
 pub struct SocialSummary {
     pub domain_id: String,
     pub slots: u64,
@@ -2948,6 +3042,11 @@ pub struct SocialSummary {
     pub tenures: u64,
     pub tenure_closures: BTreeMap<TenureEnd, u64>,
     pub vacant_office_years: u64,
+    /// Smallest candidate pool any selection saw: how far vacancy is.
+    pub fewest_office_candidates: Option<u32>,
+    pub lowest_cohesion_bps: Option<u16>,
+    pub groups_below_split_threshold: u64,
+    pub split_details: Vec<SplitSummary>,
     pub splits: u64,
     pub preemptions: u64,
     pub links: u64,
@@ -3067,6 +3166,31 @@ pub fn summarize(
     for reason in packet.tenures.iter().filter_map(|t| t.closed_by) {
         *tenure_closures.entry(reason).or_insert(0) += 1;
     }
+    let fewest_office_candidates = packet
+        .tenures
+        .iter()
+        .map(|t| t.selection_proof.candidates)
+        .filter(|c| *c > 0)
+        .min();
+    let lowest_cohesion_bps = packet.cohesion.iter().map(|c| c.cohesion_bps).min();
+    let below: BTreeSet<u32> = packet
+        .cohesion
+        .iter()
+        .filter(|c| c.years_below_threshold > 0)
+        .map(|c| c.group)
+        .collect();
+    let split_details = packet
+        .groups
+        .iter()
+        .enumerate()
+        .filter(|(_, g)| g.split_from.is_some())
+        .map(|(i, g)| SplitSummary {
+            year: g.entity.existence.start_year,
+            archetype_id: g.entity.archetype_id.clone(),
+            site_id: g.site_id.clone(),
+            moved_members: members_at(packet, i as u32, g.entity.existence.start_year).len() as u64,
+        })
+        .collect();
     let kind_count = |kind: &str| packet.events.iter().filter(|e| e.kind == kind).count() as u64;
     Ok(SocialSummary {
         domain_id: packet.domain_id.clone(),
@@ -3077,6 +3201,10 @@ pub fn summarize(
         tenures: packet.tenures.len() as u64,
         tenure_closures,
         vacant_office_years,
+        fewest_office_candidates,
+        lowest_cohesion_bps,
+        groups_below_split_threshold: below.len() as u64,
+        split_details,
         splits: kind_count("split"),
         preemptions: kind_count("employment_preemption"),
         links: packet.links.len() as u64,

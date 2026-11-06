@@ -381,7 +381,15 @@ pub struct SocialRelation {
     pub role_id: Option<String>,
     pub weight_bps: Option<u16>,
     pub time_cost_bps: Option<u16>,
+    /// What opened the relation; an end never rewrites it.
     pub cause_event_id: Option<String>,
+    /// What closed it. Absent while it is open or when nothing dated closed it.
+    #[serde(
+        default,
+        deserialize_with = "present_optional",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub end_cause_event_id: Option<String>,
     pub provenance: Provenance,
     pub rule_id: String,
 }
