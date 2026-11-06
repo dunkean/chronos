@@ -74,7 +74,7 @@ La topologie spatiale vient d’un contrat `HistoryAtlas` : `cell_id`, `parent_i
 
 ### 2.1 Entrées minimales et bootstrap
 
-`WorldSpecV2` contient obligatoirement `world_seed`, `timeline`, `atlas_ref`, références des packs culturels/institutionnels/de noms, `population_provider`, `domain_policy`, paramètres des processus et liste des contraintes auteur. Chaque référence est une empreinte de contenu vérifiée par l’hôte.
+`WorldSpecV2` contient obligatoirement `world_seed`, `timeline`, `atlas_ref`, références des packs culturels/institutionnels/de noms, `population_provider`, `domain_policy`, `setting_profile` (`historical`, `low_fantasy` ou `high_fantasy`, §23.4), paramètres des processus et liste des contraintes auteur. Chaque référence est une empreinte de contenu vérifiée par l’hôte.
 
 L’atlas de S0–S5 est une fixture régionale complète, exportée ou virtuelle et figée. Il fournit :
 
@@ -892,6 +892,16 @@ Les templates du JSON choisissent un mode initial parmi `collective_body`, `appo
 Les overlays marqués `spatial_or_material_tag` sont transmis à l’hôte spatial et ne changent pas une loi sociale par magie. Les overlays rituels ou magiques activent des archétypes optionnels, avec les mêmes règles de densité ; ils n’ajoutent aucun pouvoir biologique non déclaré. `reproduction_profile_required` impose un profil d’ascendance explicite, pas une reproduction fongique déduite du style architectural.
 
 Le profil de noms est résolu par la variante dans le pack Namebench figé. Si un pool manque, S1 prépare un repli déterministe déclaré `synthetic` ; le titre générique et le nom personnel ne sont jamais pris pour une identité.
+
+### 23.4 Couverture des archétypes
+
+Le catalogue compte 121 archétypes : les 53 de départ, inchangés, et 68 ajoutés pour couvrir les pans militaire, judiciaire, monastique, soigneur, spectacle, marginaux, criminel et fantastique. [`archetype-coverage.v1.json`](archetype-coverage.v1.json) et sa synthèse [`archetype-coverage.md`](archetype-coverage.md) prouvent cette couverture de deux façons : chacun des 242 systèmes Pecking Order est relié à un archétype ou exclu avec une raison, et chacune des cases d'une grille fonctionnelle de 86 cases (plus 9 ajoutées et justifiées) est couverte ou déclarée hors périmètre. Aucune n'est hors périmètre. La liste des 242 systèmes est figée dans la grille, épinglée sur le commit `7dc27d0` de Pecking Order avec l'empreinte SHA-256 des fichiers lus. `tools/check_catalogue_v2.py` ne lit que le dépôt de Chronos et échoue sur toute référence manquante, tag hors catalogue, ancien identifiant modifié, valeur hors bornes ou activité positive sans type compatible (§25.1).
+
+**Réglage de fantastique.** `setting_profile` est un paramètre obligatoire du monde. Chaque archétype porte `setting` : `historical`, `low_fantasy` ou `high_fantasy`, dans cet ordre. Un archétype est actif seulement si son `setting` est inférieur ou égal à celui du monde. Un monde historique n'active donc aucun archétype fantastique, même quand l'overlay d'une variante le désigne. Les overlays du §23.3 restent le mécanisme d'activation local ; cinq overlays ajoutés (`arcane_orders`, `forbidden_arts`, `wild_lore`, `otherworld_courts`, `nonhuman_presence`) regroupent les archétypes fantastiques. La disponibilité des archétypes non fantastiques qui ne sont pas de base reste tranchée par le contexte de site (S2, S4).
+
+**Alignement (lot S1 du §27.6).** `engine_defaults.alignment` fixe les seuils du §27.2, les bornes des tirages du §27.5 et les seuils de statut du §27.4. Le catalogue fermé `conduct_tag_definitions` compte 40 tags. `family_value_profiles` donne un poids de -1 000 à +1 000 sur chaque tag pour les 21 familles. `archetype_alignment`, indexé par identifiant et couvrant les 121 archétypes, porte la base `morality_bps` et `lawfulness_bps`, l'écart possible de chaque axe, les `conduct_tags` et la `default_visibility`. Une économie ordinaire a une base proche de zéro et un écart large, qui donne une entreprise lambda, honnête ou véreuse ; une guilde de voleurs a une base `lawless` ou `crooked`, un ordre hospitalier une base `upright`. Aucune base n'est déduite d'une espèce ni d'une ascendance : l'enclave non humaine a une base nulle et la horde monstrueuse est définie par sa conduite. La formule de `conformity_bps` est une proposition de S1, que le §27.4 ne fixe pas. Toutes ces valeurs sont des réglages initiaux de worldbuilding (`initial_template_not_historical_calibration`), jamais calibrés.
+
+**Noms.** `name_profile` porte le kind Namebench de l'archétype (`organization.guild`, `organization.criminal`, ...). Le kind ne dépend ni de la famille culturelle ni de la classe morale, que l'appelant passe à part comme ton. `name_kind_catalogue` distingue les kinds de départ de Namebench de ceux que Chronos lui propose. Un nom de repli reste `synthetic`.
 
 ## 24. Sémantique du plan démographique et du résultat
 

@@ -1,0 +1,5178 @@
+{
+  "schema_version": 1,
+  "status": "design_proposal",
+  "parameters_status": "initial_template_not_historical_calibration",
+  "catalogue_ref": "culture-bindings.v1.json",
+  "source_pin": {
+    "repository": "pecking-order",
+    "commit": "7dc27d07dc38a4dcc09dc4fd20de24bd4ac581d5",
+    "commit_subject": "Audit organization-role coherence and replace broken select menus",
+    "read_via": "git show <commit>:<path> ; le dépôt vivant n'est jamais lu par l'outil de vérification",
+    "files": [
+      {
+        "path": "data/systems.json",
+        "sha256": "4bcb67135baf40e0d96cd9b54d8b6ab6957124b7a5005f85b3f70c85503cae32",
+        "bytes": 1102375
+      },
+      {
+        "path": "data/systems_civic_military.json",
+        "sha256": "a8966d52004d488a7db9f87d167953bf0e407ced6466ea779ab757faaf0e9d7f",
+        "bytes": 237253
+      },
+      {
+        "path": "data/systems_specialist.json",
+        "sha256": "9a5bd0639fdc36f8458fe22386da351d5345299cdb2b76079356a6d91d2aa1df",
+        "bytes": 99626
+      },
+      {
+        "path": "docs/CATALOG.md",
+        "sha256": "c2f3724526900275ce894dbd60535585bed66ec576b0f7a7fb7242e4d1ef8a87",
+        "bytes": 22196
+      }
+    ],
+    "system_count": 242,
+    "family_counts": {
+      "civic": 21,
+      "clandestine": 12,
+      "economic": 27,
+      "educational": 12,
+      "fantastic": 22,
+      "judicial": 10,
+      "kinship": 13,
+      "military": 33,
+      "political": 52,
+      "religious": 40
+    },
+    "frozen_ids_sha256": "5bf78e865f95876fa08dcba7e64fa127c90a4f7b788db8bdeebbcb156a26317f"
+  },
+  "frozen_systems": [
+    {
+      "id": "kingdom",
+      "family": "political",
+      "label_fr": "Royaume"
+    },
+    {
+      "id": "empire",
+      "family": "political",
+      "label_fr": "Empire"
+    },
+    {
+      "id": "aristocratic_nation",
+      "family": "political",
+      "label_fr": "Nation aristocratique"
+    },
+    {
+      "id": "democratic_nation",
+      "family": "political",
+      "label_fr": "Nation démocratique"
+    },
+    {
+      "id": "federation",
+      "family": "political",
+      "label_fr": "Fédération"
+    },
+    {
+      "id": "confederation",
+      "family": "political",
+      "label_fr": "Confédération"
+    },
+    {
+      "id": "city_state",
+      "family": "political",
+      "label_fr": "Cité-État"
+    },
+    {
+      "id": "city",
+      "family": "political",
+      "label_fr": "Ville"
+    },
+    {
+      "id": "village",
+      "family": "political",
+      "label_fr": "Village"
+    },
+    {
+      "id": "hamlet",
+      "family": "political",
+      "label_fr": "Hameau"
+    },
+    {
+      "id": "province",
+      "family": "political",
+      "label_fr": "Province"
+    },
+    {
+      "id": "frontier_march",
+      "family": "political",
+      "label_fr": "Marche frontière"
+    },
+    {
+      "id": "tributary_realm",
+      "family": "political",
+      "label_fr": "Royaume tributaire"
+    },
+    {
+      "id": "elective_monarchy",
+      "family": "political",
+      "label_fr": "Monarchie élective"
+    },
+    {
+      "id": "principality",
+      "family": "political",
+      "label_fr": "Principauté"
+    },
+    {
+      "id": "duchy",
+      "family": "political",
+      "label_fr": "Duché"
+    },
+    {
+      "id": "county",
+      "family": "political",
+      "label_fr": "Comté"
+    },
+    {
+      "id": "barony",
+      "family": "political",
+      "label_fr": "Baronnie"
+    },
+    {
+      "id": "free_city",
+      "family": "political",
+      "label_fr": "Ville libre"
+    },
+    {
+      "id": "chartered_town",
+      "family": "political",
+      "label_fr": "Bourg à charte"
+    },
+    {
+      "id": "ward",
+      "family": "political",
+      "label_fr": "Quartier urbain"
+    },
+    {
+      "id": "rural_district",
+      "family": "political",
+      "label_fr": "District rural"
+    },
+    {
+      "id": "protectorate",
+      "family": "political",
+      "label_fr": "Protectorat"
+    },
+    {
+      "id": "occupied_territory",
+      "family": "political",
+      "label_fr": "Territoire occupé"
+    },
+    {
+      "id": "nomadic_confederation",
+      "family": "political",
+      "label_fr": "Confédération nomade"
+    },
+    {
+      "id": "tribal_council",
+      "family": "political",
+      "label_fr": "Conseil tribal"
+    },
+    {
+      "id": "island_polity",
+      "family": "political",
+      "label_fr": "Politie insulaire"
+    },
+    {
+      "id": "canal_authority",
+      "family": "political",
+      "label_fr": "Autorité de canal"
+    },
+    {
+      "id": "crown_council",
+      "family": "political",
+      "label_fr": "Conseil de la Couronne"
+    },
+    {
+      "id": "parliament",
+      "family": "political",
+      "label_fr": "Parlement"
+    },
+    {
+      "id": "local_council",
+      "family": "political",
+      "label_fr": "Conseil local"
+    },
+    {
+      "id": "village_federation",
+      "family": "political",
+      "label_fr": "Fédération de villages"
+    },
+    {
+      "id": "frontier_settlement",
+      "family": "political",
+      "label_fr": "Colonie de frontière"
+    },
+    {
+      "id": "city_league",
+      "family": "political",
+      "label_fr": "Ligue de cités"
+    },
+    {
+      "id": "republic",
+      "family": "political",
+      "label_fr": "République"
+    },
+    {
+      "id": "bureaucratic_state",
+      "family": "political",
+      "label_fr": "État administratif"
+    },
+    {
+      "id": "theocracy",
+      "family": "political",
+      "label_fr": "Théocratie"
+    },
+    {
+      "id": "military_junta",
+      "family": "political",
+      "label_fr": "Junte militaire"
+    },
+    {
+      "id": "revolutionary_council",
+      "family": "political",
+      "label_fr": "Conseil révolutionnaire"
+    },
+    {
+      "id": "colonial_administration",
+      "family": "political",
+      "label_fr": "Administration coloniale"
+    },
+    {
+      "id": "merchant_republic",
+      "family": "political",
+      "label_fr": "République marchande"
+    },
+    {
+      "id": "sacred_kingdom",
+      "family": "political",
+      "label_fr": "Royaume sacré"
+    },
+    {
+      "id": "guild_republic",
+      "family": "political",
+      "label_fr": "République des métiers"
+    },
+    {
+      "id": "refuge_camp",
+      "family": "political",
+      "label_fr": "Camp de refuge"
+    },
+    {
+      "id": "disaster_commission",
+      "family": "political",
+      "label_fr": "Commission de crise"
+    },
+    {
+      "id": "temple_city",
+      "family": "religious",
+      "label_fr": "Cité-temple"
+    },
+    {
+      "id": "cult",
+      "family": "religious",
+      "label_fr": "Culte"
+    },
+    {
+      "id": "mystery_cult",
+      "family": "religious",
+      "label_fr": "Culte à mystères"
+    },
+    {
+      "id": "shamanic_circle",
+      "family": "religious",
+      "label_fr": "Cercle chamanique"
+    },
+    {
+      "id": "priesthood",
+      "family": "religious",
+      "label_fr": "Sacerdoce"
+    },
+    {
+      "id": "monastery",
+      "family": "religious",
+      "label_fr": "Monastère"
+    },
+    {
+      "id": "religious_order",
+      "family": "religious",
+      "label_fr": "Ordre religieux"
+    },
+    {
+      "id": "congregation",
+      "family": "religious",
+      "label_fr": "Congrégation"
+    },
+    {
+      "id": "religious_empire",
+      "family": "religious",
+      "label_fr": "Empire religieux"
+    },
+    {
+      "id": "pilgrimage_shrine",
+      "family": "religious",
+      "label_fr": "Sanctuaire de pèlerinage"
+    },
+    {
+      "id": "oracle_house",
+      "family": "religious",
+      "label_fr": "Maison d’oracle"
+    },
+    {
+      "id": "ancestor_shrine",
+      "family": "religious",
+      "label_fr": "Sanctuaire ancestral"
+    },
+    {
+      "id": "hermitage",
+      "family": "religious",
+      "label_fr": "Ermitage"
+    },
+    {
+      "id": "mission_station",
+      "family": "religious",
+      "label_fr": "Mission"
+    },
+    {
+      "id": "lay_brotherhood",
+      "family": "religious",
+      "label_fr": "Confrérie laïque"
+    },
+    {
+      "id": "cult_cell",
+      "family": "religious",
+      "label_fr": "Cellule de culte"
+    },
+    {
+      "id": "heresy_court",
+      "family": "religious",
+      "label_fr": "Tribunal doctrinal"
+    },
+    {
+      "id": "temple_estate",
+      "family": "religious",
+      "label_fr": "Domaine de temple"
+    },
+    {
+      "id": "funerary_guild",
+      "family": "religious",
+      "label_fr": "Confrérie funéraire"
+    },
+    {
+      "id": "festival_council",
+      "family": "religious",
+      "label_fr": "Conseil des fêtes"
+    },
+    {
+      "id": "craft_guild",
+      "family": "economic",
+      "label_fr": "Guilde artisanale"
+    },
+    {
+      "id": "merchant_guild",
+      "family": "economic",
+      "label_fr": "Guilde marchande"
+    },
+    {
+      "id": "apprenticeship_workshop",
+      "family": "economic",
+      "label_fr": "Atelier d’apprentissage"
+    },
+    {
+      "id": "cooperative",
+      "family": "economic",
+      "label_fr": "Coopérative"
+    },
+    {
+      "id": "workers_union",
+      "family": "economic",
+      "label_fr": "Syndicat de travailleurs"
+    },
+    {
+      "id": "caravan_company",
+      "family": "economic",
+      "label_fr": "Compagnie caravanière"
+    },
+    {
+      "id": "trading_company",
+      "family": "economic",
+      "label_fr": "Compagnie de commerce"
+    },
+    {
+      "id": "bank",
+      "family": "economic",
+      "label_fr": "Banque"
+    },
+    {
+      "id": "credit_union",
+      "family": "economic",
+      "label_fr": "Caisse mutuelle"
+    },
+    {
+      "id": "market_authority",
+      "family": "economic",
+      "label_fr": "Autorité de marché"
+    },
+    {
+      "id": "merchant_caravan",
+      "family": "economic",
+      "label_fr": "Caravane marchande"
+    },
+    {
+      "id": "fishing_cooperative",
+      "family": "economic",
+      "label_fr": "Coopérative de pêche"
+    },
+    {
+      "id": "farm_collective",
+      "family": "economic",
+      "label_fr": "Collectif agricole"
+    },
+    {
+      "id": "mining_company",
+      "family": "economic",
+      "label_fr": "Compagnie minière"
+    },
+    {
+      "id": "shipping_consortium",
+      "family": "economic",
+      "label_fr": "Consortium maritime"
+    },
+    {
+      "id": "insurance_house",
+      "family": "economic",
+      "label_fr": "Maison d’assurance"
+    },
+    {
+      "id": "labor_exchange",
+      "family": "economic",
+      "label_fr": "Bourse du travail"
+    },
+    {
+      "id": "guild_federation",
+      "family": "economic",
+      "label_fr": "Fédération des guildes"
+    },
+    {
+      "id": "toll_keepers",
+      "family": "economic",
+      "label_fr": "Ferme des péages"
+    },
+    {
+      "id": "grain_exchange",
+      "family": "economic",
+      "label_fr": "Bourse aux grains"
+    },
+    {
+      "id": "army",
+      "family": "military",
+      "label_fr": "Armée de terre"
+    },
+    {
+      "id": "militia",
+      "family": "military",
+      "label_fr": "Milice"
+    },
+    {
+      "id": "navy",
+      "family": "military",
+      "label_fr": "Marine de guerre"
+    },
+    {
+      "id": "pirate_flotilla",
+      "family": "military",
+      "label_fr": "Flottille pirate"
+    },
+    {
+      "id": "knightly_order",
+      "family": "military",
+      "label_fr": "Ordre chevaleresque"
+    },
+    {
+      "id": "border_guard",
+      "family": "military",
+      "label_fr": "Garde-frontière"
+    },
+    {
+      "id": "intelligence_service",
+      "family": "military",
+      "label_fr": "Service de renseignement"
+    },
+    {
+      "id": "scout_company",
+      "family": "military",
+      "label_fr": "Compagnie d’éclaireurs"
+    },
+    {
+      "id": "mercenary_company",
+      "family": "military",
+      "label_fr": "Compagnie mercenaire"
+    },
+    {
+      "id": "siege_train",
+      "family": "military",
+      "label_fr": "Train de siège"
+    },
+    {
+      "id": "military_order",
+      "family": "military",
+      "label_fr": "Ordre militaire"
+    },
+    {
+      "id": "garrison",
+      "family": "military",
+      "label_fr": "Garnison"
+    },
+    {
+      "id": "naval_fleet",
+      "family": "military",
+      "label_fr": "Flotte"
+    },
+    {
+      "id": "coast_watch",
+      "family": "military",
+      "label_fr": "Veille côtière"
+    },
+    {
+      "id": "war_council",
+      "family": "military",
+      "label_fr": "Conseil de guerre"
+    },
+    {
+      "id": "combat_company",
+      "family": "military",
+      "label_fr": "Compagnie de combat"
+    },
+    {
+      "id": "siege_defense_council",
+      "family": "military",
+      "label_fr": "Conseil de défense de siège"
+    },
+    {
+      "id": "veterans_association",
+      "family": "military",
+      "label_fr": "Association d’anciens combattants"
+    },
+    {
+      "id": "joint_family",
+      "family": "kinship",
+      "label_fr": "Maison familiale commune"
+    },
+    {
+      "id": "matrilineal_house",
+      "family": "kinship",
+      "label_fr": "Maison matrilinéaire"
+    },
+    {
+      "id": "noble_house",
+      "family": "kinship",
+      "label_fr": "Maison noble"
+    },
+    {
+      "id": "lineage",
+      "family": "kinship",
+      "label_fr": "Lignée"
+    },
+    {
+      "id": "clan",
+      "family": "kinship",
+      "label_fr": "Clan"
+    },
+    {
+      "id": "dynasty",
+      "family": "kinship",
+      "label_fr": "Dynastie"
+    },
+    {
+      "id": "adoptive_house",
+      "family": "kinship",
+      "label_fr": "Maison d’adoption"
+    },
+    {
+      "id": "retainer_household",
+      "family": "kinship",
+      "label_fr": "Maison de clientèle"
+    },
+    {
+      "id": "clan_council",
+      "family": "kinship",
+      "label_fr": "Conseil de clan"
+    },
+    {
+      "id": "inheritance_court",
+      "family": "kinship",
+      "label_fr": "Cour successorale"
+    },
+    {
+      "id": "court_of_justice",
+      "family": "judicial",
+      "label_fr": "Cour de justice"
+    },
+    {
+      "id": "village_court",
+      "family": "judicial",
+      "label_fr": "Tribunal villageois"
+    },
+    {
+      "id": "guild_court",
+      "family": "judicial",
+      "label_fr": "Tribunal des métiers"
+    },
+    {
+      "id": "inquest_commission",
+      "family": "judicial",
+      "label_fr": "Commission d’enquête"
+    },
+    {
+      "id": "mediation_circle",
+      "family": "judicial",
+      "label_fr": "Cercle de médiation"
+    },
+    {
+      "id": "prison_administration",
+      "family": "judicial",
+      "label_fr": "Administration pénitentiaire"
+    },
+    {
+      "id": "watch_court",
+      "family": "judicial",
+      "label_fr": "Cour de veille"
+    },
+    {
+      "id": "arbitration_chamber",
+      "family": "judicial",
+      "label_fr": "Chambre d’arbitrage"
+    },
+    {
+      "id": "appeals_court",
+      "family": "judicial",
+      "label_fr": "Cour d’appel"
+    },
+    {
+      "id": "customary_council",
+      "family": "judicial",
+      "label_fr": "Conseil coutumier"
+    },
+    {
+      "id": "academy",
+      "family": "educational",
+      "label_fr": "Académie"
+    },
+    {
+      "id": "village_school",
+      "family": "educational",
+      "label_fr": "École villageoise"
+    },
+    {
+      "id": "university",
+      "family": "educational",
+      "label_fr": "Université"
+    },
+    {
+      "id": "scriptorium",
+      "family": "educational",
+      "label_fr": "Scriptorium"
+    },
+    {
+      "id": "library",
+      "family": "educational",
+      "label_fr": "Bibliothèque"
+    },
+    {
+      "id": "guild_school",
+      "family": "educational",
+      "label_fr": "École de métier"
+    },
+    {
+      "id": "observatory",
+      "family": "educational",
+      "label_fr": "Observatoire"
+    },
+    {
+      "id": "healing_house",
+      "family": "educational",
+      "label_fr": "Maison de soins"
+    },
+    {
+      "id": "apprentice_school",
+      "family": "educational",
+      "label_fr": "Maison d’apprentissage"
+    },
+    {
+      "id": "scholars_circle",
+      "family": "educational",
+      "label_fr": "Cercle de savants"
+    },
+    {
+      "id": "water_board",
+      "family": "civic",
+      "label_fr": "Commission de l’eau"
+    },
+    {
+      "id": "irrigation_council",
+      "family": "civic",
+      "label_fr": "Conseil d’irrigation"
+    },
+    {
+      "id": "fire_watch",
+      "family": "civic",
+      "label_fr": "Garde du feu"
+    },
+    {
+      "id": "public_works_office",
+      "family": "civic",
+      "label_fr": "Office des travaux publics"
+    },
+    {
+      "id": "sanitation_board",
+      "family": "civic",
+      "label_fr": "Commission sanitaire"
+    },
+    {
+      "id": "harbor_authority",
+      "family": "civic",
+      "label_fr": "Autorité portuaire"
+    },
+    {
+      "id": "commons_trust",
+      "family": "civic",
+      "label_fr": "Fiducie des communs"
+    },
+    {
+      "id": "neighborhood_watch",
+      "family": "civic",
+      "label_fr": "Veille de quartier"
+    },
+    {
+      "id": "relief_society",
+      "family": "civic",
+      "label_fr": "Société de secours"
+    },
+    {
+      "id": "burial_society",
+      "family": "civic",
+      "label_fr": "Société funéraire"
+    },
+    {
+      "id": "public_market_board",
+      "family": "civic",
+      "label_fr": "Régie du marché public"
+    },
+    {
+      "id": "road_wardens",
+      "family": "civic",
+      "label_fr": "Garde-routes"
+    },
+    {
+      "id": "secret_society",
+      "family": "clandestine",
+      "label_fr": "Société secrète"
+    },
+    {
+      "id": "smugglers_ring",
+      "family": "clandestine",
+      "label_fr": "Réseau de contrebande"
+    },
+    {
+      "id": "assassins_order",
+      "family": "clandestine",
+      "label_fr": "Ordre des assassins"
+    },
+    {
+      "id": "resistance_network",
+      "family": "clandestine",
+      "label_fr": "Réseau de résistance"
+    },
+    {
+      "id": "spy_ring",
+      "family": "clandestine",
+      "label_fr": "Réseau d’espionnage"
+    },
+    {
+      "id": "thieves_guild",
+      "family": "clandestine",
+      "label_fr": "Guilde des voleurs"
+    },
+    {
+      "id": "underground_press",
+      "family": "clandestine",
+      "label_fr": "Imprimerie clandestine"
+    },
+    {
+      "id": "mutual_aid_cell",
+      "family": "clandestine",
+      "label_fr": "Cellule d’entraide clandestine"
+    },
+    {
+      "id": "mage_college",
+      "family": "fantastic",
+      "label_fr": "Collège de mages"
+    },
+    {
+      "id": "dragon_court",
+      "family": "fantastic",
+      "label_fr": "Cour draconique"
+    },
+    {
+      "id": "adventuring_company",
+      "family": "fantastic",
+      "label_fr": "Compagnie d’aventuriers"
+    },
+    {
+      "id": "monster_hunters_lodge",
+      "family": "fantastic",
+      "label_fr": "Loge de chasseurs de monstres"
+    },
+    {
+      "id": "druid_grove",
+      "family": "fantastic",
+      "label_fr": "Bosquet druidique"
+    },
+    {
+      "id": "fey_court",
+      "family": "fantastic",
+      "label_fr": "Cour féerique"
+    },
+    {
+      "id": "necromantic_college",
+      "family": "fantastic",
+      "label_fr": "Collège nécromantique"
+    },
+    {
+      "id": "elemental_conclave",
+      "family": "fantastic",
+      "label_fr": "Conclave élémentaire"
+    },
+    {
+      "id": "dragon_clan",
+      "family": "fantastic",
+      "label_fr": "Clan draconique"
+    },
+    {
+      "id": "adventurers_guild",
+      "family": "fantastic",
+      "label_fr": "Guilde des aventuriers"
+    },
+    {
+      "id": "planar_gate_authority",
+      "family": "fantastic",
+      "label_fr": "Autorité des portails"
+    },
+    {
+      "id": "golem_workshop",
+      "family": "fantastic",
+      "label_fr": "Atelier de golems"
+    },
+    {
+      "id": "dragonflight",
+      "family": "fantastic",
+      "label_fr": "Vol draconique"
+    },
+    {
+      "id": "arcane_registry",
+      "family": "fantastic",
+      "label_fr": "Registre arcanique"
+    },
+    {
+      "id": "spirit_court",
+      "family": "fantastic",
+      "label_fr": "Cour des esprits"
+    },
+    {
+      "id": "monster_pack",
+      "family": "fantastic",
+      "label_fr": "Meute monstrueuse"
+    },
+    {
+      "id": "relic_custodians",
+      "family": "fantastic",
+      "label_fr": "Gardiens de reliques"
+    },
+    {
+      "id": "witch_coven",
+      "family": "fantastic",
+      "label_fr": "Coven de sorcières"
+    },
+    {
+      "id": "guild_of_enchanters",
+      "family": "fantastic",
+      "label_fr": "Guilde des enchanteurs"
+    },
+    {
+      "id": "oracle_network",
+      "family": "fantastic",
+      "label_fr": "Réseau d’oracles"
+    },
+    {
+      "id": "undead_legion",
+      "family": "fantastic",
+      "label_fr": "Légion des morts-vivants"
+    },
+    {
+      "id": "demon_pact_court",
+      "family": "fantastic",
+      "label_fr": "Cour des pactes infernaux"
+    },
+    {
+      "id": "nation",
+      "family": "political",
+      "label_fr": "Nation"
+    },
+    {
+      "id": "army_group",
+      "family": "military",
+      "label_fr": "Groupe d’armées"
+    },
+    {
+      "id": "army_corps",
+      "family": "military",
+      "label_fr": "Corps d’armée"
+    },
+    {
+      "id": "division",
+      "family": "military",
+      "label_fr": "Division"
+    },
+    {
+      "id": "brigade",
+      "family": "military",
+      "label_fr": "Brigade"
+    },
+    {
+      "id": "regiment",
+      "family": "military",
+      "label_fr": "Régiment"
+    },
+    {
+      "id": "battalion",
+      "family": "military",
+      "label_fr": "Bataillon"
+    },
+    {
+      "id": "company",
+      "family": "military",
+      "label_fr": "Compagnie"
+    },
+    {
+      "id": "platoon",
+      "family": "military",
+      "label_fr": "Peloton"
+    },
+    {
+      "id": "squad",
+      "family": "military",
+      "label_fr": "Escouade"
+    },
+    {
+      "id": "naval_squadron",
+      "family": "military",
+      "label_fr": "Escadre"
+    },
+    {
+      "id": "warship_crew",
+      "family": "military",
+      "label_fr": "Équipage de navire de guerre"
+    },
+    {
+      "id": "merchant_ship_crew",
+      "family": "economic",
+      "label_fr": "Équipage de navire marchand"
+    },
+    {
+      "id": "air_force",
+      "family": "military",
+      "label_fr": "Force aérienne"
+    },
+    {
+      "id": "expedition",
+      "family": "military",
+      "label_fr": "Expédition"
+    },
+    {
+      "id": "raiding_party",
+      "family": "military",
+      "label_fr": "Parti de raid"
+    },
+    {
+      "id": "bodyguard",
+      "family": "military",
+      "label_fr": "Garde rapprochée"
+    },
+    {
+      "id": "royal_household",
+      "family": "kinship",
+      "label_fr": "Maison de la couronne"
+    },
+    {
+      "id": "royal_court",
+      "family": "political",
+      "label_fr": "Cour royale"
+    },
+    {
+      "id": "diplomatic_mission",
+      "family": "political",
+      "label_fr": "Mission diplomatique"
+    },
+    {
+      "id": "ministry",
+      "family": "political",
+      "label_fr": "Ministère"
+    },
+    {
+      "id": "civil_service",
+      "family": "political",
+      "label_fr": "Fonction publique"
+    },
+    {
+      "id": "political_party",
+      "family": "political",
+      "label_fr": "Parti politique"
+    },
+    {
+      "id": "trade_union_federation",
+      "family": "economic",
+      "label_fr": "Fédération syndicale"
+    },
+    {
+      "id": "corporation",
+      "family": "economic",
+      "label_fr": "Société par actions"
+    },
+    {
+      "id": "chartered_company",
+      "family": "economic",
+      "label_fr": "Compagnie à charte"
+    },
+    {
+      "id": "colonial_company",
+      "family": "economic",
+      "label_fr": "Compagnie coloniale"
+    },
+    {
+      "id": "estate_administration",
+      "family": "economic",
+      "label_fr": "Administration de domaine"
+    },
+    {
+      "id": "crime_family",
+      "family": "clandestine",
+      "label_fr": "Famille criminelle"
+    },
+    {
+      "id": "street_gang",
+      "family": "clandestine",
+      "label_fr": "Bande de rue"
+    },
+    {
+      "id": "prison_gang",
+      "family": "clandestine",
+      "label_fr": "Groupe de détenus"
+    },
+    {
+      "id": "spy_cell",
+      "family": "clandestine",
+      "label_fr": "Cellule d’espionnage"
+    },
+    {
+      "id": "revolutionary_party",
+      "family": "political",
+      "label_fr": "Parti révolutionnaire"
+    },
+    {
+      "id": "sports_club",
+      "family": "civic",
+      "label_fr": "Club sportif"
+    },
+    {
+      "id": "theatrical_troupe",
+      "family": "civic",
+      "label_fr": "Troupe théâtrale"
+    },
+    {
+      "id": "traveling_circus",
+      "family": "civic",
+      "label_fr": "Cirque itinérant"
+    },
+    {
+      "id": "artisan_confraternity",
+      "family": "economic",
+      "label_fr": "Confrérie d’artisans"
+    },
+    {
+      "id": "temple_granary_office",
+      "family": "religious",
+      "label_fr": "Office du grenier sacré"
+    },
+    {
+      "id": "sacred_calendar_council",
+      "family": "religious",
+      "label_fr": "Conseil du calendrier sacré"
+    },
+    {
+      "id": "pilgrimage_wayhouse_network",
+      "family": "religious",
+      "label_fr": "Réseau des maisons d’étape"
+    },
+    {
+      "id": "procession_company",
+      "family": "religious",
+      "label_fr": "Compagnie processionnelle"
+    },
+    {
+      "id": "vow_renewal_court",
+      "family": "religious",
+      "label_fr": "Cour de renouvellement des vœux"
+    },
+    {
+      "id": "vow_release_circle",
+      "family": "religious",
+      "label_fr": "Cercle de déliaison des vœux"
+    },
+    {
+      "id": "funerary_boat_brotherhood",
+      "family": "religious",
+      "label_fr": "Confrérie des passeurs funèbres"
+    },
+    {
+      "id": "mortuary_purification_house",
+      "family": "religious",
+      "label_fr": "Maison de purification mortuaire"
+    },
+    {
+      "id": "ancestor_feast_compact",
+      "family": "kinship",
+      "label_fr": "Pacte des festins ancestraux"
+    },
+    {
+      "id": "lineage_memory_archive",
+      "family": "kinship",
+      "label_fr": "Archive des mémoires de lignée"
+    },
+    {
+      "id": "diviner_apprentice_house",
+      "family": "educational",
+      "label_fr": "Maison d’apprentissage divinatoire"
+    },
+    {
+      "id": "dream_interpretation_circle",
+      "family": "religious",
+      "label_fr": "Cercle d’interprétation des rêves"
+    },
+    {
+      "id": "itinerant_prophets_movement",
+      "family": "religious",
+      "label_fr": "Mouvement des prophètes itinérants"
+    },
+    {
+      "id": "mendicant_preaching_network",
+      "family": "religious",
+      "label_fr": "Réseau de prédication mendiante"
+    },
+    {
+      "id": "mendicant_almonry",
+      "family": "religious",
+      "label_fr": "Aumônerie mendiante"
+    },
+    {
+      "id": "exorcist_lodge",
+      "family": "religious",
+      "label_fr": "Loge des exorcistes"
+    },
+    {
+      "id": "possession_witness_circle",
+      "family": "religious",
+      "label_fr": "Cercle témoin des possessions"
+    },
+    {
+      "id": "plague_vow_fellowship",
+      "family": "religious",
+      "label_fr": "Fraternité du vœu de peste"
+    },
+    {
+      "id": "epidemic_recovery_house",
+      "family": "civic",
+      "label_fr": "Maison de convalescence épidémique"
+    },
+    {
+      "id": "solar_clock_custodians",
+      "family": "religious",
+      "label_fr": "Gardiens des horloges solaires"
+    },
+    {
+      "id": "astral_calendar_consortium",
+      "family": "educational",
+      "label_fr": "Consortium des calendriers astraux"
+    },
+    {
+      "id": "sacred_grove_moot",
+      "family": "religious",
+      "label_fr": "Assemblée du bosquet sacré"
+    },
+    {
+      "id": "migration_omen_watch",
+      "family": "civic",
+      "label_fr": "Veille des migrations animales"
+    },
+    {
+      "id": "spring_spirit_compact",
+      "family": "civic",
+      "label_fr": "Pacte de la source vive"
+    },
+    {
+      "id": "pass_shrine_wardens",
+      "family": "civic",
+      "label_fr": "Gardiens du sanctuaire de col"
+    },
+    {
+      "id": "forge_initiation_order",
+      "family": "religious",
+      "label_fr": "Ordre initiatique de la forge"
+    },
+    {
+      "id": "communal_oath_hunt",
+      "family": "civic",
+      "label_fr": "Compagnie de chasse sous serment"
+    },
+    {
+      "id": "relic_authentication_chamber",
+      "family": "religious",
+      "label_fr": "Chambre d’authentification des reliques"
+    },
+    {
+      "id": "roadside_lantern_brotherhood",
+      "family": "civic",
+      "label_fr": "Fraternité des lanternes de route"
+    },
+    {
+      "id": "dream_incubation_sanctuary",
+      "family": "religious",
+      "label_fr": "Sanctuaire d’incubation des rêves"
+    }
+  ],
+  "exclusion_reason_codes": {
+    "polity_scale": "Souveraineté ou gouvernement d'un État entier. Chronos modélise la polity et ses offices supérieurs (`home_domain`, §2) en dehors des archétypes de groupes locaux ; un domaine S0-S5 ne dépasse pas 20 000 habitants (§17).",
+    "command_echelon": "Niveau interne de commandement d'une force permanente, sans mécanique sociale distincte de l'archétype `garrison` (ou `war_fleet`) qui le contient. Aucun domaine S0-S5 n'atteint cette échelle.",
+    "modern_form": "Forme institutionnelle étrangère au cadre médiéval ou fantastique de Chronos (aviation, parti de masse, société par actions, fédération syndicale interprofessionnelle)."
+  },
+  "system_decisions": [
+    {
+      "system_id": "academy",
+      "decision": "map",
+      "archetype_id": "university"
+    },
+    {
+      "system_id": "adoptive_house",
+      "decision": "map",
+      "archetype_id": "kin_group"
+    },
+    {
+      "system_id": "adventurers_guild",
+      "decision": "map",
+      "archetype_id": "adventuring_company"
+    },
+    {
+      "system_id": "adventuring_company",
+      "decision": "map",
+      "archetype_id": "adventuring_company"
+    },
+    {
+      "system_id": "air_force",
+      "decision": "exclude",
+      "reason_code": "modern_form",
+      "reason": "Forme institutionnelle étrangère au cadre médiéval ou fantastique de Chronos (aviation, parti de masse, société par actions, fédération syndicale interprofessionnelle)."
+    },
+    {
+      "system_id": "ancestor_feast_compact",
+      "decision": "map",
+      "archetype_id": "ancestral_cult"
+    },
+    {
+      "system_id": "ancestor_shrine",
+      "decision": "map",
+      "archetype_id": "ancestral_cult"
+    },
+    {
+      "system_id": "appeals_court",
+      "decision": "map",
+      "archetype_id": "law_court"
+    },
+    {
+      "system_id": "apprentice_school",
+      "decision": "map",
+      "archetype_id": "school"
+    },
+    {
+      "system_id": "apprenticeship_workshop",
+      "decision": "map",
+      "archetype_id": "workshop"
+    },
+    {
+      "system_id": "arbitration_chamber",
+      "decision": "map",
+      "archetype_id": "law_court"
+    },
+    {
+      "system_id": "arcane_registry",
+      "decision": "map",
+      "archetype_id": "mage_order",
+      "note": "Registre des pactes et artefacts tenu par un collège de mages."
+    },
+    {
+      "system_id": "aristocratic_nation",
+      "decision": "exclude",
+      "reason_code": "polity_scale",
+      "reason": "Souveraineté ou gouvernement d'un État entier. Chronos modélise la polity et ses offices supérieurs (`home_domain`, §2) en dehors des archétypes de groupes locaux ; un domaine S0-S5 ne dépasse pas 20 000 habitants (§17)."
+    },
+    {
+      "system_id": "army",
+      "decision": "map",
+      "archetype_id": "garrison",
+      "note": "Force permanente : garnison à l'échelle d'un domaine ; la hiérarchie interne est exclue."
+    },
+    {
+      "system_id": "army_corps",
+      "decision": "exclude",
+      "reason_code": "command_echelon",
+      "reason": "Niveau interne de commandement d'une force permanente, sans mécanique sociale distincte de l'archétype `garrison` (ou `war_fleet`) qui le contient. Aucun domaine S0-S5 n'atteint cette échelle."
+    },
+    {
+      "system_id": "army_group",
+      "decision": "exclude",
+      "reason_code": "command_echelon",
+      "reason": "Niveau interne de commandement d'une force permanente, sans mécanique sociale distincte de l'archétype `garrison` (ou `war_fleet`) qui le contient. Aucun domaine S0-S5 n'atteint cette échelle."
+    },
+    {
+      "system_id": "artisan_confraternity",
+      "decision": "map",
+      "archetype_id": "craft_association"
+    },
+    {
+      "system_id": "assassins_order",
+      "decision": "map",
+      "archetype_id": "assassin_brotherhood"
+    },
+    {
+      "system_id": "astral_calendar_consortium",
+      "decision": "map",
+      "archetype_id": "university"
+    },
+    {
+      "system_id": "bank",
+      "decision": "map",
+      "archetype_id": "banking_house"
+    },
+    {
+      "system_id": "barony",
+      "decision": "map",
+      "archetype_id": "lordship"
+    },
+    {
+      "system_id": "battalion",
+      "decision": "exclude",
+      "reason_code": "command_echelon",
+      "reason": "Niveau interne de commandement d'une force permanente, sans mécanique sociale distincte de l'archétype `garrison` (ou `war_fleet`) qui le contient. Aucun domaine S0-S5 n'atteint cette échelle."
+    },
+    {
+      "system_id": "bodyguard",
+      "decision": "map",
+      "archetype_id": "retinue",
+      "note": "Escorte personnelle d'un patron : suite armée."
+    },
+    {
+      "system_id": "border_guard",
+      "decision": "map",
+      "archetype_id": "garrison"
+    },
+    {
+      "system_id": "brigade",
+      "decision": "exclude",
+      "reason_code": "command_echelon",
+      "reason": "Niveau interne de commandement d'une force permanente, sans mécanique sociale distincte de l'archétype `garrison` (ou `war_fleet`) qui le contient. Aucun domaine S0-S5 n'atteint cette échelle."
+    },
+    {
+      "system_id": "bureaucratic_state",
+      "decision": "exclude",
+      "reason_code": "polity_scale",
+      "reason": "Souveraineté ou gouvernement d'un État entier. Chronos modélise la polity et ses offices supérieurs (`home_domain`, §2) en dehors des archétypes de groupes locaux ; un domaine S0-S5 ne dépasse pas 20 000 habitants (§17)."
+    },
+    {
+      "system_id": "burial_society",
+      "decision": "map",
+      "archetype_id": "mortuary_confraternity"
+    },
+    {
+      "system_id": "canal_authority",
+      "decision": "map",
+      "archetype_id": "administration",
+      "note": "Autorité de bassin : office d'administration."
+    },
+    {
+      "system_id": "caravan_company",
+      "decision": "map",
+      "archetype_id": "caravan"
+    },
+    {
+      "system_id": "chartered_company",
+      "decision": "map",
+      "archetype_id": "merchant_league",
+      "note": "Compagnie à charte publique : ligue de marchands à privilèges."
+    },
+    {
+      "system_id": "chartered_town",
+      "decision": "map",
+      "archetype_id": "civic_council"
+    },
+    {
+      "system_id": "city",
+      "decision": "map",
+      "archetype_id": "civic_council"
+    },
+    {
+      "system_id": "city_league",
+      "decision": "map",
+      "archetype_id": "merchant_league",
+      "note": "Alliance de cités autonomes pour péages, défense et commerce."
+    },
+    {
+      "system_id": "city_state",
+      "decision": "map",
+      "archetype_id": "civic_council",
+      "note": "Cité souveraine : traitée par son gouvernement urbain ; la souveraineté relève de la polity."
+    },
+    {
+      "system_id": "civil_service",
+      "decision": "map",
+      "archetype_id": "administration",
+      "note": "Corps permanent d'officiers : office d'administration."
+    },
+    {
+      "system_id": "clan",
+      "decision": "map",
+      "archetype_id": "kin_group"
+    },
+    {
+      "system_id": "clan_council",
+      "decision": "map",
+      "archetype_id": "local_assembly"
+    },
+    {
+      "system_id": "coast_watch",
+      "decision": "map",
+      "archetype_id": "town_watch"
+    },
+    {
+      "system_id": "colonial_administration",
+      "decision": "exclude",
+      "reason_code": "polity_scale",
+      "reason": "Souveraineté ou gouvernement d'un État entier. Chronos modélise la polity et ses offices supérieurs (`home_domain`, §2) en dehors des archétypes de groupes locaux ; un domaine S0-S5 ne dépasse pas 20 000 habitants (§17)."
+    },
+    {
+      "system_id": "colonial_company",
+      "decision": "map",
+      "archetype_id": "merchant_league",
+      "note": "Monopole délégué sur des concessions : ligue de marchands à privilèges."
+    },
+    {
+      "system_id": "combat_company",
+      "decision": "map",
+      "archetype_id": "garrison"
+    },
+    {
+      "system_id": "commons_trust",
+      "decision": "map",
+      "archetype_id": "local_assembly"
+    },
+    {
+      "system_id": "communal_oath_hunt",
+      "decision": "map",
+      "archetype_id": "resource_group"
+    },
+    {
+      "system_id": "company",
+      "decision": "exclude",
+      "reason_code": "command_echelon",
+      "reason": "Niveau interne de commandement d'une force permanente, sans mécanique sociale distincte de l'archétype `garrison` (ou `war_fleet`) qui le contient. Aucun domaine S0-S5 n'atteint cette échelle."
+    },
+    {
+      "system_id": "confederation",
+      "decision": "exclude",
+      "reason_code": "polity_scale",
+      "reason": "Souveraineté ou gouvernement d'un État entier. Chronos modélise la polity et ses offices supérieurs (`home_domain`, §2) en dehors des archétypes de groupes locaux ; un domaine S0-S5 ne dépasse pas 20 000 habitants (§17)."
+    },
+    {
+      "system_id": "congregation",
+      "decision": "map",
+      "archetype_id": "base_religious_community"
+    },
+    {
+      "system_id": "cooperative",
+      "decision": "map",
+      "archetype_id": "workshop",
+      "note": "Entreprise collective : production partagée, même mécanique qu'un atelier."
+    },
+    {
+      "system_id": "corporation",
+      "decision": "exclude",
+      "reason_code": "modern_form",
+      "reason": "Forme institutionnelle étrangère au cadre médiéval ou fantastique de Chronos (aviation, parti de masse, société par actions, fédération syndicale interprofessionnelle)."
+    },
+    {
+      "system_id": "county",
+      "decision": "map",
+      "archetype_id": "lordship"
+    },
+    {
+      "system_id": "court_of_justice",
+      "decision": "map",
+      "archetype_id": "law_court"
+    },
+    {
+      "system_id": "craft_guild",
+      "decision": "map",
+      "archetype_id": "craft_guild"
+    },
+    {
+      "system_id": "credit_union",
+      "decision": "map",
+      "archetype_id": "mutual_aid_society",
+      "note": "Caisse dont les déposants sont les membres : entraide financière entre pairs."
+    },
+    {
+      "system_id": "crime_family",
+      "decision": "map",
+      "archetype_id": "protection_racket"
+    },
+    {
+      "system_id": "crown_council",
+      "decision": "map",
+      "archetype_id": "court",
+      "note": "Conseil restreint autour du souverain : société de cour."
+    },
+    {
+      "system_id": "cult",
+      "decision": "map",
+      "archetype_id": "base_religious_community"
+    },
+    {
+      "system_id": "cult_cell",
+      "decision": "map",
+      "archetype_id": "heterodox_movement"
+    },
+    {
+      "system_id": "customary_council",
+      "decision": "map",
+      "archetype_id": "law_court"
+    },
+    {
+      "system_id": "democratic_nation",
+      "decision": "exclude",
+      "reason_code": "polity_scale",
+      "reason": "Souveraineté ou gouvernement d'un État entier. Chronos modélise la polity et ses offices supérieurs (`home_domain`, §2) en dehors des archétypes de groupes locaux ; un domaine S0-S5 ne dépasse pas 20 000 habitants (§17)."
+    },
+    {
+      "system_id": "demon_pact_court",
+      "decision": "map",
+      "archetype_id": "infernal_cult"
+    },
+    {
+      "system_id": "diplomatic_mission",
+      "decision": "map",
+      "archetype_id": "embassy"
+    },
+    {
+      "system_id": "disaster_commission",
+      "decision": "map",
+      "archetype_id": "administration",
+      "note": "Organe temporaire de secours : office d'administration."
+    },
+    {
+      "system_id": "diviner_apprentice_house",
+      "decision": "map",
+      "archetype_id": "school"
+    },
+    {
+      "system_id": "division",
+      "decision": "exclude",
+      "reason_code": "command_echelon",
+      "reason": "Niveau interne de commandement d'une force permanente, sans mécanique sociale distincte de l'archétype `garrison` (ou `war_fleet`) qui le contient. Aucun domaine S0-S5 n'atteint cette échelle."
+    },
+    {
+      "system_id": "dragon_clan",
+      "decision": "map",
+      "archetype_id": "dragon_court"
+    },
+    {
+      "system_id": "dragon_court",
+      "decision": "map",
+      "archetype_id": "dragon_court"
+    },
+    {
+      "system_id": "dragonflight",
+      "decision": "map",
+      "archetype_id": "dragon_court"
+    },
+    {
+      "system_id": "dream_incubation_sanctuary",
+      "decision": "map",
+      "archetype_id": "ritual_institution"
+    },
+    {
+      "system_id": "dream_interpretation_circle",
+      "decision": "map",
+      "archetype_id": "ritual_group"
+    },
+    {
+      "system_id": "druid_grove",
+      "decision": "map",
+      "archetype_id": "druid_circle"
+    },
+    {
+      "system_id": "duchy",
+      "decision": "map",
+      "archetype_id": "lordship"
+    },
+    {
+      "system_id": "dynasty",
+      "decision": "map",
+      "archetype_id": "ruling_dynasty"
+    },
+    {
+      "system_id": "elective_monarchy",
+      "decision": "exclude",
+      "reason_code": "polity_scale",
+      "reason": "Souveraineté ou gouvernement d'un État entier. Chronos modélise la polity et ses offices supérieurs (`home_domain`, §2) en dehors des archétypes de groupes locaux ; un domaine S0-S5 ne dépasse pas 20 000 habitants (§17)."
+    },
+    {
+      "system_id": "elemental_conclave",
+      "decision": "map",
+      "archetype_id": "fey_court",
+      "note": "Assemblée d'entités surnaturelles liées par pacte : cour de puissances déclarées."
+    },
+    {
+      "system_id": "empire",
+      "decision": "exclude",
+      "reason_code": "polity_scale",
+      "reason": "Souveraineté ou gouvernement d'un État entier. Chronos modélise la polity et ses offices supérieurs (`home_domain`, §2) en dehors des archétypes de groupes locaux ; un domaine S0-S5 ne dépasse pas 20 000 habitants (§17)."
+    },
+    {
+      "system_id": "epidemic_recovery_house",
+      "decision": "map",
+      "archetype_id": "hospital_house"
+    },
+    {
+      "system_id": "estate_administration",
+      "decision": "map",
+      "archetype_id": "lordship"
+    },
+    {
+      "system_id": "exorcist_lodge",
+      "decision": "map",
+      "archetype_id": "ritual_group",
+      "note": "Petit groupe de praticiens rituels : groupe rituel."
+    },
+    {
+      "system_id": "expedition",
+      "decision": "map",
+      "archetype_id": "scout_company",
+      "note": "Mission temporaire d'exploration : compagnie légère."
+    },
+    {
+      "system_id": "farm_collective",
+      "decision": "map",
+      "archetype_id": "productive_community"
+    },
+    {
+      "system_id": "federation",
+      "decision": "exclude",
+      "reason_code": "polity_scale",
+      "reason": "Souveraineté ou gouvernement d'un État entier. Chronos modélise la polity et ses offices supérieurs (`home_domain`, §2) en dehors des archétypes de groupes locaux ; un domaine S0-S5 ne dépasse pas 20 000 habitants (§17)."
+    },
+    {
+      "system_id": "festival_council",
+      "decision": "map",
+      "archetype_id": "festive_society",
+      "note": "Comité temporaire de fêtes : société festive."
+    },
+    {
+      "system_id": "fey_court",
+      "decision": "map",
+      "archetype_id": "fey_court"
+    },
+    {
+      "system_id": "fire_watch",
+      "decision": "map",
+      "archetype_id": "town_watch"
+    },
+    {
+      "system_id": "fishing_cooperative",
+      "decision": "map",
+      "archetype_id": "resource_group"
+    },
+    {
+      "system_id": "forge_initiation_order",
+      "decision": "map",
+      "archetype_id": "ritual_group"
+    },
+    {
+      "system_id": "free_city",
+      "decision": "map",
+      "archetype_id": "civic_council"
+    },
+    {
+      "system_id": "frontier_march",
+      "decision": "map",
+      "archetype_id": "lordship",
+      "note": "Territoire militaire d'un seigneur : seigneurie à devoirs d'alerte."
+    },
+    {
+      "system_id": "frontier_settlement",
+      "decision": "map",
+      "archetype_id": "local_colony"
+    },
+    {
+      "system_id": "funerary_boat_brotherhood",
+      "decision": "map",
+      "archetype_id": "mortuary_confraternity"
+    },
+    {
+      "system_id": "funerary_guild",
+      "decision": "map",
+      "archetype_id": "mortuary_confraternity"
+    },
+    {
+      "system_id": "garrison",
+      "decision": "map",
+      "archetype_id": "garrison"
+    },
+    {
+      "system_id": "golem_workshop",
+      "decision": "map",
+      "archetype_id": "mage_order"
+    },
+    {
+      "system_id": "grain_exchange",
+      "decision": "map",
+      "archetype_id": "market_association"
+    },
+    {
+      "system_id": "guild_court",
+      "decision": "map",
+      "archetype_id": "law_court"
+    },
+    {
+      "system_id": "guild_federation",
+      "decision": "map",
+      "archetype_id": "merchant_league",
+      "note": "Coordination de métiers : ligue."
+    },
+    {
+      "system_id": "guild_of_enchanters",
+      "decision": "map",
+      "archetype_id": "mage_order"
+    },
+    {
+      "system_id": "guild_republic",
+      "decision": "map",
+      "archetype_id": "civic_council",
+      "note": "Gouvernement de cité tenu par les métiers : conseil urbain."
+    },
+    {
+      "system_id": "guild_school",
+      "decision": "map",
+      "archetype_id": "school"
+    },
+    {
+      "system_id": "hamlet",
+      "decision": "map",
+      "archetype_id": "local_assembly"
+    },
+    {
+      "system_id": "harbor_authority",
+      "decision": "map",
+      "archetype_id": "administration"
+    },
+    {
+      "system_id": "healing_house",
+      "decision": "map",
+      "archetype_id": "hospital_house"
+    },
+    {
+      "system_id": "heresy_court",
+      "decision": "map",
+      "archetype_id": "inquisition"
+    },
+    {
+      "system_id": "hermitage",
+      "decision": "map",
+      "archetype_id": "hermitage"
+    },
+    {
+      "system_id": "inheritance_court",
+      "decision": "map",
+      "archetype_id": "law_court"
+    },
+    {
+      "system_id": "inquest_commission",
+      "decision": "map",
+      "archetype_id": "law_court"
+    },
+    {
+      "system_id": "insurance_house",
+      "decision": "map",
+      "archetype_id": "banking_house",
+      "note": "Mutualisation des pertes de marchands et de navires : fonction financière."
+    },
+    {
+      "system_id": "intelligence_service",
+      "decision": "map",
+      "archetype_id": "intelligence_network"
+    },
+    {
+      "system_id": "irrigation_council",
+      "decision": "map",
+      "archetype_id": "water_association"
+    },
+    {
+      "system_id": "island_polity",
+      "decision": "exclude",
+      "reason_code": "polity_scale",
+      "reason": "Souveraineté ou gouvernement d'un État entier. Chronos modélise la polity et ses offices supérieurs (`home_domain`, §2) en dehors des archétypes de groupes locaux ; un domaine S0-S5 ne dépasse pas 20 000 habitants (§17)."
+    },
+    {
+      "system_id": "itinerant_prophets_movement",
+      "decision": "map",
+      "archetype_id": "heterodox_movement"
+    },
+    {
+      "system_id": "joint_family",
+      "decision": "map",
+      "archetype_id": "household_compound"
+    },
+    {
+      "system_id": "kingdom",
+      "decision": "exclude",
+      "reason_code": "polity_scale",
+      "reason": "Souveraineté ou gouvernement d'un État entier. Chronos modélise la polity et ses offices supérieurs (`home_domain`, §2) en dehors des archétypes de groupes locaux ; un domaine S0-S5 ne dépasse pas 20 000 habitants (§17)."
+    },
+    {
+      "system_id": "knightly_order",
+      "decision": "map",
+      "archetype_id": "knightly_order"
+    },
+    {
+      "system_id": "labor_exchange",
+      "decision": "map",
+      "archetype_id": "market_association",
+      "note": "Appariement d'emplois : fonction de marché, sans archétype propre."
+    },
+    {
+      "system_id": "lay_brotherhood",
+      "decision": "map",
+      "archetype_id": "lay_confraternity"
+    },
+    {
+      "system_id": "library",
+      "decision": "map",
+      "archetype_id": "scriptorium"
+    },
+    {
+      "system_id": "lineage",
+      "decision": "map",
+      "archetype_id": "kin_group"
+    },
+    {
+      "system_id": "lineage_memory_archive",
+      "decision": "map",
+      "archetype_id": "kin_group"
+    },
+    {
+      "system_id": "local_council",
+      "decision": "map",
+      "archetype_id": "civic_council"
+    },
+    {
+      "system_id": "mage_college",
+      "decision": "map",
+      "archetype_id": "mage_order"
+    },
+    {
+      "system_id": "market_authority",
+      "decision": "map",
+      "archetype_id": "market_association"
+    },
+    {
+      "system_id": "matrilineal_house",
+      "decision": "map",
+      "archetype_id": "kin_group"
+    },
+    {
+      "system_id": "mediation_circle",
+      "decision": "map",
+      "archetype_id": "law_court"
+    },
+    {
+      "system_id": "mendicant_almonry",
+      "decision": "map",
+      "archetype_id": "mendicant_friary"
+    },
+    {
+      "system_id": "mendicant_preaching_network",
+      "decision": "map",
+      "archetype_id": "mendicant_friary"
+    },
+    {
+      "system_id": "mercenary_company",
+      "decision": "map",
+      "archetype_id": "mercenary_company"
+    },
+    {
+      "system_id": "merchant_caravan",
+      "decision": "map",
+      "archetype_id": "caravan"
+    },
+    {
+      "system_id": "merchant_guild",
+      "decision": "map",
+      "archetype_id": "merchant_league"
+    },
+    {
+      "system_id": "merchant_republic",
+      "decision": "map",
+      "archetype_id": "civic_council",
+      "note": "Gouvernement de cité dominé par les maisons de commerce : conseil urbain."
+    },
+    {
+      "system_id": "merchant_ship_crew",
+      "decision": "map",
+      "archetype_id": "crew"
+    },
+    {
+      "system_id": "migration_omen_watch",
+      "decision": "map",
+      "archetype_id": "resource_group"
+    },
+    {
+      "system_id": "military_junta",
+      "decision": "exclude",
+      "reason_code": "polity_scale",
+      "reason": "Souveraineté ou gouvernement d'un État entier. Chronos modélise la polity et ses offices supérieurs (`home_domain`, §2) en dehors des archétypes de groupes locaux ; un domaine S0-S5 ne dépasse pas 20 000 habitants (§17)."
+    },
+    {
+      "system_id": "military_order",
+      "decision": "map",
+      "archetype_id": "knightly_order"
+    },
+    {
+      "system_id": "militia",
+      "decision": "map",
+      "archetype_id": "militia"
+    },
+    {
+      "system_id": "mining_company",
+      "decision": "map",
+      "archetype_id": "mining_crew"
+    },
+    {
+      "system_id": "ministry",
+      "decision": "map",
+      "archetype_id": "administration",
+      "note": "Département à portefeuille : office d'administration."
+    },
+    {
+      "system_id": "mission_station",
+      "decision": "map",
+      "archetype_id": "secular_clergy",
+      "note": "Avant-poste de clergé séculier."
+    },
+    {
+      "system_id": "monastery",
+      "decision": "map",
+      "archetype_id": "monastery"
+    },
+    {
+      "system_id": "monster_hunters_lodge",
+      "decision": "map",
+      "archetype_id": "monster_hunters_lodge"
+    },
+    {
+      "system_id": "monster_pack",
+      "decision": "map",
+      "archetype_id": "monstrous_horde"
+    },
+    {
+      "system_id": "mortuary_purification_house",
+      "decision": "map",
+      "archetype_id": "mortuary_confraternity"
+    },
+    {
+      "system_id": "mutual_aid_cell",
+      "decision": "map",
+      "archetype_id": "mutual_aid_society"
+    },
+    {
+      "system_id": "mystery_cult",
+      "decision": "map",
+      "archetype_id": "ritual_group",
+      "note": "Tradition initiatique à degrés : groupe rituel fermé, distinct de la secte coercitive."
+    },
+    {
+      "system_id": "nation",
+      "decision": "exclude",
+      "reason_code": "polity_scale",
+      "reason": "Souveraineté ou gouvernement d'un État entier. Chronos modélise la polity et ses offices supérieurs (`home_domain`, §2) en dehors des archétypes de groupes locaux ; un domaine S0-S5 ne dépasse pas 20 000 habitants (§17)."
+    },
+    {
+      "system_id": "naval_fleet",
+      "decision": "map",
+      "archetype_id": "war_fleet"
+    },
+    {
+      "system_id": "naval_squadron",
+      "decision": "map",
+      "archetype_id": "war_fleet"
+    },
+    {
+      "system_id": "navy",
+      "decision": "map",
+      "archetype_id": "war_fleet"
+    },
+    {
+      "system_id": "necromantic_college",
+      "decision": "map",
+      "archetype_id": "necromancers_circle"
+    },
+    {
+      "system_id": "neighborhood_watch",
+      "decision": "map",
+      "archetype_id": "town_watch"
+    },
+    {
+      "system_id": "noble_house",
+      "decision": "map",
+      "archetype_id": "landed_house"
+    },
+    {
+      "system_id": "nomadic_confederation",
+      "decision": "exclude",
+      "reason_code": "polity_scale",
+      "reason": "Souveraineté ou gouvernement d'un État entier. Chronos modélise la polity et ses offices supérieurs (`home_domain`, §2) en dehors des archétypes de groupes locaux ; un domaine S0-S5 ne dépasse pas 20 000 habitants (§17)."
+    },
+    {
+      "system_id": "observatory",
+      "decision": "map",
+      "archetype_id": "university"
+    },
+    {
+      "system_id": "occupied_territory",
+      "decision": "exclude",
+      "reason_code": "polity_scale",
+      "reason": "Souveraineté ou gouvernement d'un État entier. Chronos modélise la polity et ses offices supérieurs (`home_domain`, §2) en dehors des archétypes de groupes locaux ; un domaine S0-S5 ne dépasse pas 20 000 habitants (§17)."
+    },
+    {
+      "system_id": "oracle_house",
+      "decision": "map",
+      "archetype_id": "ritual_institution"
+    },
+    {
+      "system_id": "oracle_network",
+      "decision": "map",
+      "archetype_id": "ritual_institution",
+      "note": "Consultation divinatoire encadrée : institution rituelle."
+    },
+    {
+      "system_id": "parliament",
+      "decision": "exclude",
+      "reason_code": "polity_scale",
+      "reason": "Souveraineté ou gouvernement d'un État entier. Chronos modélise la polity et ses offices supérieurs (`home_domain`, §2) en dehors des archétypes de groupes locaux ; un domaine S0-S5 ne dépasse pas 20 000 habitants (§17)."
+    },
+    {
+      "system_id": "pass_shrine_wardens",
+      "decision": "map",
+      "archetype_id": "base_charitable_order"
+    },
+    {
+      "system_id": "pilgrimage_shrine",
+      "decision": "map",
+      "archetype_id": "ritual_institution"
+    },
+    {
+      "system_id": "pilgrimage_wayhouse_network",
+      "decision": "map",
+      "archetype_id": "base_charitable_order"
+    },
+    {
+      "system_id": "pirate_flotilla",
+      "decision": "map",
+      "archetype_id": "pirate_crew"
+    },
+    {
+      "system_id": "plague_vow_fellowship",
+      "decision": "map",
+      "archetype_id": "lay_confraternity"
+    },
+    {
+      "system_id": "planar_gate_authority",
+      "decision": "map",
+      "archetype_id": "mage_order",
+      "note": "Office réglementaire de pratique magique : collège de mages."
+    },
+    {
+      "system_id": "platoon",
+      "decision": "exclude",
+      "reason_code": "command_echelon",
+      "reason": "Niveau interne de commandement d'une force permanente, sans mécanique sociale distincte de l'archétype `garrison` (ou `war_fleet`) qui le contient. Aucun domaine S0-S5 n'atteint cette échelle."
+    },
+    {
+      "system_id": "political_party",
+      "decision": "exclude",
+      "reason_code": "modern_form",
+      "reason": "Forme institutionnelle étrangère au cadre médiéval ou fantastique de Chronos (aviation, parti de masse, société par actions, fédération syndicale interprofessionnelle)."
+    },
+    {
+      "system_id": "possession_witness_circle",
+      "decision": "map",
+      "archetype_id": "ritual_group"
+    },
+    {
+      "system_id": "priesthood",
+      "decision": "map",
+      "archetype_id": "secular_clergy"
+    },
+    {
+      "system_id": "principality",
+      "decision": "map",
+      "archetype_id": "lordship"
+    },
+    {
+      "system_id": "prison_administration",
+      "decision": "map",
+      "archetype_id": "prison"
+    },
+    {
+      "system_id": "prison_gang",
+      "decision": "map",
+      "archetype_id": "base_criminal_network",
+      "note": "Réseau interne de détenus : réseau criminel générique, hébergé par l'institution `prison`."
+    },
+    {
+      "system_id": "procession_company",
+      "decision": "map",
+      "archetype_id": "festive_society"
+    },
+    {
+      "system_id": "protectorate",
+      "decision": "exclude",
+      "reason_code": "polity_scale",
+      "reason": "Souveraineté ou gouvernement d'un État entier. Chronos modélise la polity et ses offices supérieurs (`home_domain`, §2) en dehors des archétypes de groupes locaux ; un domaine S0-S5 ne dépasse pas 20 000 habitants (§17)."
+    },
+    {
+      "system_id": "province",
+      "decision": "map",
+      "archetype_id": "administration",
+      "note": "Échelon territorial exécutant les décisions centrales : office d'administration."
+    },
+    {
+      "system_id": "public_market_board",
+      "decision": "map",
+      "archetype_id": "market_association"
+    },
+    {
+      "system_id": "public_works_office",
+      "decision": "map",
+      "archetype_id": "administration"
+    },
+    {
+      "system_id": "raiding_party",
+      "decision": "map",
+      "archetype_id": "raiding_band"
+    },
+    {
+      "system_id": "refuge_camp",
+      "decision": "map",
+      "archetype_id": "refugee_community"
+    },
+    {
+      "system_id": "regiment",
+      "decision": "exclude",
+      "reason_code": "command_echelon",
+      "reason": "Niveau interne de commandement d'une force permanente, sans mécanique sociale distincte de l'archétype `garrison` (ou `war_fleet`) qui le contient. Aucun domaine S0-S5 n'atteint cette échelle."
+    },
+    {
+      "system_id": "relic_authentication_chamber",
+      "decision": "map",
+      "archetype_id": "ritual_institution"
+    },
+    {
+      "system_id": "relic_custodians",
+      "decision": "map",
+      "archetype_id": "ancient_site_guardians",
+      "note": "Garde d'objets ou de lieux anciens sous règle."
+    },
+    {
+      "system_id": "relief_society",
+      "decision": "map",
+      "archetype_id": "base_charitable_order"
+    },
+    {
+      "system_id": "religious_empire",
+      "decision": "exclude",
+      "reason_code": "polity_scale",
+      "reason": "Souveraineté ou gouvernement d'un État entier. Chronos modélise la polity et ses offices supérieurs (`home_domain`, §2) en dehors des archétypes de groupes locaux ; un domaine S0-S5 ne dépasse pas 20 000 habitants (§17)."
+    },
+    {
+      "system_id": "religious_order",
+      "decision": "map",
+      "archetype_id": "monastery",
+      "note": "Réseau de maisons sous une règle : traité comme monastère."
+    },
+    {
+      "system_id": "republic",
+      "decision": "exclude",
+      "reason_code": "polity_scale",
+      "reason": "Souveraineté ou gouvernement d'un État entier. Chronos modélise la polity et ses offices supérieurs (`home_domain`, §2) en dehors des archétypes de groupes locaux ; un domaine S0-S5 ne dépasse pas 20 000 habitants (§17)."
+    },
+    {
+      "system_id": "resistance_network",
+      "decision": "map",
+      "archetype_id": "outlaw_company"
+    },
+    {
+      "system_id": "retainer_household",
+      "decision": "map",
+      "archetype_id": "retinue"
+    },
+    {
+      "system_id": "revolutionary_council",
+      "decision": "exclude",
+      "reason_code": "polity_scale",
+      "reason": "Souveraineté ou gouvernement d'un État entier. Chronos modélise la polity et ses offices supérieurs (`home_domain`, §2) en dehors des archétypes de groupes locaux ; un domaine S0-S5 ne dépasse pas 20 000 habitants (§17)."
+    },
+    {
+      "system_id": "revolutionary_party",
+      "decision": "map",
+      "archetype_id": "outlaw_company"
+    },
+    {
+      "system_id": "road_wardens",
+      "decision": "map",
+      "archetype_id": "administration",
+      "note": "Entretien et signalisation des voies : service d'administration."
+    },
+    {
+      "system_id": "roadside_lantern_brotherhood",
+      "decision": "map",
+      "archetype_id": "base_neighborhood"
+    },
+    {
+      "system_id": "royal_court",
+      "decision": "map",
+      "archetype_id": "court"
+    },
+    {
+      "system_id": "royal_household",
+      "decision": "map",
+      "archetype_id": "court",
+      "note": "Maison domestique et administrative de la couronne : société de cour."
+    },
+    {
+      "system_id": "rural_district",
+      "decision": "map",
+      "archetype_id": "administration",
+      "note": "Regroupement de bourgs : office d'administration."
+    },
+    {
+      "system_id": "sacred_calendar_council",
+      "decision": "map",
+      "archetype_id": "ritual_institution"
+    },
+    {
+      "system_id": "sacred_grove_moot",
+      "decision": "map",
+      "archetype_id": "local_assembly",
+      "note": "Assemblée de communautés riveraines : assemblée rurale."
+    },
+    {
+      "system_id": "sacred_kingdom",
+      "decision": "exclude",
+      "reason_code": "polity_scale",
+      "reason": "Souveraineté ou gouvernement d'un État entier. Chronos modélise la polity et ses offices supérieurs (`home_domain`, §2) en dehors des archétypes de groupes locaux ; un domaine S0-S5 ne dépasse pas 20 000 habitants (§17)."
+    },
+    {
+      "system_id": "sanitation_board",
+      "decision": "map",
+      "archetype_id": "administration"
+    },
+    {
+      "system_id": "scholars_circle",
+      "decision": "map",
+      "archetype_id": "university"
+    },
+    {
+      "system_id": "scout_company",
+      "decision": "map",
+      "archetype_id": "scout_company"
+    },
+    {
+      "system_id": "scriptorium",
+      "decision": "map",
+      "archetype_id": "scriptorium"
+    },
+    {
+      "system_id": "secret_society",
+      "decision": "map",
+      "archetype_id": "secret_society"
+    },
+    {
+      "system_id": "shamanic_circle",
+      "decision": "map",
+      "archetype_id": "ancestral_cult"
+    },
+    {
+      "system_id": "shipping_consortium",
+      "decision": "map",
+      "archetype_id": "shipping_consortium"
+    },
+    {
+      "system_id": "siege_defense_council",
+      "decision": "map",
+      "archetype_id": "civic_council"
+    },
+    {
+      "system_id": "siege_train",
+      "decision": "map",
+      "archetype_id": "garrison",
+      "note": "Corps technique permanent : détachement de garnison."
+    },
+    {
+      "system_id": "smugglers_ring",
+      "decision": "map",
+      "archetype_id": "smuggling_ring"
+    },
+    {
+      "system_id": "solar_clock_custodians",
+      "decision": "map",
+      "archetype_id": "ritual_institution"
+    },
+    {
+      "system_id": "spirit_court",
+      "decision": "map",
+      "archetype_id": "fey_court",
+      "note": "Assemblée d'esprits du lieu : cour de puissances déclarées."
+    },
+    {
+      "system_id": "sports_club",
+      "decision": "map",
+      "archetype_id": "festive_society"
+    },
+    {
+      "system_id": "spring_spirit_compact",
+      "decision": "map",
+      "archetype_id": "water_association"
+    },
+    {
+      "system_id": "spy_cell",
+      "decision": "map",
+      "archetype_id": "intelligence_network"
+    },
+    {
+      "system_id": "spy_ring",
+      "decision": "map",
+      "archetype_id": "intelligence_network"
+    },
+    {
+      "system_id": "squad",
+      "decision": "exclude",
+      "reason_code": "command_echelon",
+      "reason": "Niveau interne de commandement d'une force permanente, sans mécanique sociale distincte de l'archétype `garrison` (ou `war_fleet`) qui le contient. Aucun domaine S0-S5 n'atteint cette échelle."
+    },
+    {
+      "system_id": "street_gang",
+      "decision": "map",
+      "archetype_id": "protection_racket"
+    },
+    {
+      "system_id": "temple_city",
+      "decision": "map",
+      "archetype_id": "ritual_institution"
+    },
+    {
+      "system_id": "temple_estate",
+      "decision": "map",
+      "archetype_id": "lordship",
+      "note": "Domaine foncier d'un sanctuaire : même mécanique de rente et de tenures qu'une seigneurie."
+    },
+    {
+      "system_id": "temple_granary_office",
+      "decision": "map",
+      "archetype_id": "ritual_institution"
+    },
+    {
+      "system_id": "theatrical_troupe",
+      "decision": "map",
+      "archetype_id": "itinerant_troupe"
+    },
+    {
+      "system_id": "theocracy",
+      "decision": "exclude",
+      "reason_code": "polity_scale",
+      "reason": "Souveraineté ou gouvernement d'un État entier. Chronos modélise la polity et ses offices supérieurs (`home_domain`, §2) en dehors des archétypes de groupes locaux ; un domaine S0-S5 ne dépasse pas 20 000 habitants (§17)."
+    },
+    {
+      "system_id": "thieves_guild",
+      "decision": "map",
+      "archetype_id": "thieves_guild"
+    },
+    {
+      "system_id": "toll_keepers",
+      "decision": "map",
+      "archetype_id": "administration",
+      "note": "Concession fiscale : office de percepteurs rendant compte à une autorité."
+    },
+    {
+      "system_id": "trade_union_federation",
+      "decision": "exclude",
+      "reason_code": "modern_form",
+      "reason": "Forme institutionnelle étrangère au cadre médiéval ou fantastique de Chronos (aviation, parti de masse, société par actions, fédération syndicale interprofessionnelle)."
+    },
+    {
+      "system_id": "trading_company",
+      "decision": "map",
+      "archetype_id": "base_trade_company"
+    },
+    {
+      "system_id": "traveling_circus",
+      "decision": "map",
+      "archetype_id": "itinerant_troupe"
+    },
+    {
+      "system_id": "tribal_council",
+      "decision": "map",
+      "archetype_id": "local_assembly"
+    },
+    {
+      "system_id": "tributary_realm",
+      "decision": "exclude",
+      "reason_code": "polity_scale",
+      "reason": "Souveraineté ou gouvernement d'un État entier. Chronos modélise la polity et ses offices supérieurs (`home_domain`, §2) en dehors des archétypes de groupes locaux ; un domaine S0-S5 ne dépasse pas 20 000 habitants (§17)."
+    },
+    {
+      "system_id": "undead_legion",
+      "decision": "map",
+      "archetype_id": "monstrous_horde",
+      "note": "Force armée définie par sa conduite ; l'archétype ne déduit rien de la nature de ses membres."
+    },
+    {
+      "system_id": "underground_press",
+      "decision": "map",
+      "archetype_id": "secret_society",
+      "note": "Collectif clandestin de diffusion : mécanique de société fermée à projet caché."
+    },
+    {
+      "system_id": "university",
+      "decision": "map",
+      "archetype_id": "university"
+    },
+    {
+      "system_id": "veterans_association",
+      "decision": "map",
+      "archetype_id": "mutual_aid_society",
+      "note": "Soutien mutuel et défense des droits des anciens combattants."
+    },
+    {
+      "system_id": "village",
+      "decision": "map",
+      "archetype_id": "village_council"
+    },
+    {
+      "system_id": "village_court",
+      "decision": "map",
+      "archetype_id": "law_court"
+    },
+    {
+      "system_id": "village_federation",
+      "decision": "map",
+      "archetype_id": "administration",
+      "note": "Coordination légère de villages : office d'administration."
+    },
+    {
+      "system_id": "village_school",
+      "decision": "map",
+      "archetype_id": "school"
+    },
+    {
+      "system_id": "vow_release_circle",
+      "decision": "map",
+      "archetype_id": "ritual_group"
+    },
+    {
+      "system_id": "vow_renewal_court",
+      "decision": "map",
+      "archetype_id": "ritual_institution"
+    },
+    {
+      "system_id": "war_council",
+      "decision": "exclude",
+      "reason_code": "polity_scale",
+      "reason": "Souveraineté ou gouvernement d'un État entier. Chronos modélise la polity et ses offices supérieurs (`home_domain`, §2) en dehors des archétypes de groupes locaux ; un domaine S0-S5 ne dépasse pas 20 000 habitants (§17)."
+    },
+    {
+      "system_id": "ward",
+      "decision": "map",
+      "archetype_id": "ward_community"
+    },
+    {
+      "system_id": "warship_crew",
+      "decision": "map",
+      "archetype_id": "war_fleet"
+    },
+    {
+      "system_id": "watch_court",
+      "decision": "map",
+      "archetype_id": "law_court"
+    },
+    {
+      "system_id": "water_board",
+      "decision": "map",
+      "archetype_id": "water_association"
+    },
+    {
+      "system_id": "witch_coven",
+      "decision": "map",
+      "archetype_id": "arcane_cabal",
+      "note": "Cercle fermé de praticiens qui se protègent entre eux."
+    },
+    {
+      "system_id": "workers_union",
+      "decision": "map",
+      "archetype_id": "journeymen_fellowship"
+    }
+  ],
+  "brief_cell_count": 86,
+  "grid_cells": [
+    {
+      "id": "subsistence_extraction.farm",
+      "category": "subsistence_extraction",
+      "label": "Ferme",
+      "origin": "brief",
+      "status": "covered",
+      "archetype_ids": [
+        "base_farm",
+        "productive_community",
+        "farm_household"
+      ]
+    },
+    {
+      "id": "subsistence_extraction.pastoralism",
+      "category": "subsistence_extraction",
+      "label": "Pâturage et nomades pastoraux",
+      "origin": "brief",
+      "status": "covered",
+      "archetype_ids": [
+        "herding_group",
+        "mobile_household",
+        "travel_party"
+      ],
+      "note": "Le troupeau est un capital propre (`herding_group`) ; la mobilité vient de `mobile_household` et `travel_party`. Les trajets entre domaines relèvent de S7."
+    },
+    {
+      "id": "subsistence_extraction.fishing",
+      "category": "subsistence_extraction",
+      "label": "Pêche",
+      "origin": "brief",
+      "status": "covered",
+      "archetype_ids": [
+        "resource_group",
+        "shore_community"
+      ],
+      "note": "Pas d'archétype dédié : `resource_group` (récolte du milieu, activité `agriculture`) et `shore_community` suffisent. Choix discutable, voir le rapport."
+    },
+    {
+      "id": "subsistence_extraction.mining_quarry",
+      "category": "subsistence_extraction",
+      "label": "Mine et carrière",
+      "origin": "brief",
+      "status": "covered",
+      "archetype_ids": [
+        "mining_crew"
+      ],
+      "note": "Activité `craft` : travail qualifié sous concession."
+    },
+    {
+      "id": "subsistence_extraction.forestry_charcoal",
+      "category": "subsistence_extraction",
+      "label": "Forêt et charbonnage",
+      "origin": "brief",
+      "status": "covered",
+      "archetype_ids": [
+        "resource_group",
+        "forest_house"
+      ],
+      "note": "Pas d'archétype dédié : la famille `forest_houses` associe déjà `forest_house` et `resource_group`."
+    },
+    {
+      "id": "subsistence_extraction.saltworks",
+      "category": "subsistence_extraction",
+      "label": "Saline",
+      "origin": "brief",
+      "status": "covered",
+      "archetype_ids": [
+        "mining_crew"
+      ],
+      "note": "Même mécanique de concession et de risque ; la fiscalité du sel relève de l'administration."
+    },
+    {
+      "id": "craft_trade.workshop",
+      "category": "craft_trade",
+      "label": "Atelier",
+      "origin": "brief",
+      "status": "covered",
+      "archetype_ids": [
+        "workshop",
+        "base_workshop"
+      ]
+    },
+    {
+      "id": "craft_trade.guild",
+      "category": "craft_trade",
+      "label": "Guilde",
+      "origin": "brief",
+      "status": "covered",
+      "archetype_ids": [
+        "craft_guild",
+        "craft_association",
+        "base_craft_association"
+      ]
+    },
+    {
+      "id": "craft_trade.market",
+      "category": "craft_trade",
+      "label": "Marché",
+      "origin": "brief",
+      "status": "covered",
+      "archetype_ids": [
+        "market_association"
+      ]
+    },
+    {
+      "id": "craft_trade.caravan",
+      "category": "craft_trade",
+      "label": "Caravane",
+      "origin": "brief",
+      "status": "covered",
+      "archetype_ids": [
+        "caravan"
+      ]
+    },
+    {
+      "id": "craft_trade.shipowner",
+      "category": "craft_trade",
+      "label": "Armateur",
+      "origin": "brief",
+      "status": "covered",
+      "archetype_ids": [
+        "shipping_consortium",
+        "crew"
+      ],
+      "note": "`shipping_consortium` porte la propriété et l'assurance ; `crew` porte les équipages."
+    },
+    {
+      "id": "craft_trade.banking",
+      "category": "craft_trade",
+      "label": "Banque et prêt",
+      "origin": "brief",
+      "status": "covered",
+      "archetype_ids": [
+        "banking_house"
+      ],
+      "note": "Inclut l'assurance. L'usure est un tag de conduite, pas un type de groupe."
+    },
+    {
+      "id": "craft_trade.merchant_league",
+      "category": "craft_trade",
+      "label": "Ligue marchande",
+      "origin": "brief",
+      "status": "covered",
+      "archetype_ids": [
+        "merchant_league"
+      ],
+      "note": "Couvre guilde marchande, fédération de guildes et ligue de cités."
+    },
+    {
+      "id": "power.court",
+      "category": "power",
+      "label": "Cour",
+      "origin": "brief",
+      "status": "covered",
+      "archetype_ids": [
+        "court"
+      ]
+    },
+    {
+      "id": "power.lordship",
+      "category": "power",
+      "label": "Seigneurie",
+      "origin": "brief",
+      "status": "covered",
+      "archetype_ids": [
+        "lordship",
+        "landed_house",
+        "territorial_house"
+      ],
+      "note": "`lordship` est l'ancre juridictionnelle et domaniale ; les maisons sont ses vues de lignage."
+    },
+    {
+      "id": "power.urban_council",
+      "category": "power",
+      "label": "Conseil urbain",
+      "origin": "brief",
+      "status": "covered",
+      "archetype_ids": [
+        "civic_council"
+      ]
+    },
+    {
+      "id": "power.rural_assembly",
+      "category": "power",
+      "label": "Assemblée rurale",
+      "origin": "brief",
+      "status": "covered",
+      "archetype_ids": [
+        "local_assembly",
+        "village_council"
+      ]
+    },
+    {
+      "id": "power.clan",
+      "category": "power",
+      "label": "Clan",
+      "origin": "brief",
+      "status": "covered",
+      "archetype_ids": [
+        "kin_group"
+      ],
+      "note": "Le clan comme lignage ; son assemblée est `local_assembly`."
+    },
+    {
+      "id": "power.administration",
+      "category": "power",
+      "label": "Administration",
+      "origin": "brief",
+      "status": "covered",
+      "archetype_ids": [
+        "administration",
+        "base_local_institution"
+      ]
+    },
+    {
+      "id": "power.embassy",
+      "category": "power",
+      "label": "Ambassade",
+      "origin": "brief",
+      "status": "covered",
+      "archetype_ids": [
+        "embassy"
+      ]
+    },
+    {
+      "id": "power.ruling_family",
+      "category": "power",
+      "label": "Famille régnante",
+      "origin": "brief",
+      "status": "covered",
+      "archetype_ids": [
+        "ruling_dynasty"
+      ]
+    },
+    {
+      "id": "power.pretenders",
+      "category": "power",
+      "label": "Prétendants",
+      "origin": "brief",
+      "status": "covered",
+      "archetype_ids": [
+        "house_faction",
+        "base_faction"
+      ],
+      "note": "Pas d'archétype dédié : une prétention est une relation `claims` portée par une faction de maisons. Choix discutable, voir le rapport."
+    },
+    {
+      "id": "justice_order.tribunal",
+      "category": "justice_order",
+      "label": "Tribunal",
+      "origin": "brief",
+      "status": "covered",
+      "archetype_ids": [
+        "law_court"
+      ]
+    },
+    {
+      "id": "justice_order.watch",
+      "category": "justice_order",
+      "label": "Guet",
+      "origin": "brief",
+      "status": "covered",
+      "archetype_ids": [
+        "town_watch"
+      ]
+    },
+    {
+      "id": "justice_order.jail",
+      "category": "justice_order",
+      "label": "Geôle",
+      "origin": "brief",
+      "status": "covered",
+      "archetype_ids": [
+        "prison"
+      ]
+    },
+    {
+      "id": "justice_order.inquisition",
+      "category": "justice_order",
+      "label": "Inquisition",
+      "origin": "brief",
+      "status": "covered",
+      "archetype_ids": [
+        "inquisition"
+      ]
+    },
+    {
+      "id": "justice_order.provostship",
+      "category": "justice_order",
+      "label": "Prévôté",
+      "origin": "brief",
+      "status": "covered",
+      "archetype_ids": [
+        "provostship"
+      ],
+      "note": "Officier royal ou seigneurial cumulant police et justice sur un ressort."
+    },
+    {
+      "id": "justice_order.executioner",
+      "category": "justice_order",
+      "label": "Bourreau",
+      "origin": "brief",
+      "status": "covered",
+      "archetype_ids": [
+        "executioner_house"
+      ],
+      "note": "Lignage à charge héréditaire et statut d'exclu ; la conformité culturelle règle le stigmate."
+    },
+    {
+      "id": "military.levy",
+      "category": "military",
+      "label": "Levée",
+      "origin": "brief",
+      "status": "covered",
+      "archetype_ids": [
+        "militia"
+      ],
+      "note": "Une levée est une mobilisation de la milice par un événement de guerre (S2). Choix discutable, voir le rapport.",
+      "delivery_limit": "La mobilisation par événement de guerre n'existe qu'avec les processus généraux de S2 ; en S1 seul le stock de milice est défini."
+    },
+    {
+      "id": "military.militia",
+      "category": "military",
+      "label": "Milice",
+      "origin": "brief",
+      "status": "covered",
+      "archetype_ids": [
+        "militia"
+      ]
+    },
+    {
+      "id": "military.garrison",
+      "category": "military",
+      "label": "Garnison",
+      "origin": "brief",
+      "status": "covered",
+      "archetype_ids": [
+        "garrison"
+      ]
+    },
+    {
+      "id": "military.mercenaries",
+      "category": "military",
+      "label": "Mercenaires",
+      "origin": "brief",
+      "status": "covered",
+      "archetype_ids": [
+        "mercenary_company"
+      ]
+    },
+    {
+      "id": "military.knightly_order",
+      "category": "military",
+      "label": "Ordre de chevalerie",
+      "origin": "brief",
+      "status": "covered",
+      "archetype_ids": [
+        "knightly_order"
+      ]
+    },
+    {
+      "id": "military.fleet",
+      "category": "military",
+      "label": "Flotte",
+      "origin": "brief",
+      "status": "covered",
+      "archetype_ids": [
+        "war_fleet"
+      ]
+    },
+    {
+      "id": "military.raiders",
+      "category": "military",
+      "label": "Pillards",
+      "origin": "brief",
+      "status": "covered",
+      "archetype_ids": [
+        "raiding_band"
+      ],
+      "note": "Pillage saisonnier parfois toléré par la culture ; distinct du banditisme et de la piraterie."
+    },
+    {
+      "id": "military.scouts",
+      "category": "military",
+      "label": "Éclaireurs",
+      "origin": "brief",
+      "status": "covered",
+      "archetype_ids": [
+        "scout_company"
+      ]
+    },
+    {
+      "id": "religion.secular_clergy",
+      "category": "religion",
+      "label": "Clergé séculier",
+      "origin": "brief",
+      "status": "covered",
+      "archetype_ids": [
+        "secular_clergy"
+      ]
+    },
+    {
+      "id": "religion.monastery",
+      "category": "religion",
+      "label": "Monastère",
+      "origin": "brief",
+      "status": "covered",
+      "archetype_ids": [
+        "monastery"
+      ]
+    },
+    {
+      "id": "religion.mendicant_order",
+      "category": "religion",
+      "label": "Ordre mendiant",
+      "origin": "brief",
+      "status": "covered",
+      "archetype_ids": [
+        "mendicant_friary"
+      ]
+    },
+    {
+      "id": "religion.hermits",
+      "category": "religion",
+      "label": "Ermites",
+      "origin": "brief",
+      "status": "covered",
+      "archetype_ids": [
+        "hermitage"
+      ]
+    },
+    {
+      "id": "religion.lay_confraternity",
+      "category": "religion",
+      "label": "Confrérie laïque",
+      "origin": "brief",
+      "status": "covered",
+      "archetype_ids": [
+        "lay_confraternity",
+        "mortuary_confraternity"
+      ]
+    },
+    {
+      "id": "religion.heterodox_cult",
+      "category": "religion",
+      "label": "Culte hétérodoxe",
+      "origin": "brief",
+      "status": "covered",
+      "archetype_ids": [
+        "heterodox_movement"
+      ]
+    },
+    {
+      "id": "religion.sect",
+      "category": "religion",
+      "label": "Secte",
+      "origin": "brief",
+      "status": "covered",
+      "archetype_ids": [
+        "closed_sect"
+      ],
+      "note": "Emprise sur les membres, interdiction de partir ; distincte du culte hétérodoxe."
+    },
+    {
+      "id": "religion.ancestral_cult",
+      "category": "religion",
+      "label": "Culte ancestral ou païen",
+      "origin": "brief",
+      "status": "covered",
+      "archetype_ids": [
+        "ancestral_cult"
+      ]
+    },
+    {
+      "id": "religion.pilgrims",
+      "category": "religion",
+      "label": "Pèlerins",
+      "origin": "brief",
+      "status": "covered",
+      "archetype_ids": [
+        "travel_party",
+        "base_charitable_order",
+        "ritual_institution"
+      ],
+      "note": "Pas d'archétype dédié : le voyage (`travel_party`), l'accueil (`base_charitable_order`) et le sanctuaire (`ritual_institution`)."
+    },
+    {
+      "id": "knowledge_care.school",
+      "category": "knowledge_care",
+      "label": "École",
+      "origin": "brief",
+      "status": "covered",
+      "archetype_ids": [
+        "school"
+      ]
+    },
+    {
+      "id": "knowledge_care.university",
+      "category": "knowledge_care",
+      "label": "Université",
+      "origin": "brief",
+      "status": "covered",
+      "archetype_ids": [
+        "university"
+      ],
+      "note": "Couvre aussi académies, cercles de savants et observatoires."
+    },
+    {
+      "id": "knowledge_care.scriptorium",
+      "category": "knowledge_care",
+      "label": "Scriptorium",
+      "origin": "brief",
+      "status": "covered",
+      "archetype_ids": [
+        "scriptorium"
+      ]
+    },
+    {
+      "id": "knowledge_care.hospital",
+      "category": "knowledge_care",
+      "label": "Hôpital et léproserie",
+      "origin": "brief",
+      "status": "covered",
+      "archetype_ids": [
+        "hospital_house"
+      ],
+      "note": "Maison de soin résidentielle ; l'ordre qui la dessert est `base_charitable_order`."
+    },
+    {
+      "id": "knowledge_care.apothecaries",
+      "category": "knowledge_care",
+      "label": "Apothicaires",
+      "origin": "brief",
+      "status": "covered",
+      "archetype_ids": [
+        "healers_circle",
+        "craft_guild"
+      ],
+      "note": "Pas d'archétype dédié : praticiens dans `healers_circle`, corps réglementé dans `craft_guild`. Choix discutable, voir le rapport."
+    },
+    {
+      "id": "knowledge_care.midwives",
+      "category": "knowledge_care",
+      "label": "Sages-femmes",
+      "origin": "brief",
+      "status": "covered",
+      "archetype_ids": [
+        "healers_circle"
+      ]
+    },
+    {
+      "id": "knowledge_care.healers",
+      "category": "knowledge_care",
+      "label": "Guérisseurs",
+      "origin": "brief",
+      "status": "covered",
+      "archetype_ids": [
+        "healers_circle"
+      ]
+    },
+    {
+      "id": "culture_sociability.troupe",
+      "category": "culture_sociability",
+      "label": "Troupe itinérante",
+      "origin": "brief",
+      "status": "covered",
+      "archetype_ids": [
+        "itinerant_troupe"
+      ]
+    },
+    {
+      "id": "culture_sociability.minstrels",
+      "category": "culture_sociability",
+      "label": "Ménestrels",
+      "origin": "brief",
+      "status": "covered",
+      "archetype_ids": [
+        "itinerant_troupe"
+      ],
+      "note": "Petite troupe sous patronage ; pas d'archétype séparé. Choix discutable, voir le rapport."
+    },
+    {
+      "id": "culture_sociability.youth_abbey",
+      "category": "culture_sociability",
+      "label": "Abbaye de jeunesse",
+      "origin": "brief",
+      "status": "covered",
+      "archetype_ids": [
+        "festive_society"
+      ]
+    },
+    {
+      "id": "culture_sociability.women_circle",
+      "category": "culture_sociability",
+      "label": "Cercle de femmes",
+      "origin": "brief",
+      "status": "covered",
+      "archetype_ids": [
+        "women_circle"
+      ],
+      "note": "Cercle informel de classe `friend_circle` ; le filtre de sexe est une règle de recrutement, jamais une ascendance."
+    },
+    {
+      "id": "culture_sociability.neighborhood_brotherhood",
+      "category": "culture_sociability",
+      "label": "Fraternité de quartier",
+      "origin": "brief",
+      "status": "covered",
+      "archetype_ids": [
+        "base_neighborhood",
+        "neighborhood",
+        "lay_confraternity"
+      ]
+    },
+    {
+      "id": "culture_sociability.taverns",
+      "category": "culture_sociability",
+      "label": "Tavernes",
+      "origin": "brief",
+      "status": "covered",
+      "archetype_ids": [
+        "tavern_house"
+      ]
+    },
+    {
+      "id": "culture_sociability.friend_circle",
+      "category": "culture_sociability",
+      "label": "Cercle d'amis",
+      "origin": "brief",
+      "status": "covered",
+      "archetype_ids": [
+        "companionship",
+        "base_friend_circle"
+      ]
+    },
+    {
+      "id": "crime_margins.brigands",
+      "category": "crime_margins",
+      "label": "Brigands",
+      "origin": "brief",
+      "status": "covered",
+      "archetype_ids": [
+        "bandit_band"
+      ]
+    },
+    {
+      "id": "crime_margins.thieves_guild",
+      "category": "crime_margins",
+      "label": "Guilde de voleurs",
+      "origin": "brief",
+      "status": "covered",
+      "archetype_ids": [
+        "thieves_guild",
+        "base_criminal_network"
+      ]
+    },
+    {
+      "id": "crime_margins.smugglers",
+      "category": "crime_margins",
+      "label": "Contrebandiers",
+      "origin": "brief",
+      "status": "covered",
+      "archetype_ids": [
+        "smuggling_ring"
+      ]
+    },
+    {
+      "id": "crime_margins.pirates",
+      "category": "crime_margins",
+      "label": "Pirates",
+      "origin": "brief",
+      "status": "covered",
+      "archetype_ids": [
+        "pirate_crew"
+      ]
+    },
+    {
+      "id": "crime_margins.racket",
+      "category": "crime_margins",
+      "label": "Racket",
+      "origin": "brief",
+      "status": "covered",
+      "archetype_ids": [
+        "protection_racket"
+      ]
+    },
+    {
+      "id": "crime_margins.assassins",
+      "category": "crime_margins",
+      "label": "Assassins",
+      "origin": "brief",
+      "status": "covered",
+      "archetype_ids": [
+        "assassin_brotherhood"
+      ]
+    },
+    {
+      "id": "crime_margins.forgers",
+      "category": "crime_margins",
+      "label": "Faussaires",
+      "origin": "brief",
+      "status": "covered",
+      "archetype_ids": [
+        "forgery_ring"
+      ]
+    },
+    {
+      "id": "crime_margins.slavers",
+      "category": "crime_margins",
+      "label": "Marchands d'esclaves",
+      "origin": "brief",
+      "status": "covered",
+      "archetype_ids": [
+        "slave_trading_ring"
+      ],
+      "note": "Peut être licite dans une juridiction et proscrit dans une autre : la légalité reste relative (§27.3)."
+    },
+    {
+      "id": "crime_margins.fences",
+      "category": "crime_margins",
+      "label": "Recéleurs",
+      "origin": "brief",
+      "status": "covered",
+      "archetype_ids": [
+        "smuggling_ring",
+        "thieves_guild"
+      ],
+      "note": "Pas d'archétype dédié : nœud de revente du commerce illicite. Choix discutable, voir le rapport."
+    },
+    {
+      "id": "crime_margins.organized_beggars",
+      "category": "crime_margins",
+      "label": "Mendiants organisés",
+      "origin": "brief",
+      "status": "covered",
+      "archetype_ids": [
+        "beggar_brotherhood"
+      ]
+    },
+    {
+      "id": "crime_margins.outlaws",
+      "category": "crime_margins",
+      "label": "Proscrits",
+      "origin": "brief",
+      "status": "covered",
+      "archetype_ids": [
+        "outlaw_company"
+      ],
+      "note": "Hors-la-loi de statut juridique, de la bande prédatrice à la résistance ; la conduite est tirée par slot."
+    },
+    {
+      "id": "crime_margins.refugees",
+      "category": "crime_margins",
+      "label": "Réfugiés",
+      "origin": "brief",
+      "status": "covered",
+      "archetype_ids": [
+        "refugee_community"
+      ],
+      "delivery_limit": "Le déplacement forcé vient des événements de S2 et des flux de S3 ; en S1 seul l'archétype est défini."
+    },
+    {
+      "id": "crime_margins.minority_enclaves",
+      "category": "crime_margins",
+      "label": "Enclaves minoritaires",
+      "origin": "brief",
+      "status": "covered",
+      "archetype_ids": [
+        "minority_enclave"
+      ],
+      "note": "Défini par la situation sociale, pas par une ascendance."
+    },
+    {
+      "id": "crime_margins.secret_society",
+      "category": "crime_margins",
+      "label": "Société secrète",
+      "origin": "brief",
+      "status": "covered",
+      "archetype_ids": [
+        "secret_society"
+      ]
+    },
+    {
+      "id": "fantasy.mage_order",
+      "category": "fantasy",
+      "label": "Ordre de mages",
+      "origin": "brief",
+      "status": "covered",
+      "archetype_ids": [
+        "mage_order"
+      ]
+    },
+    {
+      "id": "fantasy.cabal",
+      "category": "fantasy",
+      "label": "Cabale",
+      "origin": "brief",
+      "status": "covered",
+      "archetype_ids": [
+        "arcane_cabal"
+      ]
+    },
+    {
+      "id": "fantasy.alchemists",
+      "category": "fantasy",
+      "label": "Alchimistes",
+      "origin": "brief",
+      "status": "covered",
+      "archetype_ids": [
+        "alchemists_lodge"
+      ],
+      "note": "Pratique réputée historique mais classée `low_fantasy` : elle exige un effet surnaturel déclaré. Voir le rapport."
+    },
+    {
+      "id": "fantasy.druid_circle",
+      "category": "fantasy",
+      "label": "Cercle druidique",
+      "origin": "brief",
+      "status": "covered",
+      "archetype_ids": [
+        "druid_circle"
+      ]
+    },
+    {
+      "id": "fantasy.monster_hunters",
+      "category": "fantasy",
+      "label": "Chasseurs de monstres",
+      "origin": "brief",
+      "status": "covered",
+      "archetype_ids": [
+        "monster_hunters_lodge"
+      ]
+    },
+    {
+      "id": "fantasy.adventurers",
+      "category": "fantasy",
+      "label": "Compagnie d'aventuriers",
+      "origin": "brief",
+      "status": "covered",
+      "archetype_ids": [
+        "adventuring_company"
+      ]
+    },
+    {
+      "id": "fantasy.demonic_cult",
+      "category": "fantasy",
+      "label": "Culte démoniaque",
+      "origin": "brief",
+      "status": "covered",
+      "archetype_ids": [
+        "infernal_cult"
+      ]
+    },
+    {
+      "id": "fantasy.necromancers",
+      "category": "fantasy",
+      "label": "Nécromanciens",
+      "origin": "brief",
+      "status": "covered",
+      "archetype_ids": [
+        "necromancers_circle"
+      ]
+    },
+    {
+      "id": "fantasy.fey_court",
+      "category": "fantasy",
+      "label": "Cour féerique",
+      "origin": "brief",
+      "status": "covered",
+      "archetype_ids": [
+        "fey_court"
+      ],
+      "note": "Membres au profil d'ascendance explicite fourni par l'auteur.",
+      "delivery_limit": "Exige un profil d'ascendance explicite ; un profil non biparental est refusé par le fournisseur Lineage Lab avant S8 (§1.3)."
+    },
+    {
+      "id": "fantasy.dragon_court",
+      "category": "fantasy",
+      "label": "Cour draconique",
+      "origin": "brief",
+      "status": "covered",
+      "archetype_ids": [
+        "dragon_court"
+      ],
+      "note": "Membres au profil d'ascendance explicite fourni par l'auteur.",
+      "delivery_limit": "Exige un profil d'ascendance explicite ; un profil non biparental est refusé par le fournisseur Lineage Lab avant S8 (§1.3)."
+    },
+    {
+      "id": "fantasy.nonhuman_enclave",
+      "category": "fantasy",
+      "label": "Enclave non humaine",
+      "origin": "brief",
+      "status": "covered",
+      "archetype_ids": [
+        "nonhuman_enclave"
+      ],
+      "note": "Ni bonne ni mauvaise par nature : base d'alignement nulle (§6.2, §27.1).",
+      "delivery_limit": "Exige un profil d'ascendance explicite ; un profil non biparental est refusé par le fournisseur Lineage Lab avant S8 (§1.3)."
+    },
+    {
+      "id": "fantasy.monstrous_horde",
+      "category": "fantasy",
+      "label": "Horde monstrueuse",
+      "origin": "brief",
+      "status": "covered",
+      "archetype_ids": [
+        "monstrous_horde"
+      ],
+      "note": "Définie par sa conduite (pillage, violence) et non par une espèce ; l'écart laisse place aux hordes ordinaires.",
+      "delivery_limit": "Exige un profil d'ascendance explicite ; un profil non biparental est refusé par le fournisseur Lineage Lab avant S8 (§1.3)."
+    },
+    {
+      "id": "fantasy.ancient_site_guardians",
+      "category": "fantasy",
+      "label": "Gardiens d'un site ancien",
+      "origin": "brief",
+      "status": "covered",
+      "archetype_ids": [
+        "ancient_site_guardians"
+      ],
+      "note": "Exige un site marqué comme ancien par l'hôte spatial ; le catalogue d'atlas S0 n'en porte pas encore.",
+      "delivery_limit": "Dépend d'un marqueur de site ancien absent du catalogue d'atlas S0 ; activable par overlay local seulement."
+    },
+    {
+      "id": "added.mutual_aid",
+      "category": "added",
+      "label": "Entraide mutuelle et assurance",
+      "origin": "added",
+      "status": "covered",
+      "archetype_ids": [
+        "mutual_aid_society",
+        "mortuary_confraternity"
+      ],
+      "note": "Sociétés de secours, caisses mutuelles, associations d'anciens combattants (6 systèmes Pecking Order). Distinct de la charité : on secourt ses pairs, pas des tiers.",
+      "justification": "Sociétés de secours, caisses mutuelles, associations d'anciens combattants (6 systèmes Pecking Order). Distinct de la charité : on secourt ses pairs, pas des tiers."
+    },
+    {
+      "id": "added.journeymen",
+      "category": "added",
+      "label": "Compagnons, journaliers et salariés",
+      "origin": "added",
+      "status": "covered",
+      "archetype_ids": [
+        "journeymen_fellowship"
+      ],
+      "note": "Syndicats de travailleurs et compagnonnage : intérêt distinct des maîtres de la guilde, souvent proscrit.",
+      "justification": "Syndicats de travailleurs et compagnonnage : intérêt distinct des maîtres de la guilde, souvent proscrit."
+    },
+    {
+      "id": "added.intelligence",
+      "category": "added",
+      "label": "Renseignement et espionnage",
+      "origin": "added",
+      "status": "covered",
+      "archetype_ids": [
+        "intelligence_network"
+      ],
+      "note": "Réseaux d'espions et services de renseignement (4 systèmes Pecking Order) : ni société secrète, ni ambassade.",
+      "justification": "Réseaux d'espions et services de renseignement (4 systèmes Pecking Order) : ni société secrète, ni ambassade."
+    },
+    {
+      "id": "added.commons_infrastructure",
+      "category": "added",
+      "label": "Biens communs, eau, voies et fisc",
+      "origin": "added",
+      "status": "covered",
+      "archetype_ids": [
+        "water_association",
+        "local_assembly",
+        "administration"
+      ],
+      "note": "Commissions de l'eau, fiducies des communs, péages, travaux publics (12 systèmes civic et economic).",
+      "justification": "Commissions de l'eau, fiducies des communs, péages, travaux publics (12 systèmes civic et economic)."
+    },
+    {
+      "id": "added.funerary_rites",
+      "category": "added",
+      "label": "Rites funéraires",
+      "origin": "added",
+      "status": "covered",
+      "archetype_ids": [
+        "mortuary_confraternity"
+      ],
+      "note": "Sociétés funéraires, passeurs, maisons de purification (4 systèmes religieux et civiques).",
+      "justification": "Sociétés funéraires, passeurs, maisons de purification (4 systèmes religieux et civiques)."
+    },
+    {
+      "id": "added.retinue_bodyguard",
+      "category": "added",
+      "label": "Suite armée et garde rapprochée",
+      "origin": "added",
+      "status": "covered",
+      "archetype_ids": [
+        "retinue"
+      ],
+      "note": "Maisons de clientèle et gardes du corps (2 systèmes).",
+      "justification": "Maisons de clientèle et gardes du corps (2 systèmes)."
+    },
+    {
+      "id": "added.hospitality_travelers",
+      "category": "added",
+      "label": "Hospitalité et accueil des voyageurs",
+      "origin": "added",
+      "status": "covered",
+      "archetype_ids": [
+        "tavern_house",
+        "base_charitable_order"
+      ],
+      "note": "Maisons d'étape, gardiens de col, lanternes de route.",
+      "justification": "Maisons d'étape, gardiens de col, lanternes de route."
+    },
+    {
+      "id": "added.festivals_sport",
+      "category": "added",
+      "label": "Fêtes, processions et sport",
+      "origin": "added",
+      "status": "covered",
+      "archetype_ids": [
+        "festive_society"
+      ],
+      "note": "Clubs sportifs, conseils des fêtes, compagnies processionnelles (3 systèmes).",
+      "justification": "Clubs sportifs, conseils des fêtes, compagnies processionnelles (3 systèmes)."
+    },
+    {
+      "id": "added.insurgents",
+      "category": "added",
+      "label": "Insurrection et résistance",
+      "origin": "added",
+      "status": "covered",
+      "archetype_ids": [
+        "outlaw_company",
+        "secret_society"
+      ],
+      "note": "Réseaux de résistance et mouvements de renversement (2 systèmes) : groupes proscrits à projet politique.",
+      "justification": "Réseaux de résistance et mouvements de renversement (2 systèmes) : groupes proscrits à projet politique."
+    }
+  ],
+  "new_archetypes": {
+    "herding_group": {
+      "description": "Troupeau et pâtre : unité d'activité dont le capital est le bétail.",
+      "why_distinct": "Le troupeau fixe la mobilité et la propriété, ce que ni ferme ni `resource_group` n'expriment.",
+      "cells": [
+        "subsistence_extraction.pastoralism"
+      ],
+      "systems": []
+    },
+    "mining_crew": {
+      "description": "Équipe d'extraction sous concession : mine, carrière, marais salants.",
+      "why_distinct": "Risque, concession et dépendance à un seigneur ou à une compagnie.",
+      "cells": [
+        "subsistence_extraction.mining_quarry",
+        "subsistence_extraction.saltworks"
+      ],
+      "systems": [
+        "mining_company"
+      ]
+    },
+    "shipping_consortium": {
+      "description": "Armateurs qui mutualisent navires, cargaisons et assurance.",
+      "why_distinct": "Propriété collective de navires, distincte de l'équipage `crew`.",
+      "cells": [
+        "craft_trade.shipowner"
+      ],
+      "systems": [
+        "shipping_consortium"
+      ]
+    },
+    "banking_house": {
+      "description": "Maison de dépôt, de change, de prêt et d'assurance.",
+      "why_distinct": "Capital et crédit : mécanique que le négoce ordinaire n'a pas.",
+      "cells": [
+        "craft_trade.banking"
+      ],
+      "systems": [
+        "bank",
+        "insurance_house"
+      ]
+    },
+    "merchant_league": {
+      "description": "Guilde marchande ou ligue de cités : privilèges, convois, arbitrage.",
+      "why_distinct": "Association de négociants (non d'artisans) à portée interurbaine.",
+      "cells": [
+        "craft_trade.merchant_league"
+      ],
+      "systems": [
+        "chartered_company",
+        "city_league",
+        "colonial_company",
+        "guild_federation",
+        "merchant_guild"
+      ]
+    },
+    "lordship": {
+      "description": "Seigneurie : justice banale, redevances et tenures sur un domaine.",
+      "why_distinct": "Relation seigneur-tenanciers que les maisons (vues de lignage) ne portent pas.",
+      "cells": [
+        "power.lordship"
+      ],
+      "systems": [
+        "barony",
+        "county",
+        "duchy",
+        "estate_administration",
+        "frontier_march",
+        "principality",
+        "temple_estate"
+      ]
+    },
+    "embassy": {
+      "description": "Mission installée auprès d'une cour ou d'une cité étrangère.",
+      "why_distinct": "Corps délégué à l'étranger, hors des institutions du site.",
+      "cells": [
+        "power.embassy"
+      ],
+      "systems": [
+        "diplomatic_mission"
+      ]
+    },
+    "ruling_dynasty": {
+      "description": "Lignage qui détient la charge souveraine.",
+      "why_distinct": "Règles de succession et d'alliance propres ; lié aux revendications.",
+      "cells": [
+        "power.ruling_family"
+      ],
+      "systems": [
+        "dynasty"
+      ]
+    },
+    "law_court": {
+      "description": "Juridiction qui instruit et tranche : tribunal villageois, de métier ou d'appel.",
+      "why_distinct": "Jugement et peine, absents des conseils.",
+      "cells": [
+        "justice_order.tribunal"
+      ],
+      "systems": [
+        "appeals_court",
+        "arbitration_chamber",
+        "court_of_justice",
+        "customary_council",
+        "guild_court",
+        "inheritance_court",
+        "inquest_commission",
+        "mediation_circle",
+        "village_court",
+        "watch_court"
+      ]
+    },
+    "town_watch": {
+      "description": "Guet et veille : patrouille, alarme, garde du feu ou des côtes.",
+      "why_distinct": "Maintien de l'ordre quotidien.",
+      "cells": [
+        "justice_order.watch"
+      ],
+      "systems": [
+        "coast_watch",
+        "fire_watch",
+        "neighborhood_watch"
+      ]
+    },
+    "prison": {
+      "description": "Geôle et administration pénitentiaire.",
+      "why_distinct": "Garde de personnes ; corruption et contrainte y sont typiques.",
+      "cells": [
+        "justice_order.jail"
+      ],
+      "systems": [
+        "prison_administration"
+      ]
+    },
+    "inquisition": {
+      "description": "Tribunal doctrinal qui poursuit l'hétérodoxie.",
+      "why_distinct": "Juridiction religieuse qui crée des statuts `proscribed` (§27.3).",
+      "cells": [
+        "justice_order.inquisition"
+      ],
+      "systems": [
+        "heresy_court"
+      ]
+    },
+    "provostship": {
+      "description": "Prévôté : police et justice déléguées par un souverain sur un ressort.",
+      "why_distinct": "Officier territorial, différent du guet municipal.",
+      "cells": [
+        "justice_order.provostship"
+      ],
+      "systems": []
+    },
+    "executioner_house": {
+      "description": "Lignage chargé des exécutions et des basses œuvres de justice.",
+      "why_distinct": "Charge héréditaire marginalisée.",
+      "cells": [
+        "justice_order.executioner"
+      ],
+      "systems": []
+    },
+    "militia": {
+      "description": "Force de citoyens ou de tenanciers mobilisable pour la défense locale.",
+      "why_distinct": "Service armé à temps partiel qui consomme du temps, sans emploi de métier.",
+      "cells": [
+        "military.levy",
+        "military.militia"
+      ],
+      "systems": [
+        "militia"
+      ]
+    },
+    "garrison": {
+      "description": "Détachement permanent d'un fort ou d'une ville.",
+      "why_distinct": "Soldats professionnels à contrat protégé.",
+      "cells": [
+        "military.garrison"
+      ],
+      "systems": [
+        "army",
+        "border_guard",
+        "combat_company",
+        "garrison",
+        "siege_train"
+      ]
+    },
+    "mercenary_company": {
+      "description": "Force soldée qui négocie solde, durée et ravitaillement.",
+      "why_distinct": "Violence louée à un commanditaire.",
+      "cells": [
+        "military.mercenaries"
+      ],
+      "systems": [
+        "mercenary_company"
+      ]
+    },
+    "knightly_order": {
+      "description": "Ordre armé sous serment, devoirs d'hospitalité et patronage.",
+      "why_distinct": "Service armé et vœux, distincts de l'armée soldée.",
+      "cells": [
+        "military.knightly_order"
+      ],
+      "systems": [
+        "knightly_order",
+        "military_order"
+      ]
+    },
+    "war_fleet": {
+      "description": "Flotte de guerre : escadres, équipages, intendance.",
+      "why_distinct": "Force maritime permanente à contrat protégé.",
+      "cells": [
+        "military.fleet"
+      ],
+      "systems": [
+        "naval_fleet",
+        "naval_squadron",
+        "navy",
+        "warship_crew"
+      ]
+    },
+    "raiding_band": {
+      "description": "Parti de razzia saisonnière, parfois reconnu par sa culture.",
+      "why_distinct": "Pillage organisé distinct du brigandage et de la piraterie.",
+      "cells": [
+        "military.raiders"
+      ],
+      "systems": [
+        "raiding_party"
+      ]
+    },
+    "scout_company": {
+      "description": "Compagnie légère de reconnaissance et d'exploration.",
+      "why_distinct": "Reconnaissance du terrain, sans combat de ligne.",
+      "cells": [
+        "military.scouts"
+      ],
+      "systems": [
+        "expedition",
+        "scout_company"
+      ]
+    },
+    "secular_clergy": {
+      "description": "Clergé de paroisse et de mission.",
+      "why_distinct": "Desserte régulière d'un lieu de culte, avec ancre de site.",
+      "cells": [
+        "religion.secular_clergy"
+      ],
+      "systems": [
+        "mission_station",
+        "priesthood"
+      ]
+    },
+    "monastery": {
+      "description": "Maison de vie commune régie par une règle.",
+      "why_distinct": "Communauté résidentielle fermée.",
+      "cells": [
+        "religion.monastery"
+      ],
+      "systems": [
+        "monastery",
+        "religious_order"
+      ]
+    },
+    "mendicant_friary": {
+      "description": "Fraternité sans domaine foncier vivant d'aumônes.",
+      "why_distinct": "Pauvreté volontaire et prédication itinérante.",
+      "cells": [
+        "religion.mendicant_order"
+      ],
+      "systems": [
+        "mendicant_almonry",
+        "mendicant_preaching_network"
+      ]
+    },
+    "hermitage": {
+      "description": "Retraite de contemplation reliée à un village voisin.",
+      "why_distinct": "Solitude et conseil, très petits effectifs.",
+      "cells": [
+        "religion.hermits"
+      ],
+      "systems": [
+        "hermitage"
+      ]
+    },
+    "lay_confraternity": {
+      "description": "Association de laïcs pour une dévotion, des œuvres ou des secours.",
+      "why_distinct": "Dévotion partagée sans clergé.",
+      "cells": [
+        "culture_sociability.neighborhood_brotherhood",
+        "religion.lay_confraternity"
+      ],
+      "systems": [
+        "lay_brotherhood",
+        "plague_vow_fellowship"
+      ]
+    },
+    "heterodox_movement": {
+      "description": "Mouvement de croyance divergente.",
+      "why_distinct": "Divergence doctrinale, cible des tribunaux doctrinaux.",
+      "cells": [
+        "religion.heterodox_cult"
+      ],
+      "systems": [
+        "cult_cell",
+        "itinerant_prophets_movement"
+      ]
+    },
+    "closed_sect": {
+      "description": "Groupe fermé à emprise forte sur ses membres.",
+      "why_distinct": "Contrainte et isolement, que le culte hétérodoxe n'implique pas.",
+      "cells": [
+        "religion.sect"
+      ],
+      "systems": []
+    },
+    "ancestral_cult": {
+      "description": "Culte des ancêtres, des esprits du lieu ou des cycles.",
+      "why_distinct": "Rite sans clergé séculier, ancré dans la lignée ou le lieu.",
+      "cells": [
+        "religion.ancestral_cult"
+      ],
+      "systems": [
+        "ancestor_feast_compact",
+        "ancestor_shrine",
+        "shamanic_circle"
+      ]
+    },
+    "base_charitable_order": {
+      "description": "Ordre ou œuvre de charité : aumône, accueil, soin.",
+      "why_distinct": "Base d'alignement vertueuse (§27.6).",
+      "cells": [
+        "added.hospitality_travelers",
+        "religion.pilgrims"
+      ],
+      "systems": [
+        "pass_shrine_wardens",
+        "pilgrimage_wayhouse_network",
+        "relief_society"
+      ]
+    },
+    "university": {
+      "description": "Communauté d'étude sous charte : facultés, grades, débats.",
+      "why_distinct": "Enseignement supérieur et recherche.",
+      "cells": [
+        "knowledge_care.university"
+      ],
+      "systems": [
+        "academy",
+        "astral_calendar_consortium",
+        "observatory",
+        "scholars_circle",
+        "university"
+      ]
+    },
+    "scriptorium": {
+      "description": "Atelier de copie, d'enluminure et de conservation de manuscrits.",
+      "why_distinct": "Production savante, activité `craft`.",
+      "cells": [
+        "knowledge_care.scriptorium"
+      ],
+      "systems": [
+        "library",
+        "scriptorium"
+      ]
+    },
+    "hospital_house": {
+      "description": "Maison de soin résidentielle : hôpital, léproserie, convalescence.",
+      "why_distinct": "Hébergement de malades.",
+      "cells": [
+        "knowledge_care.hospital"
+      ],
+      "systems": [
+        "epidemic_recovery_house",
+        "healing_house"
+      ]
+    },
+    "healers_circle": {
+      "description": "Sages-femmes, guérisseurs et préparateurs de remèdes.",
+      "why_distinct": "Savoir de soin informel, hors clergé et hors hospice.",
+      "cells": [
+        "knowledge_care.apothecaries",
+        "knowledge_care.healers",
+        "knowledge_care.midwives"
+      ],
+      "systems": []
+    },
+    "itinerant_troupe": {
+      "description": "Troupe de spectacle ou de ménestrels qui voyage.",
+      "why_distinct": "Revenu de passage et patronage.",
+      "cells": [
+        "culture_sociability.minstrels",
+        "culture_sociability.troupe"
+      ],
+      "systems": [
+        "theatrical_troupe",
+        "traveling_circus"
+      ]
+    },
+    "festive_society": {
+      "description": "Abbaye de jeunesse, club de jeux, comité de fêtes.",
+      "why_distinct": "Sociabilité festive et police des mœurs.",
+      "cells": [
+        "added.festivals_sport",
+        "culture_sociability.youth_abbey"
+      ],
+      "systems": [
+        "festival_council",
+        "procession_company",
+        "sports_club"
+      ]
+    },
+    "women_circle": {
+      "description": "Cercle informel de femmes.",
+      "why_distinct": "Cercle d'amis à recrutement restreint.",
+      "cells": [
+        "culture_sociability.women_circle"
+      ],
+      "systems": []
+    },
+    "tavern_house": {
+      "description": "Taverne ou auberge : hébergement, boisson, jeu.",
+      "why_distinct": "Lieu de rencontre et de recel, activité de services.",
+      "cells": [
+        "added.hospitality_travelers",
+        "culture_sociability.taverns"
+      ],
+      "systems": []
+    },
+    "base_criminal_network": {
+      "description": "Réseau criminel générique (§27.6).",
+      "why_distinct": "Base toujours disponible, stock initial 1 par mille adultes.",
+      "cells": [
+        "crime_margins.thieves_guild"
+      ],
+      "systems": [
+        "prison_gang"
+      ]
+    },
+    "thieves_guild": {
+      "description": "Guilde urbaine de vol et de recel qui arbitre ses membres.",
+      "why_distinct": "Vol organisé avec règles internes.",
+      "cells": [
+        "crime_margins.fences",
+        "crime_margins.thieves_guild"
+      ],
+      "systems": [
+        "thieves_guild"
+      ]
+    },
+    "protection_racket": {
+      "description": "Famille ou bande qui rançonne un quartier.",
+      "why_distinct": "Extorsion territoriale, ouvertement connue.",
+      "cells": [
+        "crime_margins.racket"
+      ],
+      "systems": [
+        "crime_family",
+        "street_gang"
+      ]
+    },
+    "bandit_band": {
+      "description": "Bande de brigands de grand chemin.",
+      "why_distinct": "Banditisme rural prédateur.",
+      "cells": [
+        "crime_margins.brigands"
+      ],
+      "systems": []
+    },
+    "smuggling_ring": {
+      "description": "Filière de contrebande et de revente de biens volés.",
+      "why_distinct": "Commerce illicite à travers un contrôle.",
+      "cells": [
+        "crime_margins.fences",
+        "crime_margins.smugglers"
+      ],
+      "systems": [
+        "smugglers_ring"
+      ]
+    },
+    "pirate_crew": {
+      "description": "Équipage hors-la-loi qui vit de prises en mer.",
+      "why_distinct": "Piraterie maritime.",
+      "cells": [
+        "crime_margins.pirates"
+      ],
+      "systems": [
+        "pirate_flotilla"
+      ]
+    },
+    "assassin_brotherhood": {
+      "description": "Confrérie d'assassins à gages.",
+      "why_distinct": "Meurtre commandité et cloisonnement.",
+      "cells": [
+        "crime_margins.assassins"
+      ],
+      "systems": [
+        "assassins_order"
+      ]
+    },
+    "forgery_ring": {
+      "description": "Atelier clandestin de fausse monnaie, de faux et de contrefaçons.",
+      "why_distinct": "Fraude de production, relevant de l'artisanat.",
+      "cells": [
+        "crime_margins.forgers"
+      ],
+      "systems": []
+    },
+    "slave_trading_ring": {
+      "description": "Maison qui capture et vend des personnes.",
+      "why_distinct": "Traite, licite ou non selon la juridiction.",
+      "cells": [
+        "crime_margins.slavers"
+      ],
+      "systems": []
+    },
+    "beggar_brotherhood": {
+      "description": "Fraternité de mendiants organisée par quartier.",
+      "why_distinct": "Mendicité structurée, parfois exploitée.",
+      "cells": [
+        "crime_margins.organized_beggars"
+      ],
+      "systems": []
+    },
+    "outlaw_company": {
+      "description": "Compagnie de proscrits : bannis, insurgés, résistants.",
+      "why_distinct": "Statut juridique de hors-la-loi, conduite variable.",
+      "cells": [
+        "added.insurgents",
+        "crime_margins.outlaws"
+      ],
+      "systems": [
+        "resistance_network",
+        "revolutionary_party"
+      ]
+    },
+    "refugee_community": {
+      "description": "Communauté déplacée qui reçoit abri, vivres et protection.",
+      "why_distinct": "Hébergement forcé et provisoire.",
+      "cells": [
+        "crime_margins.refugees"
+      ],
+      "systems": [
+        "refuge_camp"
+      ]
+    },
+    "minority_enclave": {
+      "description": "Quartier ou village d'une minorité culturelle ou religieuse.",
+      "why_distinct": "Situation sociale de minorité, sans lien avec l'ascendance.",
+      "cells": [
+        "crime_margins.minority_enclaves"
+      ],
+      "systems": []
+    },
+    "secret_society": {
+      "description": "Association fermée à signes de reconnaissance et projet caché.",
+      "why_distinct": "Secret et serment.",
+      "cells": [
+        "added.insurgents",
+        "crime_margins.secret_society"
+      ],
+      "systems": [
+        "secret_society",
+        "underground_press"
+      ]
+    },
+    "mage_order": {
+      "description": "Collège ou ordre de mages : apprentissage, registre, responsabilité.",
+      "why_distinct": "Pratique magique organisée à poids politique.",
+      "cells": [
+        "fantasy.mage_order"
+      ],
+      "systems": [
+        "arcane_registry",
+        "golem_workshop",
+        "guild_of_enchanters",
+        "mage_college",
+        "planar_gate_authority"
+      ]
+    },
+    "arcane_cabal": {
+      "description": "Cercle fermé de praticiens occultes.",
+      "why_distinct": "Pratique magique clandestine.",
+      "cells": [
+        "fantasy.cabal"
+      ],
+      "systems": [
+        "witch_coven"
+      ]
+    },
+    "alchemists_lodge": {
+      "description": "Loge d'alchimistes : laboratoire, recettes, secret.",
+      "why_distinct": "Atelier à effet surnaturel déclaré.",
+      "cells": [
+        "fantasy.alchemists"
+      ],
+      "systems": []
+    },
+    "druid_circle": {
+      "description": "Cercle gardien d'un territoire et de ses cycles.",
+      "why_distinct": "Intendance rituelle d'un lieu naturel.",
+      "cells": [
+        "fantasy.druid_circle"
+      ],
+      "systems": [
+        "druid_grove"
+      ]
+    },
+    "monster_hunters_lodge": {
+      "description": "Loge qui traque et recense les prédateurs surnaturels.",
+      "why_distinct": "Chasse spécialisée sous contrat.",
+      "cells": [
+        "fantasy.monster_hunters"
+      ],
+      "systems": [
+        "monster_hunters_lodge"
+      ]
+    },
+    "adventuring_company": {
+      "description": "Équipe sous contrat qui explore et pille des sites dangereux.",
+      "why_distinct": "Expédition lucrative sans cadre militaire.",
+      "cells": [
+        "fantasy.adventurers"
+      ],
+      "systems": [
+        "adventurers_guild",
+        "adventuring_company"
+      ]
+    },
+    "infernal_cult": {
+      "description": "Culte lié par pacte à une puissance hostile ou interdite.",
+      "why_distinct": "Pacte et blasphème.",
+      "cells": [
+        "fantasy.demonic_cult"
+      ],
+      "systems": [
+        "demon_pact_court"
+      ]
+    },
+    "necromancers_circle": {
+      "description": "Cercle qui travaille avec les morts et leurs restes.",
+      "why_distinct": "Pratique mortuaire magique interdite.",
+      "cells": [
+        "fantasy.necromancers"
+      ],
+      "systems": [
+        "necromantic_college"
+      ]
+    },
+    "fey_court": {
+      "description": "Cour de puissances surnaturelles liées par hospitalité et dette.",
+      "why_distinct": "Rang et dette rituelle.",
+      "cells": [
+        "fantasy.fey_court"
+      ],
+      "systems": [
+        "elemental_conclave",
+        "fey_court",
+        "spirit_court"
+      ]
+    },
+    "dragon_court": {
+      "description": "Cour de puissances anciennes : tribut, territoire, serments.",
+      "why_distinct": "Arbitrage entre lignées de puissances.",
+      "cells": [
+        "fantasy.dragon_court"
+      ],
+      "systems": [
+        "dragon_clan",
+        "dragon_court",
+        "dragonflight"
+      ]
+    },
+    "nonhuman_enclave": {
+      "description": "Communauté fermée dont les membres relèvent d'un profil d'ascendance explicite.",
+      "why_distinct": "Se définit par sa situation, jamais par une nature.",
+      "cells": [
+        "fantasy.nonhuman_enclave"
+      ],
+      "systems": []
+    },
+    "monstrous_horde": {
+      "description": "Troupe nombreuse et mobile qui vit de pillage et de prédation.",
+      "why_distinct": "Définie par sa conduite et non par son espèce.",
+      "cells": [
+        "fantasy.monstrous_horde"
+      ],
+      "systems": [
+        "monster_pack",
+        "undead_legion"
+      ]
+    },
+    "ancient_site_guardians": {
+      "description": "Ordre qui garde un lieu ou des objets anciens.",
+      "why_distinct": "Garde d'un site à vocation surnaturelle.",
+      "cells": [
+        "fantasy.ancient_site_guardians"
+      ],
+      "systems": [
+        "relic_custodians"
+      ]
+    },
+    "mutual_aid_society": {
+      "description": "Société de secours entre pairs : caisse, assurance, entraide.",
+      "why_distinct": "Secours mutuel financé par les membres.",
+      "cells": [
+        "added.mutual_aid"
+      ],
+      "systems": [
+        "credit_union",
+        "mutual_aid_cell",
+        "veterans_association"
+      ]
+    },
+    "journeymen_fellowship": {
+      "description": "Fraternité de compagnons et salariés d'un métier.",
+      "why_distinct": "Intérêt des non-maîtres.",
+      "cells": [
+        "added.journeymen"
+      ],
+      "systems": [
+        "workers_union"
+      ]
+    },
+    "intelligence_network": {
+      "description": "Réseau d'informateurs et de rapports.",
+      "why_distinct": "Renseignement mandaté ou clandestin.",
+      "cells": [
+        "added.intelligence"
+      ],
+      "systems": [
+        "intelligence_service",
+        "spy_cell",
+        "spy_ring"
+      ]
+    }
+  },
+  "alignment_expectations": {
+    "ordinary_economic": {
+      "archetype_ids": [
+        "base_farm",
+        "base_workshop",
+        "base_trade_company",
+        "base_service_unit",
+        "workshop",
+        "caravan",
+        "crew",
+        "exchange_network",
+        "productive_community",
+        "resource_group",
+        "service_group",
+        "service_household",
+        "herding_group",
+        "mining_crew",
+        "shipping_consortium",
+        "banking_house",
+        "merchant_league",
+        "tavern_house"
+      ],
+      "max_abs_base_morality_bps": 600,
+      "min_morality_spread_bps": 4500,
+      "rule": "base proche de zéro ; l'écart atteint 'crooked' (<= -2500) et 'upright' (>= 2500)"
+    },
+    "base_class": {
+      "thieves_guild": [
+        "lawless",
+        "crooked"
+      ],
+      "base_criminal_network": [
+        "lawless",
+        "crooked"
+      ],
+      "protection_racket": [
+        "lawless",
+        "crooked"
+      ],
+      "bandit_band": [
+        "lawless",
+        "crooked"
+      ],
+      "smuggling_ring": [
+        "lawless",
+        "crooked"
+      ],
+      "pirate_crew": [
+        "lawless",
+        "crooked"
+      ],
+      "assassin_brotherhood": [
+        "lawless",
+        "crooked"
+      ],
+      "forgery_ring": [
+        "lawless",
+        "crooked"
+      ],
+      "slave_trading_ring": [
+        "lawless",
+        "crooked"
+      ],
+      "raiding_band": [
+        "lawless",
+        "crooked"
+      ],
+      "base_charitable_order": [
+        "upright",
+        "saintly"
+      ],
+      "hospital_house": [
+        "upright",
+        "saintly"
+      ],
+      "mendicant_friary": [
+        "upright",
+        "saintly"
+      ],
+      "hermitage": [
+        "upright",
+        "saintly"
+      ],
+      "monastery": [
+        "upright",
+        "saintly"
+      ]
+    }
+  },
+  "legacy_baseline": {
+    "catalogue_commit": "aaa0063",
+    "archetype_definitions": [
+      {
+        "id": "administration",
+        "class": "institution",
+        "slot_basis": "site_occupation_anchor",
+        "default_mean_lifetime_years": null,
+        "membership_policy": "overlapping",
+        "default_time_cost_bps": 0,
+        "activity_ids": [],
+        "preemptible": false
+      },
+      {
+        "id": "caravan",
+        "class": "activity_unit",
+        "slot_basis": "expected_workforce",
+        "default_mean_lifetime_years": 20,
+        "membership_policy": "time_budgeted",
+        "default_time_cost_bps": 10000,
+        "activity_ids": [
+          "trade"
+        ],
+        "preemptible": true
+      },
+      {
+        "id": "civic_council",
+        "class": "institution",
+        "slot_basis": "site_occupation_anchor",
+        "default_mean_lifetime_years": null,
+        "membership_policy": "overlapping",
+        "default_time_cost_bps": 0,
+        "activity_ids": [],
+        "preemptible": false
+      },
+      {
+        "id": "communal_house",
+        "class": "household_view",
+        "slot_basis": "provider_households",
+        "default_mean_lifetime_years": null,
+        "membership_policy": "derived_from_provider",
+        "default_time_cost_bps": 0,
+        "activity_ids": [],
+        "preemptible": false
+      },
+      {
+        "id": "companionship",
+        "class": "friend_circle",
+        "slot_basis": "expected_active_stock",
+        "default_mean_lifetime_years": 5,
+        "membership_policy": "overlapping",
+        "default_time_cost_bps": 0,
+        "activity_ids": [],
+        "preemptible": false
+      },
+      {
+        "id": "court",
+        "class": "community",
+        "slot_basis": "expected_active_stock",
+        "default_mean_lifetime_years": 50,
+        "membership_policy": "overlapping",
+        "default_time_cost_bps": 0,
+        "activity_ids": [],
+        "preemptible": false
+      },
+      {
+        "id": "craft_association",
+        "class": "association",
+        "slot_basis": "expected_active_stock",
+        "default_mean_lifetime_years": 30,
+        "membership_policy": "overlapping",
+        "default_time_cost_bps": 0,
+        "activity_ids": [],
+        "preemptible": false
+      },
+      {
+        "id": "craft_guild",
+        "class": "association",
+        "slot_basis": "expected_active_stock",
+        "default_mean_lifetime_years": 30,
+        "membership_policy": "overlapping",
+        "default_time_cost_bps": 0,
+        "activity_ids": [],
+        "preemptible": false
+      },
+      {
+        "id": "craft_house",
+        "class": "lineage_view",
+        "slot_basis": "core_lineages",
+        "default_mean_lifetime_years": null,
+        "membership_policy": "derived_from_provider",
+        "default_time_cost_bps": 0,
+        "activity_ids": [],
+        "preemptible": false
+      },
+      {
+        "id": "crew",
+        "class": "activity_unit",
+        "slot_basis": "expected_workforce",
+        "default_mean_lifetime_years": 20,
+        "membership_policy": "time_budgeted",
+        "default_time_cost_bps": 10000,
+        "activity_ids": [
+          "trade"
+        ],
+        "preemptible": true
+      },
+      {
+        "id": "exchange_network",
+        "class": "activity_unit",
+        "slot_basis": "expected_workforce",
+        "default_mean_lifetime_years": 20,
+        "membership_policy": "time_budgeted",
+        "default_time_cost_bps": 10000,
+        "activity_ids": [
+          "trade"
+        ],
+        "preemptible": true
+      },
+      {
+        "id": "farm_household",
+        "class": "household_view",
+        "slot_basis": "provider_households",
+        "default_mean_lifetime_years": null,
+        "membership_policy": "derived_from_provider",
+        "default_time_cost_bps": 0,
+        "activity_ids": [],
+        "preemptible": false
+      },
+      {
+        "id": "forest_house",
+        "class": "lineage_view",
+        "slot_basis": "core_lineages",
+        "default_mean_lifetime_years": null,
+        "membership_policy": "derived_from_provider",
+        "default_time_cost_bps": 0,
+        "activity_ids": [],
+        "preemptible": false
+      },
+      {
+        "id": "hold_council",
+        "class": "institution",
+        "slot_basis": "site_occupation_anchor",
+        "default_mean_lifetime_years": null,
+        "membership_policy": "overlapping",
+        "default_time_cost_bps": 0,
+        "activity_ids": [],
+        "preemptible": false
+      },
+      {
+        "id": "house_faction",
+        "class": "community",
+        "slot_basis": "expected_active_stock",
+        "default_mean_lifetime_years": 50,
+        "membership_policy": "overlapping",
+        "default_time_cost_bps": 0,
+        "activity_ids": [],
+        "preemptible": false
+      },
+      {
+        "id": "household_compound",
+        "class": "household_view",
+        "slot_basis": "provider_households",
+        "default_mean_lifetime_years": null,
+        "membership_policy": "derived_from_provider",
+        "default_time_cost_bps": 0,
+        "activity_ids": [],
+        "preemptible": false
+      },
+      {
+        "id": "kin_group",
+        "class": "lineage_view",
+        "slot_basis": "core_lineages",
+        "default_mean_lifetime_years": null,
+        "membership_policy": "derived_from_provider",
+        "default_time_cost_bps": 0,
+        "activity_ids": [],
+        "preemptible": false
+      },
+      {
+        "id": "landed_house",
+        "class": "lineage_view",
+        "slot_basis": "core_lineages",
+        "default_mean_lifetime_years": null,
+        "membership_policy": "derived_from_provider",
+        "default_time_cost_bps": 0,
+        "activity_ids": [],
+        "preemptible": false
+      },
+      {
+        "id": "local_assembly",
+        "class": "institution",
+        "slot_basis": "site_occupation_anchor",
+        "default_mean_lifetime_years": null,
+        "membership_policy": "overlapping",
+        "default_time_cost_bps": 0,
+        "activity_ids": [],
+        "preemptible": false
+      },
+      {
+        "id": "local_colony",
+        "class": "community",
+        "slot_basis": "expected_active_stock",
+        "default_mean_lifetime_years": 50,
+        "membership_policy": "overlapping",
+        "default_time_cost_bps": 0,
+        "activity_ids": [],
+        "preemptible": false
+      },
+      {
+        "id": "local_community",
+        "class": "community",
+        "slot_basis": "expected_active_stock",
+        "default_mean_lifetime_years": 50,
+        "membership_policy": "overlapping",
+        "default_time_cost_bps": 0,
+        "activity_ids": [],
+        "preemptible": false
+      },
+      {
+        "id": "market_association",
+        "class": "association",
+        "slot_basis": "expected_active_stock",
+        "default_mean_lifetime_years": 30,
+        "membership_policy": "overlapping",
+        "default_time_cost_bps": 0,
+        "activity_ids": [],
+        "preemptible": false
+      },
+      {
+        "id": "merchant_house",
+        "class": "lineage_view",
+        "slot_basis": "core_lineages",
+        "default_mean_lifetime_years": null,
+        "membership_policy": "derived_from_provider",
+        "default_time_cost_bps": 0,
+        "activity_ids": [],
+        "preemptible": false
+      },
+      {
+        "id": "mobile_household",
+        "class": "household_view",
+        "slot_basis": "provider_households",
+        "default_mean_lifetime_years": null,
+        "membership_policy": "derived_from_provider",
+        "default_time_cost_bps": 0,
+        "activity_ids": [],
+        "preemptible": false
+      },
+      {
+        "id": "neighborhood",
+        "class": "community",
+        "slot_basis": "expected_active_stock",
+        "default_mean_lifetime_years": 50,
+        "membership_policy": "overlapping",
+        "default_time_cost_bps": 0,
+        "activity_ids": [],
+        "preemptible": false
+      },
+      {
+        "id": "productive_community",
+        "class": "activity_unit",
+        "slot_basis": "expected_workforce",
+        "default_mean_lifetime_years": 20,
+        "membership_policy": "time_budgeted",
+        "default_time_cost_bps": 10000,
+        "activity_ids": [
+          "agriculture"
+        ],
+        "preemptible": true
+      },
+      {
+        "id": "redistributive_institution",
+        "class": "community",
+        "slot_basis": "expected_active_stock",
+        "default_mean_lifetime_years": 50,
+        "membership_policy": "overlapping",
+        "default_time_cost_bps": 0,
+        "activity_ids": [],
+        "preemptible": false
+      },
+      {
+        "id": "resource_group",
+        "class": "activity_unit",
+        "slot_basis": "expected_workforce",
+        "default_mean_lifetime_years": 20,
+        "membership_policy": "time_budgeted",
+        "default_time_cost_bps": 10000,
+        "activity_ids": [
+          "agriculture"
+        ],
+        "preemptible": true
+      },
+      {
+        "id": "retinue",
+        "class": "activity_unit",
+        "slot_basis": "expected_workforce",
+        "default_mean_lifetime_years": 20,
+        "membership_policy": "time_budgeted",
+        "default_time_cost_bps": 10000,
+        "activity_ids": [
+          "services"
+        ],
+        "preemptible": true
+      },
+      {
+        "id": "ritual_group",
+        "class": "association",
+        "slot_basis": "expected_active_stock",
+        "default_mean_lifetime_years": 30,
+        "membership_policy": "overlapping",
+        "default_time_cost_bps": 0,
+        "activity_ids": [],
+        "preemptible": false
+      },
+      {
+        "id": "ritual_institution",
+        "class": "association",
+        "slot_basis": "expected_active_stock",
+        "default_mean_lifetime_years": 30,
+        "membership_policy": "overlapping",
+        "default_time_cost_bps": 0,
+        "activity_ids": [],
+        "preemptible": false
+      },
+      {
+        "id": "school",
+        "class": "association",
+        "slot_basis": "expected_active_stock",
+        "default_mean_lifetime_years": 30,
+        "membership_policy": "overlapping",
+        "default_time_cost_bps": 0,
+        "activity_ids": [],
+        "preemptible": false
+      },
+      {
+        "id": "service_group",
+        "class": "activity_unit",
+        "slot_basis": "expected_workforce",
+        "default_mean_lifetime_years": 20,
+        "membership_policy": "time_budgeted",
+        "default_time_cost_bps": 10000,
+        "activity_ids": [
+          "services"
+        ],
+        "preemptible": true
+      },
+      {
+        "id": "service_household",
+        "class": "activity_unit",
+        "slot_basis": "expected_workforce",
+        "default_mean_lifetime_years": 20,
+        "membership_policy": "time_budgeted",
+        "default_time_cost_bps": 10000,
+        "activity_ids": [
+          "services"
+        ],
+        "preemptible": true
+      },
+      {
+        "id": "shore_community",
+        "class": "community",
+        "slot_basis": "expected_active_stock",
+        "default_mean_lifetime_years": 50,
+        "membership_policy": "overlapping",
+        "default_time_cost_bps": 0,
+        "activity_ids": [],
+        "preemptible": false
+      },
+      {
+        "id": "territorial_house",
+        "class": "lineage_view",
+        "slot_basis": "core_lineages",
+        "default_mean_lifetime_years": null,
+        "membership_policy": "derived_from_provider",
+        "default_time_cost_bps": 0,
+        "activity_ids": [],
+        "preemptible": false
+      },
+      {
+        "id": "travel_party",
+        "class": "community",
+        "slot_basis": "expected_active_stock",
+        "default_mean_lifetime_years": 50,
+        "membership_policy": "overlapping",
+        "default_time_cost_bps": 0,
+        "activity_ids": [],
+        "preemptible": false
+      },
+      {
+        "id": "village_council",
+        "class": "institution",
+        "slot_basis": "site_occupation_anchor",
+        "default_mean_lifetime_years": null,
+        "membership_policy": "overlapping",
+        "default_time_cost_bps": 0,
+        "activity_ids": [],
+        "preemptible": false
+      },
+      {
+        "id": "ward_community",
+        "class": "community",
+        "slot_basis": "expected_active_stock",
+        "default_mean_lifetime_years": 50,
+        "membership_policy": "overlapping",
+        "default_time_cost_bps": 0,
+        "activity_ids": [],
+        "preemptible": false
+      },
+      {
+        "id": "water_association",
+        "class": "association",
+        "slot_basis": "expected_active_stock",
+        "default_mean_lifetime_years": 30,
+        "membership_policy": "overlapping",
+        "default_time_cost_bps": 0,
+        "activity_ids": [],
+        "preemptible": false
+      },
+      {
+        "id": "workshop",
+        "class": "activity_unit",
+        "slot_basis": "expected_workforce",
+        "default_mean_lifetime_years": 20,
+        "membership_policy": "time_budgeted",
+        "default_time_cost_bps": 10000,
+        "activity_ids": [
+          "craft"
+        ],
+        "preemptible": true
+      },
+      {
+        "id": "base_farm",
+        "class": "activity_unit",
+        "slot_basis": "expected_workforce",
+        "default_mean_lifetime_years": 20,
+        "membership_policy": "time_budgeted",
+        "default_time_cost_bps": 10000,
+        "activity_ids": [
+          "agriculture"
+        ],
+        "preemptible": true
+      },
+      {
+        "id": "base_workshop",
+        "class": "activity_unit",
+        "slot_basis": "expected_workforce",
+        "default_mean_lifetime_years": 20,
+        "membership_policy": "time_budgeted",
+        "default_time_cost_bps": 10000,
+        "activity_ids": [
+          "craft"
+        ],
+        "preemptible": true
+      },
+      {
+        "id": "base_trade_company",
+        "class": "activity_unit",
+        "slot_basis": "expected_workforce",
+        "default_mean_lifetime_years": 20,
+        "membership_policy": "time_budgeted",
+        "default_time_cost_bps": 10000,
+        "activity_ids": [
+          "trade"
+        ],
+        "preemptible": true
+      },
+      {
+        "id": "base_service_unit",
+        "class": "activity_unit",
+        "slot_basis": "expected_workforce",
+        "default_mean_lifetime_years": 20,
+        "membership_policy": "time_budgeted",
+        "default_time_cost_bps": 10000,
+        "activity_ids": [
+          "services"
+        ],
+        "preemptible": true
+      },
+      {
+        "id": "base_friend_circle",
+        "class": "friend_circle",
+        "slot_basis": "expected_active_stock",
+        "default_mean_lifetime_years": 5,
+        "membership_policy": "overlapping",
+        "default_time_cost_bps": 0,
+        "activity_ids": [],
+        "preemptible": false
+      },
+      {
+        "id": "base_religious_community",
+        "class": "association",
+        "slot_basis": "expected_active_stock",
+        "default_mean_lifetime_years": 30,
+        "membership_policy": "overlapping",
+        "default_time_cost_bps": 0,
+        "activity_ids": [],
+        "preemptible": false
+      },
+      {
+        "id": "base_faction",
+        "class": "association",
+        "slot_basis": "expected_active_stock",
+        "default_mean_lifetime_years": 30,
+        "membership_policy": "overlapping",
+        "default_time_cost_bps": 0,
+        "activity_ids": [],
+        "preemptible": false
+      },
+      {
+        "id": "base_neighborhood",
+        "class": "community",
+        "slot_basis": "expected_active_stock",
+        "default_mean_lifetime_years": 50,
+        "membership_policy": "overlapping",
+        "default_time_cost_bps": 0,
+        "activity_ids": [],
+        "preemptible": false
+      },
+      {
+        "id": "magical_school",
+        "class": "association",
+        "slot_basis": "expected_active_stock",
+        "default_mean_lifetime_years": 30,
+        "membership_policy": "overlapping",
+        "default_time_cost_bps": 0,
+        "activity_ids": [],
+        "preemptible": false
+      },
+      {
+        "id": "mortuary_confraternity",
+        "class": "association",
+        "slot_basis": "expected_active_stock",
+        "default_mean_lifetime_years": 30,
+        "membership_policy": "overlapping",
+        "default_time_cost_bps": 0,
+        "activity_ids": [],
+        "preemptible": false
+      },
+      {
+        "id": "base_local_institution",
+        "class": "institution",
+        "slot_basis": "site_occupation_anchor",
+        "default_mean_lifetime_years": null,
+        "membership_policy": "overlapping",
+        "default_time_cost_bps": 0,
+        "activity_ids": [],
+        "preemptible": false
+      },
+      {
+        "id": "base_craft_association",
+        "class": "association",
+        "slot_basis": "expected_active_stock",
+        "default_mean_lifetime_years": 30,
+        "membership_policy": "overlapping",
+        "default_time_cost_bps": 0,
+        "activity_ids": [],
+        "preemptible": false
+      }
+    ],
+    "base_archetype_ids": [
+      "base_farm",
+      "base_workshop",
+      "base_trade_company",
+      "base_service_unit",
+      "base_friend_circle",
+      "base_religious_community",
+      "base_faction",
+      "base_neighborhood",
+      "base_local_institution",
+      "base_craft_association"
+    ],
+    "overlay_definitions": [
+      {
+        "id": "aquatic_access",
+        "role": "spatial_or_material_tag",
+        "social_effects": "none_unless_explicitly_overridden",
+        "description": "Tag de variante déclaré ; il ne déduit automatiquement ni biologie, ni règle juridique, ni titre.",
+        "archetype_ids": []
+      },
+      {
+        "id": "canal_craft",
+        "role": "spatial_or_material_tag",
+        "social_effects": "none_unless_explicitly_overridden",
+        "description": "Tag de variante déclaré ; il ne déduit automatiquement ni biologie, ni règle juridique, ni titre.",
+        "archetype_ids": []
+      },
+      {
+        "id": "cold_seasonality",
+        "role": "spatial_or_material_tag",
+        "social_effects": "none_unless_explicitly_overridden",
+        "description": "Tag de variante déclaré ; il ne déduit automatiquement ni biologie, ni règle juridique, ni titre.",
+        "archetype_ids": []
+      },
+      {
+        "id": "compact_communal_housing",
+        "role": "spatial_or_material_tag",
+        "social_effects": "none_unless_explicitly_overridden",
+        "description": "Tag de variante déclaré ; il ne déduit automatiquement ni biologie, ni règle juridique, ni titre.",
+        "archetype_ids": []
+      },
+      {
+        "id": "forest_access",
+        "role": "spatial_or_material_tag",
+        "social_effects": "none_unless_explicitly_overridden",
+        "description": "Tag de variante déclaré ; il ne déduit automatiquement ni biologie, ni règle juridique, ni titre.",
+        "archetype_ids": []
+      },
+      {
+        "id": "fungal_ecology",
+        "role": "spatial_or_material_tag",
+        "social_effects": "none_unless_explicitly_overridden",
+        "description": "Tag de variante déclaré ; il ne déduit automatiquement ni biologie, ni règle juridique, ni titre.",
+        "archetype_ids": []
+      },
+      {
+        "id": "highland_routes",
+        "role": "spatial_or_material_tag",
+        "social_effects": "none_unless_explicitly_overridden",
+        "description": "Tag de variante déclaré ; il ne déduit automatiquement ni biologie, ni règle juridique, ni titre.",
+        "archetype_ids": []
+      },
+      {
+        "id": "lagoon_transport",
+        "role": "spatial_or_material_tag",
+        "social_effects": "none_unless_explicitly_overridden",
+        "description": "Tag de variante déclaré ; il ne déduit automatiquement ni biologie, ni règle juridique, ni titre.",
+        "archetype_ids": []
+      },
+      {
+        "id": "large_body_admission",
+        "role": "spatial_or_material_tag",
+        "social_effects": "none_unless_explicitly_overridden",
+        "description": "Tag de variante déclaré ; il ne déduit automatiquement ni biologie, ni règle juridique, ni titre.",
+        "archetype_ids": []
+      },
+      {
+        "id": "magical_institutions",
+        "role": "enable_optional_magic_archetype",
+        "social_effects": "enable_optional_archetypes",
+        "description": "Tag de variante déclaré ; il ne déduit automatiquement ni biologie, ni règle juridique, ni titre.",
+        "archetype_ids": [
+          "magical_school"
+        ]
+      },
+      {
+        "id": "mortuary_institutions",
+        "role": "enable_optional_mortuary_archetype",
+        "social_effects": "enable_optional_archetypes",
+        "description": "Tag de variante déclaré ; il ne déduit automatiquement ni biologie, ni règle juridique, ni titre.",
+        "archetype_ids": [
+          "mortuary_confraternity"
+        ]
+      },
+      {
+        "id": "pastoral_mobility",
+        "role": "spatial_or_material_tag",
+        "social_effects": "none_unless_explicitly_overridden",
+        "description": "Tag de variante déclaré ; il ne déduit automatiquement ni biologie, ni règle juridique, ni titre.",
+        "archetype_ids": []
+      },
+      {
+        "id": "planned_foundation",
+        "role": "spatial_or_material_tag",
+        "social_effects": "none_unless_explicitly_overridden",
+        "description": "Tag de variante déclaré ; il ne déduit automatiquement ni biologie, ni règle juridique, ni titre.",
+        "archetype_ids": []
+      },
+      {
+        "id": "reproduction_profile_required",
+        "role": "require_explicit_ancestry_profile",
+        "social_effects": "none_unless_explicitly_overridden",
+        "description": "Tag de variante déclaré ; il ne déduit automatiquement ni biologie, ni règle juridique, ni titre.",
+        "archetype_ids": []
+      },
+      {
+        "id": "river_corridor",
+        "role": "spatial_or_material_tag",
+        "social_effects": "none_unless_explicitly_overridden",
+        "description": "Tag de variante déclaré ; il ne déduit automatiquement ni biologie, ni règle juridique, ni titre.",
+        "archetype_ids": []
+      },
+      {
+        "id": "seasonal_mobility",
+        "role": "spatial_or_material_tag",
+        "social_effects": "none_unless_explicitly_overridden",
+        "description": "Tag de variante déclaré ; il ne déduit automatiquement ni biologie, ni règle juridique, ni titre.",
+        "archetype_ids": []
+      },
+      {
+        "id": "stone_enclosures",
+        "role": "spatial_or_material_tag",
+        "social_effects": "none_unless_explicitly_overridden",
+        "description": "Tag de variante déclaré ; il ne déduit automatiquement ni biologie, ni règle juridique, ni titre.",
+        "archetype_ids": []
+      },
+      {
+        "id": "subterranean_access",
+        "role": "spatial_or_material_tag",
+        "social_effects": "none_unless_explicitly_overridden",
+        "description": "Tag de variante déclaré ; il ne déduit automatiquement ni biologie, ni règle juridique, ni titre.",
+        "archetype_ids": []
+      },
+      {
+        "id": "terrace_agriculture",
+        "role": "spatial_or_material_tag",
+        "social_effects": "none_unless_explicitly_overridden",
+        "description": "Tag de variante déclaré ; il ne déduit automatiquement ni biologie, ni règle juridique, ni titre.",
+        "archetype_ids": []
+      },
+      {
+        "id": "tidal_seasonality",
+        "role": "spatial_or_material_tag",
+        "social_effects": "none_unless_explicitly_overridden",
+        "description": "Tag de variante déclaré ; il ne déduit automatiquement ni biologie, ni règle juridique, ni titre.",
+        "archetype_ids": []
+      },
+      {
+        "id": "vertical_households",
+        "role": "spatial_or_material_tag",
+        "social_effects": "none_unless_explicitly_overridden",
+        "description": "Tag de variante déclaré ; il ne déduit automatiquement ni biologie, ni règle juridique, ni titre.",
+        "archetype_ids": []
+      },
+      {
+        "id": "water_access",
+        "role": "spatial_or_material_tag",
+        "social_effects": "none_unless_explicitly_overridden",
+        "description": "Tag de variante déclaré ; il ne déduit automatiquement ni biologie, ni règle juridique, ni titre.",
+        "archetype_ids": []
+      },
+      {
+        "id": "wetland_access",
+        "role": "spatial_or_material_tag",
+        "social_effects": "none_unless_explicitly_overridden",
+        "description": "Tag de variante déclaré ; il ne déduit automatiquement ni biologie, ni règle juridique, ni titre.",
+        "archetype_ids": []
+      }
+    ],
+    "engine_defaults_without_s1_keys_sha256": "18167137aa70172beddf29535ef9022326cfdd722d0ccd70bf83cd1b51d2e874",
+    "sections_sha256": {
+      "source_inventory": "4f5df074522bbd1d1941e99d9b509c543ebf5aa0467682c4f64a3c135ce823a8",
+      "families": "2e1cd5662bbf5a6aa78d8dfbc5f680b08f707565d40b04e0d17b1aa42f2396a0",
+      "bindings": "ba983e52c21a94f7216ec9031de2c42483743144f8d8a83d797924f2c450576a",
+      "governance_templates": "30766fcea07bdf638051d50bc7e619a3466bd87de86a3a425295bf8411363720",
+      "kinship_templates": "62954ceb88f28d84bcb45688b7e9af641fd45672f1a091b2f76f48ae48eeb836",
+      "demography_society_templates": "46ae04864ee4b480b585e2ad2fd15d8332aa1cdc4dcda0148ffd56fcb0d1124a",
+      "institution_coverage": "7f6930ec360d8e8a7e2348a1aafe0f56dd3194346329d9a053e4e98dd33dbdb2",
+      "required_activity_coverage": "d6f7a2110c3e08b35f109106de1f25a1cefee93f9cd9634785d34615c1f4f888",
+      "resolution_order": "b5cb0e6b07a1dd7fa2fd2d616de99077d77fa209cf76a5273d31a6aa70f73957"
+    },
+    "counts": {
+      "bindings": 79,
+      "families": 21,
+      "archetypes": 53,
+      "overlays": 23
+    }
+  },
+  "status_statement": "Valeurs initiales de worldbuilding (initial_template_not_historical_calibration). Aucune n'est calibrée sur des données historiques."
+}

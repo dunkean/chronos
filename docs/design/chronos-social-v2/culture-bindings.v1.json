@@ -1436,6 +1436,90 @@
       "recovery_delta_bps_per_unpenalized_year": 200,
       "evaluated_phase": 55,
       "reference_state": "previous_year_published"
+    },
+    "setting_profile": {
+      "parameters_status": "worldbuilding_starting_values_not_calibrated",
+      "values": [
+        "historical",
+        "low_fantasy",
+        "high_fantasy"
+      ],
+      "rank": {
+        "historical": 0,
+        "low_fantasy": 1,
+        "high_fantasy": 2
+      },
+      "activation_rule": "archetype.setting <= world.setting_profile selon `rank`",
+      "overlay_rule": "Un overlay ne réactive jamais un archétype dont le `setting` dépasse celui du monde."
+    },
+    "alignment": {
+      "parameters_status": "worldbuilding_starting_values_not_calibrated",
+      "axis_bounds_bps": {
+        "min": -10000,
+        "max": 10000
+      },
+      "conduct_class_order": [
+        "lawless",
+        "crooked",
+        "ordinary",
+        "upright",
+        "saintly"
+      ],
+      "conduct_class_thresholds": {
+        "lawless": {
+          "morality_max_bps": -6000,
+          "lawfulness_max_bps": -3000
+        },
+        "crooked": {
+          "morality_max_bps": -2500
+        },
+        "ordinary": {
+          "morality_below_bps": 2500
+        },
+        "upright": {
+          "morality_below_bps": 7000
+        },
+        "saintly": {
+          "otherwise": true
+        }
+      },
+      "person_axis_draws": {
+        "substream": "alignment/v1",
+        "draws_per_axis": 3,
+        "draw_bound_bps": 1500,
+        "rule": "Somme de trois tirages entiers uniformes dans [-draw_bound, +draw_bound], ajoutée à la base culturelle, puis bornée aux axes."
+      },
+      "organization_axis_draws": {
+        "substream": "alignment/v1",
+        "draws_per_axis": 3,
+        "rule": "Écart de slot = somme de trois tirages entiers uniformes dans [-floor(spread/3), +floor(spread/3)], où spread vient de `archetype_alignment`. Axe = base de l'archétype + écart de slot, puis borné aux axes. La base culturelle des organisations n'est pas fixée en S1."
+      },
+      "legal_status_thresholds": {
+        "conformity_proscribed_at_or_below_bps": -5000,
+        "conformity_tolerated_at_or_below_bps": -1500,
+        "default_status": "licit"
+      },
+      "conformity": {
+        "status": "proposed_by_S1_not_fixed_by_spec",
+        "formula": "conformity_bps = clamp(10 * moyenne entière des poids du `value_profile` pour chaque tag de l'entité, -10000, 10000) ; 0 sans tag ; un tag absent du profil pèse 0.",
+        "value_weight_bounds": {
+          "min": -1000,
+          "max": 1000
+        }
+      },
+      "alignment_fit": {
+        "max_score": 1000,
+        "divisor": 40,
+        "rule": "max(0, 1000 - floor((|d_morality| + |d_lawfulness|) / 40)) (§27.5)"
+      },
+      "visibility_values": [
+        "open",
+        "covert"
+      ],
+      "spread_bounds_bps": {
+        "min": 0,
+        "max": 10000
+      }
     }
   },
   "institution_coverage": {
@@ -1495,6 +1579,15 @@
     "friend_circles_per_1000_adults": {
       "unit": "expected_active_stock_per_1000_adults",
       "formula": "Births per 10-year block = active stock * 10 / mean_lifetime_years; bootstrap initializes active stock."
+    },
+    "setting_profile": {
+      "unit": "enum",
+      "values": [
+        "historical",
+        "low_fantasy",
+        "high_fantasy"
+      ],
+      "meaning": "Réglage de fantastique du monde, obligatoire dans WorldSpecV2 (§2.1). Ordre historical < low_fantasy < high_fantasy. Un archétype est actif seulement si son `setting` est inférieur ou égal au réglage du monde ; un monde historique n'active aucun archétype fantastique, même si un overlay de variante le désigne."
     }
   },
   "archetype_definitions": [
@@ -1506,7 +1599,9 @@
       "membership_policy": "overlapping",
       "default_time_cost_bps": 0,
       "activity_ids": [],
-      "preemptible": false
+      "preemptible": false,
+      "setting": "historical",
+      "name_profile": "organization.office"
     },
     {
       "id": "caravan",
@@ -1518,7 +1613,9 @@
       "activity_ids": [
         "trade"
       ],
-      "preemptible": true
+      "preemptible": true,
+      "setting": "historical",
+      "name_profile": "organization.company"
     },
     {
       "id": "civic_council",
@@ -1528,7 +1625,9 @@
       "membership_policy": "overlapping",
       "default_time_cost_bps": 0,
       "activity_ids": [],
-      "preemptible": false
+      "preemptible": false,
+      "setting": "historical",
+      "name_profile": "organization.council"
     },
     {
       "id": "communal_house",
@@ -1538,7 +1637,9 @@
       "membership_policy": "derived_from_provider",
       "default_time_cost_bps": 0,
       "activity_ids": [],
-      "preemptible": false
+      "preemptible": false,
+      "setting": "historical",
+      "name_profile": "organization.household"
     },
     {
       "id": "companionship",
@@ -1548,7 +1649,9 @@
       "membership_policy": "overlapping",
       "default_time_cost_bps": 0,
       "activity_ids": [],
-      "preemptible": false
+      "preemptible": false,
+      "setting": "historical",
+      "name_profile": "organization.circle"
     },
     {
       "id": "court",
@@ -1558,7 +1661,9 @@
       "membership_policy": "overlapping",
       "default_time_cost_bps": 0,
       "activity_ids": [],
-      "preemptible": false
+      "preemptible": false,
+      "setting": "historical",
+      "name_profile": "organization.court"
     },
     {
       "id": "craft_association",
@@ -1568,7 +1673,9 @@
       "membership_policy": "overlapping",
       "default_time_cost_bps": 0,
       "activity_ids": [],
-      "preemptible": false
+      "preemptible": false,
+      "setting": "historical",
+      "name_profile": "organization.guild"
     },
     {
       "id": "craft_guild",
@@ -1578,7 +1685,9 @@
       "membership_policy": "overlapping",
       "default_time_cost_bps": 0,
       "activity_ids": [],
-      "preemptible": false
+      "preemptible": false,
+      "setting": "historical",
+      "name_profile": "organization.guild"
     },
     {
       "id": "craft_house",
@@ -1588,7 +1697,9 @@
       "membership_policy": "derived_from_provider",
       "default_time_cost_bps": 0,
       "activity_ids": [],
-      "preemptible": false
+      "preemptible": false,
+      "setting": "historical",
+      "name_profile": "organization.house"
     },
     {
       "id": "crew",
@@ -1600,7 +1711,9 @@
       "activity_ids": [
         "trade"
       ],
-      "preemptible": true
+      "preemptible": true,
+      "setting": "historical",
+      "name_profile": "organization.crew"
     },
     {
       "id": "exchange_network",
@@ -1612,7 +1725,9 @@
       "activity_ids": [
         "trade"
       ],
-      "preemptible": true
+      "preemptible": true,
+      "setting": "historical",
+      "name_profile": "organization.company"
     },
     {
       "id": "farm_household",
@@ -1622,7 +1737,9 @@
       "membership_policy": "derived_from_provider",
       "default_time_cost_bps": 0,
       "activity_ids": [],
-      "preemptible": false
+      "preemptible": false,
+      "setting": "historical",
+      "name_profile": "organization.household"
     },
     {
       "id": "forest_house",
@@ -1632,7 +1749,9 @@
       "membership_policy": "derived_from_provider",
       "default_time_cost_bps": 0,
       "activity_ids": [],
-      "preemptible": false
+      "preemptible": false,
+      "setting": "historical",
+      "name_profile": "organization.house"
     },
     {
       "id": "hold_council",
@@ -1642,7 +1761,9 @@
       "membership_policy": "overlapping",
       "default_time_cost_bps": 0,
       "activity_ids": [],
-      "preemptible": false
+      "preemptible": false,
+      "setting": "historical",
+      "name_profile": "organization.council"
     },
     {
       "id": "house_faction",
@@ -1652,7 +1773,9 @@
       "membership_policy": "overlapping",
       "default_time_cost_bps": 0,
       "activity_ids": [],
-      "preemptible": false
+      "preemptible": false,
+      "setting": "historical",
+      "name_profile": "organization.faction"
     },
     {
       "id": "household_compound",
@@ -1662,7 +1785,9 @@
       "membership_policy": "derived_from_provider",
       "default_time_cost_bps": 0,
       "activity_ids": [],
-      "preemptible": false
+      "preemptible": false,
+      "setting": "historical",
+      "name_profile": "organization.household"
     },
     {
       "id": "kin_group",
@@ -1672,7 +1797,9 @@
       "membership_policy": "derived_from_provider",
       "default_time_cost_bps": 0,
       "activity_ids": [],
-      "preemptible": false
+      "preemptible": false,
+      "setting": "historical",
+      "name_profile": "organization.house"
     },
     {
       "id": "landed_house",
@@ -1682,7 +1809,9 @@
       "membership_policy": "derived_from_provider",
       "default_time_cost_bps": 0,
       "activity_ids": [],
-      "preemptible": false
+      "preemptible": false,
+      "setting": "historical",
+      "name_profile": "organization.house"
     },
     {
       "id": "local_assembly",
@@ -1692,7 +1821,9 @@
       "membership_policy": "overlapping",
       "default_time_cost_bps": 0,
       "activity_ids": [],
-      "preemptible": false
+      "preemptible": false,
+      "setting": "historical",
+      "name_profile": "organization.council"
     },
     {
       "id": "local_colony",
@@ -1702,7 +1833,9 @@
       "membership_policy": "overlapping",
       "default_time_cost_bps": 0,
       "activity_ids": [],
-      "preemptible": false
+      "preemptible": false,
+      "setting": "historical",
+      "name_profile": "organization.community"
     },
     {
       "id": "local_community",
@@ -1712,7 +1845,9 @@
       "membership_policy": "overlapping",
       "default_time_cost_bps": 0,
       "activity_ids": [],
-      "preemptible": false
+      "preemptible": false,
+      "setting": "historical",
+      "name_profile": "organization.community"
     },
     {
       "id": "market_association",
@@ -1722,7 +1857,9 @@
       "membership_policy": "overlapping",
       "default_time_cost_bps": 0,
       "activity_ids": [],
-      "preemptible": false
+      "preemptible": false,
+      "setting": "historical",
+      "name_profile": "organization.guild"
     },
     {
       "id": "merchant_house",
@@ -1732,7 +1869,9 @@
       "membership_policy": "derived_from_provider",
       "default_time_cost_bps": 0,
       "activity_ids": [],
-      "preemptible": false
+      "preemptible": false,
+      "setting": "historical",
+      "name_profile": "organization.house"
     },
     {
       "id": "mobile_household",
@@ -1742,7 +1881,9 @@
       "membership_policy": "derived_from_provider",
       "default_time_cost_bps": 0,
       "activity_ids": [],
-      "preemptible": false
+      "preemptible": false,
+      "setting": "historical",
+      "name_profile": "organization.household"
     },
     {
       "id": "neighborhood",
@@ -1752,7 +1893,9 @@
       "membership_policy": "overlapping",
       "default_time_cost_bps": 0,
       "activity_ids": [],
-      "preemptible": false
+      "preemptible": false,
+      "setting": "historical",
+      "name_profile": "organization.community"
     },
     {
       "id": "productive_community",
@@ -1764,7 +1907,9 @@
       "activity_ids": [
         "agriculture"
       ],
-      "preemptible": true
+      "preemptible": true,
+      "setting": "historical",
+      "name_profile": "organization.community"
     },
     {
       "id": "redistributive_institution",
@@ -1774,7 +1919,9 @@
       "membership_policy": "overlapping",
       "default_time_cost_bps": 0,
       "activity_ids": [],
-      "preemptible": false
+      "preemptible": false,
+      "setting": "historical",
+      "name_profile": "organization.office"
     },
     {
       "id": "resource_group",
@@ -1786,7 +1933,9 @@
       "activity_ids": [
         "agriculture"
       ],
-      "preemptible": true
+      "preemptible": true,
+      "setting": "historical",
+      "name_profile": "organization.community"
     },
     {
       "id": "retinue",
@@ -1798,7 +1947,9 @@
       "activity_ids": [
         "services"
       ],
-      "preemptible": true
+      "preemptible": true,
+      "setting": "historical",
+      "name_profile": "organization.retinue"
     },
     {
       "id": "ritual_group",
@@ -1808,7 +1959,9 @@
       "membership_policy": "overlapping",
       "default_time_cost_bps": 0,
       "activity_ids": [],
-      "preemptible": false
+      "preemptible": false,
+      "setting": "historical",
+      "name_profile": "organization.cult"
     },
     {
       "id": "ritual_institution",
@@ -1818,7 +1971,9 @@
       "membership_policy": "overlapping",
       "default_time_cost_bps": 0,
       "activity_ids": [],
-      "preemptible": false
+      "preemptible": false,
+      "setting": "historical",
+      "name_profile": "organization.cult"
     },
     {
       "id": "school",
@@ -1828,7 +1983,9 @@
       "membership_policy": "overlapping",
       "default_time_cost_bps": 0,
       "activity_ids": [],
-      "preemptible": false
+      "preemptible": false,
+      "setting": "historical",
+      "name_profile": "organization.school"
     },
     {
       "id": "service_group",
@@ -1840,7 +1997,9 @@
       "activity_ids": [
         "services"
       ],
-      "preemptible": true
+      "preemptible": true,
+      "setting": "historical",
+      "name_profile": "organization.company"
     },
     {
       "id": "service_household",
@@ -1852,7 +2011,9 @@
       "activity_ids": [
         "services"
       ],
-      "preemptible": true
+      "preemptible": true,
+      "setting": "historical",
+      "name_profile": "organization.household"
     },
     {
       "id": "shore_community",
@@ -1862,7 +2023,9 @@
       "membership_policy": "overlapping",
       "default_time_cost_bps": 0,
       "activity_ids": [],
-      "preemptible": false
+      "preemptible": false,
+      "setting": "historical",
+      "name_profile": "organization.community"
     },
     {
       "id": "territorial_house",
@@ -1872,7 +2035,9 @@
       "membership_policy": "derived_from_provider",
       "default_time_cost_bps": 0,
       "activity_ids": [],
-      "preemptible": false
+      "preemptible": false,
+      "setting": "historical",
+      "name_profile": "organization.house"
     },
     {
       "id": "travel_party",
@@ -1882,7 +2047,9 @@
       "membership_policy": "overlapping",
       "default_time_cost_bps": 0,
       "activity_ids": [],
-      "preemptible": false
+      "preemptible": false,
+      "setting": "historical",
+      "name_profile": "organization.community"
     },
     {
       "id": "village_council",
@@ -1892,7 +2059,9 @@
       "membership_policy": "overlapping",
       "default_time_cost_bps": 0,
       "activity_ids": [],
-      "preemptible": false
+      "preemptible": false,
+      "setting": "historical",
+      "name_profile": "organization.council"
     },
     {
       "id": "ward_community",
@@ -1902,7 +2071,9 @@
       "membership_policy": "overlapping",
       "default_time_cost_bps": 0,
       "activity_ids": [],
-      "preemptible": false
+      "preemptible": false,
+      "setting": "historical",
+      "name_profile": "organization.community"
     },
     {
       "id": "water_association",
@@ -1912,7 +2083,9 @@
       "membership_policy": "overlapping",
       "default_time_cost_bps": 0,
       "activity_ids": [],
-      "preemptible": false
+      "preemptible": false,
+      "setting": "historical",
+      "name_profile": "organization.guild"
     },
     {
       "id": "workshop",
@@ -1924,7 +2097,9 @@
       "activity_ids": [
         "craft"
       ],
-      "preemptible": true
+      "preemptible": true,
+      "setting": "historical",
+      "name_profile": "organization.workshop"
     },
     {
       "id": "base_farm",
@@ -1936,7 +2111,9 @@
       "activity_ids": [
         "agriculture"
       ],
-      "preemptible": true
+      "preemptible": true,
+      "setting": "historical",
+      "name_profile": "organization.household"
     },
     {
       "id": "base_workshop",
@@ -1948,7 +2125,9 @@
       "activity_ids": [
         "craft"
       ],
-      "preemptible": true
+      "preemptible": true,
+      "setting": "historical",
+      "name_profile": "organization.workshop"
     },
     {
       "id": "base_trade_company",
@@ -1960,7 +2139,9 @@
       "activity_ids": [
         "trade"
       ],
-      "preemptible": true
+      "preemptible": true,
+      "setting": "historical",
+      "name_profile": "organization.company"
     },
     {
       "id": "base_service_unit",
@@ -1972,7 +2153,9 @@
       "activity_ids": [
         "services"
       ],
-      "preemptible": true
+      "preemptible": true,
+      "setting": "historical",
+      "name_profile": "organization.company"
     },
     {
       "id": "base_friend_circle",
@@ -1982,7 +2165,9 @@
       "membership_policy": "overlapping",
       "default_time_cost_bps": 0,
       "activity_ids": [],
-      "preemptible": false
+      "preemptible": false,
+      "setting": "historical",
+      "name_profile": "organization.circle"
     },
     {
       "id": "base_religious_community",
@@ -1992,7 +2177,9 @@
       "membership_policy": "overlapping",
       "default_time_cost_bps": 0,
       "activity_ids": [],
-      "preemptible": false
+      "preemptible": false,
+      "setting": "historical",
+      "name_profile": "organization.cult"
     },
     {
       "id": "base_faction",
@@ -2002,7 +2189,9 @@
       "membership_policy": "overlapping",
       "default_time_cost_bps": 0,
       "activity_ids": [],
-      "preemptible": false
+      "preemptible": false,
+      "setting": "historical",
+      "name_profile": "organization.faction"
     },
     {
       "id": "base_neighborhood",
@@ -2012,7 +2201,9 @@
       "membership_policy": "overlapping",
       "default_time_cost_bps": 0,
       "activity_ids": [],
-      "preemptible": false
+      "preemptible": false,
+      "setting": "historical",
+      "name_profile": "organization.community"
     },
     {
       "id": "magical_school",
@@ -2022,7 +2213,9 @@
       "membership_policy": "overlapping",
       "default_time_cost_bps": 0,
       "activity_ids": [],
-      "preemptible": false
+      "preemptible": false,
+      "setting": "low_fantasy",
+      "name_profile": "organization.school"
     },
     {
       "id": "mortuary_confraternity",
@@ -2032,7 +2225,9 @@
       "membership_policy": "overlapping",
       "default_time_cost_bps": 0,
       "activity_ids": [],
-      "preemptible": false
+      "preemptible": false,
+      "setting": "historical",
+      "name_profile": "organization.confraternity"
     },
     {
       "id": "base_local_institution",
@@ -2042,7 +2237,9 @@
       "membership_policy": "overlapping",
       "default_time_cost_bps": 0,
       "activity_ids": [],
-      "preemptible": false
+      "preemptible": false,
+      "setting": "historical",
+      "name_profile": "organization.office"
     },
     {
       "id": "base_craft_association",
@@ -2052,7 +2249,849 @@
       "membership_policy": "overlapping",
       "default_time_cost_bps": 0,
       "activity_ids": [],
-      "preemptible": false
+      "preemptible": false,
+      "setting": "historical",
+      "name_profile": "organization.guild"
+    },
+    {
+      "id": "herding_group",
+      "class": "activity_unit",
+      "slot_basis": "expected_workforce",
+      "default_mean_lifetime_years": 20,
+      "membership_policy": "time_budgeted",
+      "default_time_cost_bps": 10000,
+      "activity_ids": [
+        "agriculture"
+      ],
+      "preemptible": true,
+      "setting": "historical",
+      "name_profile": "organization.household"
+    },
+    {
+      "id": "mining_crew",
+      "class": "activity_unit",
+      "slot_basis": "expected_workforce",
+      "default_mean_lifetime_years": 20,
+      "membership_policy": "time_budgeted",
+      "default_time_cost_bps": 10000,
+      "activity_ids": [
+        "craft"
+      ],
+      "preemptible": true,
+      "setting": "historical",
+      "name_profile": "organization.community"
+    },
+    {
+      "id": "shipping_consortium",
+      "class": "association",
+      "slot_basis": "expected_active_stock",
+      "default_mean_lifetime_years": 30,
+      "membership_policy": "overlapping",
+      "default_time_cost_bps": 0,
+      "activity_ids": [],
+      "preemptible": false,
+      "setting": "historical",
+      "name_profile": "organization.company"
+    },
+    {
+      "id": "banking_house",
+      "class": "activity_unit",
+      "slot_basis": "expected_workforce",
+      "default_mean_lifetime_years": 20,
+      "membership_policy": "time_budgeted",
+      "default_time_cost_bps": 10000,
+      "activity_ids": [
+        "trade"
+      ],
+      "preemptible": true,
+      "setting": "historical",
+      "name_profile": "organization.company"
+    },
+    {
+      "id": "merchant_league",
+      "class": "association",
+      "slot_basis": "expected_active_stock",
+      "default_mean_lifetime_years": 30,
+      "membership_policy": "overlapping",
+      "default_time_cost_bps": 0,
+      "activity_ids": [],
+      "preemptible": false,
+      "setting": "historical",
+      "name_profile": "organization.guild"
+    },
+    {
+      "id": "lordship",
+      "class": "institution",
+      "slot_basis": "site_occupation_anchor",
+      "default_mean_lifetime_years": null,
+      "membership_policy": "overlapping",
+      "default_time_cost_bps": 0,
+      "activity_ids": [],
+      "preemptible": false,
+      "setting": "historical",
+      "name_profile": "organization.domain"
+    },
+    {
+      "id": "embassy",
+      "class": "institution",
+      "slot_basis": "site_occupation_anchor",
+      "default_mean_lifetime_years": null,
+      "membership_policy": "overlapping",
+      "default_time_cost_bps": 0,
+      "activity_ids": [],
+      "preemptible": false,
+      "setting": "historical",
+      "name_profile": "organization.office"
+    },
+    {
+      "id": "ruling_dynasty",
+      "class": "lineage_view",
+      "slot_basis": "core_lineages",
+      "default_mean_lifetime_years": null,
+      "membership_policy": "derived_from_provider",
+      "default_time_cost_bps": 0,
+      "activity_ids": [],
+      "preemptible": false,
+      "setting": "historical",
+      "name_profile": "organization.house"
+    },
+    {
+      "id": "law_court",
+      "class": "institution",
+      "slot_basis": "site_occupation_anchor",
+      "default_mean_lifetime_years": null,
+      "membership_policy": "overlapping",
+      "default_time_cost_bps": 0,
+      "activity_ids": [],
+      "preemptible": false,
+      "setting": "historical",
+      "name_profile": "organization.tribunal"
+    },
+    {
+      "id": "town_watch",
+      "class": "institution",
+      "slot_basis": "site_occupation_anchor",
+      "default_mean_lifetime_years": null,
+      "membership_policy": "overlapping",
+      "default_time_cost_bps": 0,
+      "activity_ids": [],
+      "preemptible": false,
+      "setting": "historical",
+      "name_profile": "organization.office"
+    },
+    {
+      "id": "prison",
+      "class": "institution",
+      "slot_basis": "site_occupation_anchor",
+      "default_mean_lifetime_years": null,
+      "membership_policy": "overlapping",
+      "default_time_cost_bps": 0,
+      "activity_ids": [],
+      "preemptible": false,
+      "setting": "historical",
+      "name_profile": "organization.office"
+    },
+    {
+      "id": "inquisition",
+      "class": "institution",
+      "slot_basis": "site_occupation_anchor",
+      "default_mean_lifetime_years": null,
+      "membership_policy": "overlapping",
+      "default_time_cost_bps": 0,
+      "activity_ids": [],
+      "preemptible": false,
+      "setting": "historical",
+      "name_profile": "organization.tribunal"
+    },
+    {
+      "id": "provostship",
+      "class": "institution",
+      "slot_basis": "site_occupation_anchor",
+      "default_mean_lifetime_years": null,
+      "membership_policy": "overlapping",
+      "default_time_cost_bps": 0,
+      "activity_ids": [],
+      "preemptible": false,
+      "setting": "historical",
+      "name_profile": "organization.office"
+    },
+    {
+      "id": "executioner_house",
+      "class": "lineage_view",
+      "slot_basis": "core_lineages",
+      "default_mean_lifetime_years": null,
+      "membership_policy": "derived_from_provider",
+      "default_time_cost_bps": 0,
+      "activity_ids": [],
+      "preemptible": false,
+      "setting": "historical",
+      "name_profile": "organization.house"
+    },
+    {
+      "id": "militia",
+      "class": "association",
+      "slot_basis": "expected_active_stock",
+      "default_mean_lifetime_years": 30,
+      "membership_policy": "time_budgeted",
+      "default_time_cost_bps": 1500,
+      "activity_ids": [],
+      "preemptible": true,
+      "setting": "historical",
+      "name_profile": "organization.military_unit"
+    },
+    {
+      "id": "garrison",
+      "class": "activity_unit",
+      "slot_basis": "expected_workforce",
+      "default_mean_lifetime_years": 20,
+      "membership_policy": "time_budgeted",
+      "default_time_cost_bps": 10000,
+      "activity_ids": [
+        "services"
+      ],
+      "preemptible": false,
+      "setting": "historical",
+      "name_profile": "organization.military_unit"
+    },
+    {
+      "id": "mercenary_company",
+      "class": "activity_unit",
+      "slot_basis": "expected_workforce",
+      "default_mean_lifetime_years": 20,
+      "membership_policy": "time_budgeted",
+      "default_time_cost_bps": 10000,
+      "activity_ids": [
+        "services"
+      ],
+      "preemptible": false,
+      "setting": "historical",
+      "name_profile": "organization.company"
+    },
+    {
+      "id": "knightly_order",
+      "class": "association",
+      "slot_basis": "expected_active_stock",
+      "default_mean_lifetime_years": 30,
+      "membership_policy": "overlapping",
+      "default_time_cost_bps": 0,
+      "activity_ids": [],
+      "preemptible": false,
+      "setting": "historical",
+      "name_profile": "organization.order"
+    },
+    {
+      "id": "war_fleet",
+      "class": "activity_unit",
+      "slot_basis": "expected_workforce",
+      "default_mean_lifetime_years": 20,
+      "membership_policy": "time_budgeted",
+      "default_time_cost_bps": 10000,
+      "activity_ids": [
+        "services"
+      ],
+      "preemptible": false,
+      "setting": "historical",
+      "name_profile": "organization.crew"
+    },
+    {
+      "id": "raiding_band",
+      "class": "association",
+      "slot_basis": "expected_active_stock",
+      "default_mean_lifetime_years": 30,
+      "membership_policy": "time_budgeted",
+      "default_time_cost_bps": 3000,
+      "activity_ids": [],
+      "preemptible": true,
+      "setting": "historical",
+      "name_profile": "organization.band"
+    },
+    {
+      "id": "scout_company",
+      "class": "activity_unit",
+      "slot_basis": "expected_workforce",
+      "default_mean_lifetime_years": 20,
+      "membership_policy": "time_budgeted",
+      "default_time_cost_bps": 10000,
+      "activity_ids": [
+        "services"
+      ],
+      "preemptible": false,
+      "setting": "historical",
+      "name_profile": "organization.company"
+    },
+    {
+      "id": "secular_clergy",
+      "class": "institution",
+      "slot_basis": "site_occupation_anchor",
+      "default_mean_lifetime_years": null,
+      "membership_policy": "overlapping",
+      "default_time_cost_bps": 0,
+      "activity_ids": [],
+      "preemptible": false,
+      "setting": "historical",
+      "name_profile": "organization.cult"
+    },
+    {
+      "id": "monastery",
+      "class": "community",
+      "slot_basis": "expected_active_stock",
+      "default_mean_lifetime_years": 50,
+      "membership_policy": "overlapping",
+      "default_time_cost_bps": 0,
+      "activity_ids": [],
+      "preemptible": false,
+      "setting": "historical",
+      "name_profile": "organization.monastery"
+    },
+    {
+      "id": "mendicant_friary",
+      "class": "association",
+      "slot_basis": "expected_active_stock",
+      "default_mean_lifetime_years": 30,
+      "membership_policy": "overlapping",
+      "default_time_cost_bps": 0,
+      "activity_ids": [],
+      "preemptible": false,
+      "setting": "historical",
+      "name_profile": "organization.order"
+    },
+    {
+      "id": "hermitage",
+      "class": "community",
+      "slot_basis": "expected_active_stock",
+      "default_mean_lifetime_years": 50,
+      "membership_policy": "overlapping",
+      "default_time_cost_bps": 0,
+      "activity_ids": [],
+      "preemptible": false,
+      "setting": "historical",
+      "name_profile": "organization.monastery"
+    },
+    {
+      "id": "lay_confraternity",
+      "class": "association",
+      "slot_basis": "expected_active_stock",
+      "default_mean_lifetime_years": 30,
+      "membership_policy": "overlapping",
+      "default_time_cost_bps": 0,
+      "activity_ids": [],
+      "preemptible": false,
+      "setting": "historical",
+      "name_profile": "organization.confraternity"
+    },
+    {
+      "id": "heterodox_movement",
+      "class": "association",
+      "slot_basis": "expected_active_stock",
+      "default_mean_lifetime_years": 30,
+      "membership_policy": "overlapping",
+      "default_time_cost_bps": 0,
+      "activity_ids": [],
+      "preemptible": false,
+      "setting": "historical",
+      "name_profile": "organization.cult"
+    },
+    {
+      "id": "closed_sect",
+      "class": "association",
+      "slot_basis": "expected_active_stock",
+      "default_mean_lifetime_years": 30,
+      "membership_policy": "overlapping",
+      "default_time_cost_bps": 0,
+      "activity_ids": [],
+      "preemptible": false,
+      "setting": "historical",
+      "name_profile": "organization.cult"
+    },
+    {
+      "id": "ancestral_cult",
+      "class": "association",
+      "slot_basis": "expected_active_stock",
+      "default_mean_lifetime_years": 30,
+      "membership_policy": "overlapping",
+      "default_time_cost_bps": 0,
+      "activity_ids": [],
+      "preemptible": false,
+      "setting": "historical",
+      "name_profile": "organization.cult"
+    },
+    {
+      "id": "base_charitable_order",
+      "class": "association",
+      "slot_basis": "expected_active_stock",
+      "default_mean_lifetime_years": 30,
+      "membership_policy": "overlapping",
+      "default_time_cost_bps": 0,
+      "activity_ids": [],
+      "preemptible": false,
+      "setting": "historical",
+      "name_profile": "organization.order"
+    },
+    {
+      "id": "university",
+      "class": "community",
+      "slot_basis": "expected_active_stock",
+      "default_mean_lifetime_years": 50,
+      "membership_policy": "overlapping",
+      "default_time_cost_bps": 0,
+      "activity_ids": [],
+      "preemptible": false,
+      "setting": "historical",
+      "name_profile": "organization.school"
+    },
+    {
+      "id": "scriptorium",
+      "class": "activity_unit",
+      "slot_basis": "expected_workforce",
+      "default_mean_lifetime_years": 20,
+      "membership_policy": "time_budgeted",
+      "default_time_cost_bps": 10000,
+      "activity_ids": [
+        "craft"
+      ],
+      "preemptible": true,
+      "setting": "historical",
+      "name_profile": "organization.workshop"
+    },
+    {
+      "id": "hospital_house",
+      "class": "community",
+      "slot_basis": "expected_active_stock",
+      "default_mean_lifetime_years": 50,
+      "membership_policy": "overlapping",
+      "default_time_cost_bps": 0,
+      "activity_ids": [],
+      "preemptible": false,
+      "setting": "historical",
+      "name_profile": "organization.hospital"
+    },
+    {
+      "id": "healers_circle",
+      "class": "association",
+      "slot_basis": "expected_active_stock",
+      "default_mean_lifetime_years": 30,
+      "membership_policy": "overlapping",
+      "default_time_cost_bps": 0,
+      "activity_ids": [],
+      "preemptible": false,
+      "setting": "historical",
+      "name_profile": "organization.circle"
+    },
+    {
+      "id": "itinerant_troupe",
+      "class": "activity_unit",
+      "slot_basis": "expected_workforce",
+      "default_mean_lifetime_years": 20,
+      "membership_policy": "time_budgeted",
+      "default_time_cost_bps": 10000,
+      "activity_ids": [
+        "services"
+      ],
+      "preemptible": true,
+      "setting": "historical",
+      "name_profile": "organization.troupe"
+    },
+    {
+      "id": "festive_society",
+      "class": "association",
+      "slot_basis": "expected_active_stock",
+      "default_mean_lifetime_years": 30,
+      "membership_policy": "overlapping",
+      "default_time_cost_bps": 0,
+      "activity_ids": [],
+      "preemptible": false,
+      "setting": "historical",
+      "name_profile": "organization.circle"
+    },
+    {
+      "id": "women_circle",
+      "class": "friend_circle",
+      "slot_basis": "expected_active_stock",
+      "default_mean_lifetime_years": 5,
+      "membership_policy": "overlapping",
+      "default_time_cost_bps": 0,
+      "activity_ids": [],
+      "preemptible": false,
+      "setting": "historical",
+      "name_profile": "organization.circle"
+    },
+    {
+      "id": "tavern_house",
+      "class": "activity_unit",
+      "slot_basis": "expected_workforce",
+      "default_mean_lifetime_years": 20,
+      "membership_policy": "time_budgeted",
+      "default_time_cost_bps": 10000,
+      "activity_ids": [
+        "services"
+      ],
+      "preemptible": true,
+      "setting": "historical",
+      "name_profile": "organization.tavern"
+    },
+    {
+      "id": "base_criminal_network",
+      "class": "association",
+      "slot_basis": "expected_active_stock",
+      "default_mean_lifetime_years": 30,
+      "membership_policy": "overlapping",
+      "default_time_cost_bps": 0,
+      "activity_ids": [],
+      "preemptible": false,
+      "setting": "historical",
+      "name_profile": "organization.criminal"
+    },
+    {
+      "id": "thieves_guild",
+      "class": "association",
+      "slot_basis": "expected_active_stock",
+      "default_mean_lifetime_years": 30,
+      "membership_policy": "overlapping",
+      "default_time_cost_bps": 0,
+      "activity_ids": [],
+      "preemptible": false,
+      "setting": "historical",
+      "name_profile": "organization.criminal"
+    },
+    {
+      "id": "protection_racket",
+      "class": "association",
+      "slot_basis": "expected_active_stock",
+      "default_mean_lifetime_years": 30,
+      "membership_policy": "overlapping",
+      "default_time_cost_bps": 0,
+      "activity_ids": [],
+      "preemptible": false,
+      "setting": "historical",
+      "name_profile": "organization.criminal"
+    },
+    {
+      "id": "bandit_band",
+      "class": "association",
+      "slot_basis": "expected_active_stock",
+      "default_mean_lifetime_years": 30,
+      "membership_policy": "overlapping",
+      "default_time_cost_bps": 0,
+      "activity_ids": [],
+      "preemptible": false,
+      "setting": "historical",
+      "name_profile": "organization.band"
+    },
+    {
+      "id": "smuggling_ring",
+      "class": "association",
+      "slot_basis": "expected_active_stock",
+      "default_mean_lifetime_years": 30,
+      "membership_policy": "overlapping",
+      "default_time_cost_bps": 0,
+      "activity_ids": [],
+      "preemptible": false,
+      "setting": "historical",
+      "name_profile": "organization.criminal"
+    },
+    {
+      "id": "pirate_crew",
+      "class": "association",
+      "slot_basis": "expected_active_stock",
+      "default_mean_lifetime_years": 30,
+      "membership_policy": "overlapping",
+      "default_time_cost_bps": 0,
+      "activity_ids": [],
+      "preemptible": false,
+      "setting": "historical",
+      "name_profile": "organization.crew"
+    },
+    {
+      "id": "assassin_brotherhood",
+      "class": "association",
+      "slot_basis": "expected_active_stock",
+      "default_mean_lifetime_years": 30,
+      "membership_policy": "overlapping",
+      "default_time_cost_bps": 0,
+      "activity_ids": [],
+      "preemptible": false,
+      "setting": "historical",
+      "name_profile": "organization.secret_society"
+    },
+    {
+      "id": "forgery_ring",
+      "class": "association",
+      "slot_basis": "expected_active_stock",
+      "default_mean_lifetime_years": 30,
+      "membership_policy": "overlapping",
+      "default_time_cost_bps": 0,
+      "activity_ids": [],
+      "preemptible": false,
+      "setting": "historical",
+      "name_profile": "organization.criminal"
+    },
+    {
+      "id": "slave_trading_ring",
+      "class": "association",
+      "slot_basis": "expected_active_stock",
+      "default_mean_lifetime_years": 30,
+      "membership_policy": "overlapping",
+      "default_time_cost_bps": 0,
+      "activity_ids": [],
+      "preemptible": false,
+      "setting": "historical",
+      "name_profile": "organization.criminal"
+    },
+    {
+      "id": "beggar_brotherhood",
+      "class": "association",
+      "slot_basis": "expected_active_stock",
+      "default_mean_lifetime_years": 30,
+      "membership_policy": "overlapping",
+      "default_time_cost_bps": 0,
+      "activity_ids": [],
+      "preemptible": false,
+      "setting": "historical",
+      "name_profile": "organization.confraternity"
+    },
+    {
+      "id": "outlaw_company",
+      "class": "association",
+      "slot_basis": "expected_active_stock",
+      "default_mean_lifetime_years": 30,
+      "membership_policy": "overlapping",
+      "default_time_cost_bps": 0,
+      "activity_ids": [],
+      "preemptible": false,
+      "setting": "historical",
+      "name_profile": "organization.band"
+    },
+    {
+      "id": "refugee_community",
+      "class": "community",
+      "slot_basis": "expected_active_stock",
+      "default_mean_lifetime_years": 50,
+      "membership_policy": "overlapping",
+      "default_time_cost_bps": 0,
+      "activity_ids": [],
+      "preemptible": false,
+      "setting": "historical",
+      "name_profile": "organization.community"
+    },
+    {
+      "id": "minority_enclave",
+      "class": "community",
+      "slot_basis": "expected_active_stock",
+      "default_mean_lifetime_years": 50,
+      "membership_policy": "overlapping",
+      "default_time_cost_bps": 0,
+      "activity_ids": [],
+      "preemptible": false,
+      "setting": "historical",
+      "name_profile": "organization.community"
+    },
+    {
+      "id": "secret_society",
+      "class": "association",
+      "slot_basis": "expected_active_stock",
+      "default_mean_lifetime_years": 30,
+      "membership_policy": "overlapping",
+      "default_time_cost_bps": 0,
+      "activity_ids": [],
+      "preemptible": false,
+      "setting": "historical",
+      "name_profile": "organization.secret_society"
+    },
+    {
+      "id": "mage_order",
+      "class": "association",
+      "slot_basis": "expected_active_stock",
+      "default_mean_lifetime_years": 30,
+      "membership_policy": "overlapping",
+      "default_time_cost_bps": 0,
+      "activity_ids": [],
+      "preemptible": false,
+      "setting": "high_fantasy",
+      "name_profile": "organization.order"
+    },
+    {
+      "id": "arcane_cabal",
+      "class": "association",
+      "slot_basis": "expected_active_stock",
+      "default_mean_lifetime_years": 30,
+      "membership_policy": "overlapping",
+      "default_time_cost_bps": 0,
+      "activity_ids": [],
+      "preemptible": false,
+      "setting": "low_fantasy",
+      "name_profile": "organization.secret_society"
+    },
+    {
+      "id": "alchemists_lodge",
+      "class": "activity_unit",
+      "slot_basis": "expected_workforce",
+      "default_mean_lifetime_years": 20,
+      "membership_policy": "time_budgeted",
+      "default_time_cost_bps": 10000,
+      "activity_ids": [
+        "craft"
+      ],
+      "preemptible": true,
+      "setting": "low_fantasy",
+      "name_profile": "organization.workshop"
+    },
+    {
+      "id": "druid_circle",
+      "class": "association",
+      "slot_basis": "expected_active_stock",
+      "default_mean_lifetime_years": 30,
+      "membership_policy": "overlapping",
+      "default_time_cost_bps": 0,
+      "activity_ids": [],
+      "preemptible": false,
+      "setting": "low_fantasy",
+      "name_profile": "organization.cult"
+    },
+    {
+      "id": "monster_hunters_lodge",
+      "class": "association",
+      "slot_basis": "expected_active_stock",
+      "default_mean_lifetime_years": 30,
+      "membership_policy": "overlapping",
+      "default_time_cost_bps": 0,
+      "activity_ids": [],
+      "preemptible": false,
+      "setting": "low_fantasy",
+      "name_profile": "organization.company"
+    },
+    {
+      "id": "adventuring_company",
+      "class": "activity_unit",
+      "slot_basis": "expected_workforce",
+      "default_mean_lifetime_years": 20,
+      "membership_policy": "time_budgeted",
+      "default_time_cost_bps": 10000,
+      "activity_ids": [
+        "services"
+      ],
+      "preemptible": false,
+      "setting": "low_fantasy",
+      "name_profile": "organization.company"
+    },
+    {
+      "id": "infernal_cult",
+      "class": "association",
+      "slot_basis": "expected_active_stock",
+      "default_mean_lifetime_years": 30,
+      "membership_policy": "overlapping",
+      "default_time_cost_bps": 0,
+      "activity_ids": [],
+      "preemptible": false,
+      "setting": "low_fantasy",
+      "name_profile": "organization.cult"
+    },
+    {
+      "id": "necromancers_circle",
+      "class": "association",
+      "slot_basis": "expected_active_stock",
+      "default_mean_lifetime_years": 30,
+      "membership_policy": "overlapping",
+      "default_time_cost_bps": 0,
+      "activity_ids": [],
+      "preemptible": false,
+      "setting": "low_fantasy",
+      "name_profile": "organization.secret_society"
+    },
+    {
+      "id": "fey_court",
+      "class": "community",
+      "slot_basis": "expected_active_stock",
+      "default_mean_lifetime_years": 50,
+      "membership_policy": "overlapping",
+      "default_time_cost_bps": 0,
+      "activity_ids": [],
+      "preemptible": false,
+      "setting": "high_fantasy",
+      "name_profile": "organization.court"
+    },
+    {
+      "id": "dragon_court",
+      "class": "community",
+      "slot_basis": "expected_active_stock",
+      "default_mean_lifetime_years": 50,
+      "membership_policy": "overlapping",
+      "default_time_cost_bps": 0,
+      "activity_ids": [],
+      "preemptible": false,
+      "setting": "high_fantasy",
+      "name_profile": "organization.court"
+    },
+    {
+      "id": "nonhuman_enclave",
+      "class": "community",
+      "slot_basis": "expected_active_stock",
+      "default_mean_lifetime_years": 50,
+      "membership_policy": "overlapping",
+      "default_time_cost_bps": 0,
+      "activity_ids": [],
+      "preemptible": false,
+      "setting": "high_fantasy",
+      "name_profile": "organization.community"
+    },
+    {
+      "id": "monstrous_horde",
+      "class": "community",
+      "slot_basis": "expected_active_stock",
+      "default_mean_lifetime_years": 50,
+      "membership_policy": "overlapping",
+      "default_time_cost_bps": 0,
+      "activity_ids": [],
+      "preemptible": false,
+      "setting": "high_fantasy",
+      "name_profile": "organization.band"
+    },
+    {
+      "id": "ancient_site_guardians",
+      "class": "association",
+      "slot_basis": "expected_active_stock",
+      "default_mean_lifetime_years": 30,
+      "membership_policy": "overlapping",
+      "default_time_cost_bps": 0,
+      "activity_ids": [],
+      "preemptible": false,
+      "setting": "low_fantasy",
+      "name_profile": "organization.order"
+    },
+    {
+      "id": "mutual_aid_society",
+      "class": "association",
+      "slot_basis": "expected_active_stock",
+      "default_mean_lifetime_years": 30,
+      "membership_policy": "overlapping",
+      "default_time_cost_bps": 0,
+      "activity_ids": [],
+      "preemptible": false,
+      "setting": "historical",
+      "name_profile": "organization.confraternity"
+    },
+    {
+      "id": "journeymen_fellowship",
+      "class": "association",
+      "slot_basis": "expected_active_stock",
+      "default_mean_lifetime_years": 30,
+      "membership_policy": "overlapping",
+      "default_time_cost_bps": 0,
+      "activity_ids": [],
+      "preemptible": false,
+      "setting": "historical",
+      "name_profile": "organization.guild"
+    },
+    {
+      "id": "intelligence_network",
+      "class": "association",
+      "slot_basis": "expected_active_stock",
+      "default_mean_lifetime_years": 30,
+      "membership_policy": "overlapping",
+      "default_time_cost_bps": 0,
+      "activity_ids": [],
+      "preemptible": false,
+      "setting": "historical",
+      "name_profile": "organization.secret_society"
     }
   ],
   "overlay_definitions": [
@@ -2220,6 +3259,59 @@
       "social_effects": "none_unless_explicitly_overridden",
       "description": "Tag de variante déclaré ; il ne déduit automatiquement ni biologie, ni règle juridique, ni titre.",
       "archetype_ids": []
+    },
+    {
+      "id": "arcane_orders",
+      "role": "enable_optional_fantasy_archetypes",
+      "social_effects": "enable_optional_archetypes",
+      "description": "Active les ordres et cercles de pratique magique organisée (ordre de mages, cabale, alchimistes). Sans effet en monde historique.",
+      "archetype_ids": [
+        "mage_order",
+        "arcane_cabal",
+        "alchemists_lodge"
+      ]
+    },
+    {
+      "id": "forbidden_arts",
+      "role": "enable_optional_fantasy_archetypes",
+      "social_effects": "enable_optional_archetypes",
+      "description": "Active les groupes liés aux arts interdits (nécromanciens, cultes infernaux). Sans effet en monde historique.",
+      "archetype_ids": [
+        "necromancers_circle",
+        "infernal_cult"
+      ]
+    },
+    {
+      "id": "wild_lore",
+      "role": "enable_optional_fantasy_archetypes",
+      "social_effects": "enable_optional_archetypes",
+      "description": "Active druides, chasseurs de monstres, compagnies d'aventuriers et gardiens de sites anciens. Sans effet en monde historique.",
+      "archetype_ids": [
+        "druid_circle",
+        "monster_hunters_lodge",
+        "adventuring_company",
+        "ancient_site_guardians"
+      ]
+    },
+    {
+      "id": "otherworld_courts",
+      "role": "enable_optional_fantasy_archetypes",
+      "social_effects": "enable_optional_archetypes",
+      "description": "Active les cours de puissances surnaturelles déclarées (féeriques, draconiques). Les membres exigent un profil d'ascendance explicite fourni par l'auteur. Réservé aux mondes de haute fantaisie.",
+      "archetype_ids": [
+        "fey_court",
+        "dragon_court"
+      ]
+    },
+    {
+      "id": "nonhuman_presence",
+      "role": "enable_optional_fantasy_archetypes",
+      "social_effects": "enable_optional_archetypes",
+      "description": "Active enclaves et hordes dont les membres relèvent d'un profil d'ascendance explicite. Aucun alignement n'en est déduit : seule la conduite compte. Réservé aux mondes de haute fantaisie.",
+      "archetype_ids": [
+        "nonhuman_enclave",
+        "monstrous_horde"
+      ]
     }
   ],
   "governance_templates": [
@@ -2629,7 +3721,9 @@
     "base_faction",
     "base_neighborhood",
     "base_local_institution",
-    "base_craft_association"
+    "base_craft_association",
+    "base_criminal_network",
+    "base_charitable_order"
   ],
   "required_activity_coverage": [
     "agriculture",
@@ -3478,5 +4572,2958 @@
         "elite": 1000
       }
     }
-  ]
+  ],
+  "conduct_tag_definitions": [
+    {
+      "id": "violence",
+      "label": "Violence",
+      "description": "Recours à la force physique contre autrui."
+    },
+    {
+      "id": "extortion",
+      "label": "Extorsion",
+      "description": "Protection forcée, rançonnement, chantage."
+    },
+    {
+      "id": "theft",
+      "label": "Vol",
+      "description": "Prise de biens sans consentement, brigandage, recel."
+    },
+    {
+      "id": "smuggling",
+      "label": "Contrebande",
+      "description": "Commerce de biens interdits ou soustraits aux droits."
+    },
+    {
+      "id": "fraud",
+      "label": "Fraude",
+      "description": "Falsification, tromperie, faux document ou fausse monnaie."
+    },
+    {
+      "id": "slavery",
+      "label": "Esclavage",
+      "description": "Possession ou commerce de personnes."
+    },
+    {
+      "id": "assassination",
+      "label": "Assassinat",
+      "description": "Meurtre commandité."
+    },
+    {
+      "id": "piracy",
+      "label": "Piraterie",
+      "description": "Prise de navires et de cargaisons en mer."
+    },
+    {
+      "id": "raiding",
+      "label": "Pillage",
+      "description": "Razzia et pillage de populations ou de convois."
+    },
+    {
+      "id": "corruption",
+      "label": "Corruption",
+      "description": "Détournement d'une charge ou d'une règle contre avantage."
+    },
+    {
+      "id": "usury",
+      "label": "Usure",
+      "description": "Prêt à intérêt, sa valeur étant discutée selon les cultures."
+    },
+    {
+      "id": "charity",
+      "label": "Charité",
+      "description": "Don et secours aux démunis sans contrepartie."
+    },
+    {
+      "id": "hospitality",
+      "label": "Hospitalité",
+      "description": "Accueil du voyageur et de l'étranger."
+    },
+    {
+      "id": "healing",
+      "label": "Soin",
+      "description": "Soins aux malades et aux blessés."
+    },
+    {
+      "id": "piety",
+      "label": "Piété",
+      "description": "Pratique et service d'un culte."
+    },
+    {
+      "id": "asceticism",
+      "label": "Ascèse",
+      "description": "Renoncement, pauvreté volontaire, retraite."
+    },
+    {
+      "id": "heresy",
+      "label": "Hétérodoxie",
+      "description": "Divergence doctrinale par rapport au culte dominant."
+    },
+    {
+      "id": "blasphemy",
+      "label": "Blasphème",
+      "description": "Offense publique à ce qu'une culture tient pour sacré."
+    },
+    {
+      "id": "sorcery",
+      "label": "Sorcellerie",
+      "description": "Pratique d'arts occultes ou magiques."
+    },
+    {
+      "id": "necromancy",
+      "label": "Nécromancie",
+      "description": "Commerce avec les morts et usage de leurs restes."
+    },
+    {
+      "id": "infernal_pact",
+      "label": "Pacte infernal",
+      "description": "Marché avec une puissance hostile ou interdite."
+    },
+    {
+      "id": "secrecy",
+      "label": "Secret",
+      "description": "Existence ou activités cachées."
+    },
+    {
+      "id": "espionage",
+      "label": "Espionnage",
+      "description": "Collecte clandestine de renseignements."
+    },
+    {
+      "id": "oathkeeping",
+      "label": "Serment",
+      "description": "Fidélité à la parole donnée, loyauté, vassalité."
+    },
+    {
+      "id": "justice",
+      "label": "Justice",
+      "description": "Arbitrage et application de règles reconnues."
+    },
+    {
+      "id": "punishment",
+      "label": "Châtiment",
+      "description": "Peines, détention, exécution."
+    },
+    {
+      "id": "coercion",
+      "label": "Contrainte",
+      "description": "Emprise sur les membres, interdiction de partir, intimidation."
+    },
+    {
+      "id": "mercenary_service",
+      "label": "Service soldé",
+      "description": "Violence ou expertise louée à un commanditaire."
+    },
+    {
+      "id": "exploitation",
+      "label": "Exploitation",
+      "description": "Extraction de travail ou de rente au détriment des dépendants."
+    },
+    {
+      "id": "solidarity",
+      "label": "Solidarité",
+      "description": "Entraide entre membres."
+    },
+    {
+      "id": "learning",
+      "label": "Savoir",
+      "description": "Étude, enseignement, conservation des connaissances."
+    },
+    {
+      "id": "craft_standards",
+      "label": "Règle de métier",
+      "description": "Contrôle de la qualité et de la formation."
+    },
+    {
+      "id": "rebellion",
+      "label": "Rébellion",
+      "description": "Opposition organisée à une autorité."
+    },
+    {
+      "id": "gambling",
+      "label": "Jeu",
+      "description": "Jeux d'argent et paris."
+    },
+    {
+      "id": "stewardship",
+      "label": "Intendance",
+      "description": "Protection des ressources, des lieux et des cycles naturels."
+    },
+    {
+      "id": "monster_slaying",
+      "label": "Chasse aux monstres",
+      "description": "Traque de prédateurs réputés surnaturels."
+    },
+    {
+      "id": "mendicancy",
+      "label": "Mendicité",
+      "description": "Vie d'aumône, volontaire ou organisée."
+    },
+    {
+      "id": "revelry",
+      "label": "Liesse",
+      "description": "Fêtes, spectacle, sociabilité bruyante."
+    },
+    {
+      "id": "fair_dealing",
+      "label": "Loyauté en affaires",
+      "description": "Respect des contrats, poids et mesures honnêtes."
+    },
+    {
+      "id": "hoarding",
+      "label": "Thésaurisation",
+      "description": "Accumulation de richesses ou de réserves sans redistribution."
+    }
+  ],
+  "conduct_tag_catalogue_status": "closed_catalogue_extension_requires_new_catalogue_version",
+  "family_value_profiles": {
+    "agrarian_estates": {
+      "parameters_status": "initial_template_not_historical_calibration",
+      "weights": {
+        "violence": -400,
+        "extortion": -800,
+        "theft": -800,
+        "smuggling": -300,
+        "fraud": -700,
+        "slavery": -500,
+        "assassination": -900,
+        "piracy": -800,
+        "raiding": -700,
+        "corruption": -700,
+        "usury": -500,
+        "charity": 700,
+        "hospitality": 500,
+        "healing": 600,
+        "piety": 400,
+        "asceticism": 200,
+        "heresy": -300,
+        "blasphemy": -700,
+        "sorcery": -500,
+        "necromancy": -800,
+        "infernal_pact": -900,
+        "secrecy": -250,
+        "espionage": -200,
+        "oathkeeping": 800,
+        "justice": 600,
+        "punishment": 0,
+        "coercion": -600,
+        "mercenary_service": -100,
+        "exploitation": -500,
+        "solidarity": 500,
+        "learning": 400,
+        "craft_standards": 400,
+        "rebellion": -500,
+        "gambling": -200,
+        "stewardship": 600,
+        "monster_slaying": 300,
+        "mendicancy": 100,
+        "revelry": 150,
+        "fair_dealing": 500,
+        "hoarding": -200
+      }
+    },
+    "mercantile_communes": {
+      "parameters_status": "initial_template_not_historical_calibration",
+      "weights": {
+        "violence": -400,
+        "extortion": -800,
+        "theft": -800,
+        "smuggling": -300,
+        "fraud": -700,
+        "slavery": -500,
+        "assassination": -900,
+        "piracy": -800,
+        "raiding": -700,
+        "corruption": -700,
+        "usury": 100,
+        "charity": 700,
+        "hospitality": 500,
+        "healing": 600,
+        "piety": 400,
+        "asceticism": 200,
+        "heresy": -300,
+        "blasphemy": -500,
+        "sorcery": -300,
+        "necromancy": -800,
+        "infernal_pact": -900,
+        "secrecy": -250,
+        "espionage": -200,
+        "oathkeeping": 600,
+        "justice": 600,
+        "punishment": 0,
+        "coercion": -600,
+        "mercenary_service": 100,
+        "exploitation": -500,
+        "solidarity": 500,
+        "learning": 500,
+        "craft_standards": 400,
+        "rebellion": -200,
+        "gambling": -100,
+        "stewardship": 400,
+        "monster_slaying": 300,
+        "mendicancy": 100,
+        "revelry": 150,
+        "fair_dealing": 800,
+        "hoarding": -200
+      }
+    },
+    "urban_administrations": {
+      "parameters_status": "initial_template_not_historical_calibration",
+      "weights": {
+        "violence": -400,
+        "extortion": -800,
+        "theft": -800,
+        "smuggling": -300,
+        "fraud": -700,
+        "slavery": -500,
+        "assassination": -900,
+        "piracy": -800,
+        "raiding": -700,
+        "corruption": -900,
+        "usury": -300,
+        "charity": 700,
+        "hospitality": 500,
+        "healing": 600,
+        "piety": 400,
+        "asceticism": 200,
+        "heresy": -300,
+        "blasphemy": -500,
+        "sorcery": -300,
+        "necromancy": -800,
+        "infernal_pact": -900,
+        "secrecy": -350,
+        "espionage": -200,
+        "oathkeeping": 600,
+        "justice": 900,
+        "punishment": 300,
+        "coercion": -600,
+        "mercenary_service": -100,
+        "exploitation": -500,
+        "solidarity": 500,
+        "learning": 600,
+        "craft_standards": 400,
+        "rebellion": -200,
+        "gambling": -200,
+        "stewardship": 400,
+        "monster_slaying": 300,
+        "mendicancy": 100,
+        "revelry": 150,
+        "fair_dealing": 500,
+        "hoarding": -200
+      }
+    },
+    "courts_and_bazaars": {
+      "parameters_status": "initial_template_not_historical_calibration",
+      "weights": {
+        "violence": -400,
+        "extortion": -800,
+        "theft": -800,
+        "smuggling": -200,
+        "fraud": -700,
+        "slavery": -500,
+        "assassination": -900,
+        "piracy": -800,
+        "raiding": -700,
+        "corruption": -700,
+        "usury": 0,
+        "charity": 700,
+        "hospitality": 800,
+        "healing": 600,
+        "piety": 400,
+        "asceticism": 200,
+        "heresy": -300,
+        "blasphemy": -500,
+        "sorcery": -300,
+        "necromancy": -800,
+        "infernal_pact": -900,
+        "secrecy": -250,
+        "espionage": 0,
+        "oathkeeping": 600,
+        "justice": 600,
+        "punishment": 0,
+        "coercion": -600,
+        "mercenary_service": -100,
+        "exploitation": -500,
+        "solidarity": 500,
+        "learning": 400,
+        "craft_standards": 400,
+        "rebellion": -200,
+        "gambling": 0,
+        "stewardship": 400,
+        "monster_slaying": 300,
+        "mendicancy": 100,
+        "revelry": 450,
+        "fair_dealing": 700,
+        "hoarding": -200
+      }
+    },
+    "temple_centres": {
+      "parameters_status": "initial_template_not_historical_calibration",
+      "weights": {
+        "violence": -400,
+        "extortion": -800,
+        "theft": -800,
+        "smuggling": -300,
+        "fraud": -700,
+        "slavery": -500,
+        "assassination": -900,
+        "piracy": -800,
+        "raiding": -700,
+        "corruption": -700,
+        "usury": -300,
+        "charity": 900,
+        "hospitality": 500,
+        "healing": 600,
+        "piety": 800,
+        "asceticism": 600,
+        "heresy": -800,
+        "blasphemy": -900,
+        "sorcery": -600,
+        "necromancy": -800,
+        "infernal_pact": -900,
+        "secrecy": -250,
+        "espionage": -200,
+        "oathkeeping": 600,
+        "justice": 600,
+        "punishment": 0,
+        "coercion": -600,
+        "mercenary_service": -100,
+        "exploitation": -500,
+        "solidarity": 500,
+        "learning": 600,
+        "craft_standards": 400,
+        "rebellion": -200,
+        "gambling": -200,
+        "stewardship": 400,
+        "monster_slaying": 300,
+        "mendicancy": 100,
+        "revelry": 50,
+        "fair_dealing": 500,
+        "hoarding": -200
+      }
+    },
+    "fortified_houses": {
+      "parameters_status": "initial_template_not_historical_calibration",
+      "weights": {
+        "violence": -100,
+        "extortion": -800,
+        "theft": -800,
+        "smuggling": -300,
+        "fraud": -700,
+        "slavery": -500,
+        "assassination": -900,
+        "piracy": -800,
+        "raiding": -700,
+        "corruption": -700,
+        "usury": -300,
+        "charity": 700,
+        "hospitality": 500,
+        "healing": 600,
+        "piety": 400,
+        "asceticism": 200,
+        "heresy": -300,
+        "blasphemy": -500,
+        "sorcery": -300,
+        "necromancy": -800,
+        "infernal_pact": -900,
+        "secrecy": -250,
+        "espionage": -200,
+        "oathkeeping": 900,
+        "justice": 600,
+        "punishment": 300,
+        "coercion": -600,
+        "mercenary_service": 100,
+        "exploitation": -500,
+        "solidarity": 500,
+        "learning": 400,
+        "craft_standards": 400,
+        "rebellion": -600,
+        "gambling": -200,
+        "stewardship": 400,
+        "monster_slaying": 300,
+        "mendicancy": 100,
+        "revelry": 150,
+        "fair_dealing": 500,
+        "hoarding": -200
+      }
+    },
+    "clan_assemblies": {
+      "parameters_status": "initial_template_not_historical_calibration",
+      "weights": {
+        "violence": -200,
+        "extortion": -800,
+        "theft": -800,
+        "smuggling": -300,
+        "fraud": -700,
+        "slavery": -500,
+        "assassination": -900,
+        "piracy": -800,
+        "raiding": -700,
+        "corruption": -700,
+        "usury": -300,
+        "charity": 700,
+        "hospitality": 700,
+        "healing": 600,
+        "piety": 400,
+        "asceticism": 200,
+        "heresy": -300,
+        "blasphemy": -500,
+        "sorcery": -300,
+        "necromancy": -800,
+        "infernal_pact": -900,
+        "secrecy": -250,
+        "espionage": -200,
+        "oathkeeping": 800,
+        "justice": 600,
+        "punishment": -200,
+        "coercion": -600,
+        "mercenary_service": -100,
+        "exploitation": -500,
+        "solidarity": 800,
+        "learning": 400,
+        "craft_standards": 400,
+        "rebellion": -200,
+        "gambling": -200,
+        "stewardship": 400,
+        "monster_slaying": 300,
+        "mendicancy": 100,
+        "revelry": 150,
+        "fair_dealing": 500,
+        "hoarding": -200
+      }
+    },
+    "mobile_camps": {
+      "parameters_status": "initial_template_not_historical_calibration",
+      "weights": {
+        "violence": -400,
+        "extortion": -800,
+        "theft": -700,
+        "smuggling": -200,
+        "fraud": -700,
+        "slavery": -500,
+        "assassination": -900,
+        "piracy": -800,
+        "raiding": -500,
+        "corruption": -700,
+        "usury": -300,
+        "charity": 700,
+        "hospitality": 900,
+        "healing": 600,
+        "piety": 400,
+        "asceticism": 200,
+        "heresy": -300,
+        "blasphemy": -500,
+        "sorcery": -300,
+        "necromancy": -800,
+        "infernal_pact": -900,
+        "secrecy": -250,
+        "espionage": -200,
+        "oathkeeping": 600,
+        "justice": 600,
+        "punishment": 0,
+        "coercion": -600,
+        "mercenary_service": 100,
+        "exploitation": -500,
+        "solidarity": 500,
+        "learning": 400,
+        "craft_standards": 400,
+        "rebellion": -200,
+        "gambling": -200,
+        "stewardship": 500,
+        "monster_slaying": 300,
+        "mendicancy": 100,
+        "revelry": 150,
+        "fair_dealing": 500,
+        "hoarding": -200
+      }
+    },
+    "compound_courts": {
+      "parameters_status": "initial_template_not_historical_calibration",
+      "weights": {
+        "violence": -400,
+        "extortion": -800,
+        "theft": -800,
+        "smuggling": -300,
+        "fraud": -700,
+        "slavery": -500,
+        "assassination": -900,
+        "piracy": -800,
+        "raiding": -700,
+        "corruption": -700,
+        "usury": -300,
+        "charity": 700,
+        "hospitality": 700,
+        "healing": 600,
+        "piety": 400,
+        "asceticism": 200,
+        "heresy": -300,
+        "blasphemy": -500,
+        "sorcery": -300,
+        "necromancy": -800,
+        "infernal_pact": -900,
+        "secrecy": -250,
+        "espionage": -100,
+        "oathkeeping": 900,
+        "justice": 600,
+        "punishment": 0,
+        "coercion": -600,
+        "mercenary_service": -100,
+        "exploitation": -500,
+        "solidarity": 500,
+        "learning": 600,
+        "craft_standards": 400,
+        "rebellion": -200,
+        "gambling": -200,
+        "stewardship": 400,
+        "monster_slaying": 300,
+        "mendicancy": 100,
+        "revelry": 150,
+        "fair_dealing": 500,
+        "hoarding": -200
+      }
+    },
+    "maritime_networks": {
+      "parameters_status": "initial_template_not_historical_calibration",
+      "weights": {
+        "violence": -400,
+        "extortion": -800,
+        "theft": -800,
+        "smuggling": -200,
+        "fraud": -700,
+        "slavery": -500,
+        "assassination": -900,
+        "piracy": -900,
+        "raiding": -700,
+        "corruption": -700,
+        "usury": -300,
+        "charity": 700,
+        "hospitality": 500,
+        "healing": 600,
+        "piety": 400,
+        "asceticism": 200,
+        "heresy": -300,
+        "blasphemy": -500,
+        "sorcery": -300,
+        "necromancy": -800,
+        "infernal_pact": -900,
+        "secrecy": -250,
+        "espionage": -200,
+        "oathkeeping": 600,
+        "justice": 600,
+        "punishment": 0,
+        "coercion": -600,
+        "mercenary_service": 100,
+        "exploitation": -500,
+        "solidarity": 600,
+        "learning": 400,
+        "craft_standards": 400,
+        "rebellion": -200,
+        "gambling": 0,
+        "stewardship": 400,
+        "monster_slaying": 300,
+        "mendicancy": 100,
+        "revelry": 150,
+        "fair_dealing": 700,
+        "hoarding": -200
+      }
+    },
+    "communal_houses": {
+      "parameters_status": "initial_template_not_historical_calibration",
+      "weights": {
+        "violence": -400,
+        "extortion": -800,
+        "theft": -800,
+        "smuggling": -300,
+        "fraud": -700,
+        "slavery": -500,
+        "assassination": -900,
+        "piracy": -800,
+        "raiding": -700,
+        "corruption": -700,
+        "usury": -300,
+        "charity": 900,
+        "hospitality": 500,
+        "healing": 600,
+        "piety": 400,
+        "asceticism": 200,
+        "heresy": -300,
+        "blasphemy": -500,
+        "sorcery": -300,
+        "necromancy": -800,
+        "infernal_pact": -900,
+        "secrecy": -250,
+        "espionage": -200,
+        "oathkeeping": 600,
+        "justice": 600,
+        "punishment": -200,
+        "coercion": -600,
+        "mercenary_service": -100,
+        "exploitation": -800,
+        "solidarity": 900,
+        "learning": 400,
+        "craft_standards": 400,
+        "rebellion": -200,
+        "gambling": -200,
+        "stewardship": 600,
+        "monster_slaying": 300,
+        "mendicancy": 100,
+        "revelry": 150,
+        "fair_dealing": 500,
+        "hoarding": -600
+      }
+    },
+    "redistributive_centres": {
+      "parameters_status": "initial_template_not_historical_calibration",
+      "weights": {
+        "violence": -400,
+        "extortion": -800,
+        "theft": -800,
+        "smuggling": -300,
+        "fraud": -700,
+        "slavery": -500,
+        "assassination": -900,
+        "piracy": -800,
+        "raiding": -700,
+        "corruption": -700,
+        "usury": -600,
+        "charity": 1000,
+        "hospitality": 500,
+        "healing": 600,
+        "piety": 600,
+        "asceticism": 200,
+        "heresy": -300,
+        "blasphemy": -500,
+        "sorcery": -300,
+        "necromancy": -800,
+        "infernal_pact": -900,
+        "secrecy": -250,
+        "espionage": -200,
+        "oathkeeping": 600,
+        "justice": 600,
+        "punishment": 0,
+        "coercion": -600,
+        "mercenary_service": -100,
+        "exploitation": -700,
+        "solidarity": 700,
+        "learning": 400,
+        "craft_standards": 400,
+        "rebellion": -200,
+        "gambling": -200,
+        "stewardship": 400,
+        "monster_slaying": 300,
+        "mendicancy": 100,
+        "revelry": 150,
+        "fair_dealing": 500,
+        "hoarding": -700
+      }
+    },
+    "oasis_networks": {
+      "parameters_status": "initial_template_not_historical_calibration",
+      "weights": {
+        "violence": -400,
+        "extortion": -800,
+        "theft": -800,
+        "smuggling": -300,
+        "fraud": -700,
+        "slavery": -500,
+        "assassination": -900,
+        "piracy": -800,
+        "raiding": -700,
+        "corruption": -700,
+        "usury": -300,
+        "charity": 700,
+        "hospitality": 900,
+        "healing": 600,
+        "piety": 400,
+        "asceticism": 200,
+        "heresy": -300,
+        "blasphemy": -500,
+        "sorcery": -300,
+        "necromancy": -800,
+        "infernal_pact": -900,
+        "secrecy": -250,
+        "espionage": -200,
+        "oathkeeping": 600,
+        "justice": 600,
+        "punishment": 0,
+        "coercion": -600,
+        "mercenary_service": -100,
+        "exploitation": -500,
+        "solidarity": 500,
+        "learning": 400,
+        "craft_standards": 400,
+        "rebellion": -200,
+        "gambling": -200,
+        "stewardship": 700,
+        "monster_slaying": 300,
+        "mendicancy": 100,
+        "revelry": 150,
+        "fair_dealing": 700,
+        "hoarding": -200
+      }
+    },
+    "craft_holds": {
+      "parameters_status": "initial_template_not_historical_calibration",
+      "weights": {
+        "violence": -400,
+        "extortion": -800,
+        "theft": -800,
+        "smuggling": -300,
+        "fraud": -900,
+        "slavery": -500,
+        "assassination": -900,
+        "piracy": -800,
+        "raiding": -700,
+        "corruption": -700,
+        "usury": -300,
+        "charity": 700,
+        "hospitality": 500,
+        "healing": 600,
+        "piety": 400,
+        "asceticism": 200,
+        "heresy": -300,
+        "blasphemy": -500,
+        "sorcery": -300,
+        "necromancy": -800,
+        "infernal_pact": -900,
+        "secrecy": -150,
+        "espionage": -200,
+        "oathkeeping": 900,
+        "justice": 600,
+        "punishment": 0,
+        "coercion": -600,
+        "mercenary_service": -100,
+        "exploitation": -500,
+        "solidarity": 500,
+        "learning": 600,
+        "craft_standards": 800,
+        "rebellion": -200,
+        "gambling": -200,
+        "stewardship": 400,
+        "monster_slaying": 300,
+        "mendicancy": 100,
+        "revelry": 150,
+        "fair_dealing": 500,
+        "hoarding": -200
+      }
+    },
+    "forest_houses": {
+      "parameters_status": "initial_template_not_historical_calibration",
+      "weights": {
+        "violence": -400,
+        "extortion": -800,
+        "theft": -800,
+        "smuggling": -300,
+        "fraud": -700,
+        "slavery": -500,
+        "assassination": -900,
+        "piracy": -800,
+        "raiding": -700,
+        "corruption": -700,
+        "usury": -300,
+        "charity": 700,
+        "hospitality": 600,
+        "healing": 600,
+        "piety": 400,
+        "asceticism": 200,
+        "heresy": -300,
+        "blasphemy": -500,
+        "sorcery": 0,
+        "necromancy": -800,
+        "infernal_pact": -900,
+        "secrecy": -250,
+        "espionage": -200,
+        "oathkeeping": 600,
+        "justice": 600,
+        "punishment": 0,
+        "coercion": -600,
+        "mercenary_service": -100,
+        "exploitation": -500,
+        "solidarity": 500,
+        "learning": 400,
+        "craft_standards": 400,
+        "rebellion": -100,
+        "gambling": -200,
+        "stewardship": 800,
+        "monster_slaying": 500,
+        "mendicancy": 100,
+        "revelry": 150,
+        "fair_dealing": 500,
+        "hoarding": -200
+      }
+    },
+    "underground_factions": {
+      "parameters_status": "initial_template_not_historical_calibration",
+      "weights": {
+        "violence": -400,
+        "extortion": -800,
+        "theft": -600,
+        "smuggling": 0,
+        "fraud": -700,
+        "slavery": -500,
+        "assassination": -900,
+        "piracy": -800,
+        "raiding": -700,
+        "corruption": -600,
+        "usury": -300,
+        "charity": 700,
+        "hospitality": 500,
+        "healing": 600,
+        "piety": 400,
+        "asceticism": 200,
+        "heresy": -300,
+        "blasphemy": -500,
+        "sorcery": -300,
+        "necromancy": -800,
+        "infernal_pact": -900,
+        "secrecy": 250,
+        "espionage": 100,
+        "oathkeeping": 700,
+        "justice": 400,
+        "punishment": 0,
+        "coercion": -600,
+        "mercenary_service": -100,
+        "exploitation": -500,
+        "solidarity": 600,
+        "learning": 400,
+        "craft_standards": 400,
+        "rebellion": 200,
+        "gambling": -200,
+        "stewardship": 400,
+        "monster_slaying": 300,
+        "mendicancy": 100,
+        "revelry": 150,
+        "fair_dealing": 500,
+        "hoarding": -200
+      }
+    },
+    "retinue_clans": {
+      "parameters_status": "initial_template_not_historical_calibration",
+      "weights": {
+        "violence": -100,
+        "extortion": -800,
+        "theft": -800,
+        "smuggling": -300,
+        "fraud": -700,
+        "slavery": -500,
+        "assassination": -900,
+        "piracy": -800,
+        "raiding": -700,
+        "corruption": -700,
+        "usury": -300,
+        "charity": 700,
+        "hospitality": 700,
+        "healing": 600,
+        "piety": 400,
+        "asceticism": 200,
+        "heresy": -300,
+        "blasphemy": -500,
+        "sorcery": -300,
+        "necromancy": -800,
+        "infernal_pact": -900,
+        "secrecy": -250,
+        "espionage": -200,
+        "oathkeeping": 1000,
+        "justice": 600,
+        "punishment": 100,
+        "coercion": -600,
+        "mercenary_service": 100,
+        "exploitation": -500,
+        "solidarity": 500,
+        "learning": 400,
+        "craft_standards": 400,
+        "rebellion": -200,
+        "gambling": -200,
+        "stewardship": 400,
+        "monster_slaying": 300,
+        "mendicancy": 100,
+        "revelry": 150,
+        "fair_dealing": 500,
+        "hoarding": -200
+      }
+    },
+    "colony_networks": {
+      "parameters_status": "initial_template_not_historical_calibration",
+      "weights": {
+        "violence": -400,
+        "extortion": -800,
+        "theft": -800,
+        "smuggling": -300,
+        "fraud": -700,
+        "slavery": -500,
+        "assassination": -900,
+        "piracy": -800,
+        "raiding": -700,
+        "corruption": -700,
+        "usury": -300,
+        "charity": 700,
+        "hospitality": 600,
+        "healing": 600,
+        "piety": 400,
+        "asceticism": 200,
+        "heresy": -300,
+        "blasphemy": -500,
+        "sorcery": -300,
+        "necromancy": -800,
+        "infernal_pact": -900,
+        "secrecy": -250,
+        "espionage": -200,
+        "oathkeeping": 600,
+        "justice": 600,
+        "punishment": 0,
+        "coercion": -600,
+        "mercenary_service": 0,
+        "exploitation": -500,
+        "solidarity": 700,
+        "learning": 400,
+        "craft_standards": 400,
+        "rebellion": -100,
+        "gambling": -200,
+        "stewardship": 300,
+        "monster_slaying": 500,
+        "mendicancy": 100,
+        "revelry": 150,
+        "fair_dealing": 600,
+        "hoarding": -200
+      }
+    },
+    "wetland_communities": {
+      "parameters_status": "initial_template_not_historical_calibration",
+      "weights": {
+        "violence": -400,
+        "extortion": -800,
+        "theft": -800,
+        "smuggling": -300,
+        "fraud": -700,
+        "slavery": -500,
+        "assassination": -900,
+        "piracy": -800,
+        "raiding": -700,
+        "corruption": -700,
+        "usury": -300,
+        "charity": 700,
+        "hospitality": 700,
+        "healing": 700,
+        "piety": 400,
+        "asceticism": 200,
+        "heresy": -300,
+        "blasphemy": -500,
+        "sorcery": -100,
+        "necromancy": -800,
+        "infernal_pact": -900,
+        "secrecy": -250,
+        "espionage": -200,
+        "oathkeeping": 600,
+        "justice": 600,
+        "punishment": 0,
+        "coercion": -600,
+        "mercenary_service": -100,
+        "exploitation": -500,
+        "solidarity": 700,
+        "learning": 400,
+        "craft_standards": 400,
+        "rebellion": -200,
+        "gambling": -200,
+        "stewardship": 700,
+        "monster_slaying": 300,
+        "mendicancy": 100,
+        "revelry": 150,
+        "fair_dealing": 500,
+        "hoarding": -200
+      }
+    },
+    "market_towns": {
+      "parameters_status": "initial_template_not_historical_calibration",
+      "weights": {
+        "violence": -400,
+        "extortion": -800,
+        "theft": -800,
+        "smuggling": -300,
+        "fraud": -700,
+        "slavery": -500,
+        "assassination": -900,
+        "piracy": -800,
+        "raiding": -700,
+        "corruption": -800,
+        "usury": -200,
+        "charity": 700,
+        "hospitality": 500,
+        "healing": 600,
+        "piety": 400,
+        "asceticism": 200,
+        "heresy": -300,
+        "blasphemy": -500,
+        "sorcery": -300,
+        "necromancy": -800,
+        "infernal_pact": -900,
+        "secrecy": -250,
+        "espionage": -200,
+        "oathkeeping": 600,
+        "justice": 800,
+        "punishment": 0,
+        "coercion": -600,
+        "mercenary_service": -100,
+        "exploitation": -500,
+        "solidarity": 500,
+        "learning": 400,
+        "craft_standards": 600,
+        "rebellion": -200,
+        "gambling": -100,
+        "stewardship": 400,
+        "monster_slaying": 300,
+        "mendicancy": 100,
+        "revelry": 150,
+        "fair_dealing": 900,
+        "hoarding": -200
+      }
+    },
+    "hill_courts": {
+      "parameters_status": "initial_template_not_historical_calibration",
+      "weights": {
+        "violence": -300,
+        "extortion": -800,
+        "theft": -800,
+        "smuggling": -300,
+        "fraud": -700,
+        "slavery": -500,
+        "assassination": -900,
+        "piracy": -800,
+        "raiding": -600,
+        "corruption": -700,
+        "usury": -300,
+        "charity": 700,
+        "hospitality": 700,
+        "healing": 600,
+        "piety": 400,
+        "asceticism": 200,
+        "heresy": -300,
+        "blasphemy": -500,
+        "sorcery": -300,
+        "necromancy": -800,
+        "infernal_pact": -900,
+        "secrecy": -250,
+        "espionage": -200,
+        "oathkeeping": 800,
+        "justice": 600,
+        "punishment": 100,
+        "coercion": -600,
+        "mercenary_service": -100,
+        "exploitation": -500,
+        "solidarity": 500,
+        "learning": 400,
+        "craft_standards": 400,
+        "rebellion": -200,
+        "gambling": -200,
+        "stewardship": 500,
+        "monster_slaying": 300,
+        "mendicancy": 100,
+        "revelry": 150,
+        "fair_dealing": 500,
+        "hoarding": -200
+      }
+    }
+  },
+  "archetype_alignment": {
+    "administration": {
+      "morality_bps": 0,
+      "lawfulness_bps": 3000,
+      "morality_spread_bps": 5000,
+      "lawfulness_spread_bps": 3000,
+      "conduct_tags": [
+        "justice",
+        "corruption"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "caravan": {
+      "morality_bps": 0,
+      "lawfulness_bps": 500,
+      "morality_spread_bps": 5500,
+      "lawfulness_spread_bps": 3500,
+      "conduct_tags": [
+        "fair_dealing",
+        "smuggling"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "civic_council": {
+      "morality_bps": 200,
+      "lawfulness_bps": 3000,
+      "morality_spread_bps": 5000,
+      "lawfulness_spread_bps": 3000,
+      "conduct_tags": [
+        "justice",
+        "corruption"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "communal_house": {
+      "morality_bps": 300,
+      "lawfulness_bps": 500,
+      "morality_spread_bps": 3000,
+      "lawfulness_spread_bps": 2500,
+      "conduct_tags": [
+        "solidarity"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "companionship": {
+      "morality_bps": 500,
+      "lawfulness_bps": 0,
+      "morality_spread_bps": 4000,
+      "lawfulness_spread_bps": 4000,
+      "conduct_tags": [
+        "solidarity",
+        "revelry"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "court": {
+      "morality_bps": -500,
+      "lawfulness_bps": 1000,
+      "morality_spread_bps": 6000,
+      "lawfulness_spread_bps": 4000,
+      "conduct_tags": [
+        "corruption",
+        "hospitality",
+        "oathkeeping"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "craft_association": {
+      "morality_bps": 200,
+      "lawfulness_bps": 2500,
+      "morality_spread_bps": 5000,
+      "lawfulness_spread_bps": 3000,
+      "conduct_tags": [
+        "craft_standards",
+        "solidarity"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "craft_guild": {
+      "morality_bps": 200,
+      "lawfulness_bps": 2500,
+      "morality_spread_bps": 5000,
+      "lawfulness_spread_bps": 3000,
+      "conduct_tags": [
+        "craft_standards",
+        "solidarity"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "craft_house": {
+      "morality_bps": 300,
+      "lawfulness_bps": 1500,
+      "morality_spread_bps": 3500,
+      "lawfulness_spread_bps": 2500,
+      "conduct_tags": [
+        "craft_standards"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "crew": {
+      "morality_bps": 0,
+      "lawfulness_bps": 1000,
+      "morality_spread_bps": 5000,
+      "lawfulness_spread_bps": 3500,
+      "conduct_tags": [
+        "fair_dealing"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "exchange_network": {
+      "morality_bps": 0,
+      "lawfulness_bps": 500,
+      "morality_spread_bps": 5500,
+      "lawfulness_spread_bps": 3500,
+      "conduct_tags": [
+        "fair_dealing",
+        "usury"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "farm_household": {
+      "morality_bps": 300,
+      "lawfulness_bps": 1000,
+      "morality_spread_bps": 3000,
+      "lawfulness_spread_bps": 2500,
+      "conduct_tags": [
+        "hospitality"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "forest_house": {
+      "morality_bps": 300,
+      "lawfulness_bps": 500,
+      "morality_spread_bps": 3500,
+      "lawfulness_spread_bps": 3000,
+      "conduct_tags": [
+        "stewardship"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "hold_council": {
+      "morality_bps": 200,
+      "lawfulness_bps": 3000,
+      "morality_spread_bps": 5000,
+      "lawfulness_spread_bps": 3000,
+      "conduct_tags": [
+        "justice",
+        "corruption"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "house_faction": {
+      "morality_bps": -500,
+      "lawfulness_bps": -500,
+      "morality_spread_bps": 5500,
+      "lawfulness_spread_bps": 5000,
+      "conduct_tags": [
+        "rebellion",
+        "oathkeeping"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "household_compound": {
+      "morality_bps": 200,
+      "lawfulness_bps": 1500,
+      "morality_spread_bps": 3000,
+      "lawfulness_spread_bps": 2500,
+      "conduct_tags": [
+        "oathkeeping"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "kin_group": {
+      "morality_bps": 200,
+      "lawfulness_bps": 1000,
+      "morality_spread_bps": 4000,
+      "lawfulness_spread_bps": 3000,
+      "conduct_tags": [
+        "oathkeeping",
+        "solidarity"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "landed_house": {
+      "morality_bps": 0,
+      "lawfulness_bps": 1500,
+      "morality_spread_bps": 4500,
+      "lawfulness_spread_bps": 3000,
+      "conduct_tags": [
+        "oathkeeping"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "local_assembly": {
+      "morality_bps": 300,
+      "lawfulness_bps": 2500,
+      "morality_spread_bps": 5000,
+      "lawfulness_spread_bps": 3000,
+      "conduct_tags": [
+        "justice",
+        "solidarity"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "local_colony": {
+      "morality_bps": 0,
+      "lawfulness_bps": 500,
+      "morality_spread_bps": 4500,
+      "lawfulness_spread_bps": 3500,
+      "conduct_tags": [
+        "solidarity"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "local_community": {
+      "morality_bps": 500,
+      "lawfulness_bps": 1000,
+      "morality_spread_bps": 4000,
+      "lawfulness_spread_bps": 3000,
+      "conduct_tags": [
+        "solidarity"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "market_association": {
+      "morality_bps": 0,
+      "lawfulness_bps": 2500,
+      "morality_spread_bps": 5000,
+      "lawfulness_spread_bps": 3000,
+      "conduct_tags": [
+        "fair_dealing",
+        "corruption"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "merchant_house": {
+      "morality_bps": 0,
+      "lawfulness_bps": 500,
+      "morality_spread_bps": 5000,
+      "lawfulness_spread_bps": 3500,
+      "conduct_tags": [
+        "fair_dealing",
+        "usury"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "mobile_household": {
+      "morality_bps": 300,
+      "lawfulness_bps": 0,
+      "morality_spread_bps": 3000,
+      "lawfulness_spread_bps": 3000,
+      "conduct_tags": [
+        "hospitality"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "neighborhood": {
+      "morality_bps": 300,
+      "lawfulness_bps": 500,
+      "morality_spread_bps": 4000,
+      "lawfulness_spread_bps": 3500,
+      "conduct_tags": [
+        "solidarity"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "productive_community": {
+      "morality_bps": 300,
+      "lawfulness_bps": 500,
+      "morality_spread_bps": 5000,
+      "lawfulness_spread_bps": 3500,
+      "conduct_tags": [
+        "solidarity"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "redistributive_institution": {
+      "morality_bps": 500,
+      "lawfulness_bps": 2000,
+      "morality_spread_bps": 5000,
+      "lawfulness_spread_bps": 3000,
+      "conduct_tags": [
+        "charity",
+        "hoarding"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "resource_group": {
+      "morality_bps": 200,
+      "lawfulness_bps": 500,
+      "morality_spread_bps": 5000,
+      "lawfulness_spread_bps": 3500,
+      "conduct_tags": [
+        "stewardship"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "retinue": {
+      "morality_bps": 0,
+      "lawfulness_bps": 1500,
+      "morality_spread_bps": 5000,
+      "lawfulness_spread_bps": 3500,
+      "conduct_tags": [
+        "oathkeeping",
+        "violence"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "ritual_group": {
+      "morality_bps": 500,
+      "lawfulness_bps": 1500,
+      "morality_spread_bps": 4500,
+      "lawfulness_spread_bps": 3500,
+      "conduct_tags": [
+        "piety"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "ritual_institution": {
+      "morality_bps": 1000,
+      "lawfulness_bps": 2500,
+      "morality_spread_bps": 5000,
+      "lawfulness_spread_bps": 3000,
+      "conduct_tags": [
+        "piety",
+        "charity"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "school": {
+      "morality_bps": 1500,
+      "lawfulness_bps": 2000,
+      "morality_spread_bps": 4500,
+      "lawfulness_spread_bps": 3000,
+      "conduct_tags": [
+        "learning"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "service_group": {
+      "morality_bps": 200,
+      "lawfulness_bps": 500,
+      "morality_spread_bps": 5000,
+      "lawfulness_spread_bps": 3500,
+      "conduct_tags": [
+        "hospitality"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "service_household": {
+      "morality_bps": 300,
+      "lawfulness_bps": 1000,
+      "morality_spread_bps": 4500,
+      "lawfulness_spread_bps": 3000,
+      "conduct_tags": [
+        "hospitality"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "shore_community": {
+      "morality_bps": 300,
+      "lawfulness_bps": 500,
+      "morality_spread_bps": 4000,
+      "lawfulness_spread_bps": 3500,
+      "conduct_tags": [
+        "solidarity"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "territorial_house": {
+      "morality_bps": 0,
+      "lawfulness_bps": 1500,
+      "morality_spread_bps": 4500,
+      "lawfulness_spread_bps": 3000,
+      "conduct_tags": [
+        "oathkeeping"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "travel_party": {
+      "morality_bps": 300,
+      "lawfulness_bps": 0,
+      "morality_spread_bps": 4000,
+      "lawfulness_spread_bps": 3500,
+      "conduct_tags": [
+        "hospitality"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "village_council": {
+      "morality_bps": 300,
+      "lawfulness_bps": 2500,
+      "morality_spread_bps": 5000,
+      "lawfulness_spread_bps": 3000,
+      "conduct_tags": [
+        "justice",
+        "corruption"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "ward_community": {
+      "morality_bps": 300,
+      "lawfulness_bps": 500,
+      "morality_spread_bps": 4000,
+      "lawfulness_spread_bps": 3500,
+      "conduct_tags": [
+        "solidarity"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "water_association": {
+      "morality_bps": 500,
+      "lawfulness_bps": 2500,
+      "morality_spread_bps": 4000,
+      "lawfulness_spread_bps": 2500,
+      "conduct_tags": [
+        "stewardship",
+        "solidarity"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "workshop": {
+      "morality_bps": 200,
+      "lawfulness_bps": 1000,
+      "morality_spread_bps": 5000,
+      "lawfulness_spread_bps": 3500,
+      "conduct_tags": [
+        "craft_standards"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "base_farm": {
+      "morality_bps": 300,
+      "lawfulness_bps": 500,
+      "morality_spread_bps": 5000,
+      "lawfulness_spread_bps": 3500,
+      "conduct_tags": [
+        "solidarity"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "base_workshop": {
+      "morality_bps": 200,
+      "lawfulness_bps": 1000,
+      "morality_spread_bps": 5000,
+      "lawfulness_spread_bps": 3500,
+      "conduct_tags": [
+        "craft_standards"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "base_trade_company": {
+      "morality_bps": 0,
+      "lawfulness_bps": 500,
+      "morality_spread_bps": 5500,
+      "lawfulness_spread_bps": 3500,
+      "conduct_tags": [
+        "fair_dealing",
+        "usury"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "base_service_unit": {
+      "morality_bps": 200,
+      "lawfulness_bps": 500,
+      "morality_spread_bps": 5000,
+      "lawfulness_spread_bps": 3500,
+      "conduct_tags": [
+        "hospitality"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "base_friend_circle": {
+      "morality_bps": 500,
+      "lawfulness_bps": 0,
+      "morality_spread_bps": 4000,
+      "lawfulness_spread_bps": 4000,
+      "conduct_tags": [
+        "solidarity",
+        "revelry"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "base_religious_community": {
+      "morality_bps": 1000,
+      "lawfulness_bps": 1500,
+      "morality_spread_bps": 5000,
+      "lawfulness_spread_bps": 3500,
+      "conduct_tags": [
+        "piety",
+        "charity"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "base_faction": {
+      "morality_bps": -500,
+      "lawfulness_bps": 0,
+      "morality_spread_bps": 5500,
+      "lawfulness_spread_bps": 5000,
+      "conduct_tags": [
+        "oathkeeping",
+        "rebellion"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "base_neighborhood": {
+      "morality_bps": 300,
+      "lawfulness_bps": 500,
+      "morality_spread_bps": 4000,
+      "lawfulness_spread_bps": 3500,
+      "conduct_tags": [
+        "solidarity"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "magical_school": {
+      "morality_bps": 500,
+      "lawfulness_bps": 1000,
+      "morality_spread_bps": 5000,
+      "lawfulness_spread_bps": 4000,
+      "conduct_tags": [
+        "learning",
+        "sorcery"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "mortuary_confraternity": {
+      "morality_bps": 1500,
+      "lawfulness_bps": 2000,
+      "morality_spread_bps": 4000,
+      "lawfulness_spread_bps": 3000,
+      "conduct_tags": [
+        "piety",
+        "solidarity"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "base_local_institution": {
+      "morality_bps": 200,
+      "lawfulness_bps": 3000,
+      "morality_spread_bps": 5000,
+      "lawfulness_spread_bps": 3000,
+      "conduct_tags": [
+        "justice",
+        "corruption"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "base_craft_association": {
+      "morality_bps": 200,
+      "lawfulness_bps": 2500,
+      "morality_spread_bps": 5000,
+      "lawfulness_spread_bps": 3000,
+      "conduct_tags": [
+        "craft_standards",
+        "solidarity"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "herding_group": {
+      "morality_bps": 300,
+      "lawfulness_bps": 500,
+      "morality_spread_bps": 5000,
+      "lawfulness_spread_bps": 3500,
+      "conduct_tags": [
+        "stewardship"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "mining_crew": {
+      "morality_bps": -200,
+      "lawfulness_bps": 1000,
+      "morality_spread_bps": 5000,
+      "lawfulness_spread_bps": 3500,
+      "conduct_tags": [
+        "exploitation"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "shipping_consortium": {
+      "morality_bps": -300,
+      "lawfulness_bps": 1500,
+      "morality_spread_bps": 5000,
+      "lawfulness_spread_bps": 3500,
+      "conduct_tags": [
+        "fair_dealing",
+        "usury"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "banking_house": {
+      "morality_bps": -300,
+      "lawfulness_bps": 2000,
+      "morality_spread_bps": 5500,
+      "lawfulness_spread_bps": 3500,
+      "conduct_tags": [
+        "usury",
+        "fair_dealing"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "merchant_league": {
+      "morality_bps": -200,
+      "lawfulness_bps": 2000,
+      "morality_spread_bps": 5000,
+      "lawfulness_spread_bps": 3500,
+      "conduct_tags": [
+        "fair_dealing",
+        "corruption"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "lordship": {
+      "morality_bps": -500,
+      "lawfulness_bps": 2000,
+      "morality_spread_bps": 6000,
+      "lawfulness_spread_bps": 3500,
+      "conduct_tags": [
+        "justice",
+        "exploitation",
+        "oathkeeping"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "embassy": {
+      "morality_bps": 0,
+      "lawfulness_bps": 2500,
+      "morality_spread_bps": 4500,
+      "lawfulness_spread_bps": 3000,
+      "conduct_tags": [
+        "espionage",
+        "oathkeeping"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "ruling_dynasty": {
+      "morality_bps": -200,
+      "lawfulness_bps": 1500,
+      "morality_spread_bps": 6000,
+      "lawfulness_spread_bps": 4000,
+      "conduct_tags": [
+        "oathkeeping",
+        "violence"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "law_court": {
+      "morality_bps": 500,
+      "lawfulness_bps": 3500,
+      "morality_spread_bps": 5500,
+      "lawfulness_spread_bps": 3000,
+      "conduct_tags": [
+        "justice",
+        "punishment",
+        "corruption"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "town_watch": {
+      "morality_bps": 0,
+      "lawfulness_bps": 3000,
+      "morality_spread_bps": 5000,
+      "lawfulness_spread_bps": 3000,
+      "conduct_tags": [
+        "justice",
+        "violence",
+        "corruption"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "prison": {
+      "morality_bps": -500,
+      "lawfulness_bps": 3000,
+      "morality_spread_bps": 5000,
+      "lawfulness_spread_bps": 3000,
+      "conduct_tags": [
+        "punishment",
+        "coercion",
+        "corruption"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "inquisition": {
+      "morality_bps": -1000,
+      "lawfulness_bps": 3500,
+      "morality_spread_bps": 6500,
+      "lawfulness_spread_bps": 3000,
+      "conduct_tags": [
+        "coercion",
+        "punishment",
+        "piety",
+        "justice"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "provostship": {
+      "morality_bps": 0,
+      "lawfulness_bps": 3000,
+      "morality_spread_bps": 5500,
+      "lawfulness_spread_bps": 3000,
+      "conduct_tags": [
+        "justice",
+        "punishment",
+        "corruption"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "executioner_house": {
+      "morality_bps": 0,
+      "lawfulness_bps": 3500,
+      "morality_spread_bps": 3000,
+      "lawfulness_spread_bps": 2000,
+      "conduct_tags": [
+        "punishment"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "militia": {
+      "morality_bps": 500,
+      "lawfulness_bps": 2500,
+      "morality_spread_bps": 4500,
+      "lawfulness_spread_bps": 3000,
+      "conduct_tags": [
+        "oathkeeping",
+        "violence"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "garrison": {
+      "morality_bps": 0,
+      "lawfulness_bps": 3000,
+      "morality_spread_bps": 5000,
+      "lawfulness_spread_bps": 3000,
+      "conduct_tags": [
+        "violence",
+        "oathkeeping",
+        "corruption"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "mercenary_company": {
+      "morality_bps": -2000,
+      "lawfulness_bps": 0,
+      "morality_spread_bps": 6000,
+      "lawfulness_spread_bps": 5000,
+      "conduct_tags": [
+        "mercenary_service",
+        "violence",
+        "raiding"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "knightly_order": {
+      "morality_bps": 1500,
+      "lawfulness_bps": 3500,
+      "morality_spread_bps": 5000,
+      "lawfulness_spread_bps": 3000,
+      "conduct_tags": [
+        "oathkeeping",
+        "violence",
+        "piety"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "war_fleet": {
+      "morality_bps": 0,
+      "lawfulness_bps": 3000,
+      "morality_spread_bps": 5000,
+      "lawfulness_spread_bps": 3000,
+      "conduct_tags": [
+        "violence",
+        "oathkeeping"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "raiding_band": {
+      "morality_bps": -4000,
+      "lawfulness_bps": -1500,
+      "morality_spread_bps": 6000,
+      "lawfulness_spread_bps": 4500,
+      "conduct_tags": [
+        "raiding",
+        "violence",
+        "theft"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "scout_company": {
+      "morality_bps": 500,
+      "lawfulness_bps": 1500,
+      "morality_spread_bps": 4500,
+      "lawfulness_spread_bps": 3500,
+      "conduct_tags": [
+        "oathkeeping",
+        "violence"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "secular_clergy": {
+      "morality_bps": 1500,
+      "lawfulness_bps": 3000,
+      "morality_spread_bps": 5000,
+      "lawfulness_spread_bps": 3000,
+      "conduct_tags": [
+        "piety",
+        "charity",
+        "corruption"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "monastery": {
+      "morality_bps": 2500,
+      "lawfulness_bps": 4000,
+      "morality_spread_bps": 5000,
+      "lawfulness_spread_bps": 2500,
+      "conduct_tags": [
+        "piety",
+        "asceticism",
+        "charity",
+        "learning"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "mendicant_friary": {
+      "morality_bps": 3000,
+      "lawfulness_bps": 2000,
+      "morality_spread_bps": 4500,
+      "lawfulness_spread_bps": 3000,
+      "conduct_tags": [
+        "asceticism",
+        "charity",
+        "mendicancy",
+        "piety"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "hermitage": {
+      "morality_bps": 3000,
+      "lawfulness_bps": 0,
+      "morality_spread_bps": 4500,
+      "lawfulness_spread_bps": 3500,
+      "conduct_tags": [
+        "asceticism",
+        "piety"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "lay_confraternity": {
+      "morality_bps": 1500,
+      "lawfulness_bps": 2500,
+      "morality_spread_bps": 4500,
+      "lawfulness_spread_bps": 3000,
+      "conduct_tags": [
+        "piety",
+        "charity",
+        "solidarity"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "heterodox_movement": {
+      "morality_bps": 1000,
+      "lawfulness_bps": -2000,
+      "morality_spread_bps": 5500,
+      "lawfulness_spread_bps": 4000,
+      "conduct_tags": [
+        "heresy",
+        "piety",
+        "rebellion"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "closed_sect": {
+      "morality_bps": -1500,
+      "lawfulness_bps": -500,
+      "morality_spread_bps": 6000,
+      "lawfulness_spread_bps": 4500,
+      "conduct_tags": [
+        "coercion",
+        "piety",
+        "exploitation",
+        "secrecy"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "ancestral_cult": {
+      "morality_bps": 1000,
+      "lawfulness_bps": 1500,
+      "morality_spread_bps": 4500,
+      "lawfulness_spread_bps": 3000,
+      "conduct_tags": [
+        "piety",
+        "stewardship"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "base_charitable_order": {
+      "morality_bps": 4000,
+      "lawfulness_bps": 2500,
+      "morality_spread_bps": 4000,
+      "lawfulness_spread_bps": 3000,
+      "conduct_tags": [
+        "charity",
+        "healing",
+        "hospitality"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "university": {
+      "morality_bps": 1000,
+      "lawfulness_bps": 2500,
+      "morality_spread_bps": 5000,
+      "lawfulness_spread_bps": 3500,
+      "conduct_tags": [
+        "learning"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "scriptorium": {
+      "morality_bps": 1500,
+      "lawfulness_bps": 3000,
+      "morality_spread_bps": 4500,
+      "lawfulness_spread_bps": 3000,
+      "conduct_tags": [
+        "learning",
+        "craft_standards"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "hospital_house": {
+      "morality_bps": 3000,
+      "lawfulness_bps": 3000,
+      "morality_spread_bps": 4500,
+      "lawfulness_spread_bps": 3000,
+      "conduct_tags": [
+        "healing",
+        "charity",
+        "hospitality"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "healers_circle": {
+      "morality_bps": 1500,
+      "lawfulness_bps": 500,
+      "morality_spread_bps": 5000,
+      "lawfulness_spread_bps": 4000,
+      "conduct_tags": [
+        "healing"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "itinerant_troupe": {
+      "morality_bps": 0,
+      "lawfulness_bps": -500,
+      "morality_spread_bps": 5000,
+      "lawfulness_spread_bps": 4500,
+      "conduct_tags": [
+        "revelry"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "festive_society": {
+      "morality_bps": 500,
+      "lawfulness_bps": 0,
+      "morality_spread_bps": 4500,
+      "lawfulness_spread_bps": 4500,
+      "conduct_tags": [
+        "revelry",
+        "violence"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "women_circle": {
+      "morality_bps": 800,
+      "lawfulness_bps": 0,
+      "morality_spread_bps": 4000,
+      "lawfulness_spread_bps": 4000,
+      "conduct_tags": [
+        "solidarity"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "tavern_house": {
+      "morality_bps": -200,
+      "lawfulness_bps": 500,
+      "morality_spread_bps": 5000,
+      "lawfulness_spread_bps": 4000,
+      "conduct_tags": [
+        "hospitality",
+        "gambling",
+        "revelry"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "base_criminal_network": {
+      "morality_bps": -6200,
+      "lawfulness_bps": -4000,
+      "morality_spread_bps": 3500,
+      "lawfulness_spread_bps": 3000,
+      "conduct_tags": [
+        "extortion",
+        "theft",
+        "violence",
+        "corruption",
+        "secrecy"
+      ],
+      "default_visibility": "covert",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "thieves_guild": {
+      "morality_bps": -6200,
+      "lawfulness_bps": -4000,
+      "morality_spread_bps": 3500,
+      "lawfulness_spread_bps": 3000,
+      "conduct_tags": [
+        "theft",
+        "extortion",
+        "secrecy"
+      ],
+      "default_visibility": "covert",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "protection_racket": {
+      "morality_bps": -7000,
+      "lawfulness_bps": -3500,
+      "morality_spread_bps": 3000,
+      "lawfulness_spread_bps": 3000,
+      "conduct_tags": [
+        "extortion",
+        "violence",
+        "corruption"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "bandit_band": {
+      "morality_bps": -6500,
+      "lawfulness_bps": -5000,
+      "morality_spread_bps": 3500,
+      "lawfulness_spread_bps": 3500,
+      "conduct_tags": [
+        "theft",
+        "violence",
+        "raiding"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "smuggling_ring": {
+      "morality_bps": -3500,
+      "lawfulness_bps": -4000,
+      "morality_spread_bps": 4000,
+      "lawfulness_spread_bps": 3500,
+      "conduct_tags": [
+        "smuggling",
+        "corruption",
+        "secrecy"
+      ],
+      "default_visibility": "covert",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "pirate_crew": {
+      "morality_bps": -6500,
+      "lawfulness_bps": -5000,
+      "morality_spread_bps": 3500,
+      "lawfulness_spread_bps": 3500,
+      "conduct_tags": [
+        "piracy",
+        "violence",
+        "theft"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "assassin_brotherhood": {
+      "morality_bps": -7000,
+      "lawfulness_bps": -3500,
+      "morality_spread_bps": 3000,
+      "lawfulness_spread_bps": 4000,
+      "conduct_tags": [
+        "assassination",
+        "secrecy",
+        "oathkeeping"
+      ],
+      "default_visibility": "covert",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "forgery_ring": {
+      "morality_bps": -4000,
+      "lawfulness_bps": -3500,
+      "morality_spread_bps": 4000,
+      "lawfulness_spread_bps": 3500,
+      "conduct_tags": [
+        "fraud",
+        "secrecy",
+        "craft_standards"
+      ],
+      "default_visibility": "covert",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "slave_trading_ring": {
+      "morality_bps": -7500,
+      "lawfulness_bps": -2000,
+      "morality_spread_bps": 3000,
+      "lawfulness_spread_bps": 5000,
+      "conduct_tags": [
+        "slavery",
+        "coercion",
+        "violence"
+      ],
+      "default_visibility": "covert",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "beggar_brotherhood": {
+      "morality_bps": -1500,
+      "lawfulness_bps": -2500,
+      "morality_spread_bps": 5000,
+      "lawfulness_spread_bps": 4000,
+      "conduct_tags": [
+        "mendicancy",
+        "fraud",
+        "solidarity"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "outlaw_company": {
+      "morality_bps": -1000,
+      "lawfulness_bps": -5500,
+      "morality_spread_bps": 6000,
+      "lawfulness_spread_bps": 4000,
+      "conduct_tags": [
+        "rebellion",
+        "theft",
+        "violence",
+        "solidarity"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "refugee_community": {
+      "morality_bps": 1000,
+      "lawfulness_bps": -500,
+      "morality_spread_bps": 4000,
+      "lawfulness_spread_bps": 3500,
+      "conduct_tags": [
+        "solidarity",
+        "mendicancy"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "minority_enclave": {
+      "morality_bps": 500,
+      "lawfulness_bps": 0,
+      "morality_spread_bps": 4000,
+      "lawfulness_spread_bps": 3500,
+      "conduct_tags": [
+        "solidarity"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "secret_society": {
+      "morality_bps": -1000,
+      "lawfulness_bps": -1500,
+      "morality_spread_bps": 6000,
+      "lawfulness_spread_bps": 4500,
+      "conduct_tags": [
+        "secrecy",
+        "oathkeeping",
+        "rebellion"
+      ],
+      "default_visibility": "covert",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "mage_order": {
+      "morality_bps": 500,
+      "lawfulness_bps": 2000,
+      "morality_spread_bps": 6000,
+      "lawfulness_spread_bps": 4000,
+      "conduct_tags": [
+        "sorcery",
+        "learning",
+        "oathkeeping"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "arcane_cabal": {
+      "morality_bps": -1500,
+      "lawfulness_bps": -2000,
+      "morality_spread_bps": 6000,
+      "lawfulness_spread_bps": 4500,
+      "conduct_tags": [
+        "sorcery",
+        "secrecy"
+      ],
+      "default_visibility": "covert",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "alchemists_lodge": {
+      "morality_bps": 0,
+      "lawfulness_bps": 0,
+      "morality_spread_bps": 5500,
+      "lawfulness_spread_bps": 4000,
+      "conduct_tags": [
+        "learning",
+        "secrecy",
+        "sorcery"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "druid_circle": {
+      "morality_bps": 1500,
+      "lawfulness_bps": 1000,
+      "morality_spread_bps": 5000,
+      "lawfulness_spread_bps": 3500,
+      "conduct_tags": [
+        "stewardship",
+        "sorcery",
+        "piety"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "monster_hunters_lodge": {
+      "morality_bps": 500,
+      "lawfulness_bps": 1500,
+      "morality_spread_bps": 5000,
+      "lawfulness_spread_bps": 3500,
+      "conduct_tags": [
+        "monster_slaying",
+        "violence",
+        "mercenary_service"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "adventuring_company": {
+      "morality_bps": 0,
+      "lawfulness_bps": -500,
+      "morality_spread_bps": 5500,
+      "lawfulness_spread_bps": 4500,
+      "conduct_tags": [
+        "mercenary_service",
+        "violence",
+        "theft",
+        "monster_slaying"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "infernal_cult": {
+      "morality_bps": -5500,
+      "lawfulness_bps": -2500,
+      "morality_spread_bps": 4500,
+      "lawfulness_spread_bps": 4000,
+      "conduct_tags": [
+        "infernal_pact",
+        "blasphemy",
+        "sorcery",
+        "secrecy"
+      ],
+      "default_visibility": "covert",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "necromancers_circle": {
+      "morality_bps": -3500,
+      "lawfulness_bps": -1500,
+      "morality_spread_bps": 6000,
+      "lawfulness_spread_bps": 4500,
+      "conduct_tags": [
+        "necromancy",
+        "sorcery",
+        "secrecy"
+      ],
+      "default_visibility": "covert",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "fey_court": {
+      "morality_bps": 0,
+      "lawfulness_bps": 500,
+      "morality_spread_bps": 6000,
+      "lawfulness_spread_bps": 5000,
+      "conduct_tags": [
+        "oathkeeping",
+        "hospitality",
+        "sorcery"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "dragon_court": {
+      "morality_bps": 0,
+      "lawfulness_bps": 1000,
+      "morality_spread_bps": 6000,
+      "lawfulness_spread_bps": 4500,
+      "conduct_tags": [
+        "oathkeeping",
+        "hoarding",
+        "violence"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "nonhuman_enclave": {
+      "morality_bps": 0,
+      "lawfulness_bps": 0,
+      "morality_spread_bps": 4500,
+      "lawfulness_spread_bps": 3500,
+      "conduct_tags": [
+        "solidarity"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "monstrous_horde": {
+      "morality_bps": -4000,
+      "lawfulness_bps": -3000,
+      "morality_spread_bps": 6000,
+      "lawfulness_spread_bps": 4500,
+      "conduct_tags": [
+        "raiding",
+        "violence",
+        "theft"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "ancient_site_guardians": {
+      "morality_bps": 1500,
+      "lawfulness_bps": 3000,
+      "morality_spread_bps": 5000,
+      "lawfulness_spread_bps": 3500,
+      "conduct_tags": [
+        "oathkeeping",
+        "stewardship",
+        "piety"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "mutual_aid_society": {
+      "morality_bps": 1500,
+      "lawfulness_bps": 1500,
+      "morality_spread_bps": 4500,
+      "lawfulness_spread_bps": 3500,
+      "conduct_tags": [
+        "solidarity",
+        "charity"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "journeymen_fellowship": {
+      "morality_bps": 500,
+      "lawfulness_bps": -1000,
+      "morality_spread_bps": 4500,
+      "lawfulness_spread_bps": 4000,
+      "conduct_tags": [
+        "solidarity",
+        "rebellion",
+        "craft_standards"
+      ],
+      "default_visibility": "open",
+      "parameters_status": "initial_template_not_historical_calibration"
+    },
+    "intelligence_network": {
+      "morality_bps": -1000,
+      "lawfulness_bps": 0,
+      "morality_spread_bps": 5500,
+      "lawfulness_spread_bps": 4000,
+      "conduct_tags": [
+        "espionage",
+        "secrecy",
+        "fraud"
+      ],
+      "default_visibility": "covert",
+      "parameters_status": "initial_template_not_historical_calibration"
+    }
+  },
+  "name_kind_catalogue": {
+    "owner": "namebench",
+    "note": "Namebench possède les kinds ; Chronos liste ici ceux qu'il demande. Le kind ne dépend ni de la famille culturelle ni de la classe morale (le ton est passé à part). Un nom de repli reste `synthetic`. Le régime est la lecture de Chronos du §7 de la spec Namebench, à confirmer par Namebench.",
+    "kinds": [
+      {
+        "kind": "organization.household",
+        "origin": "namebench_starting",
+        "regime": "descriptive",
+        "archetype_ids": [
+          "base_farm",
+          "communal_house",
+          "farm_household",
+          "herding_group",
+          "household_compound",
+          "mobile_household",
+          "service_household"
+        ]
+      },
+      {
+        "kind": "organization.house",
+        "origin": "namebench_starting",
+        "regime": "emblematic",
+        "archetype_ids": [
+          "craft_house",
+          "executioner_house",
+          "forest_house",
+          "kin_group",
+          "landed_house",
+          "merchant_house",
+          "ruling_dynasty",
+          "territorial_house"
+        ]
+      },
+      {
+        "kind": "organization.guild",
+        "origin": "namebench_starting",
+        "regime": "emblematic",
+        "archetype_ids": [
+          "base_craft_association",
+          "craft_association",
+          "craft_guild",
+          "journeymen_fellowship",
+          "market_association",
+          "merchant_league",
+          "water_association"
+        ]
+      },
+      {
+        "kind": "organization.confraternity",
+        "origin": "namebench_starting",
+        "regime": "emblematic",
+        "archetype_ids": [
+          "beggar_brotherhood",
+          "lay_confraternity",
+          "mortuary_confraternity",
+          "mutual_aid_society"
+        ]
+      },
+      {
+        "kind": "organization.order",
+        "origin": "namebench_starting",
+        "regime": "emblematic",
+        "archetype_ids": [
+          "ancient_site_guardians",
+          "base_charitable_order",
+          "knightly_order",
+          "mage_order",
+          "mendicant_friary"
+        ]
+      },
+      {
+        "kind": "organization.faction",
+        "origin": "namebench_starting",
+        "regime": "emblematic",
+        "archetype_ids": [
+          "base_faction",
+          "house_faction"
+        ]
+      },
+      {
+        "kind": "organization.secret_society",
+        "origin": "namebench_starting",
+        "regime": "emblematic",
+        "archetype_ids": [
+          "arcane_cabal",
+          "assassin_brotherhood",
+          "intelligence_network",
+          "necromancers_circle",
+          "secret_society"
+        ]
+      },
+      {
+        "kind": "organization.criminal",
+        "origin": "namebench_starting",
+        "regime": "emblematic",
+        "archetype_ids": [
+          "base_criminal_network",
+          "forgery_ring",
+          "protection_racket",
+          "slave_trading_ring",
+          "smuggling_ring",
+          "thieves_guild"
+        ]
+      },
+      {
+        "kind": "organization.company",
+        "origin": "namebench_starting",
+        "regime": "emblematic",
+        "archetype_ids": [
+          "adventuring_company",
+          "banking_house",
+          "base_service_unit",
+          "base_trade_company",
+          "caravan",
+          "exchange_network",
+          "mercenary_company",
+          "monster_hunters_lodge",
+          "scout_company",
+          "service_group",
+          "shipping_consortium"
+        ]
+      },
+      {
+        "kind": "organization.retinue",
+        "origin": "namebench_starting",
+        "regime": "descriptive",
+        "archetype_ids": [
+          "retinue"
+        ]
+      },
+      {
+        "kind": "organization.school",
+        "origin": "namebench_starting",
+        "regime": "institutional",
+        "archetype_ids": [
+          "magical_school",
+          "school",
+          "university"
+        ]
+      },
+      {
+        "kind": "organization.council",
+        "origin": "namebench_starting",
+        "regime": "institutional",
+        "archetype_ids": [
+          "civic_council",
+          "hold_council",
+          "local_assembly",
+          "village_council"
+        ]
+      },
+      {
+        "kind": "organization.community",
+        "origin": "namebench_starting",
+        "regime": "descriptive",
+        "archetype_ids": [
+          "base_neighborhood",
+          "local_colony",
+          "local_community",
+          "mining_crew",
+          "minority_enclave",
+          "neighborhood",
+          "nonhuman_enclave",
+          "productive_community",
+          "refugee_community",
+          "resource_group",
+          "shore_community",
+          "travel_party",
+          "ward_community"
+        ]
+      },
+      {
+        "kind": "organization.workshop",
+        "origin": "proposed_to_namebench",
+        "regime": "descriptive",
+        "expected_shape": "métier ou produit plus propriétaire ou lieu : Atelier des Verriers de X",
+        "archetype_ids": [
+          "alchemists_lodge",
+          "base_workshop",
+          "scriptorium",
+          "workshop"
+        ]
+      },
+      {
+        "kind": "organization.crew",
+        "origin": "proposed_to_namebench",
+        "regime": "emblematic",
+        "expected_shape": "nom de navire ou d'équipage : La Mouette, équipage de X",
+        "archetype_ids": [
+          "crew",
+          "pirate_crew",
+          "war_fleet"
+        ]
+      },
+      {
+        "kind": "organization.band",
+        "origin": "proposed_to_namebench",
+        "regime": "emblematic",
+        "expected_shape": "bande armée à épithète ou à chef : la Bande du Gué, les Loups de X",
+        "archetype_ids": [
+          "bandit_band",
+          "monstrous_horde",
+          "outlaw_company",
+          "raiding_band"
+        ]
+      },
+      {
+        "kind": "organization.military_unit",
+        "origin": "proposed_to_namebench",
+        "regime": "institutional",
+        "expected_shape": "corps armé rattaché à un lieu ou à un seigneur : Milice de X, Garnison de X",
+        "archetype_ids": [
+          "garrison",
+          "militia"
+        ]
+      },
+      {
+        "kind": "organization.office",
+        "origin": "proposed_to_namebench",
+        "regime": "institutional",
+        "expected_shape": "charge ou service plus juridiction : Prévôté de X, Geôle de X, Ambassade de X",
+        "archetype_ids": [
+          "administration",
+          "base_local_institution",
+          "embassy",
+          "prison",
+          "provostship",
+          "redistributive_institution",
+          "town_watch"
+        ]
+      },
+      {
+        "kind": "organization.tribunal",
+        "origin": "proposed_to_namebench",
+        "regime": "institutional",
+        "expected_shape": "juridiction plus lieu ou autorité : Tribunal de X, Tribunal doctrinal de X",
+        "archetype_ids": [
+          "inquisition",
+          "law_court"
+        ]
+      },
+      {
+        "kind": "organization.court",
+        "origin": "proposed_to_namebench",
+        "regime": "emblematic",
+        "expected_shape": "cour attachée à un titre, un lieu ou une lignée : Cour de X",
+        "archetype_ids": [
+          "court",
+          "dragon_court",
+          "fey_court"
+        ]
+      },
+      {
+        "kind": "organization.domain",
+        "origin": "proposed_to_namebench",
+        "regime": "institutional",
+        "expected_shape": "seigneurie nommée d'après son lieu ou son détenteur : Seigneurie de X",
+        "archetype_ids": [
+          "lordship"
+        ]
+      },
+      {
+        "kind": "organization.cult",
+        "origin": "proposed_to_namebench",
+        "regime": "emblematic",
+        "expected_shape": "communauté dévotionnelle sous une dédicace : Église Saint-X, Culte de X, Cercle de X",
+        "archetype_ids": [
+          "ancestral_cult",
+          "base_religious_community",
+          "closed_sect",
+          "druid_circle",
+          "heterodox_movement",
+          "infernal_cult",
+          "ritual_group",
+          "ritual_institution",
+          "secular_clergy"
+        ]
+      },
+      {
+        "kind": "organization.monastery",
+        "origin": "proposed_to_namebench",
+        "regime": "emblematic",
+        "expected_shape": "maison de vie religieuse sous une règle et une dédicace : Abbaye Saint-X, Ermitage de X",
+        "archetype_ids": [
+          "hermitage",
+          "monastery"
+        ]
+      },
+      {
+        "kind": "organization.hospital",
+        "origin": "proposed_to_namebench",
+        "regime": "emblematic",
+        "expected_shape": "maison de soin sous une dédicace : Hôtel-Dieu de X, Léproserie Saint-Lazare",
+        "archetype_ids": [
+          "hospital_house"
+        ]
+      },
+      {
+        "kind": "organization.troupe",
+        "origin": "proposed_to_namebench",
+        "regime": "emblematic",
+        "expected_shape": "nom de scène ou de spectacle : Les Comédiens de X",
+        "archetype_ids": [
+          "itinerant_troupe"
+        ]
+      },
+      {
+        "kind": "organization.tavern",
+        "origin": "proposed_to_namebench",
+        "regime": "descriptive",
+        "expected_shape": "enseigne : Au Cheval Blanc, auberge de X",
+        "archetype_ids": [
+          "tavern_house"
+        ]
+      },
+      {
+        "kind": "organization.circle",
+        "origin": "proposed_to_namebench",
+        "regime": "descriptive",
+        "expected_shape": "cercle informel, souvent sans nom ; sinon surnom donné par les membres ou le voisinage",
+        "archetype_ids": [
+          "base_friend_circle",
+          "companionship",
+          "festive_society",
+          "healers_circle",
+          "women_circle"
+        ]
+      }
+    ]
+  }
 }
