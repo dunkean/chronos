@@ -17,10 +17,12 @@ use super::ids::{decade_block, DomainKey, Owner, SemanticAddress};
 use super::model::{
     conduct_class, string_enum, Agency, AlignmentAxes, AlignmentEpisode, ConductClass,
     ConductThresholds, CountMeasure, Coverage, EntityNature, EntityState, ErrorCode, EventPhase,
-    HistoryError, HistoryEvent, LegalStanding, LegalStatus, Lifecycle, ObjectRef, ParentRef,
-    PersonRecord, PersonSource, Precision, PrecisionMode, Predicate, Provenance, ProvenanceStatus,
-    ResidenceEpisode, SocialAttributeEpisode, SocialEntity, SocialRelation, TimeSpan, Visibility,
+    HistoryError, HistoryEvent, LegalStanding, LegalStatus, Lifecycle, NameTree, ObjectRef,
+    ParentRef, PersonRecord, PersonSource, Precision, PrecisionMode, Predicate, Provenance,
+    ProvenanceStatus, ResidenceEpisode, SocialAttributeEpisode, SocialEntity, SocialRelation,
+    TimeSpan, Visibility,
 };
+use super::naming::{self, NameContext, Pack, NAMING_RULE};
 use super::offices::{
     mayor_office, resolve_office, AppointmentRule, OfficeDefinition, OfficeRequirements,
     OfficeView, SelectionBinding, SelectionProof, Tenure, TenureEnd, TenureMode, COUNCIL_ROLE,
@@ -76,6 +78,8 @@ pub struct SocialInputs {
     pub site_control: BTreeMap<String, Vec<ControlEpisode>>,
     pub domains: Vec<DemographicDomain>,
     pub canon_events: Vec<HistoryEvent>,
+    /// Frozen naming input. `None` explicitly selects the declared fallback.
+    pub naming_pack: Option<&'static Pack>,
 }
 impl SocialInputs {
     pub fn from_canon(canon: &GeneralCanon) -> Self {
@@ -94,6 +98,7 @@ impl SocialInputs {
             site_control: canon.site_control.clone(),
             domains: canon.domains.clone(),
             canon_events: canon.events.clone(),
+            naming_pack: Some(naming::frozen_pack()),
         }
     }
 }
@@ -111,9 +116,9 @@ string_enum!(MembershipEnd {
     Split,
     Ineligible
 });
-/// Declared fallback until the Namebench pack exists (§23.3). `name_tree` stays
-/// absent; the view renders this from `kind`, `site_id` and `ordinal`. `tone` is the
-/// founding class, given once.
+/// Legacy naming descriptor retained for API compatibility. When `name_tree` is
+/// present its provenance identifies Namebench; only `name_fallback` is a fallback.
+/// `tone` is the founding class, given once.
 #[derive(Clone, Debug, PartialEq, Eq, Serialize)]
 pub struct FallbackName {
     pub kind: String,
@@ -136,6 +141,7 @@ pub struct GroupRecord {
     pub origin: GroupOrigin,
     pub split_from: Option<String>,
     pub name: FallbackName,
+    pub name_fallback: Option<FallbackName>,
 }
 /// Compact `member_of`, `employed_by` or `affiliated_with` link; `membership_relation`
 /// gives the addressed fact. `group` indexes `SocialPacket::groups`.
@@ -209,6 +215,19 @@ pub struct SiteViews {
     pub household_archetype_id: Option<String>,
     pub lineage_archetype_id: Option<String>,
 }
+/// A name of an existing provider household or simulated-core lineage. This is
+/// naming metadata for a view, not another organization or another population.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
+pub struct PersonGroupName {
+    pub subject_ref: String,
+    pub view_kind: String,
+    pub archetype_id: String,
+    pub site_id: String,
+    /// Caller-side family key; the host supplies its surname label to `render`.
+    pub surname_ref: String,
+    pub name_tree: Option<NameTree>,
+    pub name_fallback: Option<FallbackName>,
+}
 #[derive(Clone, Debug, PartialEq, Eq, Serialize)]
 pub struct SocialPacket {
     pub canon_id: String,
@@ -228,6 +247,7 @@ pub struct SocialPacket {
     pub lives: Vec<PersonLife>,
     pub groups: Vec<GroupRecord>,
     pub site_views: BTreeMap<String, SiteViews>,
+    pub person_group_names: Vec<PersonGroupName>,
     pub memberships: Vec<Membership>,
     pub links: Vec<PersonLink>,
     pub offices: Vec<OfficeDefinition>,
@@ -253,6 +273,151 @@ fn social_error(key: &str, owner: &str, year: Option<i32>) -> HistoryError {
         ..HistoryError::new(ErrorCode::InvalidPopulationResult, key)
     }
 }
+pub(crate) fn founding_group_axes(
+    inputs: &SocialInputs,
+    group_id: &str,
+    archetype: &str,
+) -> Result<AlignmentAxes, HistoryError> {
+    let a = inputs
+        .catalogue
+        .archetype_alignment
+        .get(archetype)
+        .ok_or_else(|| social_error("social.archetype_without_alignment", archetype, None))?;
+    let axis = |name, spread: i32| {
+        let parts = [ALIGNMENT_SUBSTREAM, "group", name, group_id];
+        three_draws(inputs.world_seed, &parts, spread.div_euclid(2))
+    };
+    clamp_axes(
+        a.morality_bps + axis("morality", a.morality_spread_bps)?,
+        a.lawfulness_bps + axis("lawfulness", a.lawfulness_spread_bps)?,
+    )
+}
+
+/// Assign a canonical name once. Person-derived callers supply a stable surname
+/// reference, resolved to display text by the host rather than copied into the tree.
+pub fn initialize_organization_name(
+    inputs: &SocialInputs,
+    entity: &mut SocialEntity,
+    site: &SettlementAnchor,
+    region_id: &str,
+    axes: AlignmentAxes,
+    surname_ref: Option<&str>,
+) -> Result<(), HistoryError> {
+    let definition = inputs
+        .catalogue
+        .archetype_definitions
+        .iter()
+        .find(|a| a.id == entity.archetype_id)
+        .ok_or_else(|| social_error("social.unknown_archetype", &entity.archetype_id, None))?;
+    let observed = entity.existence.start_year.max(inputs.timeline.start_year);
+    let thresholds = inputs
+        .catalogue
+        .engine_defaults
+        .alignment
+        .conduct_class_thresholds
+        .organization
+        .into();
+    let tone = conduct_class(axes, &thresholds);
+    if entity.name_tree.is_none() {
+        if let Some(pack) = inputs.naming_pack {
+            let episode = site.episode_at(observed).expect("covering episodes");
+            // Choose the source variant, not the history family. Bootstrap
+            // groups use the earliest observed occupation (older data is absent).
+            let total: u64 = episode
+                .culture_weights
+                .values()
+                .map(|w| u64::from(*w))
+                .sum();
+            let mut draw = uniform_below(
+                inputs.world_seed,
+                &[NAMING_RULE, &entity.id, "culture"],
+                0,
+                total,
+            )?;
+            let culture = episode
+                .culture_weights
+                .iter()
+                .find(|(_, w)| {
+                    if draw < u64::from(**w) {
+                        true
+                    } else {
+                        draw -= u64::from(**w);
+                        false
+                    }
+                })
+                .expect("weighted culture")
+                .0;
+            let mut refs = BTreeMap::from([
+                ("site".into(), site.site_id.clone()),
+                ("region".into(), region_id.into()),
+            ]);
+            if let Some(polity) = inputs
+                .site_control
+                .get(&site.site_id)
+                .and_then(|episodes| episodes.iter().find(|e| e.valid.contains(observed)))
+                .map(|e| e.polity_id.as_str())
+            {
+                refs.insert("polity".into(), polity.into());
+            }
+            if let Some(surname) = surname_ref {
+                refs.insert("surname".into(), surname.into());
+            }
+            let activities: Vec<_> = episode
+                .activity_weights
+                .iter()
+                .filter(|(id, w)| **w > 0 && definition.activity_ids.contains(*id))
+                .collect();
+            let total: u64 = activities.iter().map(|(_, w)| u64::from(**w)).sum();
+            let activity = if total > 0 {
+                let mut draw = uniform_below(
+                    inputs.world_seed,
+                    &[NAMING_RULE, &entity.id, "activity"],
+                    0,
+                    total,
+                )?;
+                activities
+                    .into_iter()
+                    .find(|(_, w)| {
+                        if draw < u64::from(**w) {
+                            true
+                        } else {
+                            draw -= u64::from(**w);
+                            false
+                        }
+                    })
+                    .map(|(id, _)| id.clone())
+            } else {
+                None
+            };
+            let tone_name = match tone {
+                ConductClass::Lawless => "lawless",
+                ConductClass::Crooked => "crooked",
+                ConductClass::Ordinary => "ordinary",
+                ConductClass::Upright => "upright",
+                ConductClass::Saintly => "saintly",
+            };
+            let context = NameContext {
+                refs,
+                activity,
+                tone: Some(tone_name.into()),
+            };
+            entity.name_tree = match naming::expand_keyed(
+                pack,
+                &definition.name_profile,
+                culture,
+                &context,
+                inputs.world_seed,
+                &entity.id,
+            ) {
+                // An unsupported kind is an explicit, synthetic fallback.
+                Err(e) if e.constraint == "naming.unknown_kind" => None,
+                result => result?,
+            };
+        }
+    }
+    Ok(())
+}
+
 /// Rational stock rounded under a fixed key (§23.1).
 fn round_ratio(seed: u64, parts: &[&str], num: u128, den: u128) -> Result<u64, HistoryError> {
     const SCALE: u128 = 1_000_000;
@@ -702,25 +867,12 @@ impl<'a> Run<'a> {
         Ok((size.min + drawn as u32).min(size.max))
     }
     fn group_axes(&self, group_id: &str, archetype: &str) -> Result<AlignmentAxes, HistoryError> {
-        let a = self
-            .inputs
-            .catalogue
-            .archetype_alignment
-            .get(archetype)
-            .ok_or_else(|| social_error("social.archetype_without_alignment", archetype, None))?;
-        let axis = |name, spread: i32| {
-            let parts = [ALIGNMENT_SUBSTREAM, "group", name, group_id];
-            three_draws(self.world_seed, &parts, spread.div_euclid(2))
-        };
-        clamp_axes(
-            a.morality_bps + axis("morality", a.morality_spread_bps)?,
-            a.lawfulness_bps + axis("lawfulness", a.lawfulness_spread_bps)?,
-        )
+        founding_group_axes(self.inputs, group_id, archetype)
     }
     /// Registers a group of either origin with its runtime state.
     fn adopt(
         &mut self,
-        entity: SocialEntity,
+        mut entity: SocialEntity,
         site: usize,
         target: Option<u32>,
         origin: GroupOrigin,
@@ -761,6 +913,35 @@ impl<'a> Run<'a> {
             .conduct_class_thresholds
             .organization
             .into();
+        let tone = conduct_class(axes, &thresholds);
+        initialize_organization_name(
+            inputs,
+            &mut entity,
+            self.sites[site],
+            &self.region.region_id,
+            axes,
+            None,
+        )?;
+        let name = FallbackName {
+            kind: definition.name_profile.clone(),
+            tone,
+            site_id: self.sites[site].site_id.clone(),
+            ordinal,
+            provenance: if entity.name_tree.is_some() {
+                Provenance {
+                    status: ProvenanceStatus::Derived,
+                    source_ref: format!("namebench:{}", naming::generation_fingerprint()),
+                    rule_id: NAMING_RULE.into(),
+                }
+            } else {
+                Provenance {
+                    status: ProvenanceStatus::Synthetic,
+                    source_ref: "name-fallback".into(),
+                    rule_id: SOCIAL_RULE.into(),
+                }
+            },
+        };
+        let name_fallback = entity.name_tree.is_none().then(|| name.clone());
         self.groups.push(GroupRecord {
             site_id: self.sites[site].site_id.clone(),
             axes,
@@ -771,17 +952,8 @@ impl<'a> Run<'a> {
             preemptible: definition.preemptible,
             origin,
             split_from,
-            name: FallbackName {
-                kind: definition.name_profile.clone(),
-                tone: conduct_class(axes, &thresholds),
-                site_id: self.sites[site].site_id.clone(),
-                ordinal,
-                provenance: Provenance {
-                    status: ProvenanceStatus::Synthetic,
-                    source_ref: "name-fallback".into(),
-                    rule_id: SOCIAL_RULE.into(),
-                },
-            },
+            name,
+            name_fallback,
             entity,
         });
         self.rt.push(GroupRuntime {
@@ -2552,6 +2724,122 @@ impl<'a> Run<'a> {
         }
         Ok(views)
     }
+    fn person_group_names(
+        &self,
+        views: &BTreeMap<String, SiteViews>,
+    ) -> Result<Vec<PersonGroupName>, HistoryError> {
+        // Earliest observed episode fixes each view's naming context. Later moves,
+        // members and query windows cannot choose a new surname or culture.
+        let table = &self.result.candidate_table;
+        let mut origins: BTreeMap<(&str, &str), (i32, usize, u32)> = BTreeMap::new();
+        for h in &self.result.household_episodes {
+            let Some(&site) = self.site_index.get(h.site_id.as_str()) else {
+                continue;
+            };
+            let year = h.valid.start_year.max(self.start);
+            if year >= self.horizon {
+                continue;
+            }
+            let Some(slot) = h
+                .member_slots
+                .iter()
+                .copied()
+                .min_by_key(|s| &table.origin_id[*s as usize])
+            else {
+                continue;
+            };
+            let candidate = (year, site, slot);
+            origins
+                .entry(("household", &h.household_id))
+                .and_modify(|current| *current = (*current).min(candidate))
+                .or_insert(candidate);
+        }
+        for slot in 0..table.len() {
+            if table.source[slot] != SlotSource::Simulated {
+                continue;
+            }
+            for &(site, from, _) in &self.spans[slot] {
+                let year = from.max(self.start);
+                if year >= self.horizon {
+                    continue;
+                }
+                let candidate = (year, site, slot as u32);
+                origins
+                    .entry(("lineage", &table.family_key[slot]))
+                    .and_modify(|current| *current = (*current).min(candidate))
+                    .or_insert(candidate);
+            }
+        }
+        let mut names = Vec::new();
+        for ((view_kind, subject), (year, site, slot)) in origins {
+            let site_id = &self.sites[site].site_id;
+            let Some(view) = views.get(site_id) else {
+                continue;
+            };
+            let archetype_id = if view_kind == "household" {
+                &view.household_archetype_id
+            } else {
+                &view.lineage_archetype_id
+            };
+            let Some(archetype_id) = archetype_id else {
+                continue;
+            };
+            let definition = &self.inputs.catalogue.archetype_definitions
+                [self.archetype_index(archetype_id).expect("view archetype")];
+            let surname = &table.family_key[slot as usize];
+            let mut refs = BTreeMap::from([
+                ("site".into(), site_id.clone()),
+                ("region".into(), self.region.region_id.clone()),
+                ("surname".into(), surname.clone()),
+            ]);
+            if let Some(polity) = self.jurisdiction_at(site, year) {
+                refs.insert("polity".into(), polity.into());
+            }
+            // These views have no organizational conduct axes. Ordinary is the
+            // neutral naming tone; it asserts no morality about a family.
+            let context = NameContext {
+                refs,
+                activity: Some(self.people[slot as usize].activity_id.clone()),
+                tone: Some("ordinary".into()),
+            };
+            let tree = if let Some(pack) = self.inputs.naming_pack {
+                match naming::expand_keyed(
+                    pack,
+                    &definition.name_profile,
+                    &self.people[slot as usize].culture_id,
+                    &context,
+                    self.world_seed,
+                    &format!("{view_kind}|{subject}"),
+                ) {
+                    Err(e) if e.constraint == "naming.unknown_kind" => None,
+                    result => result?,
+                }
+            } else {
+                None
+            };
+            let fallback = tree.is_none().then(|| FallbackName {
+                kind: definition.name_profile.clone(),
+                tone: ConductClass::Ordinary,
+                site_id: site_id.clone(),
+                ordinal: 0,
+                provenance: Provenance {
+                    status: ProvenanceStatus::Synthetic,
+                    source_ref: "name-fallback".into(),
+                    rule_id: SOCIAL_RULE.into(),
+                },
+            });
+            names.push(PersonGroupName {
+                subject_ref: subject.into(),
+                view_kind: view_kind.into(),
+                archetype_id: archetype_id.clone(),
+                site_id: site_id.clone(),
+                surname_ref: surname.clone(),
+                name_tree: tree,
+                name_fallback: fallback,
+            });
+        }
+        Ok(names)
+    }
     fn conflicts(&mut self, region_standings: &[&LegalStanding]) -> Result<(), HistoryError> {
         let by_id: BTreeMap<&str, usize> = self
             .groups
@@ -2600,6 +2888,8 @@ impl<'a> Run<'a> {
     fn finish(mut self) -> Result<SocialPacket, HistoryError> {
         let region = self.region;
         let inputs = self.inputs;
+        let site_views = self.site_views()?;
+        let person_group_names = self.person_group_names(&site_views)?;
         let local: BTreeSet<&str> = self.groups.iter().map(|g| g.entity.id.as_str()).collect();
         let region_standings: Vec<&LegalStanding> = region
             .standings
@@ -2646,7 +2936,6 @@ impl<'a> Run<'a> {
                 rule_id: SOCIAL_RULE.into(),
             });
         }
-        let site_views = self.site_views()?;
         // Sorted by ID, with indices rewritten: order of creation is not a fact.
         let mut order: Vec<usize> = (0..self.groups.len()).collect();
         order.sort_by(|a, b| self.groups[*a].entity.id.cmp(&self.groups[*b].entity.id));
@@ -2729,6 +3018,7 @@ impl<'a> Run<'a> {
             lives,
             groups,
             site_views,
+            person_group_names,
             memberships,
             links,
             offices,

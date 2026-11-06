@@ -35,7 +35,7 @@ fn orchestrator() -> Option<Orchestrator> {
     )
     .unwrap();
     // Kept between runs: a warm store still goes through `validate_population`.
-    let store = Store::new(Path::new(env!("CARGO_TARGET_TMPDIR")).join("s4-store"));
+    let store = Store::new(Path::new(env!("CARGO_TARGET_TMPDIR")).join("s4-naming-store"));
     Some(Orchestrator::open(inputs, settings, store).unwrap())
 }
 
@@ -53,6 +53,17 @@ fn real_worker_packet_gives_a_stable_mayor_and_a_closed_balance() {
         let population = orchestrator.population(domain).unwrap();
         let region = orchestrator.region_of(domain).unwrap();
         let packet = orchestrator.social_packet(domain).unwrap();
+        assert!(!packet.person_group_names.is_empty());
+        assert!(packet
+            .person_group_names
+            .iter()
+            .all(|n| n.name_tree.is_some() && n.name_fallback.is_none()));
+        assert!(packet
+            .person_group_names
+            .iter()
+            .any(
+                |n| n.name_tree.as_ref().unwrap().value()["parts"]["owner"]["id"] == n.surname_ref
+            ));
         let again = reverse.social_packet(&domains[1]).unwrap();
         let other = reverse.social_packet(&domains[0]).unwrap();
         let same = if *domain == domains[0] { other } else { again };

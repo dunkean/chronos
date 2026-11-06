@@ -561,6 +561,37 @@ fn same_firm_archetype_yields_several_conduct_classes() {
         .collect();
     assert!(classes.len() >= 3, "{classes:?}");
     assert!(classes.contains(&ConductClass::Ordinary));
+    for group in &packet.groups {
+        assert_eq!(
+            group.name.tone,
+            conduct_class(group.axes, &packet.organization_thresholds)
+        );
+        assert!(group.entity.name_tree.is_some());
+        assert!(group.name_fallback.is_none());
+        assert_eq!(group.name.provenance.rule_id, super::naming::NAMING_RULE);
+    }
+    let group = packet.groups.first().unwrap();
+    let mut entity = group.entity.clone();
+    let site = world
+        .canon
+        .atlas
+        .settlements
+        .iter()
+        .find(|s| s.site_id == group.site_id)
+        .unwrap();
+    super::social::initialize_organization_name(
+        &world.region.social,
+        &mut entity,
+        site,
+        &world.region.region_id,
+        super::model::AlignmentAxes::new(10_000, 10_000).unwrap(),
+        None,
+    )
+    .unwrap();
+    assert_eq!(
+        entity.name_tree, group.entity.name_tree,
+        "later conduct never renames a group"
+    );
 }
 
 #[test]
@@ -655,7 +686,22 @@ fn every_site_has_its_anchor_and_a_vacancy_is_a_valid_result() {
         assert_eq!(view.status, OfficeStatus::Vacant, "no person is invented");
         assert!(view.holder.is_none());
     }
-    assert!(packet.groups.iter().all(|g| g.entity.name_tree.is_none()));
+    assert!(packet.groups.iter().all(|g| g.entity.name_tree.is_some()));
+    assert!(packet.groups.iter().all(|g| g.name_fallback.is_none()));
+    let mut missing = world.region.clone();
+    std::sync::Arc::make_mut(&mut missing.social).naming_pack = None;
+    // Simulate a region created without the pack as well as a packet without it.
+    for group in &mut missing.groups {
+        group.entity.name_tree = None;
+    }
+    let fallback = build_from_result(&missing, &table(&world, &[]), END).unwrap();
+    assert!(fallback.groups.iter().all(|g| g.entity.name_tree.is_none()
+        && g.name_fallback.as_ref().is_some_and(
+            |name| name.provenance.status == super::model::ProvenanceStatus::Synthetic
+        )));
+    assert_eq!(packet.memberships, fallback.memberships);
+    assert_eq!(packet.tenures, fallback.tenures);
+    assert_eq!(packet.events, fallback.events);
 }
 
 #[test]

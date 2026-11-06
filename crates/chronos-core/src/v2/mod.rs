@@ -7,6 +7,7 @@ pub mod general;
 pub mod ids;
 pub mod influence;
 pub mod model;
+pub mod naming;
 pub mod offices;
 pub mod population;
 pub mod recruit;

@@ -5,6 +5,9 @@ the English text, under "Méthode sociale v2".
 
 ## Implemented state
 
+L5 naming is implemented separately in [Organization naming v2](naming-v2.md),
+including its complete French translation and frozen Namebench provenance.
+
 The public module `chronos_core::v2` delivers the data contracts of batch S0.
 It is independent of `chronos-history-1`: the only addition to v1 code is
 `pub mod v2;`. `chronos-social-2` names the v2 family without announcing a
@@ -180,9 +183,8 @@ Error: `InvalidRecordIdentity`.
 `resolve_impact` call these checks. A group slot does not constrain `kind`,
 which its address does not carry.
 
-`SocialEntity.name_tree` reserves the name tree that the Namebench grammar will
-produce. Chronos will store the tree in the canon; the text will be rendered at
-display time. S0 types it as `NameTree`, an opaque JSON value that passes the
+`SocialEntity.name_tree` stores the tree produced by the frozen Namebench grammar.
+The canonical tree is rendered to text only at display time. S0 types it as `NameTree`, an opaque JSON value that passes the
 canonical check at construction as at reading: a float is rejected there. The
 field is absent as long as no tree exists, `null` is not accepted in its place,
 and S0 contains no generation logic.
@@ -505,8 +507,11 @@ jurisdiction, and from its bodies. Conversely, an open proscribed group never re
 an office or seat of the jurisdiction that proscribes it. The private head of a group is not an
 office of the jurisdiction.
 
-**Names.** `GroupRecord.name` is a declared `synthetic` fallback with the archetype's exact
-`name_profile` kind and founding tone. `name_tree` stays absent and Namebench is not called.
+**Names (L5).** `name_tree` is expanded once from the frozen Namebench pack, exact
+`name_profile`, source culture and founding tone. `GroupRecord.name` remains a legacy
+descriptor; `name_fallback` is explicitly `synthetic` only without a pack or an
+expandable kind. Household/core-lineage name trees are in `person_group_names`.
+See [the implemented naming method](naming-v2.md).
 
 **Influence.** `influence::influence_at` reads a packet: strength from realized members,
 attenuation by travel days, persistence after the group's end, capped per channel.
@@ -744,9 +749,8 @@ son ID adresse. Erreur : `InvalidRecordIdentity`.
 appellent ces contrôles. Un slot de groupe ne contraint pas `kind`, que son adresse
 ne porte pas.
 
-`SocialEntity.name_tree` réserve l'arbre de nom que produira la grammaire
-Namebench. Chronos stockera l'arbre dans le canon ; le texte sera rendu à
-l'affichage. S0 le type comme `NameTree`, valeur JSON opaque qui passe le
+`SocialEntity.name_tree` stocke l'arbre produit par la grammaire Namebench figée.
+L'arbre canonique n'est rendu en texte qu'à l'affichage. S0 le type comme `NameTree`, valeur JSON opaque qui passe le
 contrôle canonique à la construction comme à la lecture : un flottant y est
 refusé. Le champ est absent tant qu'aucun arbre n'existe, `null` n'est pas
 accepté à sa place, et S0 ne contient aucune logique de génération.
@@ -1069,8 +1073,11 @@ cette juridiction et de ses corps. À l'inverse, un groupe ouvert proscrit ne re
 d'un office ou d'un siège de la juridiction qui le proscrit. Le chef privé d'un groupe n'est pas un office
 de la juridiction.
 
-**Noms.** `GroupRecord.name` est un repli déclaré `synthetic`, avec le kind exact de `name_profile` et le
-ton de fondation. `name_tree` reste absent et Namebench n'est pas appelé.
+**Noms (L5).** `name_tree` est développé une fois depuis le pack Namebench figé,
+le `name_profile` exact, la culture source et le ton de fondation. `GroupRecord.name`
+conserve le descripteur historique ; `name_fallback` est explicitement `synthetic`
+uniquement sans pack ou sans kind développable. Les arbres des vues de ménages/lignées
+simulées sont dans `person_group_names`. Voir [la méthode implémentée](naming-v2.md).
 
 **Influence.** `influence::influence_at` lit un paquet : force tirée des membres réalisés, atténuation
 par jours de trajet, persistance après la fin du groupe, plafond par canal.

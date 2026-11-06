@@ -15,7 +15,7 @@ use super::model::{
 use super::population::{
     BoundaryPort, PortMode, PortRateBasis, PortRateEpisode, PortUnit, ShockEffects,
 };
-use super::social::SocialInputs;
+use super::social::{founding_group_axes, initialize_organization_name, SocialInputs};
 use super::validate::{
     causal_ranks, validate_legal_standings, LEGAL_CHANGE_EVENT_KINDS,
     SUBJECT_DISSOLUTION_EVENT_KIND, SUBJECT_FOUNDATION_EVENT_KIND,
@@ -869,6 +869,8 @@ enum Op {
 /// Group slots and legal chains of a region (§23.1, §27.3).
 struct RegionRun<'a> {
     canon: &'a GeneralCanon,
+    naming_inputs: &'a SocialInputs,
+    region_id: &'a str,
     owner: Owner,
     baselines: &'a BTreeMap<String, BTreeMap<i32, u64>>,
     ledger: EventLedger,
@@ -956,6 +958,16 @@ impl RegionRun<'_> {
             },
             site_id: site_id.into(),
         });
+        let entity = &mut self.groups.last_mut().expect("new group").entity;
+        let site = self
+            .canon
+            .atlas
+            .settlements
+            .iter()
+            .find(|s| s.site_id == site_id)
+            .expect("group site");
+        let axes = founding_group_axes(self.naming_inputs, &entity.id, &archetype.id)?;
+        initialize_organization_name(self.naming_inputs, entity, site, self.region_id, axes, None)?;
         Ok(self.groups.len() - 1)
     }
     /// Own-stock groups (§23.1): the expected stock at bootstrap with uniform ages,
@@ -1510,8 +1522,11 @@ pub fn plan_region(canon: &GeneralCanon, region_id: &str) -> Result<RegionPlan, 
     let contexts = external_contexts(canon, region_id)?;
     let mut ledger = EventLedger::new();
     let displacements = compile_displacements(canon, &shocks, &contexts, &baselines, &mut ledger)?;
+    let social = Arc::new(SocialInputs::from_canon(canon));
     let mut run = RegionRun {
         canon,
+        naming_inputs: &social,
+        region_id,
         owner: Owner::cell(&canon.canon_id, region_id),
         baselines: &baselines,
         ledger,
@@ -1553,7 +1568,7 @@ pub fn plan_region(canon: &GeneralCanon, region_id: &str) -> Result<RegionPlan, 
         groups,
         events,
         standings,
-        social: Arc::new(SocialInputs::from_canon(canon)),
+        social,
     })
 }
 

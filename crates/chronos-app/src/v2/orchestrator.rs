@@ -7,6 +7,7 @@ use chronos_core::v2::canonical::canonical_bytes;
 use chronos_core::v2::catalog::HistoryCatalogue;
 use chronos_core::v2::general::{build_canon, AuthorConstraints, GeneralCanon, WorldConfig};
 use chronos_core::v2::model::{ErrorCode, HistoryError};
+use chronos_core::v2::naming;
 use chronos_core::v2::population::{
     parse_population_result, plan_canonical_bytes, plan_population, validate_population,
     PopulationPlan, VerifiedPopulation, POPULATION_RESULT_FORMAT,
@@ -34,6 +35,7 @@ fn input_error(key: &str, path: &Path, detail: impl ToString) -> HistoryError {
         format!("{}: {}", path.display(), detail.to_string()),
     )
 }
+
 /// Frozen inputs of a world, with the exact bytes their fingerprints cover (§4.2).
 #[derive(Clone, Debug)]
 pub struct WorldInputs {
@@ -94,7 +96,9 @@ fn world_manifest(
         "packs": {
             "atlas": sha256_hex(&inputs.atlas_bytes),
             "catalogue": sha256_hex(&inputs.catalogue_bytes),
+            "naming_generation": naming::generation_fingerprint(),
         },
+        "naming_algorithm": naming::NAMING_RULE,
         "runtime_fingerprint": runtime.fingerprint,
         "runtime": runtime.manifest,
     }))
@@ -205,7 +209,12 @@ impl Orchestrator {
             &config.canon_id,
             &canonical_bytes(&manifest)?,
             &canon.canonical_bytes()?,
-            &[inputs.atlas_bytes, inputs.catalogue_bytes],
+            &[
+                inputs.atlas_bytes,
+                inputs.catalogue_bytes,
+                naming::PACK_BYTES.to_vec(),
+                naming::MANIFEST_BYTES.to_vec(),
+            ],
         )?;
         Ok(Self {
             canon,
@@ -349,5 +358,53 @@ impl Orchestrator {
         let packet = Arc::new(build_social_packet(&region, &population)?);
         packets.insert(domain_id.to_string(), packet.clone());
         Ok(packet)
+    }
+}
+
+#[cfg(test)]
+mod naming_tests {
+    use super::*;
+    #[test]
+    fn naming_manifest_pins_generation_and_excludes_rendering() {
+        let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../..");
+        let inputs = WorldInputs::load(
+            &root.join("fixtures/social-v2/region-demo.world.json"),
+            &root.join("fixtures/social-v2/region-demo.atlas.json"),
+            &root.join("docs/design/chronos-social-v2/culture-bindings.v1.json"),
+        )
+        .unwrap();
+        let runtime = RuntimeIdentity {
+            fingerprint: "test-runtime".into(),
+            manifest: json!({}),
+        };
+        let manifest = world_manifest(&inputs, &inputs.config, &runtime).unwrap();
+        assert_eq!(
+            manifest["packs"]["naming_generation"],
+            naming::generation_fingerprint()
+        );
+        assert!(!serde_json::to_string(&manifest)
+            .unwrap()
+            .contains(naming::rendering_fingerprint()));
+        let pack: Value = serde_json::from_slice(naming::PACK_BYTES).unwrap();
+        let concepts: Vec<_> = pack["concepts"]
+            .as_object()
+            .unwrap()
+            .values()
+            .map(|c| json!({"id":c["id"],"class":c["class"],"tags":c["tags"],"stems":c["stems"]}))
+            .collect();
+        let cultures: Vec<_> = pack["cultures"]
+            .as_object()
+            .unwrap()
+            .values()
+            .map(|c| json!({"id":c["id"],"language":c["language"],"palette":c["palette"]}))
+            .collect();
+        let generation = json!({"patterns":pack["patterns"],"exclusions":pack["exclusions"],"concepts":concepts,"cultures":cultures});
+        let mut bytes = canonical_bytes(&generation).unwrap();
+        bytes.push(b'\n'); // Namebench canonical JSON includes a final newline.
+        assert_eq!(sha256_hex(&bytes), naming::generation_fingerprint());
+        let rendering = json!({"forms":pack["concepts"].as_object().unwrap().iter().map(|(id,c)| (id.clone(),c["forms"].clone())).collect::<BTreeMap<_,_>>(),"languages":pack["languages"]});
+        let mut bytes = canonical_bytes(&rendering).unwrap();
+        bytes.push(b'\n');
+        assert_eq!(sha256_hex(&bytes), naming::rendering_fingerprint());
     }
 }
