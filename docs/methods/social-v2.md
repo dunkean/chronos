@@ -1,4 +1,4 @@
-# Social v2 method: S0 core and S2 batch
+# Social v2 method: S0 core, S2 batch and S3 host
 
 English is the source of this document. The complete French translation follows
 the English text, under "Méthode sociale v2".
@@ -403,10 +403,63 @@ numbers its events across regions, so adding one shifts those ordinals.
 `spared_village_keeps_baseline_target` at plan level and `plan_region` call order. No
 performance is measured, and no provider has run these plans.
 
+## S3: worker host, validation and cache
+
+### Implemented
+
+`chronos-app` runs the Lineage Lab worker as a child process, JSONL on stdin/stdout, from
+an argument list. Each job uses a fresh process and a private job root. `prepare` sends the
+plan in canonical list order, then `materialize` returns `result_ref`. The host checks, in
+order: the path stays in the job directory, size, SHA-256, canonical bytes, then
+`result_fingerprint`. Any failure is a typed error, leaves no package and selects no other
+provider.
+
+`validate_population(plan, result)` is pure and reads tables only: references, coverage,
+chronology on `(year, phase)`, one unbroken residence chain per slot, one household per
+resident, reciprocal kinship, sparse counts, and balances per site-year and per domain.
+`validation_proof` from the worker is not trusted. `VerifiedPopulation` has private fields
+and no deserializer, so a warm read validates again.
+
+`canon_id` is now host-derived: `canon-` plus the first 32 hex digits of the SHA-256 of the
+normalized manifest (resolved configuration, constraints, atlas and catalogue byte
+fingerprints, runtime manifest and `runtime_fingerprint`). The `canon_id` of a world file
+is ignored. A file with `synthetic-runtime-not-pinned` is pinned to the runtime found;
+another pinned value fails with `ProviderVersionMismatch`. A changed provider source
+therefore gives another canon, with other domain and plan IDs.
+
+Packages are immutable under `worlds/<canon>/`, published by one rename. File names are the
+SHA-256 of the ID, as §16.1 allows; the real IDs are compared on every read. The population
+cache key covers canon, owner, plan and region fingerprints, versions, protocol, format and
+detail level. A damaged package is an error and is never recomputed silently. One domain is
+resolved once; concurrent requests share its job, and a failed job can be replayed.
+
+### Limits
+
+`fixed_people`, `exact_constraints` and role demands are not checked: S3 plans leave them
+empty. Pack fingerprints cover file bytes, so line endings change the canon. The number of
+concurrent workers is not capped. There is no archive-only mode: opening a world needs the
+runtime. Directory entries are not flushed after a rename.
+
+### Validation and measures
+
+`crates/chronos-core/tests/v2_s3.rs` holds `crisis_is_applied_once` and the tampered balance
+test. `crates/chronos-app/tests/v2_s3.rs` runs the real worker when `CHRONOS_PYTHON` and
+`CHRONOS_LINEAGE_SRC` are set, and otherwise skips with a message.
+
+Measured on 2026-11-06, release build, i9-12900K, Windows 11, demo fixture with world seed
+11, full century, on a frozen copy matching provider commit `67f7842` (runtime `6ef2eee98aad`),
+one sample per case, on a machine shared with other work:
+
+| Domain | Slots | Archive | First run, empty JIT cache | Worker run, JIT cached | Warm read | Host peak |
+|---|---:|---:|---:|---:|---:|---:|
+| 0 | 19,266 | 146.8 MiB | 28.5 s | not measured | 2.8 s | 899 MiB |
+| 1 | 24,137 | 187.5 MiB | 34.1 s | 28.5 s | 3.3 s | 1,066 MiB |
+
+The worker's own memory was not measured here.
+
 ## Proposed, not implemented
 
-S3–S8 keep their scope in the study: demographic provider, result validation and
-balance reports, recruitment, API and views, exact personal constraints, bridges
+S4–S8 keep their scope in the study: balance reports, recruitment, API and views, exact personal constraints, bridges
 and optimizations. The function signatures proposed in §14.1 are not executable
 stubs in S0. Catalogue sources other than the atlas, axis generation,
 `alignment_fit`, ineligibility and rendering of name trees belong to later
@@ -828,10 +881,65 @@ ajouter un décale ces ordinaux.
 `plan_region`. Aucune performance n'est mesurée, et aucun fournisseur n'a exécuté ces
 plans.
 
+## S3 : hôte du worker, validation et cache
+
+### Implémenté
+
+`chronos-app` lance le worker Lineage Lab comme processus enfant, en JSONL sur stdin/stdout,
+depuis une liste d'arguments. Chaque job a un processus neuf et une racine de job privée.
+`prepare` envoie le plan dans l'ordre canonique de ses listes, puis `materialize` renvoie
+`result_ref`. L'hôte vérifie dans l'ordre : chemin dans le répertoire du job, taille, SHA-256,
+octets canoniques, puis `result_fingerprint`. Tout échec est une erreur typée, ne laisse aucun
+paquet et ne choisit aucun autre fournisseur.
+
+`validate_population(plan, result)` est pure et ne lit que les tables : références, couverture,
+chronologie sur `(année, phase)`, une seule chaîne de résidences continue par slot, un ménage
+par résident, parenté réciproque, comptes clairsemés et bilans par site-année et par domaine.
+Le `validation_proof` du worker n'est pas pris pour acquis. `VerifiedPopulation` a des champs
+privés et aucun désérialiseur : une lecture à chaud revalide donc le résultat.
+
+`canon_id` est désormais dérivé par l'hôte : `canon-` suivi des 32 premiers chiffres hexadécimaux
+du SHA-256 du manifeste normalisé (configuration résolue, contraintes, empreintes d'octets de
+l'atlas et du catalogue, manifeste du runtime et `runtime_fingerprint`). Le `canon_id` d'un
+fichier de monde est ignoré. Un fichier portant `synthetic-runtime-not-pinned` est épinglé sur le
+runtime trouvé ; une autre valeur épinglée échoue avec `ProviderVersionMismatch`. Un code
+fournisseur modifié donne donc un autre canon, avec d'autres IDs de domaines et de plans.
+
+Les paquets sont immuables sous `worlds/<canon>/` et publiés par un seul renommage. Les noms de
+fichiers sont le SHA-256 de l'ID, comme le permet le §16.1 ; les vrais IDs sont comparés à chaque
+lecture. La clé de cache de population couvre canon, propriétaire, empreintes du plan et de la
+région, versions, protocole, format et niveau de détail. Un paquet endommagé est une erreur et
+n'est jamais recalculé en silence. Un domaine est résolu une fois ; les requêtes concurrentes
+partagent son job, et un job échoué peut être rejoué.
+
+### Limites
+
+`fixed_people`, `exact_constraints` et les demandes de rôles ne sont pas vérifiés : les plans S3
+les laissent vides. Les empreintes de packs portent sur les octets des fichiers : les fins de
+ligne changent donc le canon. Le nombre de workers concurrents n'est pas plafonné. Il n'y a pas de
+mode archive seule : ouvrir un monde exige le runtime. Les entrées de répertoire ne sont pas
+synchronisées après un renommage.
+
+### Validation et mesures
+
+`crates/chronos-core/tests/v2_s3.rs` contient `crisis_is_applied_once` et le test de bilan falsifié.
+`crates/chronos-app/tests/v2_s3.rs` exécute le vrai worker si `CHRONOS_PYTHON` et
+`CHRONOS_LINEAGE_SRC` sont définis, et sinon s'ignore avec un message.
+
+Mesuré le 2026-11-06, build release, i9-12900K, Windows 11, fixture de démonstration avec la seed
+de monde 11, siècle complet, sur une copie figée conforme au commit fournisseur `67f7842` (runtime
+`6ef2eee98aad`), un échantillon par cas, sur une machine partagée avec d'autres travaux :
+
+| Domaine | Slots | Archive | Premier lancement, cache JIT vide | Worker, JIT en cache | Lecture à chaud | Pic de l'hôte |
+|---|---:|---:|---:|---:|---:|---:|
+| 0 | 19 266 | 146,8 Mio | 28,5 s | non mesuré | 2,8 s | 899 Mio |
+| 1 | 24 137 | 187,5 Mio | 34,1 s | 28,5 s | 3,3 s | 1 066 Mio |
+
+La mémoire du worker lui-même n'a pas été mesurée ici.
+
 ## Proposé, non implémenté
 
-S3–S8 conservent leur périmètre dans l'étude : fournisseur
-démographique, validation des résultats et bilans, recrutement, API et vues,
+S4–S8 conservent leur périmètre dans l'étude : bilans, recrutement, API et vues,
 contraintes personnelles exactes, ponts et optimisations. Les signatures de
 fonctions proposées au §14.1 ne sont pas des stubs exécutables dans S0. Sources de
 catalogue autres que l'atlas, génération des axes, `alignment_fit`, inéligibilité et rendu des arbres de

@@ -4,6 +4,8 @@
 //!   chronos-app [serve] [--port 8785] [--root DIR] [--fixture FILE] [--web DIR]
 //!   chronos-app generate [--config FILE] [--out FILE] [--root DIR] [--fixture FILE]
 //!   chronos-app check WORLD.json [--root DIR] [--fixture FILE]
+//!   chronos-app v2 materialize --world FILE --domain ID --out DIR
+//!       [--atlas FILE] [--catalogue FILE] [--python FILE] [--lineage-src DIR]
 
 mod server;
 
@@ -11,6 +13,9 @@ use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 use std::time::Instant;
 
+use chronos_app::v2::lineage_worker::WorkerSettings;
+use chronos_app::v2::orchestrator::{Orchestrator, WorldInputs};
+use chronos_app::v2::store::Store;
 use chronos_core::{generate_world, replay_hash, validate_world, Config, StackFixture, World};
 
 pub const DEFAULT_PORT: u16 = 8785;
@@ -135,6 +140,12 @@ struct Args {
     web: Option<PathBuf>,
     config: Option<PathBuf>,
     out: Option<PathBuf>,
+    world: Option<PathBuf>,
+    atlas: Option<PathBuf>,
+    catalogue: Option<PathBuf>,
+    domain: Option<String>,
+    python: Option<PathBuf>,
+    lineage_src: Option<PathBuf>,
 }
 
 fn parse_args() -> Result<Args, String> {
@@ -147,6 +158,12 @@ fn parse_args() -> Result<Args, String> {
         web: None,
         config: None,
         out: None,
+        world: None,
+        atlas: None,
+        catalogue: None,
+        domain: None,
+        python: None,
+        lineage_src: None,
     };
     let mut it = std::env::args().skip(1);
     let mut first = true;
@@ -163,6 +180,12 @@ fn parse_args() -> Result<Args, String> {
             "--web" => args.web = Some(value("--web")?.into()),
             "--config" => args.config = Some(value("--config")?.into()),
             "--out" => args.out = Some(value("--out")?.into()),
+            "--world" => args.world = Some(value("--world")?.into()),
+            "--atlas" => args.atlas = Some(value("--atlas")?.into()),
+            "--catalogue" => args.catalogue = Some(value("--catalogue")?.into()),
+            "--domain" => args.domain = Some(value("--domain")?),
+            "--python" => args.python = Some(value("--python")?.into()),
+            "--lineage-src" => args.lineage_src = Some(value("--lineage-src")?.into()),
             "-h" | "--help" => args.command = "help".into(),
             _ if first && !a.starts_with('-') => args.command = a,
             _ if !a.starts_with('-') => args.positional.push(a),
@@ -180,7 +203,12 @@ const HELP: &str = "Chronos — générateur de chronologie déterministe
   chronos-app generate [--config config.json] [--out world.json]
       Génère un monde (generation_ms = 0 pour un export identique octet pour octet).
   chronos-app check world.json
-      Valide un export et compare au rejeu si les mêmes sources sont disponibles.";
+      Valide un export et compare au rejeu si les mêmes sources sont disponibles.
+  chronos-app v2 materialize --world FILE --domain ID|INDEX --out DIR
+      [--atlas FILE] [--catalogue FILE] [--python FILE] [--lineage-src DIR]
+      Runs the Lineage Lab worker for one domain and caches the verified population.
+      Interpreter: --python, CHRONOS_PYTHON, .venv. Provider: --lineage-src,
+      CHRONOS_LINEAGE_SRC, ../lineage-lab/src.";
 
 fn main() -> ExitCode {
     let args = match parse_args() {
@@ -213,6 +241,7 @@ fn main() -> ExitCode {
         "serve" => server::serve(args.port, paths),
         "generate" => cmd_generate(&args, &paths),
         "check" => cmd_check(&args, &paths),
+        "v2" => cmd_v2(&args, &root),
         other => Err(format!("commande inconnue : {other}\n\n{HELP}")),
     };
     match result {
@@ -276,5 +305,85 @@ fn cmd_check(args: &Args, paths: &Paths) -> Result<(), String> {
     for w in &world.warnings[before..] {
         println!("  {w}");
     }
+    Ok(())
+}
+
+fn cmd_v2(args: &Args, root: &Path) -> Result<(), String> {
+    match args.positional.first().map(String::as_str) {
+        Some("materialize") => cmd_v2_materialize(args, root),
+        _ => Err(format!(
+            "v2 expects a subcommand
+
+{HELP}"
+        )),
+    }
+}
+
+/// `region-demo.world.json` sits next to `region-demo.atlas.json`.
+fn sibling_atlas(world: &Path) -> PathBuf {
+    let name = world.file_name().unwrap_or_default().to_string_lossy();
+    world.with_file_name(name.replace(".world.json", ".atlas.json"))
+}
+
+/// A domain ID depends on the pinned canon, so an index is accepted too.
+fn select_domain(domains: &[String], wanted: &str) -> Result<String, String> {
+    let by_index = wanted.parse::<usize>().ok().and_then(|i| domains.get(i));
+    by_index
+        .or_else(|| domains.iter().find(|id| *id == wanted))
+        .cloned()
+        .ok_or_else(|| {
+            let known: Vec<_> = domains
+                .iter()
+                .enumerate()
+                .map(|(i, id)| format!("  {i}: {id}"))
+                .collect();
+            format!(
+                "unknown domain {wanted}; this canon has:
+{}",
+                known.join(
+                    "
+"
+                )
+            )
+        })
+}
+
+fn cmd_v2_materialize(args: &Args, root: &Path) -> Result<(), String> {
+    let describe = |e: chronos_core::v2::model::HistoryError| format!("{e} {:?}", e.params);
+    let world = args.world.as_ref().ok_or("--world is required")?;
+    let wanted = args.domain.as_ref().ok_or("--domain is required")?;
+    let out = args.out.as_ref().ok_or("--out is required")?;
+    let atlas = args.atlas.clone().unwrap_or_else(|| sibling_atlas(world));
+    let catalogue = args
+        .catalogue
+        .clone()
+        .unwrap_or_else(|| root.join("docs/design/chronos-social-v2/culture-bindings.v1.json"));
+    let settings = WorkerSettings::resolve(
+        args.python.clone(),
+        args.lineage_src.clone(),
+        root,
+        out.join(".cache"),
+    );
+    let started = Instant::now();
+    let inputs = WorldInputs::load(world, &atlas, &catalogue).map_err(describe)?;
+    let orchestrator = Orchestrator::open(inputs, settings, Store::new(out)).map_err(describe)?;
+    let opened = started.elapsed();
+    let domain = select_domain(&orchestrator.domain_ids(), wanted)?;
+    let population = orchestrator.population(&domain).map_err(describe)?;
+    let result = population.result();
+    let summary = serde_json::json!({
+        "canon_id": orchestrator.canon().canon_id,
+        "runtime_fingerprint": orchestrator.runtime_fingerprint(),
+        "domain_id": domain,
+        "plan_id": result.plan_id,
+        "plan_fingerprint": result.plan_fingerprint,
+        "result_fingerprint": result.result_fingerprint,
+        "candidate_slots": result.candidate_table.len(),
+        "worker_runs": orchestrator.worker_runs(),
+        "open_seconds": opened.as_secs_f64(),
+        "total_seconds": started.elapsed().as_secs_f64(),
+        "world_dir": orchestrator.store().world_dir(&orchestrator.canon().canon_id),
+    });
+    println!("{summary}");
     Ok(())
 }

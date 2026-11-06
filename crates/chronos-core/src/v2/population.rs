@@ -1486,3 +1486,1192 @@ pub fn plan_population(
     validate_plan(&plan, &plan_references(canon, region)?)?;
     Ok(plan)
 }
+
+/// Format of the complete provider file (§13).
+pub const POPULATION_RESULT_FORMAT: &str = "population-result-json-1";
+/// Version of the checks `validate_population` runs; recorded in its proof.
+pub const POPULATION_VALIDATOR: &str = "chronos-core-population-1";
+
+/// Who produced a slot: the simulated core or the projected background.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum SlotSource {
+    Simulated,
+    Projected,
+}
+/// Deaths, exits and coverage ends are different states (§24.3).
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum DepartureState {
+    Dead,
+    DepartedExternal,
+    ResidentAtCoverageEnd,
+}
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum OriginType {
+    Founder,
+    Birth,
+    Arrival,
+}
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum ResidenceEnd {
+    Death,
+    Transfer,
+    DepartedExternal,
+    CoverageEnd,
+}
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum HouseholdKind {
+    Single,
+    Union,
+    SyntheticCare,
+}
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum UnionSource {
+    Simulated,
+    Projected,
+    IncomingFormed,
+}
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct CoreAttributes {
+    pub status_rank: u32,
+    pub activity_id: String,
+    pub observation: String,
+}
+/// Columns of every slot that resided in the domain (§8.2), sorted by `origin_id`.
+/// A person reference elsewhere is a zero-based row here, `null` when unknown.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct CandidateTable {
+    pub origin_id: Vec<String>,
+    pub origin_cohort_id: Vec<String>,
+    pub sex_ordinal: Vec<u32>,
+    pub source: Vec<SlotSource>,
+    pub ancestry_id: Vec<String>,
+    pub sex: Vec<u8>,
+    pub birth_year: Vec<i32>,
+    pub death_year: Vec<Option<i32>>,
+    pub death_site_id: Vec<Option<String>>,
+    pub coverage_start_year: Vec<i32>,
+    pub coverage_end_year: Vec<i32>,
+    pub departure_state: Vec<DepartureState>,
+    pub departure_year: Vec<Option<i32>>,
+    pub mother_slot: Vec<Option<u32>>,
+    pub father_slot: Vec<Option<u32>>,
+    pub family_key: Vec<String>,
+    pub reproduction_flags: Vec<u32>,
+    pub core_attributes: Vec<Option<CoreAttributes>>,
+}
+impl CandidateTable {
+    pub fn len(&self) -> usize {
+        self.origin_id.len()
+    }
+    pub fn is_empty(&self) -> bool {
+        self.origin_id.is_empty()
+    }
+    fn columns_aligned(&self) -> bool {
+        let n = self.len();
+        [
+            self.origin_cohort_id.len(),
+            self.sex_ordinal.len(),
+            self.source.len(),
+            self.ancestry_id.len(),
+            self.sex.len(),
+            self.birth_year.len(),
+            self.death_year.len(),
+            self.death_site_id.len(),
+            self.coverage_start_year.len(),
+            self.coverage_end_year.len(),
+            self.departure_state.len(),
+            self.departure_year.len(),
+            self.mother_slot.len(),
+            self.father_slot.len(),
+            self.family_key.len(),
+            self.reproduction_flags.len(),
+            self.core_attributes.len(),
+        ]
+        .iter()
+        .all(|len| *len == n)
+    }
+}
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct OriginCohort {
+    pub origin_cohort_id: String,
+    pub origin_type: OriginType,
+    pub ancestry_id: String,
+    pub birth_year: i32,
+    pub sealed: bool,
+    pub sex_counts: [u32; 2],
+}
+/// Intervals read on `(year, phase)`: `valid` alone would lose same-year visits.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct SlotResidence {
+    pub person_slot: u32,
+    pub site_id: String,
+    pub valid: TimeSpan,
+    pub start_phase: u8,
+    pub end_phase: u8,
+    pub end_reason: ResidenceEnd,
+}
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct HouseholdEpisode {
+    pub household_id: String,
+    pub kind: HouseholdKind,
+    pub formation_reason: String,
+    pub site_id: String,
+    pub member_slots: Vec<u32>,
+    pub valid: TimeSpan,
+    pub start_phase: u8,
+    pub end_phase: u8,
+}
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct UnionAllocation {
+    pub union_id: String,
+    pub family_key: String,
+    pub partner_slots: Vec<u32>,
+    pub site_at_formation: String,
+    pub source: UnionSource,
+    pub valid: TimeSpan,
+    pub start_phase: u8,
+    pub end_phase: u8,
+    pub end_reason: String,
+}
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct BirthAllocation {
+    pub child_slot: u32,
+    pub child_origin_cohort_id: String,
+    pub child_sex_ordinal: u32,
+    pub family_key: String,
+    #[serde(deserialize_with = "required_nullable")]
+    pub mother_slot: Option<u32>,
+    #[serde(deserialize_with = "required_nullable")]
+    pub father_slot: Option<u32>,
+    #[serde(deserialize_with = "required_nullable")]
+    pub parental_union_id: Option<String>,
+    pub site_id: String,
+    pub year: i32,
+    pub phase: u8,
+}
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct DeathAllocation {
+    pub person_slot: u32,
+    pub cause: String,
+    pub site_id: String,
+    pub year: i32,
+    pub phase: u8,
+}
+/// One frozen household move. A `null` endpoint is a statistical port.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct ResidenceTransfer {
+    pub transfer_id: String,
+    pub household_id: String,
+    #[serde(deserialize_with = "required_nullable")]
+    pub from_site: Option<String>,
+    #[serde(deserialize_with = "required_nullable")]
+    pub to_site: Option<String>,
+    pub origin_slots: Vec<u32>,
+    pub reason: String,
+    pub source: SlotSource,
+    #[serde(deserialize_with = "required_nullable")]
+    pub operation_id: Option<String>,
+    #[serde(deserialize_with = "required_nullable")]
+    pub port_id: Option<String>,
+    pub year: i32,
+    pub phase: u8,
+}
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct GuardianAssignment {
+    pub child_slot: u32,
+    /// `null` under synthetic care: no invented guardian.
+    #[serde(deserialize_with = "required_nullable")]
+    pub guardian_slot: Option<u32>,
+    pub source: String,
+    pub year: i32,
+    pub phase: u8,
+}
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct ParentageRecord {
+    pub child_slot: u32,
+    #[serde(deserialize_with = "required_nullable")]
+    pub mother_slot: Option<u32>,
+    #[serde(deserialize_with = "required_nullable")]
+    pub father_slot: Option<u32>,
+    pub precision: SlotSource,
+}
+/// Site count observed at phase 80 of `year`.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct AnnualCensus {
+    pub site_id: String,
+    pub year: i32,
+    pub population: u64,
+    pub simulated: u64,
+    pub projected: u64,
+    pub births: u64,
+    pub deaths: u64,
+    pub incoming: u64,
+    pub outgoing: u64,
+    pub precision: String,
+    pub coverage: String,
+}
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct CohortResidenceCount {
+    pub origin_cohort_id: String,
+    pub site_id: String,
+    pub sex: u8,
+    pub source: SlotSource,
+    pub year: i32,
+    pub count: u64,
+}
+/// The part of the provider manifest the host compares with its plan. Everything
+/// else stays as published.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ProviderManifest {
+    pub algorithm_id: String,
+    pub projection_version: String,
+    pub runtime_fingerprint: String,
+    pub catalogue_fingerprints: CatalogueFingerprints,
+    #[serde(flatten)]
+    pub other: BTreeMap<String, Value>,
+}
+/// Unverified provider file (§24.3). Only `validate_population` turns it into facts.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct PopulationResult {
+    pub format: String,
+    pub result_type: String,
+    pub complete: bool,
+    pub coverage: String,
+    pub stage: String,
+    pub plan_id: String,
+    pub plan_fingerprint: String,
+    pub result_fingerprint: String,
+    pub timeline: TimeSpan,
+    pub provider_manifest: ProviderManifest,
+    pub candidate_table: CandidateTable,
+    pub origin_cohorts: Vec<OriginCohort>,
+    pub residence_index: Vec<SlotResidence>,
+    pub residence_offsets: Vec<u32>,
+    pub household_episodes: Vec<HouseholdEpisode>,
+    pub union_allocations: Vec<UnionAllocation>,
+    pub birth_allocations: Vec<BirthAllocation>,
+    pub death_allocations: Vec<DeathAllocation>,
+    pub residence_transfers: Vec<ResidenceTransfer>,
+    pub guardian_assignments: Vec<GuardianAssignment>,
+    pub parentage: Vec<ParentageRecord>,
+    pub children_index: Vec<Vec<u32>>,
+    pub annual_censuses: Vec<AnnualCensus>,
+    pub cohort_residence_counts: Vec<CohortResidenceCount>,
+    pub diagnostics: Value,
+    /// The worker's own check: evidence, never a reason to skip the host's.
+    pub validation_proof: Value,
+}
+/// Reads the provider file. Fingerprints stay with the host (§4.2).
+pub fn parse_population_result(bytes: &[u8]) -> Result<PopulationResult, HistoryError> {
+    serde_json::from_slice(bytes).map_err(|e| {
+        HistoryError::new(
+            ErrorCode::InvalidPopulationResult,
+            "population.shape_invalid",
+        )
+        .with_param("detail", e.to_string())
+    })
+}
+/// Bytes behind `result_fingerprint`: the canonical object without that field.
+pub fn result_canonical_bytes(mut result: Value) -> Result<Vec<u8>, HistoryError> {
+    result
+        .as_object_mut()
+        .ok_or_else(|| {
+            HistoryError::new(
+                ErrorCode::InvalidPopulationResult,
+                "population.shape_invalid",
+            )
+        })?
+        .remove("result_fingerprint");
+    canonical_bytes(&result)
+}
+/// Genealogical depth the plan guarantees (§8.2).
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize)]
+pub struct KinshipLimits {
+    pub max_projection_ancestors: u64,
+    pub max_projection_descendants: u64,
+}
+/// What the host itself checked, recorded next to the facts.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
+pub struct PopulationProof {
+    pub validator: String,
+    pub plan_fingerprint: String,
+    pub result_fingerprint: String,
+    pub candidate_slots: u64,
+    pub site_years: u64,
+}
+/// A provider result that passed `validate_population`. Fields are private and
+/// it has no deserializer: this function is the only way to obtain one.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
+pub struct VerifiedPopulation {
+    result: PopulationResult,
+    kinship_limits: KinshipLimits,
+    proof: PopulationProof,
+}
+impl VerifiedPopulation {
+    pub fn result(&self) -> &PopulationResult {
+        &self.result
+    }
+    pub fn kinship_limits(&self) -> KinshipLimits {
+        self.kinship_limits
+    }
+    pub fn proof(&self) -> &PopulationProof {
+        &self.proof
+    }
+    /// Residence episodes of a slot, in chronological order.
+    pub fn residences_of(&self, slot: u32) -> &[SlotResidence] {
+        let slot = slot as usize;
+        let offsets = &self.result.residence_offsets;
+        &self.result.residence_index[offsets[slot] as usize..offsets[slot + 1] as usize]
+    }
+}
+
+type Stamp = (i32, u8);
+const BIRTH_PHASE: u8 = 20;
+const DEATH_PHASE: u8 = 30;
+const MOVE_PHASE: u8 = 40;
+const CENSUS_PHASE: u8 = 80;
+
+fn start_of(valid: TimeSpan, phase: u8) -> Stamp {
+    (valid.start_year, phase)
+}
+fn end_of(valid: TimeSpan, phase: u8) -> Stamp {
+    (valid.end_year, phase)
+}
+/// Flows counted from the registers, per site index and year.
+type SiteFlows = BTreeMap<(usize, i32), u64>;
+
+struct Audit<'a> {
+    plan: &'a PopulationPlan,
+    r: &'a PopulationResult,
+    c: &'a CandidateTable,
+    n: usize,
+    /// Index of each planned site, in sorted order.
+    sites: BTreeMap<&'a str, usize>,
+    cohorts: BTreeMap<&'a str, &'a OriginCohort>,
+    births: SiteFlows,
+    deaths: SiteFlows,
+    incoming: SiteFlows,
+    outgoing: SiteFlows,
+    /// Domain-level flows through ports, counted from the transfers alone.
+    external_in: BTreeMap<i32, u64>,
+    external_out: BTreeMap<i32, u64>,
+}
+impl<'a> Audit<'a> {
+    fn fail(&self, constraint: &str, year: Option<i32>) -> HistoryError {
+        HistoryError {
+            owner: Some(self.plan.domain_id.clone()),
+            at_year: year,
+            plan_id: Some(self.plan.plan_id.clone()),
+            ..HistoryError::new(ErrorCode::InvalidPopulationResult, constraint)
+        }
+    }
+    fn require(&self, ok: bool, constraint: &str, year: Option<i32>) -> Result<(), HistoryError> {
+        if ok {
+            Ok(())
+        } else {
+            Err(self.fail(constraint, year))
+        }
+    }
+    fn slot(&self, slot: u32) -> Result<usize, HistoryError> {
+        let slot = slot as usize;
+        self.require(slot < self.n, "population.dangling_reference", None)?;
+        Ok(slot)
+    }
+    fn site(&self, id: &str, year: i32) -> Result<usize, HistoryError> {
+        self.sites
+            .get(id)
+            .copied()
+            .ok_or_else(|| self.fail("population.unknown_site", Some(year)))
+    }
+    fn residences(&self, slot: usize) -> &'a [SlotResidence] {
+        let offsets = &self.r.residence_offsets;
+        &self.r.residence_index[offsets[slot] as usize..offsets[slot + 1] as usize]
+    }
+    fn present_at(&self, slot: usize, stamp: Stamp, site: &str) -> bool {
+        self.residences(slot).iter().any(|e| {
+            start_of(e.valid, e.start_phase) <= stamp
+                && stamp < end_of(e.valid, e.end_phase)
+                && e.site_id == site
+        })
+    }
+
+    fn header(&self) -> Result<(), HistoryError> {
+        let (r, plan) = (self.r, self.plan);
+        let complete = r.format == POPULATION_RESULT_FORMAT
+            && r.result_type == "PopulationResult"
+            && r.complete
+            && r.coverage == "complete";
+        self.require(complete, "population.not_complete", None)?;
+        self.require(
+            r.plan_id == plan.plan_id && r.plan_fingerprint == plan.plan_fingerprint,
+            "population.foreign_plan",
+            None,
+        )?;
+        self.require(
+            r.timeline == plan.timeline,
+            "population.foreign_timeline",
+            None,
+        )?;
+        let manifest = &r.provider_manifest;
+        if manifest.runtime_fingerprint != plan.provider.runtime_fingerprint {
+            return Err(HistoryError {
+                code: ErrorCode::ProviderVersionMismatch,
+                ..self.fail("population.runtime_mismatch", None)
+            });
+        }
+        self.require(
+            manifest.algorithm_id == plan.provider.algorithm_id
+                && manifest.projection_version == plan.provider.projection_version
+                && manifest.catalogue_fingerprints == plan.catalogue_fingerprints,
+            "population.provider_manifest_mismatch",
+            None,
+        )?;
+        self.require(
+            self.n as u64 <= plan.limits.max_candidate_slots
+                && r.origin_cohorts.len() as u64 <= plan.limits.max_cohorts,
+            "population.budget_exceeded",
+            None,
+        )
+    }
+
+    fn candidates(&self) -> Result<(), HistoryError> {
+        let (c, timeline) = (self.c, self.plan.timeline);
+        self.require(c.columns_aligned(), "population.columns_misaligned", None)?;
+        self.require(
+            c.origin_id.windows(2).all(|w| w[0] < w[1]),
+            "population.identity_duplicated_or_unsorted",
+            None,
+        )?;
+        self.require(
+            self.cohorts.len() == self.r.origin_cohorts.len(),
+            "population.cohort_invalid",
+            None,
+        )?;
+        let ancestries: BTreeSet<_> = self
+            .plan
+            .resolved_profiles
+            .ancestries
+            .iter()
+            .map(|a| a.id.as_str())
+            .collect();
+        let mut ordinals: BTreeMap<(&str, u8), BTreeSet<u32>> = BTreeMap::new();
+        for p in 0..self.n {
+            let birth = c.birth_year[p];
+            let origin = c.origin_cohort_id[p].as_str();
+            let cohort = self
+                .cohorts
+                .get(origin)
+                .ok_or_else(|| self.fail("population.cohort_invalid", Some(birth)))?;
+            self.require(
+                cohort.sealed
+                    && cohort.birth_year == birth
+                    && cohort.ancestry_id == c.ancestry_id[p]
+                    && ancestries.contains(c.ancestry_id[p].as_str())
+                    && c.sex[p] < 2,
+                "population.cohort_invalid",
+                Some(birth),
+            )?;
+            ordinals
+                .entry((origin, c.sex[p]))
+                .or_default()
+                .insert(c.sex_ordinal[p]);
+            let (from, to) = (c.coverage_start_year[p], c.coverage_end_year[p]);
+            self.require(
+                timeline.start_year <= from
+                    && from <= to
+                    && to <= timeline.end_year
+                    && birth <= from,
+                "population.coverage_invalid",
+                Some(from),
+            )?;
+            let (death, departure) = (c.death_year[p], c.departure_year[p]);
+            let state_ok = match c.departure_state[p] {
+                DepartureState::Dead => {
+                    departure.is_none() && death.is_some() && c.death_site_id[p].is_some()
+                }
+                // An exit closes coverage and never invents a death.
+                DepartureState::DepartedExternal => {
+                    death.is_none() && c.death_site_id[p].is_none() && departure == Some(to)
+                }
+                DepartureState::ResidentAtCoverageEnd => {
+                    death.is_none()
+                        && departure.is_none()
+                        && c.death_site_id[p].is_none()
+                        && to == timeline.end_year
+                }
+            };
+            self.require(state_ok, "population.departure_state_invalid", Some(to))?;
+            if let Some(year) = death {
+                self.require(
+                    birth <= year && year < timeline.end_year,
+                    "population.chronology_invalid",
+                    Some(year),
+                )?;
+            }
+            for parent in [c.mother_slot[p], c.father_slot[p]].into_iter().flatten() {
+                let parent = self.slot(parent)?;
+                self.require(
+                    c.birth_year[parent] < birth,
+                    "population.chronology_invalid",
+                    Some(birth),
+                )?;
+            }
+        }
+        for (id, cohort) in &self.cohorts {
+            for sex in 0..2u8 {
+                let expected = cohort.sex_counts[sex as usize];
+                let complete = match ordinals.get(&(*id, sex)) {
+                    None => expected == 0,
+                    Some(set) => {
+                        set.len() as u32 == expected
+                            && set.last().is_none_or(|last| *last + 1 == expected)
+                    }
+                };
+                self.require(
+                    complete,
+                    "population.cohort_invalid",
+                    Some(cohort.birth_year),
+                )?;
+            }
+        }
+        Ok(())
+    }
+
+    /// Shape of the residence index only: `residences` relies on these offsets.
+    fn residence_offsets(&self) -> Result<(), HistoryError> {
+        let offsets = &self.r.residence_offsets;
+        self.require(
+            offsets.len() == self.n + 1
+                && offsets.first() == Some(&0)
+                && offsets.last().map(|o| *o as usize) == Some(self.r.residence_index.len())
+                && offsets.windows(2).all(|w| w[0] < w[1]),
+            "population.residence_offsets_invalid",
+            None,
+        )
+    }
+
+    /// One unbroken chain of residences per slot: never two at once, never none.
+    fn residence_chains(&self) -> Result<(), HistoryError> {
+        let (c, timeline) = (self.c, self.plan.timeline);
+        for p in 0..self.n {
+            let chain = self.residences(p);
+            let mut previous: Option<Stamp> = None;
+            for (i, row) in chain.iter().enumerate() {
+                let a = start_of(row.valid, row.start_phase);
+                let b = end_of(row.valid, row.end_phase);
+                let year = Some(a.0);
+                self.require(
+                    row.person_slot as usize == p,
+                    "population.residence_offsets_invalid",
+                    year,
+                )?;
+                self.site(&row.site_id, a.0)?;
+                self.require(
+                    a <= b
+                        && timeline.start_year <= a.0
+                        && a.0 < timeline.end_year
+                        && b.0 <= timeline.end_year,
+                    "population.residence_interval_invalid",
+                    year,
+                )?;
+                self.require(
+                    previous.is_none_or(|end| end == a),
+                    "population.residence_gap_or_overlap",
+                    year,
+                )?;
+                self.require(
+                    i + 1 == chain.len() || row.end_reason == ResidenceEnd::Transfer,
+                    "population.residence_end_invalid",
+                    year,
+                )?;
+                previous = Some(b);
+            }
+            let (first, last) = (&chain[0], &chain[chain.len() - 1]);
+            self.require(
+                first.valid.start_year == c.coverage_start_year[p],
+                "population.coverage_invalid",
+                Some(first.valid.start_year),
+            )?;
+            let end = end_of(last.valid, last.end_phase);
+            let closed = match c.departure_state[p] {
+                DepartureState::Dead => {
+                    last.end_reason == ResidenceEnd::Death
+                        && Some(end) == c.death_year[p].map(|y| (y, DEATH_PHASE))
+                        && c.death_site_id[p].as_deref() == Some(&last.site_id)
+                }
+                DepartureState::DepartedExternal => {
+                    last.end_reason == ResidenceEnd::DepartedExternal
+                        && Some(end) == c.departure_year[p].map(|y| (y, MOVE_PHASE))
+                }
+                DepartureState::ResidentAtCoverageEnd => {
+                    last.end_reason == ResidenceEnd::CoverageEnd && end == (timeline.end_year, 0)
+                }
+            };
+            self.require(closed, "population.residence_end_invalid", Some(end.0))?;
+        }
+        Ok(())
+    }
+
+    fn households(&self) -> Result<(), HistoryError> {
+        let mut spans: Vec<Vec<(Stamp, Stamp)>> = vec![Vec::new(); self.n];
+        for row in &self.r.household_episodes {
+            let a = start_of(row.valid, row.start_phase);
+            let b = end_of(row.valid, row.end_phase);
+            let year = Some(a.0);
+            self.site(&row.site_id, a.0)?;
+            let members: BTreeSet<_> = row.member_slots.iter().collect();
+            self.require(
+                a <= b && members.len() == row.member_slots.len(),
+                "population.household_invalid",
+                year,
+            )?;
+            for member in &row.member_slots {
+                let member = self.slot(*member)?;
+                if a < b {
+                    spans[member].push((a, b));
+                }
+            }
+        }
+        for person in &mut spans {
+            person.sort_unstable();
+            self.require(
+                person.windows(2).all(|w| w[0].1 <= w[1].0),
+                "population.household_overlap",
+                person.first().map(|span| span.0 .0),
+            )?;
+        }
+        Ok(())
+    }
+
+    fn unions(&self) -> Result<BTreeMap<&'a str, &'a UnionAllocation>, HistoryError> {
+        let (c, end) = (self.c, self.plan.timeline.end_year);
+        let mut unions = BTreeMap::new();
+        for row in &self.r.union_allocations {
+            let a = start_of(row.valid, row.start_phase);
+            let b = end_of(row.valid, row.end_phase);
+            let year = Some(a.0);
+            self.site(&row.site_at_formation, a.0)?;
+            let two = row.partner_slots.len() == 2 && row.partner_slots[0] != row.partner_slots[1];
+            self.require(
+                two && a <= b && unions.insert(row.union_id.as_str(), row).is_none(),
+                "population.union_invalid",
+                year,
+            )?;
+            for partner in &row.partner_slots {
+                let p = self.slot(*partner)?;
+                let limit = match (c.death_year[p], c.departure_year[p]) {
+                    (Some(death), _) => (death, DEATH_PHASE),
+                    (None, Some(departure)) => (departure, MOVE_PHASE),
+                    (None, None) => (end, 0),
+                };
+                self.require(
+                    b <= limit && c.birth_year[p] <= a.0,
+                    "population.union_outside_life",
+                    year,
+                )?;
+                if row.source != UnionSource::Simulated {
+                    self.require(
+                        self.present_at(p, a, &row.site_at_formation),
+                        "population.union_not_coresident",
+                        year,
+                    )?;
+                }
+            }
+        }
+        Ok(unions)
+    }
+
+    fn births(&mut self, unions: &BTreeMap<&str, &UnionAllocation>) -> Result<(), HistoryError> {
+        let (c, r) = (self.c, self.r);
+        let mut registered = vec![false; self.n];
+        for row in &r.birth_allocations {
+            let year = Some(row.year);
+            let p = self.slot(row.child_slot)?;
+            let site = self.site(&row.site_id, row.year)?;
+            self.require(
+                !registered[p]
+                    && row.year == c.birth_year[p]
+                    && row.phase == BIRTH_PHASE
+                    && row.family_key == c.family_key[p]
+                    && row.child_origin_cohort_id == c.origin_cohort_id[p]
+                    && row.child_sex_ordinal == c.sex_ordinal[p]
+                    && row.mother_slot == c.mother_slot[p]
+                    && row.father_slot == c.father_slot[p]
+                    && self.residences(p)[0].site_id == row.site_id,
+                "population.birth_invalid",
+                year,
+            )?;
+            let union = row
+                .parental_union_id
+                .as_deref()
+                .and_then(|id| unions.get(id))
+                .ok_or_else(|| self.fail("population.birth_without_union", year))?;
+            let partners: BTreeSet<_> = union.partner_slots.iter().map(|s| Some(*s)).collect();
+            self.require(
+                union.family_key == row.family_key
+                    && union.valid.start_year < row.year
+                    && end_of(union.valid, union.end_phase) > (row.year, BIRTH_PHASE)
+                    && partners == BTreeSet::from([row.mother_slot, row.father_slot]),
+                "population.birth_without_union",
+                year,
+            )?;
+            for parent in [row.mother_slot, row.father_slot].into_iter().flatten() {
+                let parent = self.slot(parent)?;
+                self.require(
+                    self.present_at(parent, (row.year, BIRTH_PHASE), &row.site_id),
+                    "population.birth_parents_absent",
+                    year,
+                )?;
+            }
+            registered[p] = true;
+            *self.births.entry((site, row.year)).or_default() += 1;
+        }
+        for (p, registered) in registered.iter().enumerate() {
+            let cohort = self.cohorts[c.origin_cohort_id[p].as_str()];
+            self.require(
+                (cohort.origin_type == OriginType::Birth) == *registered,
+                "population.birth_invalid",
+                Some(c.birth_year[p]),
+            )?;
+        }
+        Ok(())
+    }
+
+    fn deaths(&mut self) -> Result<(), HistoryError> {
+        let (c, r) = (self.c, self.r);
+        let mut registered = vec![false; self.n];
+        for row in &r.death_allocations {
+            let p = self.slot(row.person_slot)?;
+            let site = self.site(&row.site_id, row.year)?;
+            self.require(
+                !registered[p]
+                    && row.phase == DEATH_PHASE
+                    && c.death_year[p] == Some(row.year)
+                    && c.death_site_id[p].as_deref() == Some(&row.site_id),
+                "population.death_invalid",
+                Some(row.year),
+            )?;
+            registered[p] = true;
+            *self.deaths.entry((site, row.year)).or_default() += 1;
+        }
+        for (p, registered) in registered.iter().enumerate() {
+            self.require(
+                c.death_year[p].is_some() == *registered,
+                "population.death_invalid",
+                c.death_year[p],
+            )?;
+        }
+        Ok(())
+    }
+
+    fn transfers(&mut self) -> Result<(), HistoryError> {
+        let (c, r, plan) = (self.c, self.r, self.plan);
+        let ports: BTreeSet<_> = plan
+            .boundary_ports
+            .iter()
+            .map(|p| p.port_id.as_str())
+            .collect();
+        let operations: BTreeSet<_> = plan
+            .historical_program
+            .iter()
+            .map(|op| op.application_key().2)
+            .collect();
+        let mut episodes: BTreeMap<&str, Vec<&HouseholdEpisode>> = BTreeMap::new();
+        for episode in &r.household_episodes {
+            episodes
+                .entry(&episode.household_id)
+                .or_default()
+                .push(episode);
+        }
+        let mut ids = BTreeSet::new();
+        let mut moved = BTreeSet::new();
+        for row in &r.residence_transfers {
+            let (year, stamp) = (Some(row.year), (row.year, MOVE_PHASE));
+            let members: BTreeSet<_> = row.origin_slots.iter().copied().collect();
+            self.require(
+                ids.insert(row.transfer_id.as_str())
+                    && row.phase == MOVE_PHASE
+                    && row.from_site != row.to_site
+                    && !members.is_empty()
+                    && members.len() == row.origin_slots.len(),
+                "population.transfer_invalid",
+                year,
+            )?;
+            let external = row.from_site.is_none() || row.to_site.is_none();
+            self.require(
+                row.port_id.as_deref().is_none_or(|p| ports.contains(p))
+                    && row
+                        .operation_id
+                        .as_deref()
+                        .is_none_or(|op| operations.contains(op))
+                    && (!external || row.port_id.is_some() || row.operation_id.is_some()),
+                "population.transfer_unknown_source",
+                year,
+            )?;
+            let frozen = episodes.get(row.household_id.as_str()).is_some_and(|rows| {
+                rows.iter().any(|h| {
+                    let endpoint = if row.from_site.is_some() {
+                        end_of(h.valid, h.end_phase)
+                    } else {
+                        start_of(h.valid, h.start_phase)
+                    };
+                    endpoint == stamp
+                        && h.member_slots.iter().copied().collect::<BTreeSet<_>>() == members
+                })
+            });
+            self.require(frozen, "population.transfer_membership_differs", year)?;
+            for member in &row.origin_slots {
+                let p = self.slot(*member)?;
+                self.require(
+                    moved.insert((p, row.year)),
+                    "population.transfer_moved_twice",
+                    year,
+                )?;
+                let chain = self.residences(p);
+                if let Some(from) = &row.from_site {
+                    let site = self.site(from, row.year)?;
+                    self.require(
+                        chain
+                            .iter()
+                            .any(|e| end_of(e.valid, e.end_phase) == stamp && &e.site_id == from),
+                        "population.transfer_without_residence",
+                        year,
+                    )?;
+                    *self.outgoing.entry((site, row.year)).or_default() += 1;
+                } else {
+                    *self.external_in.entry(row.year).or_default() += 1;
+                }
+                if let Some(to) = &row.to_site {
+                    let site = self.site(to, row.year)?;
+                    self.require(
+                        chain
+                            .iter()
+                            .any(|e| start_of(e.valid, e.start_phase) == stamp && &e.site_id == to),
+                        "population.transfer_without_residence",
+                        year,
+                    )?;
+                    *self.incoming.entry((site, row.year)).or_default() += 1;
+                } else {
+                    self.require(
+                        c.departure_year[p] == Some(row.year),
+                        "population.exit_without_departure",
+                        year,
+                    )?;
+                    *self.external_out.entry(row.year).or_default() += 1;
+                }
+            }
+        }
+        Ok(())
+    }
+
+    /// Family links rebuilt from the candidate columns must match both registers.
+    fn kinship(&self) -> Result<(), HistoryError> {
+        let c = self.c;
+        let mut children = vec![Vec::new(); self.n];
+        let mut parentage = Vec::new();
+        for p in 0..self.n {
+            let (mother, father) = (c.mother_slot[p], c.father_slot[p]);
+            for parent in [mother, father].into_iter().flatten() {
+                children[self.slot(parent)?].push(p as u32);
+            }
+            if mother.is_some() || father.is_some() {
+                parentage.push(ParentageRecord {
+                    child_slot: p as u32,
+                    mother_slot: mother,
+                    father_slot: father,
+                    precision: c.source[p],
+                });
+            }
+        }
+        self.require(
+            children == self.r.children_index && parentage == self.r.parentage,
+            "population.kinship_not_reciprocal",
+            None,
+        )?;
+        for row in &self.r.guardian_assignments {
+            let child = self.slot(row.child_slot)?;
+            let guardian = row.guardian_slot.map(|g| self.slot(g)).transpose()?;
+            self.require(
+                guardian != Some(child),
+                "population.guardian_invalid",
+                Some(row.year),
+            )?;
+        }
+        Ok(())
+    }
+
+    /// Opening population per site index: the founders, before the first census.
+    fn founders(&self) -> Result<Vec<i64>, HistoryError> {
+        let c = self.c;
+        let mut founders = vec![0i64; self.sites.len()];
+        for p in 0..self.n {
+            if self.cohorts[c.origin_cohort_id[p].as_str()].origin_type == OriginType::Founder {
+                founders[self.sites[self.residences(p)[0].site_id.as_str()]] += 1;
+            }
+        }
+        for settlement in &self.plan.settlements {
+            self.require(
+                founders[self.sites[settlement.site_id.as_str()]] as u64
+                    == settlement.initial_population,
+                "population.founders_differ_from_plan",
+                Some(self.plan.timeline.start_year),
+            )?;
+        }
+        Ok(founders)
+    }
+
+    /// Episode boundaries, closings first so a person leaves one, then enters the next.
+    fn episode_events(&self) -> Vec<EpisodeEvent> {
+        let mut events = Vec::new();
+        let mut add = |a: Stamp, b: Stamp, register, person, site: &str| {
+            if a < b {
+                let site = self.sites[site];
+                events.push((a, 1, register, person, site));
+                events.push((b, -1, register, person, site));
+            }
+        };
+        for row in &self.r.residence_index {
+            let a = start_of(row.valid, row.start_phase);
+            let b = end_of(row.valid, row.end_phase);
+            add(a, b, Register::Residence, row.person_slot, &row.site_id);
+        }
+        for row in &self.r.household_episodes {
+            let a = start_of(row.valid, row.start_phase);
+            let b = end_of(row.valid, row.end_phase);
+            for member in &row.member_slots {
+                add(a, b, Register::Household, *member, &row.site_id);
+            }
+        }
+        events.sort_unstable();
+        events
+    }
+
+    fn census_grid(&self) -> Result<BTreeMap<(&'a str, i32), &'a AnnualCensus>, HistoryError> {
+        let timeline = self.plan.timeline;
+        let census: BTreeMap<_, _> = self
+            .r
+            .annual_censuses
+            .iter()
+            .map(|row| ((row.site_id.as_str(), row.year), row))
+            .collect();
+        let years = (timeline.end_year - timeline.start_year) as usize;
+        self.require(
+            census.len() == self.r.annual_censuses.len()
+                && census.len() == self.sites.len() * years
+                && census
+                    .keys()
+                    .all(|(site, year)| self.sites.contains_key(site) && timeline.contains(*year)),
+            "population.census_grid_incomplete",
+            None,
+        )?;
+        Ok(census)
+    }
+
+    /// Sparse origin/site/sex counts of one year against the resident slots.
+    fn sparse_counts(
+        &self,
+        year: i32,
+        residence: &[Option<usize>],
+        rows: Vec<&CohortResidenceCount>,
+    ) -> Result<(), HistoryError> {
+        let c = self.c;
+        let mut expected: BTreeMap<(&str, usize, u8, SlotSource), u64> = BTreeMap::new();
+        for (p, site) in residence.iter().enumerate() {
+            if let Some(site) = *site {
+                *expected
+                    .entry((&c.origin_cohort_id[p], site, c.sex[p], c.source[p]))
+                    .or_default() += 1;
+            }
+        }
+        for row in rows {
+            let site = self.site(&row.site_id, year)?;
+            let key = (row.origin_cohort_id.as_str(), site, row.sex, row.source);
+            self.require(
+                expected.remove(&key) == Some(row.count),
+                "population.sparse_counts_differ",
+                Some(year),
+            )?;
+        }
+        self.require(
+            expected.is_empty(),
+            "population.sparse_counts_differ",
+            Some(year),
+        )
+    }
+
+    /// Walks residences and households to each phase-80 census, then compares
+    /// every published count with what the tables alone imply (§24.3).
+    fn balances(&self) -> Result<u64, HistoryError> {
+        let (r, c, timeline) = (self.r, self.c, self.plan.timeline);
+        let events = self.episode_events();
+        let census = self.census_grid()?;
+        let mut sparse: BTreeMap<i32, Vec<&CohortResidenceCount>> = BTreeMap::new();
+        for row in &r.cohort_residence_counts {
+            sparse.entry(row.year).or_default().push(row);
+        }
+        let site_ids: Vec<&str> = self.sites.keys().copied().collect();
+        let mut previous = self.founders()?;
+        let mut domain: i64 = previous.iter().sum();
+        let mut residence: Vec<Option<usize>> = vec![None; self.n];
+        let mut household: Vec<Option<usize>> = vec![None; self.n];
+        let mut cursor = 0;
+        for year in timeline.start_year..timeline.end_year {
+            let at = Some(year);
+            while cursor < events.len() && events[cursor].0 <= (year, CENSUS_PHASE) {
+                let (stamp, delta, register, person, site) = events[cursor];
+                let (state, key) = match register {
+                    Register::Residence => (
+                        &mut residence[person as usize],
+                        "population.residence_gap_or_overlap",
+                    ),
+                    Register::Household => (
+                        &mut household[person as usize],
+                        "population.household_overlap",
+                    ),
+                };
+                let consistent = if delta > 0 {
+                    state.replace(site).is_none()
+                } else {
+                    state.take() == Some(site)
+                };
+                self.require(consistent, key, Some(stamp.0))?;
+                cursor += 1;
+            }
+            self.require(
+                residence == household,
+                "population.resident_without_household",
+                at,
+            )?;
+            self.sparse_counts(year, &residence, sparse.remove(&year).unwrap_or_default())?;
+            let mut counts = vec![[0u64; 2]; site_ids.len()];
+            for (p, site) in residence.iter().enumerate() {
+                if let Some(site) = *site {
+                    counts[site][(c.source[p] == SlotSource::Projected) as usize] += 1;
+                }
+            }
+            let mut total = 0i64;
+            let mut natural = 0i64;
+            for (i, site) in site_ids.iter().enumerate() {
+                let row = census[&(*site, year)];
+                let flow = |table: &SiteFlows| table.get(&(i, year)).copied().unwrap_or(0);
+                let (births, deaths) = (flow(&self.births), flow(&self.deaths));
+                let (incoming, outgoing) = (flow(&self.incoming), flow(&self.outgoing));
+                let [simulated, projected] = counts[i];
+                let population = simulated + projected;
+                self.require(
+                    population as i64
+                        == previous[i] + births as i64 - deaths as i64 + incoming as i64
+                            - outgoing as i64,
+                    "population.balance_not_closed",
+                    at,
+                )?;
+                self.require(
+                    row.population == population
+                        && row.simulated == simulated
+                        && row.projected == projected
+                        && row.births == births
+                        && row.deaths == deaths
+                        && row.incoming == incoming
+                        && row.outgoing == outgoing,
+                    "population.census_differs",
+                    at,
+                )?;
+                previous[i] = population as i64;
+                total += population as i64;
+                natural += births as i64 - deaths as i64;
+            }
+            // Local moves cancel at domain level: only ports change the total.
+            let port = |table: &BTreeMap<i32, u64>| table.get(&year).copied().unwrap_or(0) as i64;
+            domain += natural + port(&self.external_in) - port(&self.external_out);
+            self.require(total == domain, "population.domain_balance_not_closed", at)?;
+        }
+        self.require(sparse.is_empty(), "population.sparse_counts_differ", None)?;
+        Ok(census.len() as u64)
+    }
+}
+#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+enum Register {
+    Residence,
+    Household,
+}
+type EpisodeEvent = (Stamp, i8, Register, u32, usize);
+
+/// Checks a provider result against its plan from the tables alone (§14.1, §24.3):
+/// references, coverage, chronology, single residence, reciprocal kinship and
+/// balances per site and per domain. A published proof changes nothing here. The
+/// host has already checked the file and result fingerprints (§4.2).
+pub fn validate_population(
+    plan: &PopulationPlan,
+    result: PopulationResult,
+) -> Result<VerifiedPopulation, HistoryError> {
+    let mut sites: Vec<_> = plan
+        .settlements
+        .iter()
+        .map(|s| s.site_id.as_str())
+        .collect();
+    sites.sort_unstable();
+    let mut audit = Audit {
+        plan,
+        r: &result,
+        c: &result.candidate_table,
+        n: result.candidate_table.len(),
+        sites: sites.iter().enumerate().map(|(i, s)| (*s, i)).collect(),
+        cohorts: result
+            .origin_cohorts
+            .iter()
+            .map(|c| (c.origin_cohort_id.as_str(), c))
+            .collect(),
+        births: BTreeMap::new(),
+        deaths: BTreeMap::new(),
+        incoming: BTreeMap::new(),
+        outgoing: BTreeMap::new(),
+        external_in: BTreeMap::new(),
+        external_out: BTreeMap::new(),
+    };
+    audit.header()?;
+    audit.candidates()?;
+    audit.residence_offsets()?;
+    audit.residence_chains()?;
+    audit.households()?;
+    let unions = audit.unions()?;
+    audit.births(&unions)?;
+    audit.deaths()?;
+    audit.transfers()?;
+    audit.kinship()?;
+    let site_years = audit.balances()?;
+    let proof = PopulationProof {
+        validator: POPULATION_VALIDATOR.into(),
+        plan_fingerprint: result.plan_fingerprint.clone(),
+        result_fingerprint: result.result_fingerprint.clone(),
+        candidate_slots: result.candidate_table.len() as u64,
+        site_years,
+    };
+    Ok(VerifiedPopulation {
+        result,
+        kinship_limits: KinshipLimits {
+            max_projection_ancestors: plan.limits.max_projection_ancestors,
+            max_projection_descendants: plan.limits.max_projection_descendants,
+        },
+        proof,
+    })
+}
