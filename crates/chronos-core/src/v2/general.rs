@@ -264,6 +264,26 @@ impl EventLedger {
             events: Vec::new(),
         }
     }
+    /// Continues the numbering of events an earlier stage already published.
+    pub(crate) fn reserve(&mut self, events: &[HistoryEvent]) -> Result<(), HistoryError> {
+        for event in events {
+            let address = SemanticAddress::decode(&event.id)?;
+            let (Some(owner), [kind, block, ordinal]) = (address.owner(), address.owned_tail())
+            else {
+                continue;
+            };
+            let block = block
+                .parse()
+                .map_err(|_| invalid("canon.event_address_unreadable"))?;
+            let ordinal: u32 = ordinal
+                .parse()
+                .map_err(|_| invalid("canon.event_address_unreadable"))?;
+            let key = SemanticAddress::event(&owner, kind, block, 0)?.encode();
+            let next = self.next.entry(key).or_insert(0);
+            *next = (*next).max(ordinal + 1);
+        }
+        Ok(())
+    }
     pub(crate) fn add(&mut self, e: NewEvent) -> Result<SemanticAddress, HistoryError> {
         let block = decade_block(e.year);
         let key = SemanticAddress::event(e.owner, e.kind, block, 0)?.encode();

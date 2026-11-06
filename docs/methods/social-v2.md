@@ -1,4 +1,4 @@
-# Social v2 method: S0 core, S2 batch and S3 host
+# Social v2 method: S0 core, S2 batch, S3 host and S4 social layer
 
 English is the source of this document. The complete French translation follows
 the English text, under "Méthode sociale v2".
@@ -457,13 +457,85 @@ one sample per case, on a machine shared with other work:
 
 The worker's own memory was not measured here.
 
+## S4: social layer
+
+### Implemented
+
+`social::build_social_packet(region_plan, verified_population)` is pure and builds one packet
+per domain over the whole horizon. `RegionPlan.social` carries the frozen canon inputs it reads
+(catalogue, atlas, polities, control): the field is outside the canonical projection, so the
+two arguments of §14.1 hold and region fingerprints do not move. `build_social_prefix` stops
+at a year and gives the same facts as the full packet read before it (§9.5).
+`offices::resolve_office(packet, office_id, at_year)` only reads: the year asked draws nothing.
+
+**Attributes** (`attributes.rs`). Status, activity, workforce draw, culture, family latent,
+alignment axes and initial skills, under `social/attributes/v1` and `alignment/v1`, keyed by
+domain seed, family key and person key. The §9.4 selector picks the family uniform or the
+individual one, never their mean. Status uses the §8.4 residues. Core attributes are kept.
+`ancestry_id` is read by no draw.
+
+**Group slots** (`social.rs`). S2 groups are adopted as they are. S4 adds, under
+`social/group/v1` and per site: one anchor per occupation (`site_occupation_anchor`), one
+secondary anchor per threshold, activity units sharing the expected workers, and shared
+association, community and friend-circle stocks, with bootstrap ages and block flows as in S2.
+Friend circles use the catalogue's duration and size tables. Households and lineages stay views:
+`household_of`, `family_of`, `site_views`, and `person_record` for the §5 `PersonRecord`.
+
+**Year.** Close commitments (death, departure, dissolution, capacity), offices at phase 50,
+cohesion and splits at phase 55, then jobs, other time-budgeted groups, overlapping affiliations
+and circles. Each draw is keyed by `(request_id, year, vacancy_ordinal, draw_ordinal)`. Weights
+are those of §23.2 with the multiplicative `alignment_fit`. Network uses the published state Y−1.
+Circles create `trusts` links, one per member, never a clique.
+
+**Offices.** A site anchor has a head (`mayor`) and a collective body; a secondary anchor and an
+association have a head. A term ends, a holder dies, leaves or loses eligibility, and the mandate
+closes at that boundary; the replacement or the vacancy opens at the same date. The first
+observed holder carries `initial_observed_binding` and no event. A full-time job is preempted
+and traced by `employment_preemption`.
+
+**Legality.** S4 groups get standing chains like S2 groups, and cite `foundation`, `dissolution`
+and the control `charter`. `in_conflict_with` is derived from open proscribed standings. A
+proscribed person or a known member of an open proscribed group is barred from offices of that
+jurisdiction, and from its bodies. The private head of a group is not an office of the
+jurisdiction.
+
+**Names.** `GroupRecord.name` is a declared `synthetic` fallback with the archetype's exact
+`name_profile` kind and founding tone. `name_tree` stays absent and Namebench is not called.
+
+**Influence.** `influence::influence_at` reads a packet: strength from realized members,
+attenuation by travel days, persistence after the group's end, capped per channel.
+
+### Choices not fixed by the study
+
+- Rule of the head: `collective_body` templates elect their head (`weighted_election`); an
+  `appointment` or `seniority` template gives its own rule. `lordship` is hereditary, read from
+  its archetype ID because the catalogue declares no succession field. Secondary anchors appoint.
+- `hereditary` draws among eligible kin of the last holder, then among all candidates.
+- A person holds one personal charge at a time. Associations and communities recruit within
+  the `recruitment` travel budget, others on their site; reach is read at the world's start.
+- `status_fit` of a group is the closeness to a stable focus rank drawn per slot; for an office it
+  is the rank itself. Friend circles carry no standing and no life events.
+
+### Limits
+
+An edict only reaches the archetypes S2 holds; S4 groups change status at control changes only.
+`stock_multiplier` of overlays is not applied. Person standings are read, never generated. A
+packet is recomputed, not stored: `Orchestrator::social_packet` keeps it in memory. Tenures have
+no `claimed` or `regent` case yet. Status and activity are fixed for life. Weights are untuned.
+
+### Validation and measures
+
+`src/v2/social_tests.rs` holds the pure proofs on a hand-built table, and
+`crates/chronos-app/tests/v2_s4.rs` runs both demo domains on the real worker, skipping with a
+message without `CHRONOS_PYTHON` and `CHRONOS_LINEAGE_SRC`. `chronos-app v2 social` prints groups
+by class and conduct class, vacancies and mayors.
+
 ## Proposed, not implemented
 
-S4–S8 keep their scope in the study: balance reports, recruitment, API and views, exact personal constraints, bridges
+S5–S8 keep their scope in the study: balance reports, API and views, exact personal constraints, bridges
 and optimizations. The function signatures proposed in §14.1 are not executable
-stubs in S0. Catalogue sources other than the atlas, axis generation,
-`alignment_fit`, ineligibility and rendering of name trees belong to later
-batches.
+stubs in S0. Catalogue sources other than the atlas and rendering of name trees belong to
+later batches.
 
 ## Validation and measures
 
@@ -937,13 +1009,85 @@ de monde 11, siècle complet, sur une copie figée conforme au commit fournisseu
 
 La mémoire du worker lui-même n'a pas été mesurée ici.
 
+## S4 : couche sociale
+
+### Implémenté
+
+`social::build_social_packet(region_plan, verified_population)` est pure et construit un paquet
+par domaine sur tout l'horizon. `RegionPlan.social` porte les entrées figées du canon qu'elle lit
+(catalogue, atlas, collectifs, contrôle) : ce champ est hors de la projection canonique, donc les
+deux arguments du §14.1 tiennent et les empreintes de région ne bougent pas. `build_social_prefix`
+s'arrête à une année et donne les mêmes faits que le paquet complet lu avant cette date (§9.5).
+`offices::resolve_office(packet, office_id, at_year)` ne fait que lire : l'année demandée ne tire rien.
+
+**Attributs** (`attributes.rs`). Statut, activité, tirage de participation, culture, latent familial,
+axes d'alignement et compétences initiales, sous `social/attributes/v1` et `alignment/v1`, avec la
+graine de domaine, la clé de famille et la clé de personne. Le sélecteur du §9.4 choisit l'uniforme
+familial ou l'individuel, jamais leur moyenne. Le statut suit les résidus du §8.4. Les attributs du
+noyau sont conservés. Aucun tirage ne lit `ancestry_id`.
+
+**Slots de groupes** (`social.rs`). Les groupes de S2 sont repris tels quels. S4 ajoute, sous
+`social/group/v1` et par site : une ancre par occupation (`site_occupation_anchor`), une ancre
+secondaire par seuil, les unités d'activité qui se partagent les travailleurs attendus, et les stocks
+partagés d'associations, communautés et cercles d'amis, avec âges de bootstrap et flux par bloc comme
+en S2. Les cercles utilisent les tables de durée et de taille du catalogue. Foyers et lignages restent
+des vues : `household_of`, `family_of`, `site_views`, et `person_record` pour le `PersonRecord` du §5.
+
+**Année.** Fermer les engagements (décès, départ, dissolution, capacité), offices en phase 50,
+cohésion et scissions en phase 55, puis emplois, autres groupes à budget de temps, affiliations
+superposables et cercles. Chaque tirage a pour clé `(request_id, année, vacancy_ordinal, draw_ordinal)`.
+Les poids sont ceux du §23.2, avec `alignment_fit` multiplicatif. Le réseau lit l'état publié Y−1.
+Les cercles créent des liens `trusts`, un par membre, jamais une clique.
+
+**Offices.** Une ancre de site a un chef (`mayor`) et un corps collectif ; une ancre secondaire et une
+association ont un chef. Une échéance, un décès, un départ ou une perte d'éligibilité ferment le mandat
+à cette frontière ; le remplacement ou la vacance s'ouvre à la même date. Le premier titulaire observé
+porte `initial_observed_binding` et aucun événement. Un emploi à plein temps est préempté et tracé par
+`employment_preemption`.
+
+**Légalité.** Les groupes de S4 ont des chaînes de statuts comme ceux de S2 et citent `foundation`,
+`dissolution` et la `charter` de contrôle. `in_conflict_with` se déduit des statuts proscrits de groupes
+ouverts. Une personne proscrite ou un membre connu d'un groupe ouvert proscrit est écarté des offices de
+cette juridiction et de ses corps. Le chef privé d'un groupe n'est pas un office de la juridiction.
+
+**Noms.** `GroupRecord.name` est un repli déclaré `synthetic`, avec le kind exact de `name_profile` et le
+ton de fondation. `name_tree` reste absent et Namebench n'est pas appelé.
+
+**Influence.** `influence::influence_at` lit un paquet : force tirée des membres réalisés, atténuation
+par jours de trajet, persistance après la fin du groupe, plafond par canal.
+
+### Choix non fixés par l'étude
+
+- Règle du chef : les templates `collective_body` élisent leur chef (`weighted_election`) ; un template
+  `appointment` ou `seniority` donne sa règle. `lordship` est héréditaire, lu sur l'ID d'archétype car le
+  catalogue ne déclare aucun champ de succession. Les ancres secondaires nomment.
+- `hereditary` tire parmi la parenté éligible du dernier titulaire, puis parmi tous les candidats.
+- Une personne tient une seule charge personnelle à la fois. Associations et communautés recrutent dans
+  le budget de trajet `recruitment`, les autres sur leur site ; la portée est lue au début du monde.
+- Le `status_fit` d'un groupe est la proximité d'un rang stable tiré par slot ; pour un office, c'est le
+  rang lui-même. Les cercles d'amis n'ont ni statut légal ni événements de vie.
+
+### Limites
+
+Un édit n'atteint que les archétypes détenus par S2 ; les groupes de S4 ne changent de statut qu'aux
+changements de contrôle. Le `stock_multiplier` des overlays n'est pas appliqué. Les statuts de personnes
+sont lus, jamais générés. Un paquet est recalculé, pas stocké : `Orchestrator::social_packet` le garde en
+mémoire. Les mandats n'ont pas encore de cas `claimed` ni `regent`. Statut et activité sont fixés pour la
+vie. Les poids ne sont pas réglés.
+
+### Validation et mesures
+
+`src/v2/social_tests.rs` contient les preuves pures sur une table écrite à la main, et
+`crates/chronos-app/tests/v2_s4.rs` exécute les deux domaines de démonstration sur le vrai worker, et
+s'ignore avec un message sans `CHRONOS_PYTHON` et `CHRONOS_LINEAGE_SRC`. `chronos-app v2 social` affiche
+les groupes par classe et classe de conduite, les vacances et les maires.
+
 ## Proposé, non implémenté
 
-S4–S8 conservent leur périmètre dans l'étude : bilans, recrutement, API et vues,
+S5–S8 conservent leur périmètre dans l'étude : bilans, API et vues,
 contraintes personnelles exactes, ponts et optimisations. Les signatures de
 fonctions proposées au §14.1 ne sont pas des stubs exécutables dans S0. Sources de
-catalogue autres que l'atlas, génération des axes, `alignment_fit`, inéligibilité et rendu des arbres de
-nom appartiennent aux lots suivants.
+catalogue autres que l'atlas et rendu des arbres de nom appartiennent aux lots suivants.
 
 ## Validation et mesures
 

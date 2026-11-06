@@ -15,12 +15,14 @@ use super::model::{
 use super::population::{
     BoundaryPort, PortMode, PortRateBasis, PortRateEpisode, PortUnit, ShockEffects,
 };
+use super::social::SocialInputs;
 use super::validate::{
     causal_ranks, validate_legal_standings, LEGAL_CHANGE_EVENT_KINDS,
     SUBJECT_DISSOLUTION_EVENT_KIND, SUBJECT_FOUNDATION_EVENT_KIND,
 };
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
+use std::sync::Arc;
 
 pub const MAX_EXACT_CANDIDATES: usize = 100_000;
 string_enum!(ImpactTarget {
@@ -443,6 +445,10 @@ pub struct RegionPlan {
     pub groups: Vec<RegionGroup>,
     pub events: Vec<HistoryEvent>,
     pub standings: Vec<LegalStanding>,
+    /// Frozen canon inputs of the social layer (§14.1), outside the canonical
+    /// projection: the world manifest identifies them.
+    #[serde(skip)]
+    pub social: Arc<SocialInputs>,
 }
 impl RegionPlan {
     /// Canonical bytes: `plan_region` has already sorted the lists.
@@ -502,7 +508,7 @@ fn site_baselines(
     Ok(series)
 }
 /// Linear interpolation between markers; it anticipates no crisis (§7.4).
-fn baseline_at(series: &BTreeMap<i32, u64>, year: i32) -> u64 {
+pub(crate) fn baseline_at(series: &BTreeMap<i32, u64>, year: i32) -> u64 {
     let before = series.range(..=year).next_back();
     let after = series.range(year..).next();
     match (before, after) {
@@ -1547,6 +1553,7 @@ pub fn plan_region(canon: &GeneralCanon, region_id: &str) -> Result<RegionPlan, 
         groups,
         events,
         standings,
+        social: Arc::new(SocialInputs::from_canon(canon)),
     })
 }
 

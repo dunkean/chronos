@@ -65,7 +65,7 @@ dataUsed(fixture);
 
 // Diagnostics: every stable code raised by the Rust v2 core and host has a `diagnostics.` message, and no message is orphaned.
 const diagNamespaces = ['address', 'alignment', 'atlas', 'canon', 'canonical', 'catalogue', 'domain', 'entity', 'event', 'graph', 'id', 'impact', 'interval',
-  'legal', 'name_tree', 'object_ref', 'person_table', 'plan', 'population', 'region', 'relation', 'target'];
+  'legal', 'name_tree', 'object_ref', 'office', 'person_table', 'plan', 'population', 'region', 'relation', 'social', 'target'];
 const hostNamespaces = ['orchestrator', 'store', 'worker'];
 const diagSources = [[path.join(root, 'crates', 'chronos-core', 'src', 'v2'), diagNamespaces], [path.join(root, 'crates', 'chronos-app', 'src', 'v2'), hostNamespaces]];
 const codes = new Set();

@@ -12,6 +12,7 @@ use chronos_core::v2::population::{
     PopulationPlan, VerifiedPopulation, POPULATION_RESULT_FORMAT,
 };
 use chronos_core::v2::region::{plan_region, RegionPlan};
+use chronos_core::v2::social::{build_social_packet, SocialPacket};
 use chronos_core::v2::{atlas::HistoryAtlas, ALGORITHM_VERSION};
 use serde::de::DeserializeOwned;
 use serde_json::{json, Value};
@@ -165,6 +166,7 @@ pub struct Orchestrator {
     settings: WorkerSettings,
     regions: Mutex<BTreeMap<String, Arc<RegionPlan>>>,
     jobs: Mutex<BTreeMap<String, Arc<Job>>>,
+    packets: Mutex<BTreeMap<String, Arc<SocialPacket>>>,
     worker_runs: AtomicUsize,
 }
 impl Orchestrator {
@@ -212,6 +214,7 @@ impl Orchestrator {
             settings,
             regions: Mutex::default(),
             jobs: Mutex::default(),
+            packets: Mutex::default(),
             worker_runs: AtomicUsize::new(0),
         })
     }
@@ -247,7 +250,7 @@ impl Orchestrator {
         regions.insert(region_id.to_string(), region.clone());
         Ok(region)
     }
-    fn region_of(&self, domain_id: &str) -> Result<Arc<RegionPlan>, HistoryError> {
+    pub fn region_of(&self, domain_id: &str) -> Result<Arc<RegionPlan>, HistoryError> {
         let domain = self
             .canon
             .domains
@@ -333,5 +336,18 @@ impl Orchestrator {
             finished: false,
         };
         leader.finish(self.resolve(domain_id).map(Arc::new))
+    }
+    /// Full-horizon social packet of a domain, built once from its verified population
+    /// (§14.1). The lock is held while building: one packet is computed once.
+    pub fn social_packet(&self, domain_id: &str) -> Result<Arc<SocialPacket>, HistoryError> {
+        let mut packets = self.packets.lock().expect("packets lock");
+        if let Some(packet) = packets.get(domain_id) {
+            return Ok(packet.clone());
+        }
+        let population = self.population(domain_id)?;
+        let region = self.region_of(domain_id)?;
+        let packet = Arc::new(build_social_packet(&region, &population)?);
+        packets.insert(domain_id.to_string(), packet.clone());
+        Ok(packet)
     }
 }

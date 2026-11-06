@@ -6,6 +6,7 @@
 //!   chronos-app check WORLD.json [--root DIR] [--fixture FILE]
 //!   chronos-app v2 materialize --world FILE --domain ID --out DIR
 //!       [--atlas FILE] [--catalogue FILE] [--python FILE] [--lineage-src DIR]
+//!   chronos-app v2 social --world FILE --domain ID --out DIR [--site SITE] [--years Y,Y]
 
 mod server;
 
@@ -15,7 +16,9 @@ use std::time::Instant;
 
 use chronos_app::v2::lineage_worker::WorkerSettings;
 use chronos_app::v2::orchestrator::{Orchestrator, WorldInputs};
+use chronos_app::v2::sha256_hex;
 use chronos_app::v2::store::Store;
+use chronos_core::v2::social::summarize;
 use chronos_core::{generate_world, replay_hash, validate_world, Config, StackFixture, World};
 
 pub const DEFAULT_PORT: u16 = 8785;
@@ -144,6 +147,8 @@ struct Args {
     atlas: Option<PathBuf>,
     catalogue: Option<PathBuf>,
     domain: Option<String>,
+    site: Option<String>,
+    years: Option<String>,
     python: Option<PathBuf>,
     lineage_src: Option<PathBuf>,
 }
@@ -162,6 +167,8 @@ fn parse_args() -> Result<Args, String> {
         atlas: None,
         catalogue: None,
         domain: None,
+        site: None,
+        years: None,
         python: None,
         lineage_src: None,
     };
@@ -184,6 +191,8 @@ fn parse_args() -> Result<Args, String> {
             "--atlas" => args.atlas = Some(value("--atlas")?.into()),
             "--catalogue" => args.catalogue = Some(value("--catalogue")?.into()),
             "--domain" => args.domain = Some(value("--domain")?),
+            "--site" => args.site = Some(value("--site")?),
+            "--years" => args.years = Some(value("--years")?),
             "--python" => args.python = Some(value("--python")?.into()),
             "--lineage-src" => args.lineage_src = Some(value("--lineage-src")?.into()),
             "-h" | "--help" => args.command = "help".into(),
@@ -205,8 +214,10 @@ const HELP: &str = "Chronos — générateur de chronologie déterministe
   chronos-app check world.json
       Valide un export et compare au rejeu si les mêmes sources sont disponibles.
   chronos-app v2 materialize --world FILE --domain ID|INDEX --out DIR
+  chronos-app v2 social --world FILE --domain ID|INDEX --out DIR [--site SITE] [--years Y,Y]
       [--atlas FILE] [--catalogue FILE] [--python FILE] [--lineage-src DIR]
       Runs the Lineage Lab worker for one domain and caches the verified population.
+      `social` prints groups by class and conduct class, vacancies and mayors.
       Interpreter: --python, CHRONOS_PYTHON, .venv. Provider: --lineage-src,
       CHRONOS_LINEAGE_SRC, ../lineage-lab/src.";
 
@@ -311,6 +322,7 @@ fn cmd_check(args: &Args, paths: &Paths) -> Result<(), String> {
 fn cmd_v2(args: &Args, root: &Path) -> Result<(), String> {
     match args.positional.first().map(String::as_str) {
         Some("materialize") => cmd_v2_materialize(args, root),
+        Some("social") => cmd_v2_social(args, root),
         _ => Err(format!(
             "v2 expects a subcommand
 
@@ -348,10 +360,15 @@ fn select_domain(domains: &[String], wanted: &str) -> Result<String, String> {
         })
 }
 
-fn cmd_v2_materialize(args: &Args, root: &Path) -> Result<(), String> {
-    let describe = |e: chronos_core::v2::model::HistoryError| format!("{e} {:?}", e.params);
+fn describe(e: chronos_core::v2::model::HistoryError) -> String {
+    format!(
+        "{e} {:?} owner={:?} year={:?}",
+        e.params, e.owner, e.at_year
+    )
+}
+
+fn open_world(args: &Args, root: &Path) -> Result<Orchestrator, String> {
     let world = args.world.as_ref().ok_or("--world is required")?;
-    let wanted = args.domain.as_ref().ok_or("--domain is required")?;
     let out = args.out.as_ref().ok_or("--out is required")?;
     let atlas = args.atlas.clone().unwrap_or_else(|| sibling_atlas(world));
     let catalogue = args
@@ -364,9 +381,53 @@ fn cmd_v2_materialize(args: &Args, root: &Path) -> Result<(), String> {
         root,
         out.join(".cache"),
     );
-    let started = Instant::now();
     let inputs = WorldInputs::load(world, &atlas, &catalogue).map_err(describe)?;
-    let orchestrator = Orchestrator::open(inputs, settings, Store::new(out)).map_err(describe)?;
+    Orchestrator::open(inputs, settings, Store::new(out)).map_err(describe)
+}
+
+/// Report of §15.4 for one domain: groups by class and conduct class, vacancies and
+/// mayors. Without `--site`, every site of the domain is listed.
+fn cmd_v2_social(args: &Args, root: &Path) -> Result<(), String> {
+    let wanted = args.domain.as_ref().ok_or("--domain is required")?;
+    let started = Instant::now();
+    let orchestrator = open_world(args, root)?;
+    let domain = select_domain(&orchestrator.domain_ids(), wanted)?;
+    let population = orchestrator.population(&domain).map_err(describe)?;
+    let ready = started.elapsed();
+    let packet = orchestrator.social_packet(&domain).map_err(describe)?;
+    let built = started.elapsed() - ready;
+    let years = match &args.years {
+        Some(text) => text
+            .split(',')
+            .map(|y| y.trim().parse().map_err(|_| format!("invalid year {y}")))
+            .collect::<Result<Vec<i32>, String>>()?,
+        None => vec![1340, 1360, 1380],
+    };
+    let sites = match &args.site {
+        Some(site) => vec![site.clone()],
+        None => packet.site_views.keys().cloned().collect(),
+    };
+    let summary = summarize(&packet, &population, &years, &sites).map_err(describe)?;
+    let bytes = packet.canonical_bytes().map_err(describe)?;
+    let report = serde_json::json!({
+        "canon_id": orchestrator.canon().canon_id,
+        "packet_sha256": sha256_hex(&bytes),
+        "packet_bytes": bytes.len(),
+        "population_seconds": ready.as_secs_f64(),
+        "packet_seconds": built.as_secs_f64(),
+        "summary": summary,
+    });
+    println!(
+        "{}",
+        serde_json::to_string_pretty(&report).map_err(|e| e.to_string())?
+    );
+    Ok(())
+}
+
+fn cmd_v2_materialize(args: &Args, root: &Path) -> Result<(), String> {
+    let wanted = args.domain.as_ref().ok_or("--domain is required")?;
+    let started = Instant::now();
+    let orchestrator = open_world(args, root)?;
     let opened = started.elapsed();
     let domain = select_domain(&orchestrator.domain_ids(), wanted)?;
     let population = orchestrator.population(&domain).map_err(describe)?;
