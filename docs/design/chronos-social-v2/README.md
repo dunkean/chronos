@@ -1216,3 +1216,11 @@ Les calculs utilisent des rationnels exacts ; le multiplicateur est quantifié u
 Le mode intégré remplace les ouvertures périodiques de `Cohorts.bounds` par une éligibilité fondée sur la dernière naissance réussie. Les deux composantes doivent tendre vers `p / (1 + (s − 1) × p)` naissances par paire et par an. Retirer seulement la multiplication par l’espacement, ou substituer ce taux stationnaire, ne reproduit ni le délai après une crise ni la formation des unions.
 
 Mesurer ensuite la reproduction nette sans régulateur, les trajectoires sur un siècle et l’extinction du noyau, sur la liste de seeds enregistrée. Si un template vise le remplacement, il est recalibré et versionné pour les deux composantes ; le petit noyau n’a pas à suivre une cible, et le régulateur ne doit pas être seul à maintenir une population voulue stable.
+
+### 28.6 Réappariement local et fécondité initiale
+
+Mesure sans choc, 22 seeds : avec des paires scellées à la naissance et un partenaire perdu jamais remplacé, 44 % des femmes atteignant 18 ans avaient déjà perdu leur partenaire, et la part de femmes fertiles en couple tombait de 85 % à 31 %. La population de 11 000 habitants finissait vers 2 000. Cette règle du §26.2 et du §28.3 est donc amendée, ce qui avance une partie de l’extension S8.
+
+`chronos-local-repairing-1`, publiée dans le manifeste, apparie en phase 35 les adultes projetés sans partenaire : même site et même ascendance, écart d’âge du profil, hors parentèle et hors anciens partenaires, veufs et divorcés compris. Une personne peut donc avoir plusieurs unions. Une paire n’a toujours qu’une union, et une paire fermée ne se reforme pas. `remarriage_delay_years` n’est pas encore respecté. `separated_potential_pair_years` reste publié mais ne mesure plus une perte de fécondité.
+
+La mesure de référence est `net_reproduction_at_maturity`. Avec cette règle et `fertility_peak_bps = 3200`, elle vaut 0,914 et la population finit à 9 044. Les profils d’ascendance de fixture passent à `fertility_peak_bps = 4000` (environ 1,05 mesuré sur trois seeds seulement), valeur initiale de worldbuilding choisie pour suivre des marqueurs de base croissant de 3 000 ppm par an. Le régulateur ne comble pas seul un tel écart.
