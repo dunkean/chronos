@@ -2,7 +2,7 @@
 
 Document de reprise. Il permet de reprendre le développement dans une nouvelle conversation sans autre contexte. **Mets-le à jour à chaque session** : statut des tâches (§7), journal (§9), décisions (§8).
 
-Dernière mise à jour : 06/11/2026. Statut global : **design social v2 détaillé, implémentation non commencée.** Rien des paliers P0–P5 ni des nouveaux lots S0–S8 n'est implémenté. Le statut du chantier ressources décrit ci-dessous est celui consigné le 26/10 et n’a pas été réaudité dans cette session.
+Dernière mise à jour : 06/11/2026. Statut global : **social v2 S0–S5 implémenté et recette jouée.** S6–S8 et les paliers P0–P5 ne sont pas implémentés. Le statut du chantier ressources décrit ci-dessous est celui consigné le 26/10 et n’a pas été réaudité dans cette session.
 
 **Point d’entrée actuel pour Chronos : [design social v2](design/chronos-social-v2/README.md).** Il intègre les remarques des deux tours de discussion, fixe le pilotage interne de Lineage Lab, les proportions statistiques par défaut et la première livraison S0–S5. Les paliers historiques P0–P5 restent des références ; la réécriture Rust de la généalogie et l’exactitude systématique des budgets ne sont plus des prérequis. Aucun moteur n’a changé dans cette session.
 
@@ -190,12 +190,12 @@ La spécification est rédigée ; les statuts ci-dessous concernent uniquement l
 
 | Lot | Travail | Statut |
 |---|---|---|
-| S0 | Types, clés, atlas, contrats d’impact et validation v2 | à faire |
-| S1 | Profils culturels et archétypes exécutables ; intégrer le raccord préparé | à faire |
-| S2 | Canon général, régions, domaines fixes et contexte extérieur | livré sur `social-v2/s2-canon`, non fusionné |
-| S3 | Worker Lineage Lab et programme historique noyau/cohortes | à faire |
-| S4 | Complément procédural, recrutement, mandats et groupes informels | livré sur `social-v2/s4-social`, non fusionné |
-| S5 | API, stockage, carte, graphes interactifs, chronologie et bilans | livré sur `social-v2/s5-final`, non fusionné ; parcours de recette dans `docs/reviews/social-v2-acceptance.md` |
+| S0 | Types, clés, atlas, contrats d’impact et validation v2 | fait, sur `main` ; preuve : `tests/v2_s0.rs` |
+| S1 | Profils culturels et archétypes exécutables ; intégrer le raccord préparé | fait, sur `main` ; 133 archétypes, `tools/check_catalogue_v2.py` |
+| S2 | Canon général, régions, domaines fixes et contexte extérieur | fait, sur `main` ; preuve : `tests/v2_s2.rs` |
+| S3 | Worker Lineage Lab et programme historique noyau/cohortes | fait, sur `main` et Lineage Lab `24d2301` ; même démographie selon l’ordre des requêtes |
+| S4 | Complément procédural, recrutement, mandats et groupes informels | fait, sur `main` ; preuve : maire stable, bilan fermé ; vacances et scissions rares sur la démo |
+| S5 | API, stockage, carte, graphes interactifs, chronologie et bilans | fait, sur `main` ; recette §18.4 jouée sur la graine 11, voir `docs/reviews/social-v2-acceptance.md` |
 | S6 | Scénarios exacts, personnes requises et branches | à faire |
 | S7 | Liaisons exactes d’acteurs nommés entre domaines | à faire |
 | S8 | Mesures, checkpoints, sélection paresseuse, grands sites, fournisseur démographique procédural, profils mixtes, nouveaux sites dynamiques et formats binaires éventuels | à faire |
@@ -228,6 +228,7 @@ Pour S0–S5, D1/D2/D4 ne bloquent pas le développement : l’atlas et les géo
 
 ## 9. Journal
 
+- **06/11/2026, social v2 S0–S5** : implémentation de S0 à S5 par des agents Codex, Opus et Sonnet, avec une revue par lot. Ajouts de produit : alignement et légalité (§27, D13), catalogue de 133 archétypes, deux langues (D14), portage Rust à terme (D12). Mesuré sur 22 seeds sans choc : 11 000 habitants en 1300, 13 717 en 1399, reproduction nette 1,05 (§28.6). Un domaine : environ 30 s à froid, 3 s à chaud, 150 à 190 Mio. Limites : vacances et scissions rares sur la démo, noyau des plans de démo en baisse d’environ moitié, chef d’association tiré parmi les résidents, parcours de recette joué à la main.
 - **06/11/2026, design social v2** : prise en compte des deux tours de commentaires ; préparation de `docs/design/chronos-social-v2/` avec modèle social, hasard indexé, plans démographiques, pilotage interne de Lineage Lab, raccord culturel, recrutement, mandats, impacts statistiques ou exacts, monde ouvert, visualisations, API et lots S0–S8. Discussion et annotations utilisateur conservées. Relectures indépendantes par Claude Opus 5.5 et intégration des corrections sur les cycles, registres démographiques, mobilité, noyau, profils et contrats autonomes. Documentation et contrats seulement : aucun changement de moteur, aucune mesure de performance nouvelle.
 - **26/10/2026, reprise Azgaar** : audit du checkout Fantasy Map Generator `67d555b`, rédaction de `docs/integration-azgaar.md`, lien depuis le README et lots proposés A0–A5 en §7.3. Comparaison des capacités avec le code Chronos actuel ; limites explicites du cycle économique, du hasard global et des récits sans causes. Documentation seulement : aucun moteur, schéma, canon ou statut P0–P5 modifié ; aucun benchmark exécuté.
 - **26/10/2026** : analyse de la vision et rédaction de `docs/reviews/vision-entites-sociales.md`. Recherche des couches de roches : la lithologie et les sols sont trouvés dans `city_generator/origin/main` (`godot-render/tools/surface_context.py`), sans aucune ressource exploitable. Agent ressources lancé, puis recadré deux fois : (1) niveau monde dans Neural Earth avec Orogen ; (2) Neural Earth comme seule chaîne multi-échelle. Mis en pause en attendant la fusion de Render v2. Création de ce document. Rien n'est commité dans Chronos.
