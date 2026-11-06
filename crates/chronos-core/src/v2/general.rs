@@ -901,7 +901,10 @@ fn run_contacts(
     let seed = config.world_seed;
     let p = &config.processes;
     let mut flows = BTreeMap::new();
-    for contact in &atlas.external_contacts {
+    // Ordinals follow IDs: the canonical atlas does not keep the array order.
+    let mut contacts: Vec<_> = atlas.external_contacts.iter().collect();
+    contacts.sort_by(|a, b| a.contact_id.cmp(&b.contact_id));
+    for contact in contacts {
         let owner = Owner::new(&config.canon_id, contact.owner_scope.clone());
         let mut episodes = Vec::new();
         for block in blocks(contact.valid) {

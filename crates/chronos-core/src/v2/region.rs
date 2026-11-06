@@ -1102,6 +1102,11 @@ impl RegionRun<'_> {
         if let Some(last) = segments.last_mut().filter(|s| s.end.is_none()) {
             if last.start == year {
                 segments.pop();
+                // The previous segment now ends without a successor: it takes the
+                // closing cause, unless a change of jurisdiction already gave one.
+                if let Some(previous) = segments.last_mut().filter(|s| s.end == Some(year)) {
+                    previous.end_cause.get_or_insert(cause);
+                }
             } else {
                 last.end = Some(year);
                 last.end_cause = Some(cause);

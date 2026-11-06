@@ -938,7 +938,7 @@ Les champs reconnus sont exactement ceux de l’exemple complet pour ces deux sc
 
 Les épisodes d’occupation ne se chevauchent pas et couvrent la période résidente de chaque site. S3 gère actifs/ruinés avec capacité datée ; la fondation future d’un site et l’abandon imposé avant qu’il soit effectivement vide requièrent `dynamic_settlements_v1`, extension S8. Un abandon ne tue pas silencieusement les résidents. Les IDs de crise sont de la provenance opaque pour le worker ; leur existence dans le canon est validée par Chronos avant l’appel.
 
-Un choc fourni est **déjà exposé au niveau local**. Le worker ne retire pas un deuxième tirage d’exposition. Les sites sont explicitement non vides dans sa liste ; aucune liste vide ne signifie implicitement « tout le monde ».
+Un choc fourni est **déjà exposé au niveau local**. Le worker ne retire pas un deuxième tirage d’exposition. Chaque choc porte son `shock_id`, identité de l’épisode local, distincte de `source_event_id` : plusieurs chocs partagent un même événement, avec une seule exposition par événement et site. Les sites sont explicitement non vides dans sa liste ; aucune liste vide ne signifie implicitement « tout le monde ».
 
 `historical_program` est une liste explicitement ordonnée par `(année, phase, op_id)`, clé d’application et de normalisation. La phase découle du type d’opération : 10 pour `protect_person`, à sa date de début ; 30 pour `force_death` ; 40 pour `move_households` et `admit_people`.
 

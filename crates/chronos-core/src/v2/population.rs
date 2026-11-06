@@ -259,6 +259,8 @@ pub enum ShockComposition {
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct PopulationShock {
+    /// Identity of the local episode. Several shocks share one source event.
+    pub shock_id: String,
     pub source_event_id: String,
     pub valid: TimeSpan,
     pub site_ids: Vec<String>,
@@ -507,14 +509,7 @@ pub fn plan_canonical_bytes(plan: &PopulationPlan) -> Result<Vec<u8>, HistoryErr
     for shock in &mut p.shocks {
         shock.site_ids.sort();
     }
-    p.shocks.sort_by_key(|s| {
-        (
-            s.source_event_id.clone(),
-            s.valid.start_year,
-            s.valid.end_year,
-            s.site_ids.clone(),
-        )
-    });
+    p.shocks.sort_by(|a, b| a.shock_id.cmp(&b.shock_id));
     for op in &mut p.historical_program {
         if let HistoricalOperation::AdmitPeople { person_ids, .. } = op {
             person_ids.sort();
@@ -915,15 +910,20 @@ fn validate_plan_inner(p: &PopulationPlan, refs: &PlanReferences) -> Result<(), 
             Ok(())
         }
     };
-    let mut shocks = BTreeSet::new();
+    // One exposure per event and village, whatever its dates (§7.5).
+    let mut exposures = BTreeSet::new();
+    if !unique_ids(p.shocks.iter().map(|s| s.shock_id.as_str())) {
+        return Err(invalid("plan.shock_id_invalid_or_duplicated"));
+    }
     for s in &p.shocks {
         span(s.valid)?;
         event(&s.source_event_id, s.valid.start_year)?;
+        if s.shock_id == s.source_event_id {
+            return Err(invalid("plan.shock_id_equals_source_event"));
+        }
         for id in &s.site_ids {
-            if !sites.contains(id.as_str())
-                || !shocks.insert((&s.source_event_id, id, s.valid.start_year, s.valid.end_year))
-            {
-                return Err(invalid("choc local dupliqué ou site absent"));
+            if !sites.contains(id.as_str()) || !exposures.insert((&s.source_event_id, id)) {
+                return Err(invalid("plan.shock_exposure_duplicated_or_site_unknown"));
             }
         }
     }
@@ -1407,33 +1407,23 @@ pub fn plan_population(
                 })
         })
         .collect();
-    // Same event, dates and profile: one shock listing all its sites.
-    let mut shocks: BTreeMap<_, PopulationShock> = BTreeMap::new();
-    for local in region
+    // One shock per local episode, in canonical order: the host hashes this list.
+    let mut shocks: Vec<_> = region
         .shocks
         .iter()
         .filter(|s| inside.contains(s.site_id.as_str()))
-    {
-        let key = (
-            &local.source_event_id,
-            local.valid.start_year,
-            local.valid.end_year,
-            &local.severity_profile_id,
-        );
-        shocks
-            .entry(key)
-            .or_insert_with(|| PopulationShock {
-                source_event_id: local.source_event_id.clone(),
-                valid: local.valid,
-                site_ids: Vec::new(),
-                severity_profile_id: local.severity_profile_id.clone(),
-                recovery_years: local.recovery_years,
-                composition: ShockComposition::IndependentSurvivalV1,
-                effects: local.effects.clone(),
-            })
-            .site_ids
-            .push(local.site_id.clone());
-    }
+        .map(|local| PopulationShock {
+            shock_id: local.episode_id.clone(),
+            source_event_id: local.source_event_id.clone(),
+            valid: local.valid,
+            site_ids: vec![local.site_id.clone()],
+            severity_profile_id: local.severity_profile_id.clone(),
+            recovery_years: local.recovery_years,
+            composition: ShockComposition::IndependentSurvivalV1,
+            effects: local.effects.clone(),
+        })
+        .collect();
+    shocks.sort_by(|a, b| a.shock_id.cmp(&b.shock_id));
     let mut historical_program: Vec<_> = region
         .displacements
         .iter()
@@ -1483,7 +1473,7 @@ pub fn plan_population(
         },
         settlements,
         baseline_markers,
-        shocks: shocks.into_values().collect(),
+        shocks,
         historical_program,
         role_demands: Vec::new(),
         fixed_people: Vec::new(),
