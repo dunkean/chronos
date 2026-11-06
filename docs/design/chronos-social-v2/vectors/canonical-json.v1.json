@@ -1,0 +1,70 @@
+{
+  "version": "canonical-json-1",
+  "vectors": [
+    {
+      "name": "vector-0",
+      "input": null,
+      "expected_utf8": "null",
+      "expected_hex": "6e756c6c"
+    },
+    {
+      "name": "vector-1",
+      "input": true,
+      "expected_utf8": "true",
+      "expected_hex": "74727565"
+    },
+    {
+      "name": "vector-2",
+      "input": 0,
+      "expected_utf8": "0",
+      "expected_hex": "30"
+    },
+    {
+      "name": "vector-3",
+      "input": -42,
+      "expected_utf8": "-42",
+      "expected_hex": "2d3432"
+    },
+    {
+      "name": "vector-4",
+      "input": 18446744073709551615,
+      "expected_utf8": "18446744073709551615",
+      "expected_hex": "3138343436373434303733373039353531363135"
+    },
+    {
+      "name": "vector-5",
+      "input": {
+        "z": 1,
+        "a": 2
+      },
+      "expected_utf8": "{\"a\":2,\"z\":1}",
+      "expected_hex": "7b2261223a322c227a223a317d"
+    },
+    {
+      "name": "vector-6",
+      "input": {
+        "é": "été",
+        "a": "\"\\\n\t\b\f\r\u0000\u001f",
+        "𐀀": "/ "
+      },
+      "expected_utf8": "{\"a\":\"\\\"\\\\\\n\\t\\b\\f\\r\\u0000\\u001f\",\"é\":\"été\",\"𐀀\":\"/ \"}",
+      "expected_hex": "7b2261223a225c225c5c5c6e5c745c625c665c725c75303030305c7530303166222c22c3a9223a22c3a974c3a9222c22f0908080223a222fe280a8227d"
+    },
+    {
+      "name": "vector-7",
+      "input": {
+        "list": [
+          {
+            "id": "b"
+          },
+          {
+            "id": "a"
+          }
+        ],
+        "null": null
+      },
+      "expected_utf8": "{\"list\":[{\"id\":\"b\"},{\"id\":\"a\"}],\"null\":null}",
+      "expected_hex": "7b226c697374223a5b7b226964223a2262227d2c7b226964223a2261227d5d2c226e756c6c223a6e756c6c7d"
+    }
+  ]
+}
