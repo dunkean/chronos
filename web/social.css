@@ -1,6 +1,9 @@
 /* Page sociale v2 : réutilise les jetons de style.css (palette marine/ardoise). */
 
-body.social { display: block; }
+/* style.css pins html/body to the viewport with overflow hidden from 900px (the v1 workshop is a
+   fixed-height app). This page is a long document: it must scroll as a whole. */
+html:has(body.social), body.social { height: auto; }
+body.social { display: block; overflow: visible; min-height: 100vh; }
 .social .bar { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
 .s-fixture {
   margin: 0; padding: 3px 10px; border: 2px dashed #e7c46a; color: #f5d98a;
@@ -54,7 +57,9 @@ body.social { display: block; }
 
 .s-graph-grid { display: grid; grid-template-columns: minmax(0, 1fr) 230px; gap: 10px; }
 @media (max-width: 1250px) { .s-graph-grid { grid-template-columns: 1fr; } }
-.s-cy { height: 480px; border: 1px solid var(--line); background: var(--field); border-radius: 3px; }
+.s-graph-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 4px 0 6px; font-size: 13px; }
+.s-graph-tools .s-dim { margin-left: 6px; }
+.s-cy { height: min(480px, 70vh); touch-action: pan-y; border: 1px solid var(--line); background: var(--field); border-radius: 3px; }
 .s-graph-note { padding: 6px 8px; background: #f6efd9; border: 1px solid #d6b13a; margin-bottom: 6px; }
 .s-graph-count { margin-top: 6px; font-size: 13px; color: var(--ink-2); }
 .s-glist-wrap h3 { font-size: 14px; margin-bottom: 4px; }
@@ -67,6 +72,10 @@ body.social { display: block; }
 .s-glist-rels li { padding: 2px 0; }
 
 /* Fiche */
+.s-tech { margin: 2px 0 6px; font-size: 12px; color: var(--ink-2); }
+.s-tech summary { cursor: pointer; }
+.s-tech p { margin: 3px 0 0; overflow-wrap: anywhere; word-break: break-all; }
+.s-tech code { font-size: 11px; }
 .s-sheet-head h2 { font: 700 22px/1.2 var(--font-hist); margin: 2px 0 6px; }
 .s-kicker { font-size: 12px; color: var(--ink-2); text-transform: uppercase; letter-spacing: 0.03em; overflow-wrap: anywhere; }
 .s-actions { display: flex; gap: 6px; flex-wrap: wrap; margin: 8px 0; }

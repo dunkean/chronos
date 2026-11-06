@@ -38,7 +38,7 @@ export function createSheet(root, ctx) {
         r.selection ? [t('explain.selection'), t('explain.selection_detail', {
           candidates: r.selection.candidates ?? 0, selected: fmtInt(r.selection.selected_weight ?? 0), total: fmtInt(r.selection.total_weight ?? 0) })] : null,
         r.constraints ? [t('explain.constraints'), t('explain.constraints_detail', {
-          min: r.constraints.min_age, max: r.constraints.max_age, term: r.constraints.term_years ?? '\u221e', site: String(r.constraints.residence_site_id).split('/').pop() })] : null,
+          min: r.constraints.min_age, max: r.constraints.max_age, term: r.constraints.term_years ?? '\u221e', site: model.siteName(r.constraints.residence_site_id) || String(r.constraints.residence_site_id).split('/').pop() })] : null,
       ];
       explainBox.append(h('p', { class: 's-explain-sentence' }, t(r.sentence_key, resolveParams(r.sentence_params))), dl(rows),
         r.causes?.length ? h('div', null, h('h4', null, t('explain.causes')),
@@ -167,10 +167,12 @@ export function createSheet(root, ctx) {
   function entityBody(e, year) {
     const alive = model.exists(e.id, year);
     const head = h('header', { class: 's-sheet-head' },
-      h('p', { class: 's-kicker' }, `${kindLabel(e.kind)} · ${e.id}`),
+      h('p', { class: 's-kicker' }, kindLabel(e.kind)),
       h('h2', null, model.name(e.id), e.name_synthetic ? h('span', { class: 'status st-synthetic s-synth', title: t('sheet.synthetic_name') }, t('provenance.status.synthetic')) : null),
-      e.name_provenance ? h('p', { class: 's-dim' }, t('sheet.name_source', { status: t(`provenance.status.${e.name_provenance.status}`), source: e.name_provenance.source ?? e.name_provenance.source_ref ?? '' })) : null,
       !alive ? h('p', { class: 's-warn' }, t('sheet.not_existing', { year, span: span(e.existence ?? [0, null]) })) : null,
+      h('details', { class: 's-tech' }, h('summary', null, t('sheet.tech_details')),
+        h('p', { class: 's-id' }, h('span', { class: 's-dim' }, `${t('sheet.tech_id')} `), h('code', null, e.id)),
+        e.name_provenance ? h('p', { class: 's-dim' }, t('sheet.name_source', { status: t(`provenance.status.${e.name_provenance.status}`), source: e.name_provenance.source ?? e.name_provenance.source_ref ?? '' })) : null),
       h('div', { class: 's-actions' },
         h('button', { type: 'button', class: 'btn btn-quiet', onclick: () => state.set({ center: e.id }) }, t('sheet.center_graph')),
         e.kind === 'person' ? h('button', { type: 'button', class: 'btn btn-quiet', onclick: () => state.set({ center: e.id, mode: 'kinship' }) }, t('sheet.show_kinship')) : null));

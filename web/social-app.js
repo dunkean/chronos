@@ -79,7 +79,7 @@ async function main() {
     showError(err);
     return;
   }
-  const model = new Model(view);
+  const model = new Model(view, world?.sites ?? []);
   const state = new QueryState({ year: view.at_year, site: site ?? '' });
   if (!fixture) state.value.site ||= site;
   const ctx = { view, model, state, world, fixture, selection: null, year: () => state.get().year ?? view.at_year };
@@ -212,13 +212,17 @@ async function main() {
     lang.value = getLocale();
     yearInput.value = y;
     yearRange.value = y;
-    const name = view.scope.name ?? '';
+    const name = model.siteName(view.scope.site_id) || (view.scope.name ?? '');
     $('year-label').textContent = t('page.year_heading', { name, year: y });
     if (fixture) $('fixture-label').textContent = tk(view, 'fixture_label');
     const status = view.provenance.status;
+    // Only what the data says: an entity whose name is flagged as a declared fallback.
+    const isFallback = (x) => x.name_synthetic === true || x.name_provenance?.status === 'synthetic';
+    const fallbackNames = view.entities.filter(isFallback).length;
     $('prov').replaceChildren(
       h('span', { class: `status st-${status}` }, t(`provenance.status.${status}`)),
       ` ${tk(view.provenance, 'detail')} ${t('page.canon')} : ${view.canon_id}. ${t('page.coverage')} : ${t(`coverage.${view.coverage}`)}.`
+      + (fallbackNames ? ` ${t('page.names_fallback', { n: fallbackNames })}` : '')
       + (view.view_fingerprint ? ` ${t('page.view_fingerprint')} : ${view.view_fingerprint.slice(0, 12)}.` : ''));
     more.hidden = !view.limits.cursor;
     more.textContent = t('page.load_more', { shown: view.limits.returned_nodes, total: view.limits.total_nodes ?? view.limits.returned_nodes });

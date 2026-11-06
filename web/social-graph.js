@@ -93,13 +93,21 @@ export function createGraphView(root, ctx) {
   const listTitle = h('h3');
   let query = '';
   search.addEventListener('input', () => { query = foldText(search.value); renderList(); });
-  root.append(filters, note, h('div', { class: 's-graph-grid' }, cyBox, h('div', { class: 's-glist-wrap' }, listTitle, searchLabel, search, list)), counter);
+  const zoomIn = h('button', { type: 'button', class: 'btn btn-quiet' }, '+');
+  const zoomOut = h('button', { type: 'button', class: 'btn btn-quiet' }, '−');
+  const zoomFit = h('button', { type: 'button', class: 'btn btn-quiet' });
+  const zoomHint = h('span', { class: 's-dim' });
+  const tools = h('div', { class: 's-graph-tools', role: 'group' }, zoomOut, zoomIn, zoomFit, zoomHint);
+  root.append(filters, note, tools, h('div', { class: 's-graph-grid' }, cyBox, h('div', { class: 's-glist-wrap' }, listTitle, searchLabel, search, list)), counter);
 
   let cy = null;
   let last = null;
   if (typeof cytoscape === 'function') {
     cy = cytoscape({
       container: cyBox, elements: [], minZoom: 0.3, maxZoom: 2.5,
+      // The wheel belongs to the page: zoom is on the buttons and on Ctrl/Cmd + wheel (see below).
+      userZoomingEnabled: false,
+      userPanningEnabled: !window.matchMedia?.('(pointer: coarse)').matches,
       style: [
         { selector: 'node', style: {
           'background-color': 'data(color)', shape: 'data(shape)', width: 'data(size)', height: 'data(size)',
@@ -118,6 +126,22 @@ export function createGraphView(root, ctx) {
         { selector: 'edge[kind = "union"]', style: { 'target-arrow-shape': 'none', 'line-style': 'dashed' } },
       ],
     });
+    cyBox.cy = cy; // handle for debugging and browser checks
+    const zoomBy = (factor, pos) => {
+      const level = Math.min(cy.maxZoom(), Math.max(cy.minZoom(), cy.zoom() * factor));
+      cy.zoom({ level, renderedPosition: pos ?? { x: cyBox.clientWidth / 2, y: cyBox.clientHeight / 2 } });
+    };
+    // Ctrl/Cmd + wheel (and trackpad pinch, which browsers report as Ctrl + wheel) zooms the graph;
+    // a plain wheel is left alone so that the page scrolls over the graph.
+    cyBox.addEventListener('wheel', (ev) => {
+      if (!(ev.ctrlKey || ev.metaKey)) return;
+      ev.preventDefault();
+      const r = cyBox.getBoundingClientRect();
+      zoomBy(Math.exp(-ev.deltaY * 0.0025), { x: ev.clientX - r.left, y: ev.clientY - r.top });
+    }, { passive: false });
+    zoomIn.addEventListener('click', () => zoomBy(1.25));
+    zoomOut.addEventListener('click', () => zoomBy(0.8));
+    zoomFit.addEventListener('click', () => cy.fit(undefined, 24));
     cy.on('tap', 'node', (ev) => state.set({ sel: ev.target.id() }));
     cy.on('dbltap', 'node', (ev) => state.set({ center: ev.target.id(), sel: ev.target.id() }));
   }
@@ -178,6 +202,12 @@ export function createGraphView(root, ctx) {
     search.setAttribute('aria-label', t('graph.search_aria'));
     searchLabel.textContent = t('graph.search_label');
     listTitle.textContent = t('graph.list_title');
+    tools.setAttribute('aria-label', t('graph.zoom_tools'));
+    zoomIn.setAttribute('aria-label', t('graph.zoom_in'));
+    zoomOut.setAttribute('aria-label', t('graph.zoom_out'));
+    zoomFit.textContent = t('graph.zoom_fit');
+    zoomHint.textContent = t('graph.zoom_hint');
+    tools.hidden = !cy;
   }
 
   function render() {

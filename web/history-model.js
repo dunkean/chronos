@@ -72,9 +72,26 @@ export function nameOf(e) {
 }
 
 export class Model {
-  constructor(view) {
+  constructor(view, siteLabels = []) {
     this.view = view;
+    this.siteLabels = new Map(siteLabels.map((s) => [s.site_id, s.label]));
     this.index();
+  }
+  // Display name of a site: the host's label, never the slug of its identifier.
+  siteName(siteId) {
+    const known = this.siteLabels.get(siteId) ?? this.view.overlay?.sites?.find((s) => s.site_id === siteId)?.label;
+    if (known) return known;
+    const scope = this.view.scope;
+    return scope && scope.site_id === siteId && scope.name ? scope.name : '';
+  }
+  // "Mayor of <seat>": the role is a key, the seat is data.
+  officeName(e) {
+    const role = nameOf(e);
+    const seat = e.site_id ? this.siteName(e.site_id) : '';
+    if (!seat) return role;
+    // French elision (d’Avenhorn): the key is chosen by the first letter of the seat.
+    const vowel = /^[AEIOUYÀ-ÅÈ-ÏÒ-ÖØÙ-Ý]/i.test(seat.normalize('NFC'));
+    return t(vowel ? 'office.of_site_vowel' : 'office.of_site', { role, site: seat });
   }
   // The view object is replaced in place when the year moves; the model re-reads it.
   index() {
@@ -116,7 +133,7 @@ export class Model {
   // Display name: a proper name is data, an office or event name is a key.
   name(id) {
     const e = this.byId.get(id);
-    if (e) return nameOf(e);
+    if (e) return e.kind === 'office' ? this.officeName(e) : nameOf(e);
     const ev = this.events.get(id);
     if (ev) return tk(ev, 'label');
     const holder = this.holders.get(id);
