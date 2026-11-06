@@ -1,0 +1,3478 @@
+{
+ "schema": "chronos.history-view.v2-draft",
+ "canon_id": "canon-fixture-social-demo",
+ "view_fingerprint": "fixture-0000000000000000",
+ "fixture_label_key": "fixture.banner",
+ "provenance": {
+  "status": "synthetic",
+  "source": "web/fixtures/social-view.demo.json",
+  "detail_key": "fixture.provenance.detail"
+ },
+ "period": {
+  "from": 1340,
+  "to": 1385
+ },
+ "scope": {
+  "site_id": "site/demo/vaucelles",
+  "name": "Vaucelles"
+ },
+ "at_year": 1360,
+ "observed_start": 1340,
+ "default_selection": {
+  "office_id": "o/maire",
+  "year": 1360
+ },
+ "coverage": "partial",
+ "limits": {
+  "max_nodes": 300,
+  "max_edges": 1000,
+  "returned_nodes": 22,
+  "returned_edges": 50,
+  "complete": true,
+  "cursor": null
+ },
+ "conduct_thresholds": {
+  "person": [
+   [
+    "lawless",
+    -6000,
+    -3000
+   ],
+   [
+    "crooked",
+    -2500
+   ],
+   [
+    "ordinary",
+    2500
+   ],
+   [
+    "upright",
+    7000
+   ]
+  ],
+  "organization": [
+   [
+    "lawless",
+    -6000,
+    -3000
+   ],
+   [
+    "crooked",
+    -2500
+   ],
+   [
+    "ordinary",
+    2500
+   ],
+   [
+    "upright",
+    5500
+   ]
+  ]
+ },
+ "entities": [
+  {
+   "id": "p/guillaume",
+   "kind": "person",
+   "nature": "person",
+   "agency": "individual",
+   "name": "Guillaume Marchais",
+   "archetype_id": "person/villager",
+   "existence": [
+    1296,
+    1352
+   ],
+   "birth_year": 1296,
+   "death_year": 1352,
+   "person_source": "lineage_simulated",
+   "observed_span": [
+    1340,
+    1352
+   ],
+   "alignment_episodes": [
+    {
+     "valid": [
+      1340,
+      1352
+     ],
+     "morality_bps": 3200,
+     "lawfulness_bps": 4200,
+     "cause_event_id": null,
+     "provenance": {
+      "status": "synthetic",
+      "source": "fixture-social-view.demo",
+      "rule_id": "fixture/hand-written"
+     }
+    }
+   ],
+   "visibility": "open",
+   "conduct_tags": [],
+   "provenance": {
+    "status": "synthetic",
+    "source": "fixture-social-view.demo",
+    "rule_id": "fixture/hand-written"
+   }
+  },
+  {
+   "id": "p/alais",
+   "kind": "person",
+   "nature": "person",
+   "agency": "individual",
+   "name": "Alaïs Marchais",
+   "archetype_id": "person/villager",
+   "existence": [
+    1300,
+    1368
+   ],
+   "birth_year": 1300,
+   "death_year": 1368,
+   "person_source": "lineage_simulated",
+   "observed_span": [
+    1340,
+    1368
+   ],
+   "alignment_episodes": [
+    {
+     "valid": [
+      1340,
+      1368
+     ],
+     "morality_bps": 1500,
+     "lawfulness_bps": 2000,
+     "cause_event_id": null,
+     "provenance": {
+      "status": "synthetic",
+      "source": "fixture-social-view.demo",
+      "rule_id": "fixture/hand-written"
+     }
+    }
+   ],
+   "visibility": "open",
+   "conduct_tags": [],
+   "provenance": {
+    "status": "synthetic",
+    "source": "fixture-social-view.demo",
+    "rule_id": "fixture/hand-written"
+   }
+  },
+  {
+   "id": "p/aubert",
+   "kind": "person",
+   "nature": "person",
+   "agency": "individual",
+   "name": "Aubert Marchais",
+   "archetype_id": "person/villager",
+   "existence": [
+    1322,
+    1374
+   ],
+   "birth_year": 1322,
+   "death_year": 1374,
+   "person_source": "lineage_simulated",
+   "observed_span": [
+    1340,
+    1374
+   ],
+   "alignment_episodes": [
+    {
+     "valid": [
+      1340,
+      1354
+     ],
+     "morality_bps": 2000,
+     "lawfulness_bps": 4000,
+     "cause_event_id": null,
+     "provenance": {
+      "status": "synthetic",
+      "source": "fixture-social-view.demo",
+      "rule_id": "fixture/hand-written"
+     }
+    },
+    {
+     "valid": [
+      1354,
+      1375
+     ],
+     "morality_bps": 3600,
+     "lawfulness_bps": 5200,
+     "cause_event_id": "ev/election-1354",
+     "provenance": {
+      "status": "synthetic",
+      "source": "fixture-social-view.demo",
+      "rule_id": "fixture/hand-written"
+     }
+    }
+   ],
+   "visibility": "open",
+   "conduct_tags": [],
+   "provenance": {
+    "status": "synthetic",
+    "source": "fixture-social-view.demo",
+    "rule_id": "fixture/hand-written"
+   }
+  },
+  {
+   "id": "p/ysabeau",
+   "kind": "person",
+   "nature": "person",
+   "agency": "individual",
+   "name": "Ysabeau de Rouvray",
+   "archetype_id": "person/villager",
+   "existence": [
+    1326,
+    null
+   ],
+   "birth_year": 1326,
+   "death_year": null,
+   "person_source": "lineage_simulated",
+   "observed_span": [
+    1340,
+    1385
+   ],
+   "alignment_episodes": [
+    {
+     "valid": [
+      1340,
+      1386
+     ],
+     "morality_bps": 4200,
+     "lawfulness_bps": 2500,
+     "cause_event_id": null,
+     "provenance": {
+      "status": "synthetic",
+      "source": "fixture-social-view.demo",
+      "rule_id": "fixture/hand-written"
+     }
+    }
+   ],
+   "visibility": "open",
+   "conduct_tags": [],
+   "provenance": {
+    "status": "synthetic",
+    "source": "fixture-social-view.demo",
+    "rule_id": "fixture/hand-written"
+   }
+  },
+  {
+   "id": "p/jehan",
+   "kind": "person",
+   "nature": "person",
+   "agency": "individual",
+   "name": "Jehan Marchais",
+   "archetype_id": "person/villager",
+   "existence": [
+    1348,
+    null
+   ],
+   "birth_year": 1348,
+   "death_year": null,
+   "person_source": "lineage_simulated",
+   "observed_span": [
+    1348,
+    1385
+   ],
+   "alignment_episodes": [
+    {
+     "valid": [
+      1340,
+      1386
+     ],
+     "morality_bps": 1200,
+     "lawfulness_bps": 1800,
+     "cause_event_id": null,
+     "provenance": {
+      "status": "synthetic",
+      "source": "fixture-social-view.demo",
+      "rule_id": "fixture/hand-written"
+     }
+    }
+   ],
+   "visibility": "open",
+   "conduct_tags": [],
+   "provenance": {
+    "status": "synthetic",
+    "source": "fixture-social-view.demo",
+    "rule_id": "fixture/hand-written"
+   }
+  },
+  {
+   "id": "p/mahaut",
+   "kind": "person",
+   "nature": "person",
+   "agency": "individual",
+   "name": "Mahaut Marchais",
+   "archetype_id": "person/villager",
+   "existence": [
+    1351,
+    null
+   ],
+   "birth_year": 1351,
+   "death_year": null,
+   "person_source": "lineage_simulated",
+   "observed_span": [
+    1351,
+    1385
+   ],
+   "alignment_episodes": [
+    {
+     "valid": [
+      1340,
+      1386
+     ],
+     "morality_bps": 5800,
+     "lawfulness_bps": 1500,
+     "cause_event_id": null,
+     "provenance": {
+      "status": "synthetic",
+      "source": "fixture-social-view.demo",
+      "rule_id": "fixture/hand-written"
+     }
+    }
+   ],
+   "visibility": "open",
+   "conduct_tags": [],
+   "provenance": {
+    "status": "synthetic",
+    "source": "fixture-social-view.demo",
+    "rule_id": "fixture/hand-written"
+   }
+  },
+  {
+   "id": "p/thibaut",
+   "kind": "person",
+   "nature": "person",
+   "agency": "individual",
+   "name": "Thibaut Marchais",
+   "archetype_id": "person/villager",
+   "existence": [
+    1325,
+    null
+   ],
+   "birth_year": 1325,
+   "death_year": null,
+   "person_source": "lineage_simulated",
+   "observed_span": [
+    1340,
+    1385
+   ],
+   "alignment_episodes": [
+    {
+     "valid": [
+      1340,
+      1356
+     ],
+     "morality_bps": 900,
+     "lawfulness_bps": 1800,
+     "cause_event_id": null,
+     "provenance": {
+      "status": "synthetic",
+      "source": "fixture-social-view.demo",
+      "rule_id": "fixture/hand-written"
+     }
+    },
+    {
+     "valid": [
+      1356,
+      1386
+     ],
+     "morality_bps": -3600,
+     "lawfulness_bps": -1500,
+     "cause_event_id": "ev/dette-1356",
+     "provenance": {
+      "status": "synthetic",
+      "source": "fixture-social-view.demo",
+      "rule_id": "fixture/hand-written"
+     }
+    }
+   ],
+   "visibility": "open",
+   "conduct_tags": [],
+   "provenance": {
+    "status": "synthetic",
+    "source": "fixture-social-view.demo",
+    "rule_id": "fixture/hand-written"
+   }
+  },
+  {
+   "id": "p/gautier",
+   "kind": "person",
+   "nature": "person",
+   "agency": "individual",
+   "name": "Gautier Perrin",
+   "archetype_id": "person/villager",
+   "existence": [
+    1315,
+    1368
+   ],
+   "birth_year": 1315,
+   "death_year": 1368,
+   "person_source": "lineage_projected",
+   "observed_span": [
+    1340,
+    1368
+   ],
+   "alignment_episodes": [
+    {
+     "valid": [
+      1340,
+      1369
+     ],
+     "morality_bps": 400,
+     "lawfulness_bps": 3500,
+     "cause_event_id": null,
+     "provenance": {
+      "status": "synthetic",
+      "source": "fixture-social-view.demo",
+      "rule_id": "fixture/hand-written"
+     }
+    }
+   ],
+   "visibility": "open",
+   "conduct_tags": [],
+   "provenance": {
+    "status": "synthetic",
+    "source": "fixture-social-view.demo",
+    "rule_id": "fixture/hand-written"
+   }
+  },
+  {
+   "id": "p/hugues",
+   "kind": "person",
+   "nature": "person",
+   "agency": "individual",
+   "name": "Hugues Perrin",
+   "archetype_id": "person/villager",
+   "existence": [
+    1345,
+    null
+   ],
+   "birth_year": 1345,
+   "death_year": null,
+   "person_source": "lineage_projected",
+   "observed_span": [
+    1345,
+    1385
+   ],
+   "alignment_episodes": [
+    {
+     "valid": [
+      1340,
+      1386
+     ],
+     "morality_bps": 1000,
+     "lawfulness_bps": 3000,
+     "cause_event_id": null,
+     "provenance": {
+      "status": "synthetic",
+      "source": "fixture-social-view.demo",
+      "rule_id": "fixture/hand-written"
+     }
+    }
+   ],
+   "visibility": "open",
+   "conduct_tags": [],
+   "provenance": {
+    "status": "synthetic",
+    "source": "fixture-social-view.demo",
+    "rule_id": "fixture/hand-written"
+   }
+  },
+  {
+   "id": "p/raoul",
+   "kind": "person",
+   "nature": "person",
+   "agency": "individual",
+   "name": "Raoul le Borgne",
+   "archetype_id": "person/villager",
+   "existence": [
+    1318,
+    null
+   ],
+   "birth_year": 1318,
+   "death_year": null,
+   "person_source": "procedural",
+   "observed_span": [
+    1340,
+    1385
+   ],
+   "alignment_episodes": [
+    {
+     "valid": [
+      1340,
+      1386
+     ],
+     "morality_bps": -7400,
+     "lawfulness_bps": -5200,
+     "cause_event_id": null,
+     "provenance": {
+      "status": "synthetic",
+      "source": "fixture-social-view.demo",
+      "rule_id": "fixture/hand-written"
+     }
+    }
+   ],
+   "visibility": "covert",
+   "conduct_tags": [
+    "violence",
+    "extortion"
+   ],
+   "provenance": {
+    "status": "synthetic",
+    "source": "fixture-social-view.demo",
+    "rule_id": "fixture/hand-written"
+   }
+  },
+  {
+   "id": "p/clemence",
+   "kind": "person",
+   "nature": "person",
+   "agency": "individual",
+   "name": "Sœur Clémence",
+   "archetype_id": "person/villager",
+   "existence": [
+    1310,
+    1379
+   ],
+   "birth_year": 1310,
+   "death_year": 1379,
+   "person_source": "procedural",
+   "observed_span": [
+    1340,
+    1379
+   ],
+   "alignment_episodes": [
+    {
+     "valid": [
+      1340,
+      1380
+     ],
+     "morality_bps": 8200,
+     "lawfulness_bps": 3000,
+     "cause_event_id": null,
+     "provenance": {
+      "status": "synthetic",
+      "source": "fixture-social-view.demo",
+      "rule_id": "fixture/hand-written"
+     }
+    }
+   ],
+   "visibility": "open",
+   "conduct_tags": [
+    "charity"
+   ],
+   "provenance": {
+    "status": "synthetic",
+    "source": "fixture-social-view.demo",
+    "rule_id": "fixture/hand-written"
+   }
+  },
+  {
+   "id": "g/vaucelles",
+   "kind": "village",
+   "nature": "community",
+   "agency": "governed",
+   "name": "Vaucelles",
+   "archetype_id": "community/village",
+   "existence": [
+    1100,
+    null
+   ],
+   "alignment_episodes": [],
+   "visibility": "open",
+   "conduct_tags": [],
+   "provenance": {
+    "status": "synthetic",
+    "source": "fixture-social-view.demo",
+    "rule_id": "fixture/hand-written"
+   },
+   "site_id": "site/demo/vaucelles"
+  },
+  {
+   "id": "g/montreuil",
+   "kind": "jurisdiction",
+   "nature": "organized_group",
+   "agency": "governed",
+   "name": "Prévôté de Montreuil",
+   "archetype_id": "institution/provostry",
+   "existence": [
+    1200,
+    null
+   ],
+   "alignment_episodes": [
+    {
+     "valid": [
+      1340,
+      1386
+     ],
+     "morality_bps": 1800,
+     "lawfulness_bps": 5000,
+     "cause_event_id": null,
+     "provenance": {
+      "status": "synthetic",
+      "source": "fixture-social-view.demo",
+      "rule_id": "fixture/hand-written"
+     }
+    }
+   ],
+   "visibility": "open",
+   "conduct_tags": [],
+   "provenance": {
+    "status": "synthetic",
+    "source": "fixture-social-view.demo",
+    "rule_id": "fixture/hand-written"
+   },
+   "note_key": "fixture.note.montreuil"
+  },
+  {
+   "id": "g/mairie",
+   "kind": "municipality",
+   "nature": "organized_group",
+   "agency": "governed",
+   "name": "Mairie de Vaucelles",
+   "archetype_id": "institution/municipality",
+   "existence": [
+    1210,
+    null
+   ],
+   "alignment_episodes": [
+    {
+     "valid": [
+      1340,
+      1386
+     ],
+     "morality_bps": 3000,
+     "lawfulness_bps": 5500,
+     "cause_event_id": null,
+     "provenance": {
+      "status": "synthetic",
+      "source": "fixture-social-view.demo",
+      "rule_id": "fixture/hand-written"
+     }
+    }
+   ],
+   "visibility": "open",
+   "conduct_tags": [],
+   "provenance": {
+    "status": "synthetic",
+    "source": "fixture-social-view.demo",
+    "rule_id": "fixture/hand-written"
+   },
+   "member_count": {
+    "expected": {
+     "value": 5,
+     "unit": "people",
+     "precision": "expected",
+     "coverage": "aggregate",
+     "basis": "council",
+     "at_year": 1360
+    },
+    "realized": {
+     "value": 5,
+     "unit": "people",
+     "precision": "realized",
+     "coverage": "complete",
+     "basis": "assigned_members",
+     "at_year": 1360
+    }
+   }
+  },
+  {
+   "id": "g/famille",
+   "kind": "family",
+   "nature": "category",
+   "agency": "none",
+   "name": "Famille Marchais",
+   "archetype_id": "category/family",
+   "existence": [
+    1296,
+    null
+   ],
+   "alignment_episodes": [],
+   "visibility": "open",
+   "conduct_tags": [],
+   "provenance": {
+    "status": "synthetic",
+    "source": "fixture-social-view.demo",
+    "rule_id": "fixture/hand-written"
+   },
+   "note_key": "fixture.note.family"
+  },
+  {
+   "id": "g/guilde",
+   "kind": "guild",
+   "nature": "organized_group",
+   "agency": "governed",
+   "name": "Guilde des drapiers",
+   "archetype_id": "guild/merchant",
+   "existence": [
+    1344,
+    null
+   ],
+   "alignment_episodes": [
+    {
+     "valid": [
+      1344,
+      1386
+     ],
+     "morality_bps": 1800,
+     "lawfulness_bps": 4800,
+     "cause_event_id": null,
+     "provenance": {
+      "status": "synthetic",
+      "source": "fixture-social-view.demo",
+      "rule_id": "fixture/hand-written"
+     }
+    }
+   ],
+   "visibility": "open",
+   "conduct_tags": [],
+   "provenance": {
+    "status": "synthetic",
+    "source": "fixture-social-view.demo",
+    "rule_id": "fixture/hand-written"
+   },
+   "member_count": {
+    "expected": {
+     "value": 38,
+     "unit": "members",
+     "precision": "expected",
+     "coverage": "aggregate",
+     "basis": "guild_profile",
+     "at_year": 1360
+    },
+    "realized": {
+     "value": 9,
+     "unit": "members",
+     "precision": "realized",
+     "coverage": "partial",
+     "basis": "materialized_members",
+     "at_year": 1360
+    }
+   }
+  },
+  {
+   "id": "g/brume",
+   "kind": "criminal_network",
+   "nature": "organized_group",
+   "agency": "governed",
+   "name": "Compagnie de la Brume",
+   "archetype_id": "base_criminal_network",
+   "existence": [
+    1349,
+    null
+   ],
+   "alignment_episodes": [
+    {
+     "valid": [
+      1349,
+      1386
+     ],
+     "morality_bps": -7200,
+     "lawfulness_bps": -5000,
+     "cause_event_id": null,
+     "provenance": {
+      "status": "synthetic",
+      "source": "fixture-social-view.demo",
+      "rule_id": "fixture/hand-written"
+     }
+    }
+   ],
+   "visibility": "covert",
+   "conduct_tags": [
+    "violence",
+    "extortion",
+    "smuggling"
+   ],
+   "provenance": {
+    "status": "synthetic",
+    "source": "fixture-social-view.demo",
+    "rule_id": "fixture/hand-written"
+   },
+   "member_count": {
+    "expected": {
+     "value": 24,
+     "unit": "members",
+     "precision": "expected",
+     "coverage": "aggregate",
+     "basis": "stock_per_1000_adults",
+     "at_year": 1360
+    },
+    "realized": {
+     "value": 3,
+     "unit": "members",
+     "precision": "realized",
+     "coverage": "partial",
+     "basis": "materialized_members",
+     "at_year": 1360
+    }
+   }
+  },
+  {
+   "id": "g/oeuvre",
+   "kind": "charitable_order",
+   "nature": "organized_group",
+   "agency": "governed",
+   "name": "Œuvre de la Miséricorde",
+   "archetype_id": "base_charitable_order",
+   "existence": [
+    1349,
+    null
+   ],
+   "alignment_episodes": [
+    {
+     "valid": [
+      1349,
+      1386
+     ],
+     "morality_bps": 7800,
+     "lawfulness_bps": 2500,
+     "cause_event_id": null,
+     "provenance": {
+      "status": "synthetic",
+      "source": "fixture-social-view.demo",
+      "rule_id": "fixture/hand-written"
+     }
+    }
+   ],
+   "visibility": "open",
+   "conduct_tags": [
+    "charity"
+   ],
+   "provenance": {
+    "status": "synthetic",
+    "source": "fixture-social-view.demo",
+    "rule_id": "fixture/hand-written"
+   },
+   "member_count": {
+    "expected": {
+     "value": 18,
+     "unit": "members",
+     "precision": "expected",
+     "coverage": "aggregate",
+     "basis": "stock_per_1000_adults",
+     "at_year": 1360
+    },
+    "realized": {
+     "value": 3,
+     "unit": "members",
+     "precision": "realized",
+     "coverage": "partial",
+     "basis": "materialized_members",
+     "at_year": 1360
+    }
+   }
+  },
+  {
+   "id": "g/taverne",
+   "kind": "enterprise",
+   "nature": "organized_group",
+   "agency": "governed",
+   "name": "Taverne du Coq",
+   "archetype_id": "firm/tavern",
+   "existence": [
+    1331,
+    null
+   ],
+   "alignment_episodes": [
+    {
+     "valid": [
+      1340,
+      1356
+     ],
+     "morality_bps": 600,
+     "lawfulness_bps": 1000,
+     "cause_event_id": null,
+     "provenance": {
+      "status": "synthetic",
+      "source": "fixture-social-view.demo",
+      "rule_id": "fixture/hand-written"
+     }
+    },
+    {
+     "valid": [
+      1356,
+      1386
+     ],
+     "morality_bps": -3000,
+     "lawfulness_bps": 600,
+     "cause_event_id": "ev/extorsion-1357",
+     "provenance": {
+      "status": "synthetic",
+      "source": "fixture-social-view.demo",
+      "rule_id": "fixture/hand-written"
+     }
+    }
+   ],
+   "visibility": "open",
+   "conduct_tags": [
+    "gambling"
+   ],
+   "provenance": {
+    "status": "synthetic",
+    "source": "fixture-social-view.demo",
+    "rule_id": "fixture/hand-written"
+   }
+  },
+  {
+   "id": "g/moulin",
+   "kind": "enterprise",
+   "nature": "organized_group",
+   "agency": "governed",
+   "name": "Moulin des Perrin",
+   "archetype_id": "firm/mill",
+   "existence": [
+    1300,
+    null
+   ],
+   "alignment_episodes": [
+    {
+     "valid": [
+      1340,
+      1386
+     ],
+     "morality_bps": 3200,
+     "lawfulness_bps": 4000,
+     "cause_event_id": null,
+     "provenance": {
+      "status": "synthetic",
+      "source": "fixture-social-view.demo",
+      "rule_id": "fixture/hand-written"
+     }
+    }
+   ],
+   "visibility": "open",
+   "conduct_tags": [],
+   "provenance": {
+    "status": "synthetic",
+    "source": "fixture-social-view.demo",
+    "rule_id": "fixture/hand-written"
+   }
+  }
+ ],
+ "offices": [
+  {
+   "id": "o/maire",
+   "kind": "office",
+   "name_key": "fixture.office.mayor",
+   "organization_id": "g/mairie",
+   "collective": false,
+   "seats": 1,
+   "appointment_rule": "weighted_election",
+   "provenance": {
+    "status": "synthetic",
+    "source": "fixture-social-view.demo",
+    "rule_id": "office/elected-v1"
+   }
+  },
+  {
+   "id": "o/maitre",
+   "kind": "office",
+   "name_key": "fixture.office.guild_master",
+   "organization_id": "g/guilde",
+   "collective": false,
+   "seats": 1,
+   "appointment_rule": "co_optation",
+   "provenance": {
+    "status": "synthetic",
+    "source": "fixture-social-view.demo",
+    "rule_id": "office/co-opted-v1"
+   }
+  }
+ ],
+ "relations": [
+  {
+   "id": "r/1",
+   "subject": "p/guillaume",
+   "predicate": "parent_of",
+   "object": "p/aubert",
+   "valid": [
+    1322,
+    null
+   ],
+   "weight_bps": 5000,
+   "cause_event_id": null,
+   "provenance": {
+    "status": "synthetic",
+    "source": "fixture-social-view.demo",
+    "rule_id": "relation/parent_of"
+   }
+  },
+  {
+   "id": "r/2",
+   "subject": "p/alais",
+   "predicate": "parent_of",
+   "object": "p/aubert",
+   "valid": [
+    1322,
+    null
+   ],
+   "weight_bps": 5000,
+   "cause_event_id": null,
+   "provenance": {
+    "status": "synthetic",
+    "source": "fixture-social-view.demo",
+    "rule_id": "relation/parent_of"
+   }
+  },
+  {
+   "id": "r/3",
+   "subject": "p/guillaume",
+   "predicate": "parent_of",
+   "object": "p/thibaut",
+   "valid": [
+    1325,
+    null
+   ],
+   "weight_bps": 5000,
+   "cause_event_id": null,
+   "provenance": {
+    "status": "synthetic",
+    "source": "fixture-social-view.demo",
+    "rule_id": "relation/parent_of"
+   }
+  },
+  {
+   "id": "r/4",
+   "subject": "p/alais",
+   "predicate": "parent_of",
+   "object": "p/thibaut",
+   "valid": [
+    1325,
+    null
+   ],
+   "weight_bps": 5000,
+   "cause_event_id": null,
+   "provenance": {
+    "status": "synthetic",
+    "source": "fixture-social-view.demo",
+    "rule_id": "relation/parent_of"
+   }
+  },
+  {
+   "id": "r/5",
+   "subject": "p/aubert",
+   "predicate": "parent_of",
+   "object": "p/jehan",
+   "valid": [
+    1348,
+    null
+   ],
+   "weight_bps": 5000,
+   "cause_event_id": null,
+   "provenance": {
+    "status": "synthetic",
+    "source": "fixture-social-view.demo",
+    "rule_id": "relation/parent_of"
+   }
+  },
+  {
+   "id": "r/6",
+   "subject": "p/ysabeau",
+   "predicate": "parent_of",
+   "object": "p/jehan",
+   "valid": [
+    1348,
+    null
+   ],
+   "weight_bps": 5000,
+   "cause_event_id": null,
+   "provenance": {
+    "status": "synthetic",
+    "source": "fixture-social-view.demo",
+    "rule_id": "relation/parent_of"
+   }
+  },
+  {
+   "id": "r/7",
+   "subject": "p/aubert",
+   "predicate": "parent_of",
+   "object": "p/mahaut",
+   "valid": [
+    1351,
+    null
+   ],
+   "weight_bps": 5000,
+   "cause_event_id": null,
+   "provenance": {
+    "status": "synthetic",
+    "source": "fixture-social-view.demo",
+    "rule_id": "relation/parent_of"
+   }
+  },
+  {
+   "id": "r/8",
+   "subject": "p/ysabeau",
+   "predicate": "parent_of",
+   "object": "p/mahaut",
+   "valid": [
+    1351,
+    null
+   ],
+   "weight_bps": 5000,
+   "cause_event_id": null,
+   "provenance": {
+    "status": "synthetic",
+    "source": "fixture-social-view.demo",
+    "rule_id": "relation/parent_of"
+   }
+  },
+  {
+   "id": "r/9",
+   "subject": "p/gautier",
+   "predicate": "parent_of",
+   "object": "p/hugues",
+   "valid": [
+    1345,
+    null
+   ],
+   "weight_bps": 5000,
+   "cause_event_id": null,
+   "provenance": {
+    "status": "synthetic",
+    "source": "fixture-social-view.demo",
+    "rule_id": "relation/parent_of"
+   }
+  },
+  {
+   "id": "r/10",
+   "subject": "p/guillaume",
+   "predicate": "union_with",
+   "object": "p/alais",
+   "valid": [
+    1318,
+    1352
+   ],
+   "weight_bps": 5000,
+   "cause_event_id": null,
+   "provenance": {
+    "status": "synthetic",
+    "source": "fixture-social-view.demo",
+    "rule_id": "relation/union_with"
+   },
+   "end_cause_event_id": "ev/mort-guillaume"
+  },
+  {
+   "id": "r/11",
+   "subject": "p/aubert",
+   "predicate": "union_with",
+   "object": "p/ysabeau",
+   "valid": [
+    1346,
+    1374
+   ],
+   "weight_bps": 5000,
+   "cause_event_id": null,
+   "provenance": {
+    "status": "synthetic",
+    "source": "fixture-social-view.demo",
+    "rule_id": "relation/union_with"
+   },
+   "end_cause_event_id": "ev/mort-aubert"
+  },
+  {
+   "id": "r/12",
+   "subject": "p/guillaume",
+   "predicate": "member_of",
+   "object": "g/famille",
+   "valid": [
+    1340,
+    null
+   ],
+   "weight_bps": 10000,
+   "cause_event_id": null,
+   "provenance": {
+    "status": "synthetic",
+    "source": "fixture-social-view.demo",
+    "rule_id": "relation/member_of"
+   }
+  },
+  {
+   "id": "r/13",
+   "subject": "p/alais",
+   "predicate": "member_of",
+   "object": "g/famille",
+   "valid": [
+    1340,
+    null
+   ],
+   "weight_bps": 10000,
+   "cause_event_id": null,
+   "provenance": {
+    "status": "synthetic",
+    "source": "fixture-social-view.demo",
+    "rule_id": "relation/member_of"
+   }
+  },
+  {
+   "id": "r/14",
+   "subject": "p/aubert",
+   "predicate": "member_of",
+   "object": "g/famille",
+   "valid": [
+    1340,
+    null
+   ],
+   "weight_bps": 10000,
+   "cause_event_id": null,
+   "provenance": {
+    "status": "synthetic",
+    "source": "fixture-social-view.demo",
+    "rule_id": "relation/member_of"
+   }
+  },
+  {
+   "id": "r/15",
+   "subject": "p/thibaut",
+   "predicate": "member_of",
+   "object": "g/famille",
+   "valid": [
+    1340,
+    null
+   ],
+   "weight_bps": 10000,
+   "cause_event_id": null,
+   "provenance": {
+    "status": "synthetic",
+    "source": "fixture-social-view.demo",
+    "rule_id": "relation/member_of"
+   }
+  },
+  {
+   "id": "r/16",
+   "subject": "p/ysabeau",
+   "predicate": "member_of",
+   "object": "g/famille",
+   "valid": [
+    1340,
+    null
+   ],
+   "weight_bps": 10000,
+   "cause_event_id": null,
+   "provenance": {
+    "status": "synthetic",
+    "source": "fixture-social-view.demo",
+    "rule_id": "relation/member_of"
+   }
+  },
+  {
+   "id": "r/17",
+   "subject": "p/jehan",
+   "predicate": "member_of",
+   "object": "g/famille",
+   "valid": [
+    1340,
+    null
+   ],
+   "weight_bps": 10000,
+   "cause_event_id": null,
+   "provenance": {
+    "status": "synthetic",
+    "source": "fixture-social-view.demo",
+    "rule_id": "relation/member_of"
+   }
+  },
+  {
+   "id": "r/18",
+   "subject": "p/mahaut",
+   "predicate": "member_of",
+   "object": "g/famille",
+   "valid": [
+    1340,
+    null
+   ],
+   "weight_bps": 10000,
+   "cause_event_id": null,
+   "provenance": {
+    "status": "synthetic",
+    "source": "fixture-social-view.demo",
+    "rule_id": "relation/member_of"
+   }
+  },
+  {
+   "id": "r/19",
+   "subject": "p/aubert",
+   "predicate": "member_of",
+   "object": "g/guilde",
+   "valid": [
+    1348,
+    null
+   ],
+   "weight_bps": 5000,
+   "cause_event_id": null,
+   "provenance": {
+    "status": "synthetic",
+    "source": "fixture-social-view.demo",
+    "rule_id": "relation/member_of"
+   }
+  },
+  {
+   "id": "r/20",
+   "subject": "p/gautier",
+   "predicate": "member_of",
+   "object": "g/guilde",
+   "valid": [
+    1344,
+    1368
+   ],
+   "weight_bps": 5000,
+   "cause_event_id": null,
+   "provenance": {
+    "status": "synthetic",
+    "source": "fixture-social-view.demo",
+    "rule_id": "relation/member_of"
+   },
+   "end_cause_event_id": "ev/mort-gautier"
+  },
+  {
+   "id": "r/21",
+   "subject": "p/hugues",
+   "predicate": "member_of",
+   "object": "g/guilde",
+   "valid": [
+    1366,
+    null
+   ],
+   "weight_bps": 5000,
+   "cause_event_id": "ev/election-guilde-1370",
+   "provenance": {
+    "status": "synthetic",
+    "source": "fixture-social-view.demo",
+    "rule_id": "relation/member_of"
+   }
+  },
+  {
+   "id": "r/22",
+   "subject": "p/thibaut",
+   "predicate": "member_of",
+   "object": "g/guilde",
+   "valid": [
+    1348,
+    1357
+   ],
+   "weight_bps": 3000,
+   "cause_event_id": null,
+   "provenance": {
+    "status": "synthetic",
+    "source": "fixture-social-view.demo",
+    "rule_id": "relation/member_of"
+   },
+   "end_cause_event_id": "ev/sortie-guilde-1357"
+  },
+  {
+   "id": "r/23",
+   "subject": "p/thibaut",
+   "predicate": "member_of",
+   "object": "g/brume",
+   "valid": [
+    1356,
+    null
+   ],
+   "weight_bps": 6500,
+   "cause_event_id": "ev/dette-1356",
+   "provenance": {
+    "status": "synthetic",
+    "source": "fixture-social-view.demo",
+    "rule_id": "relation/member_of"
+   }
+  },
+  {
+   "id": "r/24",
+   "subject": "p/raoul",
+   "predicate": "member_of",
+   "object": "g/brume",
+   "valid": [
+    1349,
+    null
+   ],
+   "weight_bps": 10000,
+   "cause_event_id": "ev/fond-brume-1349",
+   "provenance": {
+    "status": "synthetic",
+    "source": "fixture-social-view.demo",
+    "rule_id": "relation/member_of"
+   }
+  },
+  {
+   "id": "r/25",
+   "subject": "p/clemence",
+   "predicate": "member_of",
+   "object": "g/oeuvre",
+   "valid": [
+    1349,
+    null
+   ],
+   "weight_bps": 10000,
+   "cause_event_id": "ev/fond-oeuvre-1349",
+   "provenance": {
+    "status": "synthetic",
+    "source": "fixture-social-view.demo",
+    "rule_id": "relation/member_of"
+   }
+  },
+  {
+   "id": "r/26",
+   "subject": "p/ysabeau",
+   "predicate": "member_of",
+   "object": "g/oeuvre",
+   "valid": [
+    1350,
+    null
+   ],
+   "weight_bps": 7000,
+   "cause_event_id": null,
+   "provenance": {
+    "status": "synthetic",
+    "source": "fixture-social-view.demo",
+    "rule_id": "relation/member_of"
+   }
+  },
+  {
+   "id": "r/27",
+   "subject": "p/mahaut",
+   "predicate": "member_of",
+   "object": "g/oeuvre",
+   "valid": [
+    1372,
+    null
+   ],
+   "weight_bps": 8000,
+   "cause_event_id": null,
+   "provenance": {
+    "status": "synthetic",
+    "source": "fixture-social-view.demo",
+    "rule_id": "relation/member_of"
+   }
+  },
+  {
+   "id": "r/28",
+   "subject": "p/guillaume",
+   "predicate": "holds_office",
+   "object": "o/maire",
+   "valid": [
+    1331,
+    1352
+   ],
+   "weight_bps": 5000,
+   "cause_event_id": null,
+   "provenance": {
+    "status": "synthetic",
+    "source": "fixture-social-view.demo",
+    "rule_id": "relation/holds_office"
+   },
+   "end_cause_event_id": "ev/mort-guillaume"
+  },
+  {
+   "id": "r/29",
+   "subject": "p/aubert",
+   "predicate": "holds_office",
+   "object": "o/maire",
+   "valid": [
+    1354,
+    1372
+   ],
+   "weight_bps": 5000,
+   "cause_event_id": "ev/election-1354",
+   "provenance": {
+    "status": "synthetic",
+    "source": "fixture-social-view.demo",
+    "rule_id": "relation/holds_office"
+   },
+   "end_cause_event_id": "ev/succession-1372"
+  },
+  {
+   "id": "r/30",
+   "subject": "p/jehan",
+   "predicate": "holds_office",
+   "object": "o/maire",
+   "valid": [
+    1372,
+    null
+   ],
+   "weight_bps": 5000,
+   "cause_event_id": "ev/succession-1372",
+   "provenance": {
+    "status": "synthetic",
+    "source": "fixture-social-view.demo",
+    "rule_id": "relation/holds_office"
+   }
+  },
+  {
+   "id": "r/31",
+   "subject": "p/gautier",
+   "predicate": "holds_office",
+   "object": "o/maitre",
+   "valid": [
+    1349,
+    1368
+   ],
+   "weight_bps": 5000,
+   "cause_event_id": null,
+   "provenance": {
+    "status": "synthetic",
+    "source": "fixture-social-view.demo",
+    "rule_id": "relation/holds_office"
+   },
+   "end_cause_event_id": "ev/mort-gautier"
+  },
+  {
+   "id": "r/32",
+   "subject": "p/hugues",
+   "predicate": "holds_office",
+   "object": "o/maitre",
+   "valid": [
+    1370,
+    null
+   ],
+   "weight_bps": 5000,
+   "cause_event_id": "ev/election-guilde-1370",
+   "provenance": {
+    "status": "synthetic",
+    "source": "fixture-social-view.demo",
+    "rule_id": "relation/holds_office"
+   }
+  },
+  {
+   "id": "r/33",
+   "subject": "o/maire",
+   "predicate": "component_of",
+   "object": "g/mairie",
+   "valid": [
+    1210,
+    null
+   ],
+   "weight_bps": 5000,
+   "cause_event_id": null,
+   "provenance": {
+    "status": "synthetic",
+    "source": "fixture-social-view.demo",
+    "rule_id": "relation/component_of"
+   }
+  },
+  {
+   "id": "r/34",
+   "subject": "o/maitre",
+   "predicate": "component_of",
+   "object": "g/guilde",
+   "valid": [
+    1344,
+    null
+   ],
+   "weight_bps": 5000,
+   "cause_event_id": null,
+   "provenance": {
+    "status": "synthetic",
+    "source": "fixture-social-view.demo",
+    "rule_id": "relation/component_of"
+   }
+  },
+  {
+   "id": "r/35",
+   "subject": "g/mairie",
+   "predicate": "governs",
+   "object": "g/vaucelles",
+   "valid": [
+    1210,
+    null
+   ],
+   "weight_bps": 5000,
+   "cause_event_id": null,
+   "provenance": {
+    "status": "synthetic",
+    "source": "fixture-social-view.demo",
+    "rule_id": "relation/governs"
+   }
+  },
+  {
+   "id": "r/36",
+   "subject": "g/mairie",
+   "predicate": "allied_with",
+   "object": "g/montreuil",
+   "valid": [
+    1340,
+    null
+   ],
+   "weight_bps": 5000,
+   "cause_event_id": null,
+   "provenance": {
+    "status": "synthetic",
+    "source": "fixture-social-view.demo",
+    "rule_id": "relation/allied_with"
+   }
+  },
+  {
+   "id": "r/37",
+   "subject": "g/oeuvre",
+   "predicate": "helps",
+   "object": "g/vaucelles",
+   "valid": [
+    1349,
+    null
+   ],
+   "weight_bps": 7500,
+   "cause_event_id": null,
+   "provenance": {
+    "status": "synthetic",
+    "source": "fixture-social-view.demo",
+    "rule_id": "relation/helps"
+   }
+  },
+  {
+   "id": "r/38",
+   "subject": "g/oeuvre",
+   "predicate": "trusts",
+   "object": "g/mairie",
+   "valid": [
+    1366,
+    null
+   ],
+   "weight_bps": 5000,
+   "cause_event_id": "ev/charte-oeuvre-1366",
+   "provenance": {
+    "status": "synthetic",
+    "source": "fixture-social-view.demo",
+    "rule_id": "relation/trusts"
+   }
+  },
+  {
+   "id": "r/39",
+   "subject": "g/guilde",
+   "predicate": "rivals",
+   "object": "g/brume",
+   "valid": [
+    1357,
+    null
+   ],
+   "weight_bps": 5000,
+   "cause_event_id": "ev/extorsion-1357",
+   "provenance": {
+    "status": "synthetic",
+    "source": "fixture-social-view.demo",
+    "rule_id": "relation/rivals"
+   }
+  },
+  {
+   "id": "r/40",
+   "subject": "g/mairie",
+   "predicate": "in_conflict_with",
+   "object": "g/brume",
+   "valid": [
+    1358,
+    null
+   ],
+   "weight_bps": 8000,
+   "cause_event_id": "ev/edit-1358",
+   "provenance": {
+    "status": "synthetic",
+    "source": "fixture-social-view.demo",
+    "rule_id": "relation/in_conflict_with"
+   }
+  },
+  {
+   "id": "r/41",
+   "subject": "g/montreuil",
+   "predicate": "in_conflict_with",
+   "object": "g/brume",
+   "valid": [
+    1351,
+    null
+   ],
+   "weight_bps": 6000,
+   "cause_event_id": "ev/edit-montreuil-1351",
+   "provenance": {
+    "status": "synthetic",
+    "source": "fixture-social-view.demo",
+    "rule_id": "relation/in_conflict_with"
+   }
+  },
+  {
+   "id": "r/42",
+   "subject": "p/thibaut",
+   "predicate": "owns",
+   "object": "g/taverne",
+   "valid": [
+    1356,
+    null
+   ],
+   "weight_bps": 5000,
+   "cause_event_id": "ev/dette-1356",
+   "provenance": {
+    "status": "synthetic",
+    "source": "fixture-social-view.demo",
+    "rule_id": "relation/owns"
+   }
+  },
+  {
+   "id": "r/43",
+   "subject": "g/brume",
+   "predicate": "controls",
+   "object": "g/taverne",
+   "valid": [
+    1357,
+    null
+   ],
+   "weight_bps": 9000,
+   "cause_event_id": "ev/extorsion-1357",
+   "provenance": {
+    "status": "synthetic",
+    "source": "fixture-social-view.demo",
+    "rule_id": "relation/controls"
+   }
+  },
+  {
+   "id": "r/44",
+   "subject": "p/gautier",
+   "predicate": "owns",
+   "object": "g/moulin",
+   "valid": [
+    1340,
+    1368
+   ],
+   "weight_bps": 5000,
+   "cause_event_id": null,
+   "provenance": {
+    "status": "synthetic",
+    "source": "fixture-social-view.demo",
+    "rule_id": "relation/owns"
+   },
+   "end_cause_event_id": "ev/mort-gautier"
+  },
+  {
+   "id": "r/45",
+   "subject": "p/hugues",
+   "predicate": "owns",
+   "object": "g/moulin",
+   "valid": [
+    1368,
+    null
+   ],
+   "weight_bps": 5000,
+   "cause_event_id": "ev/mort-gautier",
+   "provenance": {
+    "status": "synthetic",
+    "source": "fixture-social-view.demo",
+    "rule_id": "relation/owns"
+   }
+  },
+  {
+   "id": "r/46",
+   "subject": "g/moulin",
+   "predicate": "supplies",
+   "object": "g/guilde",
+   "valid": [
+    1344,
+    null
+   ],
+   "weight_bps": 5000,
+   "cause_event_id": null,
+   "provenance": {
+    "status": "synthetic",
+    "source": "fixture-social-view.demo",
+    "rule_id": "relation/supplies"
+   }
+  },
+  {
+   "id": "r/47",
+   "subject": "p/clemence",
+   "predicate": "trusts",
+   "object": "p/ysabeau",
+   "valid": [
+    1350,
+    null
+   ],
+   "weight_bps": 6000,
+   "cause_event_id": null,
+   "provenance": {
+    "status": "synthetic",
+    "source": "fixture-social-view.demo",
+    "rule_id": "relation/trusts"
+   }
+  },
+  {
+   "id": "r/48",
+   "subject": "p/aubert",
+   "predicate": "trusts",
+   "object": "p/gautier",
+   "valid": [
+    1348,
+    1368
+   ],
+   "weight_bps": 6500,
+   "cause_event_id": null,
+   "provenance": {
+    "status": "synthetic",
+    "source": "fixture-social-view.demo",
+    "rule_id": "relation/trusts"
+   }
+  },
+  {
+   "id": "r/49",
+   "subject": "p/raoul",
+   "predicate": "rivals",
+   "object": "p/aubert",
+   "valid": [
+    1358,
+    null
+   ],
+   "weight_bps": 7000,
+   "cause_event_id": "ev/edit-1358",
+   "provenance": {
+    "status": "synthetic",
+    "source": "fixture-social-view.demo",
+    "rule_id": "relation/rivals"
+   }
+  },
+  {
+   "id": "r/50",
+   "subject": "p/aubert",
+   "predicate": "protects",
+   "object": "g/vaucelles",
+   "valid": [
+    1354,
+    1372
+   ],
+   "weight_bps": 5000,
+   "cause_event_id": null,
+   "provenance": {
+    "status": "synthetic",
+    "source": "fixture-social-view.demo",
+    "rule_id": "relation/protects"
+   }
+  }
+ ],
+ "legal_standings": [
+  {
+   "id": "l/1",
+   "subject": "g/brume",
+   "jurisdiction": "g/mairie",
+   "status": "tolerated",
+   "valid": [
+    1349,
+    1358
+   ],
+   "cause_event_id": "ev/fond-brume-1349",
+   "end_cause_event_id": "ev/edit-1358",
+   "provenance": {
+    "status": "derived",
+    "source": "fixture-social-view.demo",
+    "rule_id": "fixture/hand-written"
+   },
+   "rule_id": "legal/standing-v1"
+  },
+  {
+   "id": "l/2",
+   "subject": "g/brume",
+   "jurisdiction": "g/mairie",
+   "status": "proscribed",
+   "valid": [
+    1358,
+    null
+   ],
+   "cause_event_id": "ev/edit-1358",
+   "end_cause_event_id": null,
+   "provenance": {
+    "status": "derived",
+    "source": "fixture-social-view.demo",
+    "rule_id": "fixture/hand-written"
+   },
+   "rule_id": "legal/standing-v1"
+  },
+  {
+   "id": "l/3",
+   "subject": "g/brume",
+   "jurisdiction": "g/montreuil",
+   "status": "proscribed",
+   "valid": [
+    1351,
+    null
+   ],
+   "cause_event_id": "ev/edit-montreuil-1351",
+   "end_cause_event_id": null,
+   "provenance": {
+    "status": "derived",
+    "source": "fixture-social-view.demo",
+    "rule_id": "fixture/hand-written"
+   },
+   "rule_id": "legal/standing-v1"
+  },
+  {
+   "id": "l/4",
+   "subject": "g/oeuvre",
+   "jurisdiction": "g/mairie",
+   "status": "tolerated",
+   "valid": [
+    1349,
+    1366
+   ],
+   "cause_event_id": "ev/fond-oeuvre-1349",
+   "end_cause_event_id": "ev/charte-oeuvre-1366",
+   "provenance": {
+    "status": "derived",
+    "source": "fixture-social-view.demo",
+    "rule_id": "fixture/hand-written"
+   },
+   "rule_id": "legal/standing-v1"
+  },
+  {
+   "id": "l/5",
+   "subject": "g/oeuvre",
+   "jurisdiction": "g/mairie",
+   "status": "licit",
+   "valid": [
+    1366,
+    null
+   ],
+   "cause_event_id": "ev/charte-oeuvre-1366",
+   "end_cause_event_id": null,
+   "provenance": {
+    "status": "derived",
+    "source": "fixture-social-view.demo",
+    "rule_id": "fixture/hand-written"
+   },
+   "rule_id": "legal/standing-v1"
+  },
+  {
+   "id": "l/6",
+   "subject": "g/oeuvre",
+   "jurisdiction": "g/montreuil",
+   "status": "tolerated",
+   "valid": [
+    1349,
+    1362
+   ],
+   "cause_event_id": "ev/fond-oeuvre-1349",
+   "end_cause_event_id": "ev/heresie-1362",
+   "provenance": {
+    "status": "derived",
+    "source": "fixture-social-view.demo",
+    "rule_id": "fixture/hand-written"
+   },
+   "rule_id": "legal/standing-v1"
+  },
+  {
+   "id": "l/7",
+   "subject": "g/oeuvre",
+   "jurisdiction": "g/montreuil",
+   "status": "proscribed",
+   "valid": [
+    1362,
+    1371
+   ],
+   "cause_event_id": "ev/heresie-1362",
+   "end_cause_event_id": "ev/charte-montreuil-1371",
+   "provenance": {
+    "status": "derived",
+    "source": "fixture-social-view.demo",
+    "rule_id": "fixture/hand-written"
+   },
+   "rule_id": "legal/standing-v1"
+  },
+  {
+   "id": "l/8",
+   "subject": "g/oeuvre",
+   "jurisdiction": "g/montreuil",
+   "status": "licit",
+   "valid": [
+    1371,
+    null
+   ],
+   "cause_event_id": "ev/charte-montreuil-1371",
+   "end_cause_event_id": null,
+   "provenance": {
+    "status": "derived",
+    "source": "fixture-social-view.demo",
+    "rule_id": "fixture/hand-written"
+   },
+   "rule_id": "legal/standing-v1"
+  },
+  {
+   "id": "l/9",
+   "subject": "g/guilde",
+   "jurisdiction": "g/mairie",
+   "status": "licit",
+   "valid": [
+    1344,
+    null
+   ],
+   "cause_event_id": "ev/charte-guilde-1344",
+   "end_cause_event_id": null,
+   "provenance": {
+    "status": "derived",
+    "source": "fixture-social-view.demo",
+    "rule_id": "fixture/hand-written"
+   },
+   "rule_id": "legal/standing-v1"
+  },
+  {
+   "id": "l/10",
+   "subject": "p/raoul",
+   "jurisdiction": "g/mairie",
+   "status": "proscribed",
+   "valid": [
+    1365,
+    null
+   ],
+   "cause_event_id": "ev/bannissement-1365",
+   "end_cause_event_id": null,
+   "provenance": {
+    "status": "derived",
+    "source": "fixture-social-view.demo",
+    "rule_id": "fixture/hand-written"
+   },
+   "rule_id": "legal/standing-v1"
+  },
+  {
+   "id": "l/11",
+   "subject": "g/taverne",
+   "jurisdiction": "g/mairie",
+   "status": "tolerated",
+   "valid": [
+    1357,
+    null
+   ],
+   "cause_event_id": "ev/extorsion-1357",
+   "end_cause_event_id": null,
+   "provenance": {
+    "status": "derived",
+    "source": "fixture-social-view.demo",
+    "rule_id": "fixture/hand-written"
+   },
+   "rule_id": "legal/standing-v1"
+  }
+ ],
+ "events": [
+  {
+   "id": "ev/charte-guilde-1344",
+   "year": 1344,
+   "end_year": 1344,
+   "kind": "charter",
+   "label_key": "fixture.event.guild_charter_1344.label",
+   "description_key": "fixture.event.guild_charter_1344.description",
+   "cause_ids": [],
+   "subject_ids": [
+    "g/guilde",
+    "g/mairie"
+   ],
+   "transition": {
+    "label_key": "fixture.event.guild_charter_1344.transition",
+    "before": {
+     "key": "fixture.state.none"
+    },
+    "after": {
+     "key": "fixture.state.licit_vaucelles"
+    }
+   },
+   "provenance": {
+    "status": "synthetic",
+    "source": "fixture-social-view.demo",
+    "rule_id": "event/charter"
+   }
+  },
+  {
+   "id": "ev/fond-oeuvre-1349",
+   "year": 1349,
+   "end_year": 1349,
+   "kind": "foundation",
+   "label_key": "fixture.event.charity_founding_1349.label",
+   "description_key": "fixture.event.charity_founding_1349.description",
+   "cause_ids": [],
+   "subject_ids": [
+    "g/oeuvre",
+    "p/clemence"
+   ],
+   "transition": null,
+   "provenance": {
+    "status": "synthetic",
+    "source": "fixture-social-view.demo",
+    "rule_id": "event/foundation"
+   }
+  },
+  {
+   "id": "ev/fond-brume-1349",
+   "year": 1349,
+   "end_year": 1349,
+   "kind": "foundation",
+   "label_key": "fixture.event.mist_founding_1349.label",
+   "description_key": "fixture.event.mist_founding_1349.description",
+   "cause_ids": [],
+   "subject_ids": [
+    "g/brume",
+    "p/raoul"
+   ],
+   "transition": null,
+   "provenance": {
+    "status": "synthetic",
+    "source": "fixture-social-view.demo",
+    "rule_id": "event/foundation"
+   }
+  },
+  {
+   "id": "ev/edit-montreuil-1351",
+   "year": 1351,
+   "end_year": 1351,
+   "kind": "edict",
+   "label_key": "fixture.event.montreuil_edict_1351.label",
+   "description_key": "fixture.event.montreuil_edict_1351.description",
+   "cause_ids": [
+    "ev/fond-brume-1349"
+   ],
+   "subject_ids": [
+    "g/brume",
+    "g/montreuil"
+   ],
+   "transition": {
+    "label_key": "fixture.event.montreuil_edict_1351.transition",
+    "before": {
+     "key": "fixture.state.licit_no_segment"
+    },
+    "after": {
+     "key": "fixture.state.proscribed"
+    }
+   },
+   "provenance": {
+    "status": "synthetic",
+    "source": "fixture-social-view.demo",
+    "rule_id": "event/edict"
+   }
+  },
+  {
+   "id": "ev/peste-1352",
+   "year": 1352,
+   "end_year": 1353,
+   "kind": "epidemic",
+   "label_key": "fixture.event.plague_1352.label",
+   "description_key": "fixture.event.plague_1352.description",
+   "cause_ids": [],
+   "subject_ids": [
+    "g/vaucelles"
+   ],
+   "transition": null,
+   "provenance": {
+    "status": "synthetic",
+    "source": "fixture-social-view.demo",
+    "rule_id": "event/epidemic"
+   }
+  },
+  {
+   "id": "ev/mort-guillaume",
+   "year": 1352,
+   "end_year": 1352,
+   "kind": "death",
+   "label_key": "fixture.event.death_guillaume_1352.label",
+   "description_key": "fixture.event.death_guillaume_1352.description",
+   "cause_ids": [
+    "ev/peste-1352"
+   ],
+   "subject_ids": [
+    "p/guillaume",
+    "o/maire"
+   ],
+   "transition": {
+    "label_key": "fixture.event.death_guillaume_1352.transition",
+    "before": {
+     "name": "Guillaume Marchais"
+    },
+    "after": {
+     "key": "fixture.term.vacant"
+    }
+   },
+   "provenance": {
+    "status": "synthetic",
+    "source": "fixture-social-view.demo",
+    "rule_id": "event/death"
+   }
+  },
+  {
+   "id": "ev/election-1354",
+   "year": 1354,
+   "end_year": 1354,
+   "kind": "election",
+   "label_key": "fixture.event.election_1354.label",
+   "description_key": "fixture.event.election_1354.description",
+   "cause_ids": [
+    "ev/mort-guillaume"
+   ],
+   "subject_ids": [
+    "p/aubert",
+    "o/maire"
+   ],
+   "transition": {
+    "label_key": "fixture.event.election_1354.transition",
+    "before": {
+     "key": "fixture.term.vacant"
+    },
+    "after": {
+     "name": "Aubert Marchais"
+    }
+   },
+   "provenance": {
+    "status": "synthetic",
+    "source": "fixture-social-view.demo",
+    "rule_id": "event/election"
+   }
+  },
+  {
+   "id": "ev/dette-1356",
+   "year": 1356,
+   "end_year": 1356,
+   "kind": "debt_default",
+   "label_key": "fixture.event.debt_1356.label",
+   "description_key": "fixture.event.debt_1356.description",
+   "cause_ids": [],
+   "subject_ids": [
+    "p/thibaut",
+    "g/brume"
+   ],
+   "transition": {
+    "label_key": "fixture.event.debt_1356.transition",
+    "before": {
+     "key": "fixture.state.ordinary_m"
+    },
+    "after": {
+     "key": "fixture.state.crooked_m"
+    }
+   },
+   "provenance": {
+    "status": "synthetic",
+    "source": "fixture-social-view.demo",
+    "rule_id": "event/debt_default"
+   }
+  },
+  {
+   "id": "ev/sortie-guilde-1357",
+   "year": 1357,
+   "end_year": 1357,
+   "kind": "affiliation",
+   "label_key": "fixture.event.guild_exit_1357.label",
+   "description_key": "fixture.event.guild_exit_1357.description",
+   "cause_ids": [
+    "ev/dette-1356"
+   ],
+   "subject_ids": [
+    "p/thibaut",
+    "g/guilde"
+   ],
+   "transition": {
+    "label_key": "fixture.event.guild_exit_1357.transition",
+    "before": {
+     "name": "Guilde des drapiers"
+    },
+    "after": {
+     "name": "Compagnie de la Brume"
+    }
+   },
+   "provenance": {
+    "status": "synthetic",
+    "source": "fixture-social-view.demo",
+    "rule_id": "event/affiliation"
+   }
+  },
+  {
+   "id": "ev/extorsion-1357",
+   "year": 1357,
+   "end_year": 1357,
+   "kind": "crime",
+   "label_key": "fixture.event.racket_1357.label",
+   "description_key": "fixture.event.racket_1357.description",
+   "cause_ids": [
+    "ev/dette-1356"
+   ],
+   "subject_ids": [
+    "g/brume",
+    "g/taverne"
+   ],
+   "transition": {
+    "label_key": "fixture.event.racket_1357.transition",
+    "before": {
+     "key": "fixture.state.ordinary_f"
+    },
+    "after": {
+     "key": "fixture.state.crooked_f"
+    }
+   },
+   "provenance": {
+    "status": "synthetic",
+    "source": "fixture-social-view.demo",
+    "rule_id": "event/crime"
+   }
+  },
+  {
+   "id": "ev/edit-1358",
+   "year": 1358,
+   "end_year": 1358,
+   "kind": "edict",
+   "label_key": "fixture.event.town_edict_1358.label",
+   "description_key": "fixture.event.town_edict_1358.description",
+   "cause_ids": [
+    "ev/extorsion-1357"
+   ],
+   "subject_ids": [
+    "g/mairie",
+    "g/brume",
+    "p/aubert"
+   ],
+   "transition": {
+    "label_key": "fixture.event.town_edict_1358.transition",
+    "before": {
+     "key": "fixture.state.tolerated"
+    },
+    "after": {
+     "key": "fixture.state.proscribed"
+    }
+   },
+   "provenance": {
+    "status": "synthetic",
+    "source": "fixture-social-view.demo",
+    "rule_id": "event/edict"
+   }
+  },
+  {
+   "id": "ev/recolte-1359",
+   "year": 1359,
+   "end_year": 1360,
+   "kind": "famine",
+   "label_key": "fixture.event.bad_harvest_1359.label",
+   "description_key": "fixture.event.bad_harvest_1359.description",
+   "cause_ids": [],
+   "subject_ids": [
+    "g/vaucelles"
+   ],
+   "transition": null,
+   "provenance": {
+    "status": "synthetic",
+    "source": "fixture-social-view.demo",
+    "rule_id": "event/famine"
+   }
+  },
+  {
+   "id": "ev/heresie-1362",
+   "year": 1362,
+   "end_year": 1362,
+   "kind": "heresy_trial",
+   "label_key": "fixture.event.heresy_trial_1362.label",
+   "description_key": "fixture.event.heresy_trial_1362.description",
+   "cause_ids": [],
+   "subject_ids": [
+    "g/oeuvre",
+    "g/montreuil"
+   ],
+   "transition": {
+    "label_key": "fixture.event.heresy_trial_1362.transition",
+    "before": {
+     "key": "fixture.state.tolerated"
+    },
+    "after": {
+     "key": "fixture.state.proscribed"
+    }
+   },
+   "provenance": {
+    "status": "synthetic",
+    "source": "fixture-social-view.demo",
+    "rule_id": "event/heresy_trial"
+   }
+  },
+  {
+   "id": "ev/bannissement-1365",
+   "year": 1365,
+   "end_year": 1365,
+   "kind": "banishment",
+   "label_key": "fixture.event.banishment_1365.label",
+   "description_key": "fixture.event.banishment_1365.description",
+   "cause_ids": [
+    "ev/edit-1358"
+   ],
+   "subject_ids": [
+    "p/raoul",
+    "g/mairie"
+   ],
+   "transition": null,
+   "provenance": {
+    "status": "synthetic",
+    "source": "fixture-social-view.demo",
+    "rule_id": "event/banishment"
+   }
+  },
+  {
+   "id": "ev/charte-oeuvre-1366",
+   "year": 1366,
+   "end_year": 1366,
+   "kind": "charter",
+   "label_key": "fixture.event.charity_charter_1366.label",
+   "description_key": "fixture.event.charity_charter_1366.description",
+   "cause_ids": [],
+   "subject_ids": [
+    "g/oeuvre",
+    "g/mairie"
+   ],
+   "transition": {
+    "label_key": "fixture.event.charity_charter_1366.transition",
+    "before": {
+     "key": "fixture.state.tolerated"
+    },
+    "after": {
+     "key": "fixture.state.licit"
+    }
+   },
+   "provenance": {
+    "status": "synthetic",
+    "source": "fixture-social-view.demo",
+    "rule_id": "event/charter"
+   }
+  },
+  {
+   "id": "ev/mort-gautier",
+   "year": 1368,
+   "end_year": 1368,
+   "kind": "death",
+   "label_key": "fixture.event.death_gautier_1368.label",
+   "description_key": "fixture.event.death_gautier_1368.description",
+   "cause_ids": [],
+   "subject_ids": [
+    "p/gautier",
+    "o/maitre"
+   ],
+   "transition": {
+    "label_key": "fixture.event.death_gautier_1368.transition",
+    "before": {
+     "name": "Gautier Perrin"
+    },
+    "after": {
+     "key": "fixture.term.vacant"
+    }
+   },
+   "provenance": {
+    "status": "synthetic",
+    "source": "fixture-social-view.demo",
+    "rule_id": "event/death"
+   }
+  },
+  {
+   "id": "ev/election-guilde-1370",
+   "year": 1370,
+   "end_year": 1370,
+   "kind": "election",
+   "label_key": "fixture.event.guild_master_1370.label",
+   "description_key": "fixture.event.guild_master_1370.description",
+   "cause_ids": [
+    "ev/mort-gautier"
+   ],
+   "subject_ids": [
+    "p/hugues",
+    "o/maitre"
+   ],
+   "transition": {
+    "label_key": "fixture.event.guild_master_1370.transition",
+    "before": {
+     "key": "fixture.term.vacant"
+    },
+    "after": {
+     "name": "Hugues Perrin"
+    }
+   },
+   "provenance": {
+    "status": "synthetic",
+    "source": "fixture-social-view.demo",
+    "rule_id": "event/election"
+   }
+  },
+  {
+   "id": "ev/charte-montreuil-1371",
+   "year": 1371,
+   "end_year": 1371,
+   "kind": "charter",
+   "label_key": "fixture.event.montreuil_charter_1371.label",
+   "description_key": "fixture.event.montreuil_charter_1371.description",
+   "cause_ids": [
+    "ev/heresie-1362"
+   ],
+   "subject_ids": [
+    "g/oeuvre",
+    "g/montreuil"
+   ],
+   "transition": {
+    "label_key": "fixture.event.montreuil_charter_1371.transition",
+    "before": {
+     "key": "fixture.state.proscribed"
+    },
+    "after": {
+     "key": "fixture.state.licit"
+    }
+   },
+   "provenance": {
+    "status": "synthetic",
+    "source": "fixture-social-view.demo",
+    "rule_id": "event/charter"
+   }
+  },
+  {
+   "id": "ev/succession-1372",
+   "year": 1372,
+   "end_year": 1372,
+   "kind": "succession",
+   "label_key": "fixture.event.succession_1372.label",
+   "description_key": "fixture.event.succession_1372.description",
+   "cause_ids": [],
+   "subject_ids": [
+    "p/jehan",
+    "p/aubert",
+    "o/maire"
+   ],
+   "transition": {
+    "label_key": "fixture.event.succession_1372.transition",
+    "before": {
+     "name": "Aubert Marchais"
+    },
+    "after": {
+     "name": "Jehan Marchais"
+    }
+   },
+   "provenance": {
+    "status": "synthetic",
+    "source": "fixture-social-view.demo",
+    "rule_id": "event/succession"
+   }
+  },
+  {
+   "id": "ev/mort-aubert",
+   "year": 1374,
+   "end_year": 1374,
+   "kind": "death",
+   "label_key": "fixture.event.death_aubert_1374.label",
+   "description_key": "fixture.event.death_aubert_1374.description",
+   "cause_ids": [],
+   "subject_ids": [
+    "p/aubert"
+   ],
+   "transition": null,
+   "provenance": {
+    "status": "synthetic",
+    "source": "fixture-social-view.demo",
+    "rule_id": "event/death"
+   }
+  }
+ ],
+ "tenures": [
+  {
+   "tenure_id": "t/1",
+   "office_id": "o/maire",
+   "person_id": "p/guillaume",
+   "valid": [
+    1331,
+    1352
+   ],
+   "mode": "effective",
+   "cause_event_id": null,
+   "selection_proof": {
+    "summary_key": "fixture.proof.before_observed"
+   }
+  },
+  {
+   "tenure_id": "t/2",
+   "office_id": "o/maire",
+   "person_id": null,
+   "valid": [
+    1352,
+    1354
+   ],
+   "mode": "vacant",
+   "cause_event_id": "ev/mort-guillaume",
+   "selection_proof": {
+    "summary_key": "fixture.proof.vacant_death"
+   }
+  },
+  {
+   "tenure_id": "t/3",
+   "office_id": "o/maire",
+   "person_id": "p/aubert",
+   "valid": [
+    1354,
+    1372
+   ],
+   "mode": "effective",
+   "cause_event_id": "ev/election-1354",
+   "selection_proof": {
+    "summary_key": "fixture.proof.election_1354",
+    "candidates": [
+     {
+      "name": "Aubert Marchais",
+      "rank": 1,
+      "weight": 412,
+      "note_key": "fixture.proof.cand.aubert"
+     },
+     {
+      "name": "Gautier Perrin",
+      "rank": 2,
+      "weight": 351,
+      "note_key": "fixture.proof.cand.gautier"
+     },
+     {
+      "name": "Thibaut Marchais",
+      "rank": 3,
+      "weight": 120,
+      "note_key": "fixture.proof.cand.thibaut"
+     }
+    ]
+   }
+  },
+  {
+   "tenure_id": "t/4",
+   "office_id": "o/maire",
+   "person_id": "p/jehan",
+   "valid": [
+    1372,
+    null
+   ],
+   "mode": "effective",
+   "cause_event_id": "ev/succession-1372",
+   "selection_proof": {
+    "summary_key": "fixture.proof.succession_1372"
+   }
+  },
+  {
+   "tenure_id": "t/5",
+   "office_id": "o/maitre",
+   "person_id": "p/gautier",
+   "valid": [
+    1349,
+    1368
+   ],
+   "mode": "effective",
+   "cause_event_id": null,
+   "selection_proof": {
+    "summary_key": "fixture.proof.cooptation_founding"
+   }
+  },
+  {
+   "tenure_id": "t/6",
+   "office_id": "o/maitre",
+   "person_id": null,
+   "valid": [
+    1368,
+    1370
+   ],
+   "mode": "vacant",
+   "cause_event_id": "ev/mort-gautier",
+   "selection_proof": {
+    "summary_key": "fixture.proof.vacant_two_years"
+   }
+  },
+  {
+   "tenure_id": "t/7",
+   "office_id": "o/maitre",
+   "person_id": "p/hugues",
+   "valid": [
+    1370,
+    null
+   ],
+   "mode": "effective",
+   "cause_event_id": "ev/election-guilde-1370",
+   "selection_proof": {
+    "summary_key": "fixture.proof.cooptation_hugues"
+   }
+  }
+ ],
+ "measures": [
+  {
+   "id": "m/population",
+   "label_key": "fixture.measure.population",
+   "domain": "site/demo/vaucelles",
+   "note_key": "fixture.measure.population.note",
+   "unit": "inhabitants",
+   "series": [
+    {
+     "at_year": 1340,
+     "expected": {
+      "value": 410,
+      "unit": "inhabitants",
+      "precision": "expected",
+      "coverage": "aggregate",
+      "basis": "baseline_model",
+      "at_year": 1340
+     },
+     "realized": {
+      "value": 408,
+      "unit": "inhabitants",
+      "precision": "realized",
+      "coverage": "complete",
+      "basis": "simulated_domain",
+      "at_year": 1340
+     }
+    },
+    {
+     "at_year": 1350,
+     "expected": {
+      "value": 420,
+      "unit": "inhabitants",
+      "precision": "expected",
+      "coverage": "aggregate",
+      "basis": "baseline_model",
+      "at_year": 1350
+     },
+     "realized": {
+      "value": 417,
+      "unit": "inhabitants",
+      "precision": "realized",
+      "coverage": "complete",
+      "basis": "simulated_domain",
+      "at_year": 1350
+     }
+    },
+    {
+     "at_year": 1360,
+     "expected": {
+      "value": 395,
+      "unit": "inhabitants",
+      "precision": "expected",
+      "coverage": "aggregate",
+      "basis": "baseline_model",
+      "at_year": 1360
+     },
+     "realized": {
+      "value": 351,
+      "unit": "inhabitants",
+      "precision": "realized",
+      "coverage": "complete",
+      "basis": "simulated_domain",
+      "at_year": 1360
+     }
+    },
+    {
+     "at_year": 1369,
+     "expected": {
+      "value": 402,
+      "unit": "inhabitants",
+      "precision": "expected",
+      "coverage": "aggregate",
+      "basis": "baseline_model",
+      "at_year": 1369
+     },
+     "realized": {
+      "value": 399,
+      "unit": "inhabitants",
+      "precision": "realized",
+      "coverage": "complete",
+      "basis": "simulated_domain",
+      "at_year": 1369
+     }
+    },
+    {
+     "at_year": 1380,
+     "expected": {
+      "value": 415,
+      "unit": "inhabitants",
+      "precision": "expected",
+      "coverage": "aggregate",
+      "basis": "baseline_model",
+      "at_year": 1380
+     },
+     "realized": {
+      "value": 421,
+      "unit": "inhabitants",
+      "precision": "realized",
+      "coverage": "complete",
+      "basis": "simulated_domain",
+      "at_year": 1380
+     }
+    }
+   ]
+  },
+  {
+   "id": "m/adultes",
+   "label_key": "fixture.measure.adults",
+   "domain": "site/demo/vaucelles",
+   "unit": "people",
+   "series": [
+    {
+     "at_year": 1340,
+     "expected": {
+      "value": 262,
+      "unit": "people",
+      "precision": "expected",
+      "coverage": "aggregate",
+      "basis": "baseline_model",
+      "at_year": 1340
+     },
+     "realized": {
+      "value": 259,
+      "unit": "people",
+      "precision": "realized",
+      "coverage": "complete",
+      "basis": "simulated_domain",
+      "at_year": 1340
+     }
+    },
+    {
+     "at_year": 1350,
+     "expected": {
+      "value": 268,
+      "unit": "people",
+      "precision": "expected",
+      "coverage": "aggregate",
+      "basis": "baseline_model",
+      "at_year": 1350
+     },
+     "realized": {
+      "value": 266,
+      "unit": "people",
+      "precision": "realized",
+      "coverage": "complete",
+      "basis": "simulated_domain",
+      "at_year": 1350
+     }
+    },
+    {
+     "at_year": 1360,
+     "expected": {
+      "value": 250,
+      "unit": "people",
+      "precision": "expected",
+      "coverage": "aggregate",
+      "basis": "baseline_model",
+      "at_year": 1360
+     },
+     "realized": {
+      "value": 231,
+      "unit": "people",
+      "precision": "realized",
+      "coverage": "complete",
+      "basis": "simulated_domain",
+      "at_year": 1360
+     }
+    },
+    {
+     "at_year": 1369,
+     "expected": {
+      "value": 255,
+      "unit": "people",
+      "precision": "expected",
+      "coverage": "aggregate",
+      "basis": "baseline_model",
+      "at_year": 1369
+     },
+     "realized": {
+      "value": 252,
+      "unit": "people",
+      "precision": "realized",
+      "coverage": "complete",
+      "basis": "simulated_domain",
+      "at_year": 1369
+     }
+    },
+    {
+     "at_year": 1380,
+     "expected": {
+      "value": 262,
+      "unit": "people",
+      "precision": "expected",
+      "coverage": "aggregate",
+      "basis": "baseline_model",
+      "at_year": 1380
+     },
+     "realized": {
+      "value": 266,
+      "unit": "people",
+      "precision": "realized",
+      "coverage": "complete",
+      "basis": "simulated_domain",
+      "at_year": 1380
+     }
+    }
+   ]
+  },
+  {
+   "id": "m/foyers",
+   "label_key": "fixture.measure.households",
+   "domain": "site/demo/vaucelles",
+   "unit": "households",
+   "series": [
+    {
+     "at_year": 1340,
+     "expected": {
+      "value": 96,
+      "unit": "households",
+      "precision": "expected",
+      "coverage": "aggregate",
+      "basis": "baseline_model",
+      "at_year": 1340
+     },
+     "realized": {
+      "value": 95,
+      "unit": "households",
+      "precision": "realized",
+      "coverage": "complete",
+      "basis": "simulated_domain",
+      "at_year": 1340
+     }
+    },
+    {
+     "at_year": 1350,
+     "expected": {
+      "value": 98,
+      "unit": "households",
+      "precision": "expected",
+      "coverage": "aggregate",
+      "basis": "baseline_model",
+      "at_year": 1350
+     },
+     "realized": {
+      "value": 99,
+      "unit": "households",
+      "precision": "realized",
+      "coverage": "complete",
+      "basis": "simulated_domain",
+      "at_year": 1350
+     }
+    },
+    {
+     "at_year": 1360,
+     "expected": {
+      "value": 92,
+      "unit": "households",
+      "precision": "expected",
+      "coverage": "aggregate",
+      "basis": "baseline_model",
+      "at_year": 1360
+     },
+     "realized": {
+      "value": 88,
+      "unit": "households",
+      "precision": "realized",
+      "coverage": "complete",
+      "basis": "simulated_domain",
+      "at_year": 1360
+     }
+    },
+    {
+     "at_year": 1369,
+     "expected": {
+      "value": 94,
+      "unit": "households",
+      "precision": "expected",
+      "coverage": "aggregate",
+      "basis": "baseline_model",
+      "at_year": 1369
+     },
+     "realized": {
+      "value": 93,
+      "unit": "households",
+      "precision": "realized",
+      "coverage": "complete",
+      "basis": "simulated_domain",
+      "at_year": 1369
+     }
+    },
+    {
+     "at_year": 1380,
+     "expected": {
+      "value": 97,
+      "unit": "households",
+      "precision": "expected",
+      "coverage": "aggregate",
+      "basis": "baseline_model",
+      "at_year": 1380
+     },
+     "realized": {
+      "value": 98,
+      "unit": "households",
+      "precision": "realized",
+      "coverage": "complete",
+      "basis": "simulated_domain",
+      "at_year": 1380
+     }
+    }
+   ]
+  },
+  {
+   "id": "m/guilde",
+   "label_key": "fixture.measure.guild",
+   "domain": "g/guilde",
+   "note_key": "fixture.measure.guild.note",
+   "unit": "members",
+   "series": [
+    {
+     "at_year": 1340,
+     "expected": {
+      "value": 0,
+      "unit": "members",
+      "precision": "expected",
+      "coverage": "aggregate",
+      "basis": "baseline_model",
+      "at_year": 1340
+     },
+     "realized": null
+    },
+    {
+     "at_year": 1350,
+     "expected": {
+      "value": 34,
+      "unit": "members",
+      "precision": "expected",
+      "coverage": "aggregate",
+      "basis": "baseline_model",
+      "at_year": 1350
+     },
+     "realized": {
+      "value": 8,
+      "unit": "members",
+      "precision": "realized",
+      "coverage": "partial",
+      "basis": "materialized_members",
+      "at_year": 1350
+     }
+    },
+    {
+     "at_year": 1360,
+     "expected": {
+      "value": 38,
+      "unit": "members",
+      "precision": "expected",
+      "coverage": "aggregate",
+      "basis": "baseline_model",
+      "at_year": 1360
+     },
+     "realized": {
+      "value": 9,
+      "unit": "members",
+      "precision": "realized",
+      "coverage": "partial",
+      "basis": "materialized_members",
+      "at_year": 1360
+     }
+    },
+    {
+     "at_year": 1369,
+     "expected": {
+      "value": 40,
+      "unit": "members",
+      "precision": "expected",
+      "coverage": "aggregate",
+      "basis": "baseline_model",
+      "at_year": 1369
+     },
+     "realized": {
+      "value": 9,
+      "unit": "members",
+      "precision": "realized",
+      "coverage": "partial",
+      "basis": "materialized_members",
+      "at_year": 1369
+     }
+    },
+    {
+     "at_year": 1380,
+     "expected": {
+      "value": 41,
+      "unit": "members",
+      "precision": "expected",
+      "coverage": "aggregate",
+      "basis": "baseline_model",
+      "at_year": 1380
+     },
+     "realized": {
+      "value": 10,
+      "unit": "members",
+      "precision": "realized",
+      "coverage": "partial",
+      "basis": "materialized_members",
+      "at_year": 1380
+     }
+    }
+   ]
+  },
+  {
+   "id": "m/brume",
+   "label_key": "fixture.measure.mist",
+   "domain": "g/brume",
+   "note_key": "fixture.measure.mist.note",
+   "unit": "members",
+   "series": [
+    {
+     "at_year": 1340,
+     "expected": {
+      "value": 0,
+      "unit": "members",
+      "precision": "expected",
+      "coverage": "aggregate",
+      "basis": "baseline_model",
+      "at_year": 1340
+     },
+     "realized": null
+    },
+    {
+     "at_year": 1350,
+     "expected": {
+      "value": 22,
+      "unit": "members",
+      "precision": "expected",
+      "coverage": "aggregate",
+      "basis": "baseline_model",
+      "at_year": 1350
+     },
+     "realized": {
+      "value": 2,
+      "unit": "members",
+      "precision": "realized",
+      "coverage": "partial",
+      "basis": "materialized_members",
+      "at_year": 1350
+     }
+    },
+    {
+     "at_year": 1360,
+     "expected": {
+      "value": 24,
+      "unit": "members",
+      "precision": "expected",
+      "coverage": "aggregate",
+      "basis": "baseline_model",
+      "at_year": 1360
+     },
+     "realized": {
+      "value": 3,
+      "unit": "members",
+      "precision": "realized",
+      "coverage": "partial",
+      "basis": "materialized_members",
+      "at_year": 1360
+     }
+    },
+    {
+     "at_year": 1369,
+     "expected": {
+      "value": 24,
+      "unit": "members",
+      "precision": "expected",
+      "coverage": "aggregate",
+      "basis": "baseline_model",
+      "at_year": 1369
+     },
+     "realized": {
+      "value": 3,
+      "unit": "members",
+      "precision": "realized",
+      "coverage": "partial",
+      "basis": "materialized_members",
+      "at_year": 1369
+     }
+    },
+    {
+     "at_year": 1380,
+     "expected": {
+      "value": 23,
+      "unit": "members",
+      "precision": "expected",
+      "coverage": "aggregate",
+      "basis": "baseline_model",
+      "at_year": 1380
+     },
+     "realized": {
+      "value": 3,
+      "unit": "members",
+      "precision": "realized",
+      "coverage": "partial",
+      "basis": "materialized_members",
+      "at_year": 1380
+     }
+    }
+   ]
+  },
+  {
+   "id": "m/postes-vacants",
+   "label_key": "fixture.measure.vacancies",
+   "domain": "site/demo/vaucelles",
+   "note_key": "fixture.measure.vacancies.note",
+   "unit": "posts",
+   "series": [
+    {
+     "at_year": 1340,
+     "expected": {
+      "value": 0,
+      "unit": "posts",
+      "precision": "expected",
+      "coverage": "aggregate",
+      "basis": "baseline_model",
+      "at_year": 1340
+     },
+     "realized": {
+      "value": 0,
+      "unit": "posts",
+      "precision": "realized",
+      "coverage": "complete",
+      "basis": "resolved_tenures",
+      "at_year": 1340
+     }
+    },
+    {
+     "at_year": 1350,
+     "expected": {
+      "value": 0,
+      "unit": "posts",
+      "precision": "expected",
+      "coverage": "aggregate",
+      "basis": "baseline_model",
+      "at_year": 1350
+     },
+     "realized": {
+      "value": 0,
+      "unit": "posts",
+      "precision": "realized",
+      "coverage": "complete",
+      "basis": "resolved_tenures",
+      "at_year": 1350
+     }
+    },
+    {
+     "at_year": 1360,
+     "expected": {
+      "value": 0,
+      "unit": "posts",
+      "precision": "expected",
+      "coverage": "aggregate",
+      "basis": "baseline_model",
+      "at_year": 1360
+     },
+     "realized": {
+      "value": 0,
+      "unit": "posts",
+      "precision": "realized",
+      "coverage": "complete",
+      "basis": "resolved_tenures",
+      "at_year": 1360
+     }
+    },
+    {
+     "at_year": 1369,
+     "expected": {
+      "value": 0,
+      "unit": "posts",
+      "precision": "expected",
+      "coverage": "aggregate",
+      "basis": "baseline_model",
+      "at_year": 1369
+     },
+     "realized": {
+      "value": 1,
+      "unit": "posts",
+      "precision": "realized",
+      "coverage": "complete",
+      "basis": "resolved_tenures",
+      "at_year": 1369
+     }
+    },
+    {
+     "at_year": 1380,
+     "expected": {
+      "value": 0,
+      "unit": "posts",
+      "precision": "expected",
+      "coverage": "aggregate",
+      "basis": "baseline_model",
+      "at_year": 1380
+     },
+     "realized": {
+      "value": 0,
+      "unit": "posts",
+      "precision": "realized",
+      "coverage": "complete",
+      "basis": "resolved_tenures",
+      "at_year": 1380
+     }
+    }
+   ]
+  },
+  {
+   "id": "m/montreuil",
+   "label_key": "fixture.measure.montreuil",
+   "domain": "g/montreuil",
+   "note_key": "fixture.measure.montreuil.note",
+   "unit": "inhabitants",
+   "series": [
+    {
+     "at_year": 1340,
+     "expected": {
+      "value": 1800,
+      "unit": "inhabitants",
+      "precision": "expected",
+      "coverage": "aggregate",
+      "basis": "baseline_model",
+      "at_year": 1340
+     },
+     "realized": null
+    },
+    {
+     "at_year": 1350,
+     "expected": {
+      "value": 1850,
+      "unit": "inhabitants",
+      "precision": "expected",
+      "coverage": "aggregate",
+      "basis": "baseline_model",
+      "at_year": 1350
+     },
+     "realized": null
+    },
+    {
+     "at_year": 1360,
+     "expected": {
+      "value": 1700,
+      "unit": "inhabitants",
+      "precision": "expected",
+      "coverage": "aggregate",
+      "basis": "baseline_model",
+      "at_year": 1360
+     },
+     "realized": null
+    },
+    {
+     "at_year": 1369,
+     "expected": {
+      "value": 1760,
+      "unit": "inhabitants",
+      "precision": "expected",
+      "coverage": "aggregate",
+      "basis": "baseline_model",
+      "at_year": 1369
+     },
+     "realized": null
+    },
+    {
+     "at_year": 1380,
+     "expected": {
+      "value": 1810,
+      "unit": "inhabitants",
+      "precision": "expected",
+      "coverage": "aggregate",
+      "basis": "baseline_model",
+      "at_year": 1380
+     },
+     "realized": null
+    }
+   ]
+  }
+ ],
+ "balances": {
+  "flows": [
+   {
+    "year": 1355,
+    "population_previous": 426,
+    "births": 10,
+    "deaths": 14,
+    "entries": 2,
+    "exits": 3,
+    "population": 421
+   },
+   {
+    "year": 1356,
+    "population_previous": 421,
+    "births": 11,
+    "deaths": 13,
+    "entries": 1,
+    "exits": 4,
+    "population": 416
+   },
+   {
+    "year": 1357,
+    "population_previous": 416,
+    "births": 9,
+    "deaths": 15,
+    "entries": 2,
+    "exits": 3,
+    "population": 409
+   },
+   {
+    "year": 1358,
+    "population_previous": 409,
+    "births": 10,
+    "deaths": 12,
+    "entries": 1,
+    "exits": 5,
+    "population": 403
+   },
+   {
+    "year": 1359,
+    "population_previous": 403,
+    "births": 8,
+    "deaths": 24,
+    "entries": 2,
+    "exits": 9,
+    "population": 380
+   },
+   {
+    "year": 1360,
+    "population_previous": 380,
+    "births": 7,
+    "deaths": 27,
+    "entries": 3,
+    "exits": 12,
+    "population": 351
+   },
+   {
+    "year": 1361,
+    "population_previous": 351,
+    "births": 9,
+    "deaths": 14,
+    "entries": 4,
+    "exits": 6,
+    "population": 344
+   },
+   {
+    "year": 1362,
+    "population_previous": 344,
+    "births": 12,
+    "deaths": 11,
+    "entries": 6,
+    "exits": 3,
+    "population": 348
+   },
+   {
+    "year": 1363,
+    "population_previous": 348,
+    "births": 11,
+    "deaths": 12,
+    "entries": 3,
+    "exits": 2,
+    "population": 348
+   },
+   {
+    "year": 1364,
+    "population_previous": 348,
+    "births": 12,
+    "deaths": 10,
+    "entries": 2,
+    "exits": 2,
+    "population": 350
+   },
+   {
+    "year": 1365,
+    "population_previous": 350,
+    "births": 11,
+    "deaths": 11,
+    "entries": 2,
+    "exits": 4,
+    "population": 348
+   }
+  ],
+  "conduct_expected_bps": {
+   "person": {
+    "lawless": 1,
+    "crooked": 700,
+    "ordinary": 7500,
+    "upright": 1500,
+    "saintly": 299
+   },
+   "organization": {
+    "lawless": 100,
+    "crooked": 900,
+    "ordinary": 6000,
+    "upright": 2200,
+    "saintly": 800
+   },
+   "basis_key": "fixture.targets_basis",
+   "provenance": {
+    "status": "synthetic",
+    "source": "fixture-social-view.demo",
+    "rule_id": "fixture/hand-written"
+   }
+  }
+ }
+}

@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Chronos social v2 — graph, timeline, balances</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="./style.css">
+  <link rel="stylesheet" href="./social.css">
+  <script src="./vendor/cytoscape.min.js"></script>
+  <script type="module" src="./social-app.js"></script>
+</head>
+<body class="social">
+  <a class="skip" href="#sheet" data-i18n="page.skip_to_sheet">Skip to the sheet</a>
+  <header class="bar">
+    <p class="brand"><span class="brand-name">Chronos</span> <span class="brand-sub" data-i18n="page.brand_sub">social v2 — views</span></p>
+    <p class="s-fixture" id="fixture-label">FIXTURE</p>
+    <nav class="actions" aria-label="Navigation" data-i18n-aria-label="page.nav_aria">
+      <label class="s-lang"><span class="sr-only" data-i18n="page.language">Language</span>
+        <select id="lang" data-i18n-aria-label="page.language"></select></label>
+      <a class="btn btn-bar" href="./index.html" data-i18n="page.v1_link">v1 workshop</a>
+    </nav>
+  </header>
+
+  <div class="error-banner" id="error" role="alert" hidden><p id="error-text"></p></div>
+  <p class="s-prov" id="prov"></p>
+
+  <section class="s-controls" aria-label="Year and route" data-i18n-aria-label="page.controls_aria">
+    <h1 id="year-label">…</h1>
+    <div class="s-year">
+      <button type="button" class="btn btn-quiet" id="year-prev" aria-label="Previous year" data-i18n-aria-label="page.year_prev">−</button>
+      <label class="sr-only" for="year" data-i18n="page.year">Year</label>
+      <input type="number" id="year" step="1">
+      <button type="button" class="btn btn-quiet" id="year-next" aria-label="Next year" data-i18n-aria-label="page.year_next">+</button>
+      <label class="sr-only" for="year-range" data-i18n="page.year_slider">Year slider</label>
+      <input type="range" id="year-range" step="1">
+    </div>
+    <div class="s-route">
+      <button type="button" class="btn btn-primary" id="btn-mayor" data-i18n="page.mayor_1360">Mayor in 1360</button>
+      <button type="button" class="btn btn-quiet" id="btn-mayor-year" data-i18n="page.mayor_of_year">Mayor of the displayed year</button>
+      <button type="button" class="btn btn-quiet" id="btn-1340">1340</button>
+      <button type="button" class="btn btn-quiet" id="btn-1360">1360</button>
+      <button type="button" class="btn btn-quiet" id="btn-reset" data-i18n="page.reset">Reset</button>
+    </div>
+  </section>
+
+  <main class="s-main">
+    <section class="s-panel s-graph" aria-labelledby="h-graph">
+      <h2 id="h-graph" data-i18n="page.graph">Graph</h2>
+      <div id="graph"></div>
+    </section>
+    <aside class="s-panel s-sheet" aria-labelledby="h-sheet">
+      <h2 id="h-sheet" class="sr-only" data-i18n="page.sheet">Sheet</h2>
+      <div id="sheet" tabindex="-1"></div>
+    </aside>
+    <section class="s-panel s-wide" aria-labelledby="h-tl">
+      <h2 id="h-tl" data-i18n="page.timeline">Timeline</h2>
+      <div id="timeline"></div>
+    </section>
+    <section class="s-panel s-wide" aria-labelledby="h-bal">
+      <h2 id="h-bal" data-i18n="page.balances">Balances: expected and realised</h2>
+      <div id="balance"></div>
+    </section>
+  </main>
+</body>
+</html>
