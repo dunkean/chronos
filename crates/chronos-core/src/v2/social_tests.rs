@@ -581,6 +581,7 @@ fn same_firm_archetype_yields_several_conduct_classes() {
         .unwrap();
     super::social::initialize_organization_name(
         &world.region.social,
+        None,
         &mut entity,
         site,
         &world.region.region_id,

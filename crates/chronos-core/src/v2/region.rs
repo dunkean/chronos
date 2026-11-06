@@ -870,6 +870,7 @@ enum Op {
 struct RegionRun<'a> {
     canon: &'a GeneralCanon,
     naming_inputs: &'a SocialInputs,
+    expander: Option<super::naming::Expander<'static>>,
     region_id: &'a str,
     owner: Owner,
     baselines: &'a BTreeMap<String, BTreeMap<i32, u64>>,
@@ -967,7 +968,15 @@ impl RegionRun<'_> {
             .find(|s| s.site_id == site_id)
             .expect("group site");
         let axes = founding_group_axes(self.naming_inputs, &entity.id, &archetype.id)?;
-        initialize_organization_name(self.naming_inputs, entity, site, self.region_id, axes, None)?;
+        initialize_organization_name(
+            self.naming_inputs,
+            self.expander.as_ref(),
+            entity,
+            site,
+            self.region_id,
+            axes,
+            None,
+        )?;
         Ok(self.groups.len() - 1)
     }
     /// Own-stock groups (§23.1): the expected stock at bootstrap with uniform ages,
@@ -1526,6 +1535,7 @@ pub fn plan_region(canon: &GeneralCanon, region_id: &str) -> Result<RegionPlan, 
     let mut run = RegionRun {
         canon,
         naming_inputs: &social,
+        expander: social.naming_pack.map(super::naming::Expander::new),
         region_id,
         owner: Owner::cell(&canon.canon_id, region_id),
         baselines: &baselines,

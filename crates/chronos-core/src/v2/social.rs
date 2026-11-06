@@ -302,6 +302,7 @@ pub(crate) fn founding_group_axes(
 /// reference, resolved to display text by the host rather than copied into the tree.
 pub fn initialize_organization_name(
     inputs: &SocialInputs,
+    expander: Option<&naming::Expander<'static>>,
     entity: &mut SocialEntity,
     site: &SettlementAnchor,
     region_id: &str,
@@ -406,8 +407,15 @@ pub fn initialize_organization_name(
                 activity,
                 tone: Some(tone_name.into()),
             };
-            entity.name_tree = match naming::expand_keyed(
-                pack,
+            let own;
+            let expander = match expander {
+                Some(shared) => shared,
+                None => {
+                    own = naming::Expander::new(pack);
+                    &own
+                }
+            };
+            entity.name_tree = match expander.expand_keyed(
                 &definition.name_profile,
                 culture,
                 &context,
@@ -503,6 +511,8 @@ struct Run<'a> {
     residents: Vec<Vec<Vec<u32>>>,
     people: Vec<PersonAttributes>,
     activities: Vec<String>,
+    /// `skill_initial` of each slot, by index in `activities`.
+    skill_initial: Vec<u32>,
     own_activity: Vec<u8>,
     family: Vec<u32>,
     capacity: Vec<u16>,
@@ -539,6 +549,8 @@ struct Run<'a> {
     diagnostics: Vec<SocialDiagnostic>,
     stamp: Vec<u32>,
     stamp_value: u32,
+    /// Shared by every name of the packet.
+    expander: Option<naming::Expander<'static>>,
 }
 
 /// Domain of a verified result, read back from its plan address.
@@ -664,6 +676,13 @@ impl<'a> Run<'a> {
             .iter()
             .cloned()
             .collect();
+        let skill_initial = people
+            .iter()
+            .flat_map(|p| {
+                let activities = activities.iter();
+                activities.map(|a| p.skill_initial.get(a).copied().unwrap_or(0))
+            })
+            .collect();
         let own_activity = people
             .iter()
             .map(|p| {
@@ -707,6 +726,7 @@ impl<'a> Run<'a> {
             residents,
             people,
             activities,
+            skill_initial,
             own_activity,
             family,
             capacity,
@@ -749,6 +769,7 @@ impl<'a> Run<'a> {
             diagnostics,
             stamp: vec![0; n],
             stamp_value: 0,
+            expander: inputs.naming_pack.map(naming::Expander::new),
         })
     }
     fn provenance(&self, rule: &str) -> Provenance {
@@ -922,6 +943,7 @@ impl<'a> Run<'a> {
         let tone = conduct_class(axes, &thresholds);
         initialize_organization_name(
             inputs,
+            self.expander.as_ref(),
             &mut entity,
             self.sites[site],
             &self.region.region_id,
@@ -1720,12 +1742,7 @@ impl<'a> Run<'a> {
     }
     fn skill_of(&self, slot: u32, activity: usize) -> u32 {
         let defaults = &self.inputs.catalogue.engine_defaults;
-        let person = &self.people[slot as usize];
-        let initial = person
-            .skill_initial
-            .get(&self.activities[activity])
-            .copied()
-            .unwrap_or(0);
+        let initial = self.skill_initial[slot as usize * self.activities.len() + activity];
         let years = if usize::from(self.own_activity[slot as usize]) == activity {
             u32::from(self.activity_years[slot as usize])
         } else {
@@ -2876,9 +2893,8 @@ impl<'a> Run<'a> {
                 activity: Some(self.people[slot as usize].activity_id.clone()),
                 tone: Some("ordinary".into()),
             };
-            let tree = if let Some(pack) = self.inputs.naming_pack {
-                match naming::expand_keyed(
-                    pack,
+            let tree = if let Some(expander) = &self.expander {
+                match expander.expand_keyed(
                     &definition.name_profile,
                     &self.people[slot as usize].culture_id,
                     &context,
