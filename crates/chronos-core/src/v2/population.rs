@@ -3,10 +3,13 @@ use super::atlas::{
     covers, unique_ids, valid_weights, validate_mobility_edge, MobilityEdge, OccupationEpisode,
     OccupationState,
 };
-use super::model::{ErrorCode, HistoryError, TimeSpan};
+use super::canonical::canonical_bytes;
+use super::ids::{DomainKey, SemanticAddress};
+use super::model::{present_optional, required_nullable, ErrorCode, HistoryError, TimeSpan};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::collections::{BTreeMap, BTreeSet};
+use std::sync::OnceLock;
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(untagged)]
@@ -24,16 +27,6 @@ impl ParameterValue {
             _ => None,
         }
     }
-}
-fn required_nullable<'de, D: serde::Deserializer<'de>, T: Deserialize<'de>>(
-    d: D,
-) -> Result<Option<T>, D::Error> {
-    Option::deserialize(d)
-}
-fn present_optional<'de, D: serde::Deserializer<'de>, T: Deserialize<'de>>(
-    d: D,
-) -> Result<Option<T>, D::Error> {
-    T::deserialize(d).map(Some)
 }
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -476,16 +469,95 @@ pub struct PopulationPlan {
     pub mobility_edges: Vec<MobilityEdge>,
 }
 
+impl HistoricalOperation {
+    fn op_id(&self) -> &str {
+        match self {
+            Self::MoveHouseholds { op_id, .. }
+            | Self::ProtectPerson { op_id, .. }
+            | Self::ForceDeath { op_id, .. }
+            | Self::AdmitPeople { op_id, .. } => op_id,
+        }
+    }
+}
+
+/// Octets canoniques du plan pour `plan_fingerprint` (§4.2) : sans `plan_id` ni
+/// `plan_fingerprint`, listes triées par ID. Épisodes d'occupation, épisodes de
+/// taux et périodes protégées sont des listes ordonnées et gardent leur ordre.
+/// Deux plans qui ne diffèrent que par l'ordre de leurs listes ont les mêmes octets.
+pub fn plan_canonical_bytes(plan: &PopulationPlan) -> Result<Vec<u8>, HistoryError> {
+    let mut p = plan.clone();
+    p.provider.capabilities.sort();
+    let profiles = &mut p.resolved_profiles;
+    profiles.ancestries.sort_by(|a, b| a.id.cmp(&b.id));
+    profiles.social_classes.sort_by(|a, b| a.id.cmp(&b.id));
+    profiles.external.sort_by(|a, b| a.id.cmp(&b.id));
+    profiles.kinship.sort_by(|a, b| a.id.cmp(&b.id));
+    p.settlements.sort_by(|a, b| a.site_id.cmp(&b.site_id));
+    p.baseline_markers
+        .sort_by(|a, b| (&a.site_id, a.year).cmp(&(&b.site_id, b.year)));
+    for shock in &mut p.shocks {
+        shock.site_ids.sort();
+    }
+    p.shocks.sort_by_key(|s| {
+        (
+            s.source_event_id.clone(),
+            s.valid.start_year,
+            s.valid.end_year,
+            s.site_ids.clone(),
+        )
+    });
+    for op in &mut p.historical_program {
+        if let HistoricalOperation::AdmitPeople { person_ids, .. } = op {
+            person_ids.sort();
+        }
+    }
+    p.historical_program
+        .sort_by(|a, b| a.op_id().cmp(b.op_id()));
+    for role in &mut p.role_demands {
+        role.status_ids.sort();
+        role.activity_ids.sort();
+    }
+    p.role_demands.sort_by(|a, b| a.slot_id.cmp(&b.slot_id));
+    for person in &mut p.fixed_people {
+        person.parent_ids.sort();
+    }
+    p.fixed_people.sort_by(|a, b| a.person_id.cmp(&b.person_id));
+    for constraint in &mut p.exact_constraints {
+        constraint.site_ids.sort();
+    }
+    p.exact_constraints
+        .sort_by(|a, b| a.constraint_id.cmp(&b.constraint_id));
+    p.boundary_ports.sort_by(|a, b| a.port_id.cmp(&b.port_id));
+    p.mobility_edges.sort_by(|a, b| a.edge_id.cmp(&b.edge_id));
+    let mut value = serde_json::to_value(&p).map_err(|e| invalid(e.to_string()))?;
+    let object = value
+        .as_object_mut()
+        .ok_or_else(|| invalid("plan non sérialisé en objet"))?;
+    object.remove("plan_id");
+    object.remove("plan_fingerprint");
+    canonical_bytes(&value)
+}
+
+/// Résolution d'une variante source (`mu_culture_id`, §26.3) par le raccord S1.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct CultureVariant {
+    pub history_family_id: String,
+    pub demography_society_id: String,
+}
+
 /// Références du canon et des packs déjà vérifiés par l'hôte. Aucun accès
 /// implicite à un fichier, worker ou dépôt voisin pendant la validation.
 #[derive(Clone, Debug)]
 pub struct PlanReferences {
+    pub canon_id: String,
+    /// Horizon du monde : un plan couvre exactement cette période (§3.2).
+    pub timeline: TimeSpan,
+    pub world_seed: u64,
     pub catalogue_fingerprints: CatalogueFingerprints,
     pub event_years: BTreeMap<String, i32>,
     pub office_ids: BTreeSet<String>,
-    /// history_family/variant -> demography_society_id résolu par S1.
-    pub history_cultures: BTreeMap<String, String>,
-    pub culture_ids: BTreeSet<String>,
+    /// `mu_culture_id` -> famille et profil social résolus par S1.
+    pub culture_variants: BTreeMap<String, CultureVariant>,
     pub activity_ids: BTreeSet<String>,
     pub contacts: BTreeMap<String, super::atlas::ExternalContact>,
     /// Bornes de l'atlas figé sur tout l'horizon, pas la seule population
@@ -511,17 +583,68 @@ fn invalid(message: impl Into<String>) -> HistoryError {
 fn unsupported(message: &str) -> HistoryError {
     HistoryError::new(ErrorCode::UnsupportedCapability, message)
 }
+/// Le schéma normatif est embarqué à la compilation : aucune E/S runtime. Les
+/// contrôles de forme restent ainsi identiques au contrat JSON publié.
+fn plan_schema() -> &'static Value {
+    static SCHEMA: OnceLock<Value> = OnceLock::new();
+    SCHEMA.get_or_init(|| {
+        serde_json::from_str(include_str!(
+            "../../../../docs/design/chronos-social-v2/population-plan.schema.json"
+        ))
+        .expect("schéma livré valide")
+    })
+}
+/// `plan_id` et `domain_id` sont des adresses : le plan ne peut pas se déclarer
+/// d'un autre monde, d'un autre profil ou d'un autre domaine que ses champs.
+fn check_plan_identity(p: &PopulationPlan, refs: &PlanReferences) -> Result<(), HistoryError> {
+    if p.canon_id != refs.canon_id || p.timeline != refs.timeline {
+        return Err(invalid("plan étranger au canon ou à l'horizon du monde"));
+    }
+    if decimal_seed(&p.world_seed)? != refs.world_seed {
+        return Err(invalid("world_seed différent de celui du canon"));
+    }
+    let domain = DomainKey::from_id(&p.domain_id).map_err(|_| invalid("domain_id non adressé"))?;
+    if domain.world() != p.canon_id || domain.society() != p.demography_society_id {
+        return Err(invalid("domaine d'un autre monde ou d'un autre profil"));
+    }
+    if SemanticAddress::plan(&domain)?.encode() != p.plan_id {
+        return Err(invalid("plan_id différent de l'adresse du domaine"));
+    }
+    Ok(())
+}
+/// Un seul modèle est livré ; toute variante future doit se prononcer ici.
+fn household_model_accepts(model: HouseholdModel, residence: &str) -> bool {
+    match model {
+        HouseholdModel::ResidentPartitionV1 => RESIDENCE_MODES.contains(&residence),
+    }
+}
+/// Parenté inline compatible avec le profil social (§25.4, §26.3) : même
+/// majorité, modèle de ménage admis, parent jamais encore dépendant.
+fn check_kinship(profiles: &ResolvedProfiles) -> Result<(), HistoryError> {
+    let parameters = &profiles.society.parameters;
+    let majority = parameters["dependent_age"].integer();
+    let residence = match &parameters["residence"] {
+        ParameterValue::Text(residence) => residence.as_str(),
+        _ => return Err(invalid("résidence mal typée")),
+    };
+    for kinship in &profiles.kinship {
+        if i64::try_from(kinship.dependent_age).ok() != majority
+            || kinship.min_parent_age < kinship.dependent_age
+            || !household_model_accepts(kinship.household_model, residence)
+        {
+            return Err(invalid(
+                "profil de parenté incompatible avec le profil social",
+            ));
+        }
+    }
+    Ok(())
+}
 fn validate_plan_inner(p: &PopulationPlan, refs: &PlanReferences) -> Result<(), HistoryError> {
-    // Le schéma normatif est embarqué à la compilation : aucune E/S runtime.
-    // Les contrôles de forme restent ainsi identiques au contrat JSON publié.
-    let schema: Value = serde_json::from_str(include_str!(
-        "../../../../docs/design/chronos-social-v2/population-plan.schema.json"
-    ))
-    .expect("schéma livré valide");
     let value = serde_json::to_value(p).map_err(|e| invalid(e.to_string()))?;
-    check_shape(&value, &schema, &schema, "plan")?;
+    check_shape(&value, plan_schema(), plan_schema(), "plan")?;
     p.timeline.validate(false)?;
-    let world_seed = decimal_seed(&p.world_seed)?;
+    check_plan_identity(p, refs)?;
+    let world_seed = refs.world_seed;
     if decimal_seed(&p.seed)?
         != super::ids::random_semantics_v2::domain_seed(
             world_seed,
@@ -618,6 +741,7 @@ fn validate_plan_inner(p: &PopulationPlan, refs: &PlanReferences) -> Result<(), 
     check_weight_refs(&profiles.society.status_weights, &status_ids)?;
     check_weight_refs(&profiles.society.core_status_weights, &status_ids)?;
     check_parameters(&profiles.society.parameters, true)?;
+    check_kinship(profiles)?;
     for ancestry in &profiles.ancestries {
         if ancestry.reproduction_mode != ReproductionMode::Biparental {
             return Err(unsupported("reproduction personnalisée non livrée"));
@@ -662,7 +786,19 @@ fn validate_plan_inner(p: &PopulationPlan, refs: &PlanReferences) -> Result<(), 
         .iter()
         .map(|s| (s.site_id.as_str(), s.initial_population))
         .collect();
-    let cultures: BTreeSet<_> = refs.culture_ids.iter().map(String::as_str).collect();
+    let culture_variant = |variant: &str| {
+        refs.culture_variants
+            .get(variant)
+            .ok_or_else(|| invalid("variante culturelle absente du raccord"))
+    };
+    // Mélange de profils dans un domaine : capacité S8, jamais une repartition.
+    let same_society = |variant: &CultureVariant| {
+        if variant.demography_society_id == p.demography_society_id {
+            Ok(())
+        } else {
+            Err(unsupported("profils sociaux mixtes dans un domaine S8"))
+        }
+    };
     let activities: BTreeSet<_> = refs.activity_ids.iter().map(String::as_str).collect();
     for s in &p.settlements {
         check_weight_refs(&s.ancestry_weights, &ancestry_ids)?;
@@ -682,26 +818,33 @@ fn validate_plan_inner(p: &PopulationPlan, refs: &PlanReferences) -> Result<(), 
             .kinship
             .iter()
             .any(|k| k.id == s.kinship_profile_id)
-            || !refs
-                .history_cultures
-                .get(&s.history_culture_id)
-                .is_some_and(|society| society == &p.demography_society_id)
-            || s.history_culture_id.split('/').count() != 2
-            || s.history_culture_id.split('/').any(str::is_empty)
         {
-            return Err(invalid("raccord culturel ou profil de parenté absent"));
+            return Err(invalid("profil de parenté absent"));
         }
+        let (family, variant) = s
+            .history_culture_id
+            .split_once('/')
+            .filter(|(family, variant)| !family.is_empty() && !variant.contains('/'))
+            .ok_or_else(|| invalid("history_culture_id hors de famille/variante"))?;
+        let principal = culture_variant(variant)?;
+        if principal.history_family_id != family {
+            return Err(invalid("variante principale hors de sa famille"));
+        }
+        same_society(principal)?;
         for e in &s.occupation_episodes {
             if !valid_weights(&e.culture_weights)
                 || !valid_weights(&e.activity_weights)
-                || e.culture_weights
-                    .keys()
-                    .any(|k| !cultures.contains(k.as_str()))
                 || e.activity_weights
                     .keys()
                     .any(|k| !activities.contains(k.as_str()))
             {
                 return Err(invalid("poids ou références d'occupation invalides"));
+            }
+            for (variant, weight) in &e.culture_weights {
+                let resolved = culture_variant(variant)?;
+                if *weight > 0 {
+                    same_society(resolved)?;
+                }
             }
         }
     }
@@ -831,11 +974,14 @@ fn validate_plan_inner(p: &PopulationPlan, refs: &PlanReferences) -> Result<(), 
             .contacts
             .get(&port.contact_id)
             .ok_or_else(|| invalid("contact absent"))?;
+        // Chaque côté du contact ouvre son port sous le même `contact_id`.
+        let side = contact
+            .site_end(&port.entry_site_id)
+            .ok_or_else(|| invalid("port sur un site étranger au contact"))?;
         if !sites.contains(port.entry_site_id.as_str())
-            || contact.entry_site_id != port.entry_site_id
-            || contact.external_context_id != port.external_context_id
-            || contact.external_profile_id != port.external_profile_id
-            || contact.population_expected != port.population_expected
+            || side.external_context_id != port.external_context_id
+            || side.external_profile_id != port.external_profile_id
+            || side.population_expected != port.population_expected
             || !contact.valid.encloses(port.valid)
             || !profiles
                 .external
@@ -877,6 +1023,8 @@ fn check_weight_refs(
     }
 }
 
+/// Valeurs de `Society.residence` dans `config.py` de Lineage Lab.
+const RESIDENCE_MODES: &[&str] = &["patrilocal", "matrilocal", "either"];
 const SOCIETY_PARAMETERS: &[&str] = &[
     "childfree_rate_bps",
     "marriage_rate_bps",
@@ -935,12 +1083,8 @@ fn check_parameters(
     }
     for (key, value) in parameters {
         if key == "residence" {
-            // Seule valeur figée par l'exemple ; les autres modes attendent
-            // le dictionnaire exécutable S1, sans en inventer ici la liste.
-            if !matches!(value, ParameterValue::Text(s) if s == "either") {
-                return Err(unsupported(
-                    "mode de résidence non spécifié par le contrat initial",
-                ));
+            if !matches!(value, ParameterValue::Text(s) if RESIDENCE_MODES.contains(&s.as_str())) {
+                return Err(invalid("mode de résidence inconnu"));
             }
             continue;
         }

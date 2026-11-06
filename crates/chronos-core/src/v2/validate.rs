@@ -8,12 +8,15 @@ pub fn causal_ranks(events: &[HistoryEvent]) -> Result<BTreeMap<String, u32>, Hi
     let mut by_id = BTreeMap::new();
     for e in events {
         if !super::atlas::valid_id(&e.id)
-            || !(-100_000..=100_000).contains(&e.year)
+            || !(-MAX_ABS_YEAR..=MAX_ABS_YEAR).contains(&e.year)
+            || e.end_year
+                .is_some_and(|end| end <= e.year || end > MAX_ABS_YEAR)
             || by_id.insert(e.id.as_str(), e).is_some()
         {
-            return Err(HistoryError::new(
+            return Err(event_error(
+                e,
                 ErrorCode::InvalidCausalOrder,
-                "événement dupliqué ou invalide",
+                "événement dupliqué ou dates invalides",
             ));
         }
     }
@@ -144,8 +147,8 @@ pub fn validate_composition(relations: &[SocialRelation]) -> Result<(), HistoryE
     let mut degree = BTreeMap::new();
     if !super::atlas::unique_ids(relations.iter().map(|r| r.id.as_str())) {
         return Err(HistoryError::new(
-            ErrorCode::CompositionCycle,
-            "identité de relation invalide",
+            ErrorCode::InvalidCanonicalValue,
+            "identité de relation invalide ou dupliquée",
         ));
     }
     for r in relations {
@@ -186,6 +189,90 @@ pub fn validate_composition(relations: &[SocialRelation]) -> Result<(), HistoryE
             ErrorCode::CompositionCycle,
             "cycle de composition stricte",
         ));
+    }
+    Ok(())
+}
+
+/// Événements capables de changer un statut légal (§27.3).
+pub const LEGAL_CHANGE_EVENT_KINDS: [&str; 4] = ["edict", "charter", "heresy_trial", "banishment"];
+
+/// Statut d'un sujet dans une juridiction à une date. L'absence de
+/// `LegalStanding` vaut `licit` ; une autre juridiction n'a aucun effet (§27.3).
+pub fn legal_status_at(
+    standings: &[LegalStanding],
+    subject: &ObjectRef,
+    jurisdiction: &ObjectRef,
+    year: i32,
+) -> LegalStatus {
+    standings
+        .iter()
+        .find(|s| {
+            &s.subject == subject && &s.jurisdiction == jurisdiction && s.valid.contains(year)
+        })
+        .map_or(LegalStatus::Licit, |s| s.status)
+}
+
+/// Une chaîne par couple sujet/juridiction. Son premier maillon est l'état
+/// initial ; chaque maillon suivant est un changement et cite un événement
+/// `edict`, `charter`, `heresy_trial` ou `banishment`, sans lui être postérieur.
+pub fn validate_legal_standings(
+    standings: &[LegalStanding],
+    events: &[HistoryEvent],
+) -> Result<(), HistoryError> {
+    let fail = |s: &LegalStanding, message: &str| HistoryError {
+        owner: Some(s.id.clone()),
+        at_year: Some(s.valid.start_year),
+        ..HistoryError::new(ErrorCode::InvalidLegalStanding, message)
+    };
+    if !super::atlas::unique_ids(standings.iter().map(|s| s.id.as_str())) {
+        return Err(HistoryError::new(
+            ErrorCode::InvalidLegalStanding,
+            "identité de statut légal invalide ou dupliquée",
+        ));
+    }
+    let events: BTreeMap<_, _> = events.iter().map(|e| (e.id.as_str(), e)).collect();
+    let mut chains: BTreeMap<_, Vec<&LegalStanding>> = BTreeMap::new();
+    for s in standings {
+        s.valid.validate(false).map_err(|e| HistoryError {
+            owner: Some(s.id.clone()),
+            at_year: Some(s.valid.start_year),
+            ..e
+        })?;
+        if !matches!(
+            s.subject,
+            ObjectRef::Entity(_) | ObjectRef::Activity(_) | ObjectRef::PersonSlot(_)
+        ) || !matches!(s.jurisdiction, ObjectRef::Entity(_))
+        {
+            return Err(fail(s, "sujet ou juridiction d'un type interdit"));
+        }
+        chains
+            .entry((&s.subject, &s.jurisdiction))
+            .or_default()
+            .push(s);
+    }
+    for chain in chains.values_mut() {
+        chain.sort_by_key(|s| (s.valid.start_year, s.valid.end_year));
+        for pair in chain.windows(2) {
+            if pair[1].valid.start_year < pair[0].valid.end_year {
+                return Err(fail(pair[1], "statuts légaux chevauchants"));
+            }
+        }
+        for (i, s) in chain.iter().enumerate() {
+            match &s.cause_event_id {
+                None if i > 0 => return Err(fail(s, "changement de statut sans événement")),
+                None => {}
+                Some(id) => {
+                    let event = events
+                        .get(id.as_str())
+                        .ok_or_else(|| fail(s, "événement de changement absent"))?;
+                    if !LEGAL_CHANGE_EVENT_KINDS.contains(&event.kind.as_str())
+                        || event.year > s.valid.start_year
+                    {
+                        return Err(fail(s, "événement d'un autre type ou postérieur"));
+                    }
+                }
+            }
+        }
     }
     Ok(())
 }

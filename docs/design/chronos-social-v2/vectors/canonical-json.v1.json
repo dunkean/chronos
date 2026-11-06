@@ -1,5 +1,10 @@
 {
   "version": "canonical-json-1",
+  "integer_bounds": {
+    "minimum": "-9223372036854775808",
+    "maximum": "18446744073709551615",
+    "note": "Entiers acceptés : de i64 min à u64 max, bornes incluses. Au-delà, la valeur est refusée, jamais arrondie."
+  },
   "vectors": [
     {
       "name": "vector-0",
@@ -65,6 +70,79 @@
       },
       "expected_utf8": "{\"list\":[{\"id\":\"b\"},{\"id\":\"a\"}],\"null\":null}",
       "expected_hex": "7b226c697374223a5b7b226964223a2262227d2c7b226964223a2261227d5d2c226e756c6c223a6e756c6c7d"
+    },
+    {
+      "name": "vector-8",
+      "input": -9223372036854775808,
+      "expected_utf8": "-9223372036854775808",
+      "expected_hex": "2d39323233333732303336383534373735383038"
+    }
+  ],
+  "rejections": [
+    {
+      "name": "float-integral",
+      "input_text": "1.0",
+      "reason": "flottant, même de valeur entière"
+    },
+    {
+      "name": "float-fraction",
+      "input_text": "0.5",
+      "reason": "flottant"
+    },
+    {
+      "name": "float-exponent",
+      "input_text": "1e3",
+      "reason": "exposant"
+    },
+    {
+      "name": "float-exponent-upper",
+      "input_text": "1E2",
+      "reason": "exposant"
+    },
+    {
+      "name": "float-negative-zero",
+      "input_text": "-0.0",
+      "reason": "flottant"
+    },
+    {
+      "name": "negative-zero",
+      "input_text": "-0",
+      "reason": "zéro signé, sans forme décimale normalisée"
+    },
+    {
+      "name": "float-nested",
+      "input_text": "{\"a\":[1.5]}",
+      "reason": "flottant imbriqué"
+    },
+    {
+      "name": "above-u64",
+      "input_text": "18446744073709551616",
+      "reason": "au-delà de la borne maximale"
+    },
+    {
+      "name": "below-i64",
+      "input_text": "-9223372036854775809",
+      "reason": "en deçà de la borne minimale"
+    },
+    {
+      "name": "nan",
+      "input_text": "NaN",
+      "reason": "non JSON ; le module json de Python l'accepte par défaut"
+    },
+    {
+      "name": "infinity",
+      "input_text": "Infinity",
+      "reason": "non JSON ; le module json de Python l'accepte par défaut"
+    },
+    {
+      "name": "lone-surrogate",
+      "input_text": "\"\\ud800\"",
+      "reason": "chaîne non représentable en UTF-8"
+    },
+    {
+      "name": "bom",
+      "input_text": "﻿1",
+      "reason": "BOM interdit"
     }
   ]
 }

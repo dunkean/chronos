@@ -1,5 +1,8 @@
 //! Atlas régional figé : aucune partition démographique ni géométrie générée.
-use super::model::{string_enum, ErrorCode, HistoryError, TimeSpan};
+use super::model::{
+    required_nullable, string_enum, ErrorCode, HistoryError, TimeSpan, MAX_ABS_COORDINATE_MM,
+    MAX_ABS_YEAR,
+};
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
 
@@ -14,6 +17,11 @@ pub struct MetricBounds {
 impl MetricBounds {
     fn contains(&self, x: i64, y: i64) -> bool {
         self.min_x_mm <= x && x <= self.max_x_mm && self.min_y_mm <= y && y <= self.max_y_mm
+    }
+    fn within_coordinate_limits(&self) -> bool {
+        [self.min_x_mm, self.min_y_mm, self.max_x_mm, self.max_y_mm]
+            .iter()
+            .all(|v| (-MAX_ABS_COORDINATE_MM..=MAX_ABS_COORDINATE_MM).contains(v))
     }
 }
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -77,17 +85,42 @@ pub struct MobilityEdge {
     pub bidirectional: bool,
     pub mode: MobilityMode,
 }
+/// Côté local d'un contact : le site d'attache et ce qu'il voit au-delà.
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct ContactSiteEnd {
+    pub site_id: String,
+    pub external_context_id: String,
+    #[serde(deserialize_with = "required_nullable")]
+    pub access_edge_id: Option<String>,
+    pub external_profile_id: String,
+    pub population_expected: u64,
+}
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
+#[serde(tag = "kind", rename_all = "snake_case", deny_unknown_fields)]
+pub enum ContactEnd {
+    Site(ContactSiteEnd),
+    External { context_id: String },
+}
+/// Contact à propriétaire unique et à deux extrémités (§2.1, §7.1). Les deux
+/// côtés partagent cet ID ; chaque site d'attache peut y ouvrir son port (§12.2).
+/// Les extrémités sont triées : site avant extérieur, puis par ID.
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct ExternalContact {
     pub contact_id: String,
     pub owner_scope: String,
-    pub entry_site_id: String,
-    pub external_context_id: String,
-    pub access_edge_id: Option<String>,
-    pub external_profile_id: String,
-    pub population_expected: u64,
+    pub ends: [ContactEnd; 2],
     pub valid: TimeSpan,
+}
+impl ExternalContact {
+    /// Extrémité ancrée à ce site, si le contact y aboutit.
+    pub fn site_end(&self, site_id: &str) -> Option<&ContactSiteEnd> {
+        self.ends.iter().find_map(|end| match end {
+            ContactEnd::Site(side) if side.site_id == site_id => Some(side),
+            _ => None,
+        })
+    }
 }
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -101,8 +134,10 @@ pub struct HistoryAtlas {
     pub mobility_edges: Vec<MobilityEdge>,
     pub external_contacts: Vec<ExternalContact>,
 }
+/// IDs de catalogue et d'atlas : ASCII imprimable sans espace, comme les champs
+/// d'adresse qu'ils alimentent (§4.1), et au plus 4 096 octets.
 pub(crate) fn valid_id(id: &str) -> bool {
-    !id.is_empty() && id.chars().count() <= 4096
+    !id.is_empty() && id.len() <= 4096 && id.bytes().all(|b| (0x21..=0x7e).contains(&b))
 }
 pub(crate) fn unique_ids<'a>(ids: impl Iterator<Item = &'a str>) -> bool {
     let mut seen = BTreeSet::new();
@@ -127,7 +162,16 @@ pub(crate) fn covers(spans: impl IntoIterator<Item = TimeSpan>, period: TimeSpan
     cursor == period.end_year
 }
 impl HistoryAtlas {
+    /// Toute erreur porte l'atlas comme propriétaire et sa date d'ouverture,
+    /// sauf si la contrainte a déjà désigné plus précis (§13).
     pub fn validate(&self) -> Result<(), HistoryError> {
+        self.validate_inner().map_err(|mut e| {
+            e.owner.get_or_insert_with(|| self.atlas_id.clone());
+            e.at_year.get_or_insert(self.timeline.start_year);
+            e
+        })
+    }
+    fn validate_inner(&self) -> Result<(), HistoryError> {
         let bad = |s: &str| HistoryError::new(ErrorCode::InvalidAtlas, s);
         self.timeline.validate(false)?;
         if !valid_id(&self.atlas_id)
@@ -160,6 +204,7 @@ impl HistoryAtlas {
                 || !valid_id(&c.coordinate_frame)
                 || c.bounds.min_x_mm > c.bounds.max_x_mm
                 || c.bounds.min_y_mm > c.bounds.max_y_mm
+                || !c.bounds.within_coordinate_limits()
                 || !unique_ids(c.neighbors.iter().map(String::as_str))
                 || !unique_ids(c.settlement_summary.site_ids.iter().map(String::as_str))
             {
@@ -224,7 +269,7 @@ impl HistoryAtlas {
                 .ok_or_else(|| bad("cellule de site absente"))?;
             if c.coordinate_frame != s.coordinate_frame
                 || !c.bounds.contains(s.x_mm, s.y_mm)
-                || s.foundation_year < -100_000
+                || s.foundation_year < -MAX_ABS_YEAR
                 || s.foundation_year > self.timeline.start_year
                 || s.initial_population > s.population_expected_max
                 || !covers(s.occupation_episodes.iter().map(|e| e.valid), self.timeline)
@@ -254,27 +299,49 @@ impl HistoryAtlas {
         }
         for c in &self.external_contacts {
             c.valid.validate(false)?;
+            let [first, second] = &c.ends;
             if !cells.contains_key(c.owner_scope.as_str())
-                || !sites
-                    .get(c.entry_site_id.as_str())
-                    .is_some_and(|s| self.cell_is_within(&s.cell_id, &c.owner_scope))
                 || !self.timeline.encloses(c.valid)
-                || !valid_id(&c.external_context_id)
-                || !valid_id(&c.external_profile_id)
-                || c.population_expected > 1_000_000_000_000
-                || c.access_edge_id.as_ref().is_some_and(|id| {
-                    !self.mobility_edges.iter().any(|e| {
-                        &e.edge_id == id
-                            && (e.from_site_id == c.entry_site_id
-                                || e.to_site_id == c.entry_site_id)
-                            && e.valid.encloses(c.valid)
-                    })
-                })
+                // Tri strict : refuse aussi deux fois la même extrémité.
+                || first >= second
+                || !matches!(first, ContactEnd::Site(_))
+                || !self.contact_end_is_valid(c, first, second, &sites)
+                || !self.contact_end_is_valid(c, second, first, &sites)
             {
                 return Err(bad("contact extérieur ou voie d'accès invalide"));
             }
         }
         Ok(())
+    }
+    fn contact_end_is_valid(
+        &self,
+        contact: &ExternalContact,
+        end: &ContactEnd,
+        other: &ContactEnd,
+        sites: &BTreeMap<&str, &SettlementAnchor>,
+    ) -> bool {
+        let side = match end {
+            ContactEnd::External { context_id } => return valid_id(context_id),
+            ContactEnd::Site(side) => side,
+        };
+        let context_matches = match other {
+            ContactEnd::External { context_id } => context_id == &side.external_context_id,
+            ContactEnd::Site(other) => other.site_id != side.site_id,
+        };
+        context_matches
+            && sites
+                .get(side.site_id.as_str())
+                .is_some_and(|s| self.cell_is_within(&s.cell_id, &contact.owner_scope))
+            && valid_id(&side.external_context_id)
+            && valid_id(&side.external_profile_id)
+            && side.population_expected <= 1_000_000_000_000
+            && side.access_edge_id.as_ref().is_none_or(|id| {
+                self.mobility_edges.iter().any(|e| {
+                    &e.edge_id == id
+                        && (e.from_site_id == side.site_id || e.to_site_id == side.site_id)
+                        && e.valid.encloses(contact.valid)
+                })
+            })
     }
     /// Recherche bornée même sur un atlas non validé.
     pub fn cell_is_within(&self, cell: &str, ancestor: &str) -> bool {
