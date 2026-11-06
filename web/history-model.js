@@ -54,13 +54,35 @@ export function conductClass(m, l, isOrg) {
 
 export const inRange = (valid, y) => y >= valid[0] && (valid[1] == null || y < valid[1]);
 
+// Name of an entity: a fixture name is data, a generated one is a key plus parameters.
+// A parameter ending in `_key` is itself a key (e.g. the kind of an organization).
+export function nameOf(e) {
+  if (!e) return '';
+  if (e.name_key && e.name_params) {
+    const params = {};
+    for (const [k, v] of Object.entries(e.name_params)) {
+      if (k.endsWith('_key')) params[k.slice(0, -4)] = t(String(v));
+      else params[k] = v;
+    }
+    return t(e.name_key, params);
+  }
+  return tk(e, 'name');
+}
+
 export class Model {
   constructor(view) {
     this.view = view;
+    this.index();
+  }
+  // The view object is replaced in place when the year moves; the model re-reads it.
+  index() {
+    const view = this.view;
     this.byId = new Map();
     for (const e of view.entities) this.byId.set(e.id, e);
     for (const o of view.offices ?? []) this.byId.set(o.id, o);
     this.events = new Map(view.events.map((e) => [e.id, e]));
+    // A holder not (yet) in the view keeps the label the tenure carries.
+    this.holders = new Map(view.tenures.filter((x) => x.person_id && x.person_name).map((x) => [x.person_id, x.person_name]));
     this.relations = view.relations;
     this.adj = new Map();
     for (const r of this.relations) {
@@ -70,14 +92,35 @@ export class Model {
       }
     }
   }
+  // Adds the facts of a fragment (graph expansion) without duplicating any ID.
+  merge(fragment) {
+    const view = this.view;
+    const add = (list, extra, key) => {
+      const have = new Set(list.map((x) => x[key]));
+      let n = 0;
+      for (const x of extra ?? []) if (!have.has(x[key])) { list.push(x); have.add(x[key]); n++; }
+      return n;
+    };
+    let added = add(view.entities, fragment.entities, 'id');
+    added += add(view.offices, fragment.offices, 'id');
+    added += add(view.relations, fragment.relations, 'id');
+    added += add(view.legal_standings, fragment.legal_standings, 'id');
+    added += add(view.events, fragment.events, 'id');
+    added += add(view.tenures, fragment.tenures, 'tenure_id');
+    if (added) this.index();
+    return added;
+  }
   get(id) { return this.byId.get(id); }
   // Display name: a proper name is data, an office or event name is a key.
   name(id) {
     const e = this.byId.get(id);
-    if (e) return tk(e, 'name');
+    if (e) return nameOf(e);
     const ev = this.events.get(id);
-    return ev ? tk(ev, 'label') : id;
+    if (ev) return tk(ev, 'label');
+    const holder = this.holders.get(id);
+    return holder ? nameOf(holder) : id;
   }
+  isSynthetic(id) { return !!this.byId.get(id)?.name_synthetic; }
   exists(id, y) {
     const e = this.byId.get(id);
     if (!e) return false;
@@ -90,7 +133,7 @@ export class Model {
   // A category, a community or an office has no conduct class.
   conduct(id, y) {
     const e = this.byId.get(id);
-    if (!e || e.kind === 'office' || e.nature === 'category' || e.nature === 'population' || e.nature === 'community') return null;
+    if (!e || e.kind === 'office' || e.nature === 'category' || e.nature === 'population') return null;
     const a = this.alignment(id, y);
     if (!a) return null;
     const org = e.nature !== 'person';
@@ -99,6 +142,11 @@ export class Model {
   }
   relationsAt(id, y) { return (this.adj.get(id) ?? []).filter((r) => inRange(r.valid, y)); }
   tenureAt(officeId, y) { return this.view.tenures.find((x) => x.office_id === officeId && inRange(x.valid, y)) ?? null; }
+  // Realized members of a group in a year, from the series carried by the view.
+  membersAt(id, y) {
+    const s = this.byId.get(id)?.member_series;
+    return s && y >= s.from && y - s.from < s.counts.length ? s.counts[y - s.from] : null;
+  }
   legalFor(subjectId) { return this.view.legal_standings.filter((s) => s.subject === subjectId); }
   jurisdictions(subjectId) { return [...new Set(this.legalFor(subjectId).map((s) => s.jurisdiction))]; }
   // No segment means licit (§27.3).

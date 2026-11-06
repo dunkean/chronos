@@ -14,19 +14,24 @@
   <a class="skip" href="#sheet" data-i18n="page.skip_to_sheet">Skip to the sheet</a>
   <header class="bar">
     <p class="brand"><span class="brand-name">Chronos</span> <span class="brand-sub" data-i18n="page.brand_sub">social v2 — views</span></p>
-    <p class="s-fixture" id="fixture-label">FIXTURE</p>
+    <p class="s-fixture" id="fixture-label" hidden>FIXTURE</p>
     <nav class="actions" aria-label="Navigation" data-i18n-aria-label="page.nav_aria">
       <label class="s-lang"><span class="sr-only" data-i18n="page.language">Language</span>
         <select id="lang" data-i18n-aria-label="page.language"></select></label>
+      <a class="btn btn-bar" data-api-only id="export-canon" download="chronos-canon-only.json" data-i18n="page.export_canon">Export (canon only)</a>
+      <a class="btn btn-bar" data-api-only id="export-full" download="chronos-with-materialized.json" data-i18n="page.export_full">Export with computed packets</a>
       <a class="btn btn-bar" href="./index.html" data-i18n="page.v1_link">v1 workshop</a>
     </nav>
   </header>
 
   <div class="error-banner" id="error" role="alert" hidden><p id="error-text"></p></div>
   <p class="s-prov" id="prov"></p>
+  <p class="s-progress" id="progress" role="status" aria-live="polite" hidden></p>
 
   <section class="s-controls" aria-label="Year and route" data-i18n-aria-label="page.controls_aria">
     <h1 id="year-label">…</h1>
+    <label class="s-site" data-api-only><span data-i18n="page.site">Site</span>
+      <select id="site"></select></label>
     <div class="s-year">
       <button type="button" class="btn btn-quiet" id="year-prev" aria-label="Previous year" data-i18n-aria-label="page.year_prev">−</button>
       <label class="sr-only" for="year" data-i18n="page.year">Year</label>
@@ -48,11 +53,16 @@
     <section class="s-panel s-graph" aria-labelledby="h-graph">
       <h2 id="h-graph" data-i18n="page.graph">Graph</h2>
       <div id="graph"></div>
+      <p><button type="button" class="btn btn-quiet" id="load-more" hidden></button></p>
     </section>
     <aside class="s-panel s-sheet" aria-labelledby="h-sheet">
       <h2 id="h-sheet" class="sr-only" data-i18n="page.sheet">Sheet</h2>
       <div id="sheet" tabindex="-1"></div>
     </aside>
+    <section class="s-panel s-wide" aria-labelledby="h-map">
+      <h2 id="h-map" data-i18n="page.map">Map: historical overlay</h2>
+      <div id="overlay-map"></div>
+    </section>
     <section class="s-panel s-wide" aria-labelledby="h-tl">
       <h2 id="h-tl" data-i18n="page.timeline">Timeline</h2>
       <div id="timeline"></div>

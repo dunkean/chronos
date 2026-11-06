@@ -9,6 +9,7 @@ pub mod influence;
 pub mod model;
 pub mod offices;
 pub mod population;
+pub mod query;
 pub mod recruit;
 pub mod region;
 pub mod social;

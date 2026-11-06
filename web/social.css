@@ -20,10 +20,10 @@ body.social { display: block; }
 .s-panel { background: var(--panel); border: 1px solid var(--line); border-radius: 4px; padding: 12px 14px; min-width: 0; }
 .s-panel > h2 { font: 700 17px/1.2 var(--font-hist); margin-bottom: 8px; }
 .s-wide { grid-column: 1 / -1; }
-.s-sheet { position: sticky; top: 8px; max-height: calc(100vh - 16px); overflow: auto; }
+.s-sheet { max-height: 80vh; overflow: auto; }
 @media (max-width: 960px) {
   .s-main { grid-template-columns: 1fr; }
-  .s-sheet { position: static; max-height: none; }
+  .s-sheet { max-height: none; }
 }
 
 .s-dim { color: var(--ink-2); font-size: 13px; }
@@ -136,3 +136,48 @@ body.social { display: block; }
 .s-tl-table summary { cursor: pointer; font-weight: 700; }
 
 .s-lang select { padding: 3px 6px; border: 1px solid rgba(231, 238, 236, 0.6); background: var(--ink); color: var(--on-ink); border-radius: 3px; font-size: 14px; }
+
+/* Progression d'un job, site, export */
+.s-progress { margin: 0; padding: 8px 16px; background: #e8f0f4; border-bottom: 1px solid #7ea0b3; font-size: 13px; font-weight: 600; }
+.s-site { display: flex; align-items: center; gap: 6px; font-size: 14px; }
+.s-site select { padding: 4px 6px; border: 1px solid var(--line); background: var(--field); border-radius: 3px; }
+.s-synth { margin-left: 8px; font-size: 12px; vertical-align: middle; }
+.s-explain { margin-top: 10px; }
+.s-explain:empty { display: none; }
+.s-explain-sentence { font-weight: 700; padding: 6px 8px; background: #fff; border-left: 4px solid var(--ink-2); }
+.s-dated { font-size: 14px; }
+
+/* Carte : superposition historique */
+.s-map-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; margin-bottom: 8px; font-size: 14px; }
+.s-map-controls select { padding: 3px 6px; border: 1px solid var(--line); background: var(--field); border-radius: 3px; }
+.s-map-fig { display: grid; grid-template-columns: minmax(0, 1fr) 220px; gap: 10px; align-items: start; }
+@media (max-width: 1100px) { .s-map-fig { grid-template-columns: 1fr; } }
+.s-map { width: 100%; height: auto; max-height: 560px; background: var(--field); border: 1px solid var(--line); }
+.s-map-frame { fill: none; stroke: var(--line); stroke-dasharray: 2 4; }
+.s-map-route { stroke: #8a9ba3; stroke-width: 2; }
+.s-map-route-water { stroke: #5b8fb0; stroke-dasharray: 6 4; }
+.s-map-route-mixed { stroke-dasharray: 2 3; }
+.s-map-dot { stroke: var(--ink); stroke-width: 2; }
+.s-map-dot.is-unmaterialized { stroke-dasharray: 3 3; stroke: var(--ink-2); }
+.s-map-site { cursor: pointer; }
+.s-map-site.is-focus .s-map-dot { stroke-width: 4; }
+.s-map-site:focus-visible { outline: 2px solid var(--ink); }
+.s-map-label { font-size: 12px; fill: var(--ink); paint-order: stroke; stroke: var(--field); stroke-width: 3px; }
+.s-map-contact { fill: none; stroke: #9a6a3a; stroke-width: 2.5; stroke-dasharray: 2 4; }
+.s-map-resident { fill: none; stroke: #ac5657; stroke-width: 3; }
+.s-map-seat { fill: #d6b13a; stroke: var(--ink); stroke-width: 1; }
+.s-map-chapter { fill: #6d4f7a; stroke: var(--ink); stroke-width: 1; }
+.s-map-legend { list-style: none; margin: 0; padding: 0; font-size: 13px; }
+.s-map-legend li { padding: 3px 0; }
+.s-map-key { display: inline-block; width: 18px; height: 12px; vertical-align: middle; }
+.s-map-key-dot { background: rgba(46, 90, 110, 0.5); border: 2px solid var(--ink); border-radius: 50%; width: 14px; }
+.s-map-key-route { border-top: 2px solid #8a9ba3; height: 0; }
+.s-map-key-contact { border: 2.5px dashed #9a6a3a; border-radius: 50%; width: 14px; }
+.s-map-key-resident { border: 3px solid #ac5657; border-radius: 50%; width: 14px; }
+.s-map-key-chapter { background: #6d4f7a; transform: rotate(45deg); width: 9px; height: 9px; }
+.s-map-lists { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 16px; margin-top: 10px; }
+@media (max-width: 1100px) { .s-map-lists { grid-template-columns: 1fr; } }
+
+.s-map-fig.is-large { grid-template-columns: 1fr; }
+.s-map-fig.is-large .s-map { max-height: none; }
+.s-map-fig.is-large .s-map-label { font-size: 15px; }

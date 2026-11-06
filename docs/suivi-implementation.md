@@ -195,7 +195,7 @@ La spécification est rédigée ; les statuts ci-dessous concernent uniquement l
 | S2 | Canon général, régions, domaines fixes et contexte extérieur | livré sur `social-v2/s2-canon`, non fusionné |
 | S3 | Worker Lineage Lab et programme historique noyau/cohortes | à faire |
 | S4 | Complément procédural, recrutement, mandats et groupes informels | livré sur `social-v2/s4-social`, non fusionné |
-| S5 | API, stockage, carte, graphes interactifs, chronologie et bilans | à faire |
+| S5 | API, stockage, carte, graphes interactifs, chronologie et bilans | livré sur `social-v2/s5-final`, non fusionné ; parcours de recette dans `docs/reviews/social-v2-acceptance.md` |
 | S6 | Scénarios exacts, personnes requises et branches | à faire |
 | S7 | Liaisons exactes d’acteurs nommés entre domaines | à faire |
 | S8 | Mesures, checkpoints, sélection paresseuse, grands sites, fournisseur démographique procédural, profils mixtes, nouveaux sites dynamiques et formats binaires éventuels | à faire |

@@ -381,7 +381,7 @@ fn domain_of(result: &PopulationResult) -> Result<DomainKey, HistoryError> {
 }
 /// `[first state, end state)` of a residence: a phase at or before publication counts
 /// for its own year, so a same-year visit shows in no state (§3.2).
-fn state_span(start: i32, start_phase: u8, end: i32, end_phase: u8) -> (i32, i32) {
+pub(crate) fn state_span(start: i32, start_phase: u8, end: i32, end_phase: u8) -> (i32, i32) {
     let published = EventPhase::StatePublication as u8;
     (
         start + i32::from(start_phase > published),

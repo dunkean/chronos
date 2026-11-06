@@ -541,9 +541,94 @@ because the smallest pool any selection saw has 35 candidates, and one split, a 
 1392. With two sites reduced to 8 initial inhabitants, the real worker gives 21 vacant office-years.
 A vacancy needs a site without an eligible adult; these figures say nothing about other seeds.
 
+## S5: API v2, web views on real data, export and sample
+
+Implemented on 2026-11-06 (lot `social-v2/s5-final`). Proposed in the study and implemented here: §14.2,
+§14.3, §15.2, §15.4, §16.2, §18.4, §27.6. Measured: the walk of `docs/reviews/social-v2-acceptance.md`.
+
+### Implemented
+
+- **`chronos_core::v2::query`** (pure, WASM-compatible). `project_view(canon, materialized, query)` returns a
+  `HistoryView`: entities, offices, relations, legal standings, events, tenures, expected and realised measures,
+  balances, the window of facts applied (`period`) and the whole `timeline`, `coverage` with the number of
+  domains materialized, `provenance`, and the limits. A domain whose packet is missing is an error
+  (`query.packet_not_materialized`), never a guess. IDs are `entity.id` and person addresses; the
+  packet-local group index and the person slot never leave the module. Entities carry `precision`, `coverage`,
+  `provenance`, and a declared fallback name: organizations `org_name.fallback` with `name_kind.<kind>`, people
+  `person.fallback` (tag, birth year, activity), all flagged `name_synthetic`. Selection proofs are counts and
+  weights, not candidate lists (§15.4). `entity_sheet` and `explain_fact` serve the dated sheet and the
+  explanation of an event, tenure, standing, relation, membership or kin link.
+- **Selection of what a view holds.** Without `scope.ids`, the seeds are the offices and organizations
+  (institutions, associations, communities) of the site, then the holders of its mayoralty over the window
+  and of the other charges at the date asked. Breadth-first expansion (depth 0, 1 or 2 by `detail`) in a fixed
+  order adds kin, partners, children, affiliations, offices and jurisdictions. With `scope.ids` the entities
+  asked are the seeds and a group also opens up to 16 members. A truncated list is never complete.
+- **Pages.** One merged list of nodes and relations (a relation follows its last endpoint). A page stops when
+  `limits.people` or `limits.relations` is reached; `cursor` is `c1.<position>.<hash of the query>`, so it is
+  stable and refused for another query. `limits.complete` is true only when no page follows and no event was cut.
+  `max_nodes` 300 and `max_edges` 1000 are the drawing caps of the web graph.
+- **Overlay** (`HistoricalOverlay`, §15.2): atlas frame, sites with their atlas positions, routes valid in the
+  year, channels `recruitment`, `economy`, `culture`, `religion`, `military`, `memory` (from `influence_at`) and
+  `legality` (share of groups tolerated or proscribed by site), external contacts, and for a selected group the
+  sites where its members live, its seat and the other chapters of its archetype. A contact keeps its attached
+  site and names its outside context; no position is given to the outside.
+- **`chronos-app/src/v2/server.rs`**: `POST /api/v2/worlds`, `POST /worlds/{canon}/query`, `GET /jobs/{id}`,
+  `GET /worlds/{canon}/entities/{id}?at_year=`, `POST /worlds/{canon}/graph`, `GET /worlds/{canon}/explain/{fact_id}`,
+  `GET /worlds/{canon}/export[?materialized=1]`, `POST /import` and `GET /worlds/{canon}`; `POST /branch`
+  answers `501 unsupported_capability` (S6). The routes sit on the existing std server, bound to `127.0.0.1`,
+  ID segments are percent-decoded once. A world is a preset name under `fixtures/social-v2/` and a seed; the
+  canon ID comes from the pinned runtime. A request whose packets are not in memory answers `202` with a job
+  (`job_id`, `dependencies`, non-canonical `progress`); identical requests share the job; a ready request
+  answers inline. Limits cap the response, never what the job materializes. A view is built from the domains
+  the request names only, so its fingerprint does not depend on what else is in memory.
+- **`exchange.rs`**: export `chronos-world-export-1`, canonical bytes. `--canon-only` holds the config, the exact
+  bytes of the packs, their SHA-256 and the canon fingerprint. `--with-materialized` adds, sorted by domain, the
+  provider archive of each domain already computed, with its fingerprints and the fingerprint of the packet built
+  from it. Import rebuilds the canon (another pinned runtime gives another canon and is refused), then adopts
+  each archive after the same structural validation as a fresh result and the fingerprint check, and requires
+  the rebuilt packet to match. The provider is not rerun: the report says `provider_replayed: false`.
+- **CLI**: `v2 export`, `v2 import`, `v2 sample --config FILE --seeds 1..N --out DIR` (aggregates per seed and
+  distributions across seeds with the versions, §15.4), `serve --store DIR`.
+- **Web** (`web/`): `data-source.js` talks to `/api/v2`, follows jobs with a progress line, and keeps the fixture
+  behind `?fixture=1`, the only case where the banner shows. The page has a site selector, reloads the view when
+  the year leaves the window or moves more than 12 years, merges the neighbourhood of the entity in focus by ID,
+  loads further pages on an explicit click, exports, and has a new map panel (`social-map.js`). Names that are
+  fallbacks show a dashed outline in the graph and a `synthetic` badge. The sheet explains tenures, events and
+  relations through `/explain` and shows the dated record through `/entities`. Conduct classes in the balances
+  are realised counts only: no target is modelled.
+
+### Choices not fixed by the study
+
+1. The window of a view is the 51 years around the date; `period` is that window and `timeline` the canon.
+2. `legality` is a map channel computed from standings, not an influence profile of the catalogue.
+3. A group's "settlements" are the sites where its members live at the date, plus its seat and the sites of
+   other groups of the same archetype.
+4. Population forecasts come from `population_expected_after_impacts`, the shock-free baseline is a second
+   measure; neither is a band, and no uncertainty is drawn.
+5. Export of archives embeds the provider file as text; an archive is about 190 MB for the demo domain.
+
+### Limits
+
+- A first request on a cold store runs the worker (about 36 s for domain 0 in the S4 report) plus the validation
+  of 190 MB; the page shows the stage and the elapsed time.
+- Import requires the same pinned runtime; without it the canon differs and the export is refused. Strict replay
+  of an archive by the provider is not offered.
+- Only the domain of the request is materialized; the other domain shows "packet not computed".
+- Person and organization names are declared fallbacks until the name grammar exists.
+- `sample` runs the provider once per seed and domain, so a hundred seeds take hours; tests use one seed.
+- The acceptance walk is played by hand with the Playwright tools, not by a test.
+
+### Validation and measures
+
+`crates/chronos-app/tests/v2_s5.rs` on the real worker: stable and shared jobs, `501` on `/branch`, IDs and
+fallback names, pagination (pages disjoint, stable, adding up to the unpaged view), mayor sheet, graph and
+explanation, the overlay without a position for the outside, deterministic export, refusal of a damaged export,
+import of a canon only and of a computed domain with 0 worker runs, and the sampler. Acceptance walk:
+`docs/reviews/social-v2-acceptance.md`.
+
 ## Proposed, not implemented
 
-S5–S8 keep their scope in the study: balance reports, API and views, exact personal constraints, bridges
+S6–S8 keep their scope in the study: exact personal constraints, branches, bridges
 and optimizations. The function signatures proposed in §14.1 are not executable
 stubs in S0. Catalogue sources other than the atlas and rendering of name trees belong to
 later batches.
@@ -1107,10 +1192,100 @@ scission, celle d'un cercle d'amis en 1392. Avec deux sites réduits à 8 habita
 donne 21 années-offices vacantes. Une vacance exige un site sans adulte éligible ; ces chiffres ne disent
 rien des autres seeds.
 
+## S5 : API v2, vues web sur données réelles, export et échantillonnage
+
+Implémenté le 06/11/2026 (lot `social-v2/s5-final`). Proposé dans l'étude et implémenté ici : §14.2, §14.3, §15.2,
+§15.4, §16.2, §18.4, §27.6. Mesuré : le parcours de `docs/reviews/social-v2-acceptance.md`.
+
+### Implémenté
+
+- **`chronos_core::v2::query`** (pur, compatible WASM). `project_view(canon, materialized, query)` rend une
+  `HistoryView` : entités, charges, relations, statuts légaux, événements, mandats, mesures attendues et
+  réalisées, bilans, la fenêtre de faits appliquée (`period`) et toute la `timeline`, la `coverage` avec le nombre
+  de domaines matérialisés, la `provenance` et les limites. Un domaine sans paquet est une erreur
+  (`query.packet_not_materialized`), jamais une supposition. Les IDs sont `entity.id` et les adresses de
+  personnes ; l'indice de groupe local au paquet et le slot de personne ne sortent jamais du module. Les entités
+  portent `precision`, `coverage`, `provenance` et un nom de repli déclaré : `org_name.fallback` avec
+  `name_kind.<kind>` pour les organisations, `person.fallback` (étiquette, année de naissance, activité) pour les
+  personnes, tous marqués `name_synthetic`. Les preuves de sélection sont des comptes et des poids, pas des listes
+  de candidats (§15.4). `entity_sheet` et `explain_fact` servent la fiche datée et l'explication d'un événement,
+  d'un mandat, d'un statut, d'une relation, d'une appartenance ou d'un lien de parenté.
+- **Choix de ce qu'une vue contient.** Sans `scope.ids`, les graines sont les charges et organisations
+  (institutions, associations, communautés) du site, puis les titulaires de sa mairie sur la fenêtre et des autres
+  charges à la date demandée. Une expansion en largeur (profondeur 0, 1 ou 2 selon `detail`), dans un ordre fixe,
+  ajoute parents, partenaires, enfants, appartenances, charges et juridictions. Avec `scope.ids`, les entités
+  demandées sont les graines et un groupe ouvre jusqu'à 16 membres. Une liste tronquée n'est jamais complète.
+- **Pages.** Une seule liste fusionnée de nœuds et de relations (une relation suit son dernier point d'attache).
+  Une page s'arrête quand `limits.people` ou `limits.relations` est atteint ; `cursor` vaut
+  `c1.<position>.<empreinte de la requête>`, donc stable et refusé pour une autre requête. `limits.complete` n'est
+  vrai que si aucune page ne suit et qu'aucun événement n'a été coupé. `max_nodes` 300 et `max_edges` 1000 sont les plafonds de dessin du
+  graphe web.
+- **Superposition** (`HistoricalOverlay`, §15.2) : repère de l'atlas, sites à leurs positions d'atlas, routes
+  valides dans l'année, canaux `recruitment`, `economy`, `culture`, `religion`, `military`, `memory` (via
+  `influence_at`) et `legality` (part de groupes tolérés ou proscrits par site), contacts extérieurs, et pour un
+  groupe choisi les sites où vivent ses membres, son siège et les autres implantations de son archétype. Un contact
+  garde son site d'attache et nomme son contexte extérieur ; aucune position n'est donnée à l'extérieur.
+- **`chronos-app/src/v2/server.rs`** : `POST /api/v2/worlds`, `POST /worlds/{canon}/query`, `GET /jobs/{id}`,
+  `GET /worlds/{canon}/entities/{id}?at_year=`, `POST /worlds/{canon}/graph`, `GET /worlds/{canon}/explain/{fact_id}`,
+  `GET /worlds/{canon}/export[?materialized=1]`, `POST /import` et `GET /worlds/{canon}` ; `POST /branch` répond
+  `501 unsupported_capability` (S6). Les routes reposent sur le serveur std existant, lié à `127.0.0.1`, les
+  segments d'ID sont décodés une seule fois. Un monde est un nom de préréglage sous `fixtures/social-v2/` et une
+  graine ; l'ID de canon vient du runtime épinglé. Une requête dont les paquets ne sont pas en mémoire répond `202`
+  avec un job (`job_id`, `dependencies`, `progress` non canonique) ; les requêtes identiques partagent le job ; une
+  requête prête répond en ligne. Les limites plafonnent la réponse, jamais ce que le job matérialise. Une vue est
+  construite depuis les seuls domaines que la requête nomme : son empreinte ne dépend pas de ce qui est en mémoire.
+- **`exchange.rs`** : export `chronos-world-export-1`, octets canoniques. `--canon-only` contient la config, les
+  octets exacts des packs, leur SHA-256 et l'empreinte du canon. `--with-materialized` ajoute, triée par domaine,
+  l'archive du fournisseur de chaque domaine déjà calculé, avec ses empreintes et celle du paquet construit
+  depuis elle. L'import reconstruit le canon (un autre runtime épinglé donne un autre canon et est refusé), puis
+  adopte chaque archive après la même validation structurelle qu'un résultat frais et le contrôle d'empreinte, et
+  exige que le paquet reconstruit corresponde. Le fournisseur n'est pas relancé : le rapport dit
+  `provider_replayed: false`.
+- **CLI** : `v2 export`, `v2 import`, `v2 sample --config FICHIER --seeds 1..N --out DOSSIER` (agrégats par graine
+  et distributions entre graines avec les versions, §15.4), `serve --store DOSSIER`.
+- **Web** (`web/`) : `data-source.js` parle à `/api/v2`, suit les jobs avec une ligne de progression et garde la
+  fixture derrière `?fixture=1`, seul cas où la bannière s'affiche. La page a un sélecteur de site, recharge la vue
+  quand l'année sort de la fenêtre ou s'éloigne de plus de 12 ans, fusionne par ID le voisinage de l'entité
+  en focus, charge les pages suivantes sur clic explicite, exporte, et porte un nouveau panneau carte
+  (`social-map.js`). Les noms de repli ont un contour en tirets dans le graphe et un badge `synthetic`. La fiche
+  explique mandats, événements et relations par `/explain` et montre la fiche datée par `/entities`. Les classes de
+  conduite des bilans sont des effectifs réalisés seulement : aucune cible n'est modélisée.
+
+### Choix non fixés par l'étude
+
+1. La fenêtre d'une vue couvre 51 ans autour de la date ; `period` est cette fenêtre et `timeline` le canon.
+2. `legality` est un canal de carte calculé depuis les statuts, pas un profil d'influence du catalogue.
+3. Les « implantations » d'un groupe sont les sites où vivent ses membres à la date, plus son siège et les sites
+   des autres groupes du même archétype.
+4. Les prévisions de population viennent de `population_expected_after_impacts` ; la base sans choc est une
+   seconde mesure ; ni l'une ni l'autre n'est une bande, et aucune incertitude n'est tracée.
+5. L'export des archives embarque le fichier du fournisseur sous forme de texte ; une archive pèse environ 190 Mo
+   pour le domaine de démonstration.
+
+### Limites
+
+- Une première requête sur un stock froid lance le worker (environ 36 s pour le domaine 0 dans le rapport S4)
+  puis valide 190 Mo ; la page montre l'étape et le temps écoulé.
+- L'import exige le même runtime épinglé ; sans lui le canon diffère et l'export est refusé. Le rejeu strict d'une
+  archive par le fournisseur n'est pas proposé.
+- Seul le domaine de la requête est matérialisé ; l'autre domaine affiche « paquet non calculé ».
+- Les noms de personnes et d'organisations sont des replis déclarés tant que la grammaire de noms n'existe pas.
+- `sample` lance le fournisseur une fois par graine et par domaine : cent graines prennent des heures ; les tests en
+  utilisent une.
+- Le parcours de recette est joué à la main avec les outils Playwright, pas par un test.
+
+### Validation et mesures
+
+`crates/chronos-app/tests/v2_s5.rs` sur le vrai worker : jobs stables et partagés, `501` sur `/branch`, IDs et noms
+de repli, pagination (pages disjointes, stables, dont la somme égale la vue non paginée), fiche du maire, graphe et
+explication, superposition sans position pour l'extérieur, export déterministe, refus d'un export abîmé, import d'un
+canon seul et d'un domaine calculé avec 0 exécution du worker, et l'échantillonneur. Parcours de recette :
+`docs/reviews/social-v2-acceptance.md`.
+
 ## Proposé, non implémenté
 
-S5–S8 conservent leur périmètre dans l'étude : bilans, API et vues,
-contraintes personnelles exactes, ponts et optimisations. Les signatures de
+S6–S8 conservent leur périmètre dans l'étude : contraintes personnelles
+exactes, branches, ponts et optimisations. Les signatures de
 fonctions proposées au §14.1 ne sont pas des stubs exécutables dans S0. Sources de
 catalogue autres que l'atlas et rendu des arbres de nom appartiennent aux lots suivants.
 

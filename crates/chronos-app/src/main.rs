@@ -24,6 +24,11 @@ use chronos_core::{generate_world, replay_hash, validate_world, Config, StackFix
 pub const DEFAULT_PORT: u16 = 8785;
 
 pub struct Paths {
+    pub root: PathBuf,
+    /// Store of the v2 host (`worlds/<canon>/...`, worker JIT cache).
+    pub data: PathBuf,
+    pub python: Option<PathBuf>,
+    pub lineage_src: Option<PathBuf>,
     pub fixture: PathBuf,
     /// Path shown to users (relative, never absolute).
     pub fixture_label: String,
@@ -151,6 +156,11 @@ struct Args {
     years: Option<String>,
     python: Option<PathBuf>,
     lineage_src: Option<PathBuf>,
+    store: Option<PathBuf>,
+    input: Option<PathBuf>,
+    seeds: Option<String>,
+    canon_only: bool,
+    with_materialized: bool,
 }
 
 fn parse_args() -> Result<Args, String> {
@@ -171,6 +181,11 @@ fn parse_args() -> Result<Args, String> {
         years: None,
         python: None,
         lineage_src: None,
+        store: None,
+        input: None,
+        seeds: None,
+        canon_only: false,
+        with_materialized: false,
     };
     let mut it = std::env::args().skip(1);
     let mut first = true;
@@ -194,6 +209,11 @@ fn parse_args() -> Result<Args, String> {
             "--site" => args.site = Some(value("--site")?),
             "--years" => args.years = Some(value("--years")?),
             "--python" => args.python = Some(value("--python")?.into()),
+            "--store" | "--data" => args.store = Some(value("--store")?.into()),
+            "--in" => args.input = Some(value("--in")?.into()),
+            "--seeds" => args.seeds = Some(value("--seeds")?),
+            "--canon-only" => args.canon_only = true,
+            "--with-materialized" => args.with_materialized = true,
             "--lineage-src" => args.lineage_src = Some(value("--lineage-src")?.into()),
             "-h" | "--help" => args.command = "help".into(),
             _ if first && !a.starts_with('-') => args.command = a,
@@ -218,6 +238,14 @@ const HELP: &str = "Chronos — générateur de chronologie déterministe
       [--atlas FILE] [--catalogue FILE] [--python FILE] [--lineage-src DIR]
       Runs the Lineage Lab worker for one domain and caches the verified population.
       `social` prints groups by class and conduct class, vacancies and mayors.
+  chronos-app v2 export --world FILE --store DIR --out FILE [--canon-only | --with-materialized] [--domain ID|INDEX]
+      Deterministic export (section 16.2). --with-materialized adds the provider archives of
+      the domains already computed in the store (or of --domain, computed first).
+  chronos-app v2 import --in FILE --store DIR
+      Replays the canon, checks every archive structurally and by fingerprint, publishes it.
+  chronos-app v2 sample --config FILE --seeds 1..N --out DIR [--years Y,Y] [--domain INDEX]
+      Aggregates over seeds (section 15.4): seed-<n>.json and summary.json under DIR.
+  chronos-app serve --store DIR   Store of the /api/v2 host (default output/v2).
       Interpreter: --python, CHRONOS_PYTHON, .venv. Provider: --lineage-src,
       CHRONOS_LINEAGE_SRC, ../lineage-lab/src.";
 
@@ -231,6 +259,13 @@ fn main() -> ExitCode {
     };
     let root = find_root(args.root.clone());
     let paths = Paths {
+        data: args
+            .store
+            .clone()
+            .unwrap_or_else(|| root.join("output").join("v2")),
+        python: args.python.clone(),
+        lineage_src: args.lineage_src.clone(),
+        root: root.clone(),
         fixture_label: match &args.fixture {
             Some(p) => p
                 .file_name()
@@ -323,6 +358,9 @@ fn cmd_v2(args: &Args, root: &Path) -> Result<(), String> {
     match args.positional.first().map(String::as_str) {
         Some("materialize") => cmd_v2_materialize(args, root),
         Some("social") => cmd_v2_social(args, root),
+        Some("export") => cmd_v2_export(args, root),
+        Some("import") => cmd_v2_import(args, root),
+        Some("sample") => cmd_v2_sample(args, root),
         _ => Err(format!(
             "v2 expects a subcommand
 
@@ -446,5 +484,121 @@ fn cmd_v2_materialize(args: &Args, root: &Path) -> Result<(), String> {
         "world_dir": orchestrator.store().world_dir(&orchestrator.canon().canon_id),
     });
     println!("{summary}");
+    Ok(())
+}
+
+fn store_settings(args: &Args, root: &Path, store: &Path) -> WorkerSettings {
+    WorkerSettings::resolve(
+        args.python.clone(),
+        args.lineage_src.clone(),
+        root,
+        store.join(".cache"),
+    )
+}
+
+fn default_catalogue(args: &Args, root: &Path) -> PathBuf {
+    args.catalogue
+        .clone()
+        .unwrap_or_else(|| root.join("docs/design/chronos-social-v2/culture-bindings.v1.json"))
+}
+
+fn cmd_v2_export(args: &Args, root: &Path) -> Result<(), String> {
+    use chronos_app::v2::exchange::export_world;
+    let world = args.world.as_ref().ok_or("--world is required")?;
+    let store = args.store.as_ref().ok_or("--store is required")?;
+    let out = args.out.as_ref().ok_or("--out FILE is required")?;
+    if args.canon_only && args.with_materialized {
+        return Err("--canon-only and --with-materialized are exclusive".into());
+    }
+    let atlas = args.atlas.clone().unwrap_or_else(|| sibling_atlas(world));
+    let inputs =
+        WorldInputs::load(world, &atlas, &default_catalogue(args, root)).map_err(describe)?;
+    let orchestrator = Orchestrator::open(
+        inputs.clone(),
+        store_settings(args, root, store),
+        Store::new(store),
+    )
+    .map_err(describe)?;
+    if args.with_materialized {
+        let domains = orchestrator.domain_ids();
+        let wanted: Vec<String> = match &args.domain {
+            Some(w) => vec![select_domain(&domains, w)?],
+            None => domains,
+        };
+        for domain in wanted {
+            orchestrator.social_packet(&domain).map_err(describe)?;
+        }
+    }
+    let bytes = export_world(&orchestrator, &inputs, args.with_materialized).map_err(describe)?;
+    std::fs::write(out, &bytes).map_err(|e| format!("write: {e}"))?;
+    println!(
+        "{}",
+        serde_json::json!({
+            "canon_id": orchestrator.canon().canon_id,
+            "mode": if args.with_materialized { "with_materialized" } else { "canon_only" },
+            "bytes": bytes.len(),
+            "export_sha256": sha256_hex(&bytes),
+            "worker_runs": orchestrator.worker_runs(),
+        })
+    );
+    Ok(())
+}
+
+fn cmd_v2_import(args: &Args, root: &Path) -> Result<(), String> {
+    use chronos_app::v2::exchange::import_world;
+    let input = args.input.as_ref().ok_or("--in FILE is required")?;
+    let store = args.store.as_ref().ok_or("--store is required")?;
+    let bytes = std::fs::read(input).map_err(|e| format!("read: {e}"))?;
+    let settings = store_settings(args, root, store);
+    let (orchestrator, _, report) = import_world(&bytes, |inputs| {
+        Orchestrator::open(inputs, settings, Store::new(store))
+    })
+    .map_err(describe)?;
+    let mut value = report.to_json();
+    value["worker_runs"] = serde_json::json!(orchestrator.worker_runs());
+    println!(
+        "{}",
+        serde_json::to_string_pretty(&value).map_err(|e| e.to_string())?
+    );
+    Ok(())
+}
+
+fn cmd_v2_sample(args: &Args, root: &Path) -> Result<(), String> {
+    use chronos_app::v2::sample::{parse_seed_range, run_sample, SampleOptions};
+    let world = args
+        .config
+        .as_ref()
+        .or(args.world.as_ref())
+        .ok_or("--config FILE is required")?;
+    let out = args.out.as_ref().ok_or("--out DIR is required")?;
+    let seeds = parse_seed_range(args.seeds.as_deref().ok_or("--seeds is required")?)?;
+    let years = match &args.years {
+        Some(text) => text
+            .split(',')
+            .map(|y| y.trim().parse().map_err(|_| format!("invalid year {y}")))
+            .collect::<Result<Vec<i32>, String>>()?,
+        None => vec![1340, 1360, 1380],
+    };
+    let domains = match &args.domain {
+        Some(d) => vec![d
+            .parse::<usize>()
+            .map_err(|_| "sample takes a domain index".to_string())?],
+        None => Vec::new(),
+    };
+    let options = SampleOptions {
+        world: world.clone(),
+        atlas: args.atlas.clone().unwrap_or_else(|| sibling_atlas(world)),
+        catalogue: default_catalogue(args, root),
+        seeds,
+        years,
+        domains,
+        out: out.clone(),
+        settings: store_settings(args, root, &out.join(".store")),
+    };
+    let summary = run_sample(&options)?;
+    println!(
+        "{}",
+        serde_json::to_string_pretty(&summary).map_err(|e| e.to_string())?
+    );
     Ok(())
 }
