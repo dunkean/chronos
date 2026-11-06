@@ -4,10 +4,12 @@ use super::atlas::{
     OccupationState,
 };
 use super::canonical::canonical_bytes;
+use super::general::{principal_culture, GeneralCanon};
 use super::ids::{DomainKey, SemanticAddress};
 use super::model::{
     present_optional, required_nullable, ErrorCode, EventPhase, HistoryError, TimeSpan,
 };
+use super::region::RegionPlan;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::collections::{BTreeMap, BTreeSet};
@@ -1287,4 +1289,219 @@ fn check_shape(v: &Value, s: &Value, root: &Value, path: &str) -> Result<(), His
         }
     }
     Ok(())
+}
+
+/// `plan_fingerprint` of a compiled plan: SHA-256 stays with the host (§4.2), which
+/// replaces this value from `plan_canonical_bytes`.
+pub const PLAN_FINGERPRINT_PENDING: &str = "pending-host-sha256";
+
+/// References of a plan, prepared from the canon and its regional plan alone.
+pub fn plan_references(
+    canon: &GeneralCanon,
+    region: &RegionPlan,
+) -> Result<PlanReferences, HistoryError> {
+    let mut culture_variants = BTreeMap::new();
+    for binding in &canon.catalogue.bindings {
+        let template = &binding.demography_society_template_id;
+        if let Some(society) = canon.config.society_ids.get(template) {
+            culture_variants.insert(
+                binding.mu_culture_id.clone(),
+                CultureVariant {
+                    history_family_id: binding.history_family_id.clone(),
+                    demography_society_id: society.clone(),
+                },
+            );
+        }
+    }
+    Ok(PlanReferences {
+        canon_id: canon.canon_id.clone(),
+        timeline: canon.timeline,
+        world_seed: canon.world_seed,
+        catalogue_fingerprints: canon.config.catalogue_fingerprints.clone(),
+        event_years: canon
+            .events
+            .iter()
+            .chain(&region.events)
+            .map(|e| (e.id.clone(), e.year))
+            .collect(),
+        office_ids: BTreeSet::new(),
+        domain_sites: canon
+            .domains
+            .iter()
+            .map(|d| (d.domain_id.clone(), d.site_ids.iter().cloned().collect()))
+            .collect(),
+        culture_variants,
+        activity_ids: canon.catalogue.required_activity_coverage.clone(),
+        contacts: canon
+            .atlas
+            .external_contacts
+            .iter()
+            .map(|c| (c.contact_id.clone(), c.clone()))
+            .collect(),
+        site_population_expected_max: canon
+            .atlas
+            .settlements
+            .iter()
+            .map(|s| (s.site_id.clone(), s.population_expected_max))
+            .collect(),
+    })
+}
+/// Compiles the fixed-horizon plan of a domain (§3.2, §14.1) and validates it. Its
+/// markers come from the shock-free baseline; shocks arrive only through `shocks`.
+pub fn plan_population(
+    canon: &GeneralCanon,
+    region: &RegionPlan,
+    domain_id: &str,
+) -> Result<PopulationPlan, HistoryError> {
+    let located = |key: &str| HistoryError {
+        owner: Some(domain_id.into()),
+        at_year: Some(canon.timeline.start_year),
+        ..invalid(key)
+    };
+    let domain = canon
+        .domains
+        .iter()
+        .find(|d| d.domain_id == domain_id)
+        .ok_or_else(|| located("plan.unknown_domain"))?;
+    if region.canon_id != canon.canon_id || region.region_id != domain.region_id {
+        return Err(located("plan.foreign_region_plan"));
+    }
+    let defaults = &canon.config.population;
+    let inside: BTreeSet<_> = domain.site_ids.iter().map(String::as_str).collect();
+    let mut settlements = Vec::new();
+    for (local_id, site_id) in domain.site_ids.iter().enumerate() {
+        let site = canon
+            .atlas
+            .settlements
+            .iter()
+            .find(|s| &s.site_id == site_id)
+            .ok_or_else(|| located("plan.unknown_site"))?;
+        let culture =
+            principal_culture(&canon.atlas, site_id).ok_or_else(|| located("plan.unknown_site"))?;
+        let family = &canon.catalogue.binding(&culture)?.history_family_id;
+        settlements.push(PlannedSettlement {
+            site_id: site_id.clone(),
+            provider_local_id: local_id as u64,
+            coordinate_frame: site.coordinate_frame.clone(),
+            x_mm: site.x_mm,
+            y_mm: site.y_mm,
+            foundation_year: site.foundation_year,
+            initial_population: site.initial_population,
+            ancestry_weights: defaults.ancestry_weights.clone(),
+            history_culture_id: format!("{family}/{culture}"),
+            kinship_profile_id: defaults.kinship.id.clone(),
+            occupation_episodes: site.occupation_episodes.clone(),
+        });
+    }
+    let baseline_markers = domain
+        .site_ids
+        .iter()
+        .flat_map(|site_id| {
+            region.site_baselines[site_id]
+                .iter()
+                .map(move |(year, population)| BaselineMarker {
+                    site_id: site_id.clone(),
+                    year: *year,
+                    population: *population,
+                    tolerance_bps: defaults.baseline_tolerance_bps,
+                })
+        })
+        .collect();
+    // Same event, dates and profile: one shock listing all its sites.
+    let mut shocks: BTreeMap<_, PopulationShock> = BTreeMap::new();
+    for local in region
+        .shocks
+        .iter()
+        .filter(|s| inside.contains(s.site_id.as_str()))
+    {
+        let key = (
+            &local.source_event_id,
+            local.valid.start_year,
+            local.valid.end_year,
+            &local.severity_profile_id,
+        );
+        shocks
+            .entry(key)
+            .or_insert_with(|| PopulationShock {
+                source_event_id: local.source_event_id.clone(),
+                valid: local.valid,
+                site_ids: Vec::new(),
+                severity_profile_id: local.severity_profile_id.clone(),
+                recovery_years: local.recovery_years,
+                composition: ShockComposition::IndependentSurvivalV1,
+                effects: local.effects.clone(),
+            })
+            .site_ids
+            .push(local.site_id.clone());
+    }
+    let mut historical_program: Vec<_> = region
+        .displacements
+        .iter()
+        .filter(|d| inside.contains(d.origin_site_id.as_str()))
+        .map(|d| HistoricalOperation::MoveHouseholds {
+            op_id: d.op_id.clone(),
+            source_event_id: d.event_id.clone(),
+            year: d.year,
+            origin_site_id: d.origin_site_id.clone(),
+            destination_site_id: d.destination_site_id.clone(),
+            destination_port_id: d.destination_port_id.clone(),
+            target_households: d.target_households,
+            precision: MovePrecision::Expected,
+        })
+        .collect();
+    historical_program.sort_by(|a, b| a.application_key().cmp(&b.application_key()));
+    let template = canon
+        .catalogue
+        .demography_society_templates
+        .iter()
+        .find(|t| canon.config.society_ids.get(&t.id) == Some(&domain.demography_society_id))
+        .ok_or_else(|| located("plan.society_template_missing"))?;
+    let key = DomainKey::from_id(domain_id)?;
+    let plan = PopulationPlan {
+        schema_version: 1,
+        plan_id: SemanticAddress::plan(&key)?.encode(),
+        canon_id: canon.canon_id.clone(),
+        domain_id: domain_id.into(),
+        plan_fingerprint: PLAN_FINGERPRINT_PENDING.into(),
+        timeline: canon.timeline,
+        world_seed: canon.world_seed.to_string(),
+        seed: super::ids::random_semantics_v2::domain_seed(
+            canon.world_seed,
+            domain_id,
+            &canon.config.provider.algorithm_id,
+        )
+        .to_string(),
+        provider: canon.config.provider.clone(),
+        catalogue_fingerprints: canon.config.catalogue_fingerprints.clone(),
+        demography_society_id: domain.demography_society_id.clone(),
+        resolved_profiles: ResolvedProfiles {
+            society: template.resolved(&domain.demography_society_id),
+            ancestries: defaults.ancestries.clone(),
+            social_classes: defaults.social_classes.clone(),
+            external: defaults.external.clone(),
+            kinship: vec![defaults.kinship.clone()],
+        },
+        settlements,
+        baseline_markers,
+        shocks: shocks.into_values().collect(),
+        historical_program,
+        role_demands: Vec::new(),
+        fixed_people: Vec::new(),
+        exact_constraints: Vec::new(),
+        boundary_ports: region.contexts[domain_id].ports.clone(),
+        limits: defaults.limits.clone(),
+        regulation: defaults.regulation.clone(),
+        core_policy: CorePolicy::FreeTry3ThenProjected,
+        mobility_edges: canon
+            .atlas
+            .mobility_edges
+            .iter()
+            .filter(|e| {
+                inside.contains(e.from_site_id.as_str()) && inside.contains(e.to_site_id.as_str())
+            })
+            .cloned()
+            .collect(),
+    };
+    validate_plan(&plan, &plan_references(canon, region)?)?;
+    Ok(plan)
 }

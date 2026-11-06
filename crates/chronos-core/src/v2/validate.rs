@@ -198,6 +198,12 @@ pub fn validate_composition(relations: &[SocialRelation]) -> Result<(), HistoryE
 /// Événements capables de changer un statut légal (§27.3).
 pub const LEGAL_CHANGE_EVENT_KINDS: [&str; 4] = ["edict", "charter", "heresy_trial", "banishment"];
 
+/// Life bounds of a group: `foundation` may open the first standing of a chain and
+/// `dissolution` close the last one, each at its exact date and for a participating
+/// subject. Neither is a status change.
+pub const SUBJECT_FOUNDATION_EVENT_KIND: &str = "foundation";
+pub const SUBJECT_DISSOLUTION_EVENT_KIND: &str = "dissolution";
+
 /// Statut d'un sujet dans une juridiction à une date. L'absence de
 /// `LegalStanding` vaut `licit` ; une autre juridiction n'a aucun effet (§27.3).
 pub fn legal_status_at(
@@ -220,6 +226,9 @@ pub fn legal_status_at(
 /// `world_end` sans successeur immédiat cite son événement de fin. Les causes
 /// sont de type `edict`, `charter`, `heresy_trial` ou `banishment`, sans être
 /// postérieures à la date qu'elles expliquent.
+///
+/// Only exceptions: the subject's foundation for its first standing and its
+/// dissolution for its last one.
 pub fn validate_legal_standings(
     standings: &[LegalStanding],
     events: &[HistoryEvent],
@@ -238,11 +247,17 @@ pub fn validate_legal_standings(
         ));
     }
     let events: BTreeMap<_, _> = events.iter().map(|e| (e.id.as_str(), e)).collect();
-    let check_cause = |s: &LegalStanding, id: &str, date: i32| {
+    // `life_kind`: the only subject life event admitted at this place in the chain.
+    let check_cause = |s: &LegalStanding, id: &str, date: i32, life_kind: Option<&str>| {
         let event = events
             .get(id)
             .ok_or_else(|| fail(s, "événement de changement absent"))?;
-        if !LEGAL_CHANGE_EVENT_KINDS.contains(&event.kind.as_str()) || event.year > date {
+        let subject_life = life_kind == Some(event.kind.as_str())
+            && event.year == date
+            && event.participants.contains(&s.subject);
+        if !subject_life
+            && (!LEGAL_CHANGE_EVENT_KINDS.contains(&event.kind.as_str()) || event.year > date)
+        {
             return Err(fail(s, "événement d'un autre type ou postérieur"));
         }
         Ok(())
@@ -278,14 +293,22 @@ pub fn validate_legal_standings(
                 return Err(fail(s, "statuts légaux chevauchants"));
             }
             match &s.cause_event_id {
-                Some(id) => check_cause(s, id, s.valid.start_year)?,
+                Some(id) => {
+                    let life = (i == 0).then_some(SUBJECT_FOUNDATION_EVENT_KIND);
+                    check_cause(s, id, s.valid.start_year, life)?
+                }
                 None if s.valid.start_year != observed_start => {
                     return Err(fail(s, "changement de statut sans événement"));
                 }
                 None => {}
             }
             match &s.end_cause_event_id {
-                Some(id) => check_cause(s, id, s.valid.end_year)?,
+                Some(id) => {
+                    let life = next_start
+                        .is_none()
+                        .then_some(SUBJECT_DISSOLUTION_EVENT_KIND);
+                    check_cause(s, id, s.valid.end_year, life)?
+                }
                 None if s.valid.end_year != next_start.unwrap_or(world_end) => {
                     return Err(fail(s, "fin de statut sans événement"));
                 }

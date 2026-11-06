@@ -1,0 +1,1294 @@
+{
+  "atlas_id": "atlas/region-demo",
+  "source_fingerprint": "synthetic-region-demo-1",
+  "provenance": {
+    "status": "synthetic",
+    "source_ref": "fixtures/social-v2/region-demo.atlas.json",
+    "rule_id": "hand-authored-virtual-region-1"
+  },
+  "timeline": {
+    "start_year": 1300,
+    "end_year": 1400
+  },
+  "cells": [
+    {
+      "cell_id": "region/demo",
+      "parent_id": null,
+      "neighbors": [],
+      "area_m2": 40000000000,
+      "bounds": {
+        "min_x_mm": 0,
+        "min_y_mm": 0,
+        "max_x_mm": 200000000,
+        "max_y_mm": 200000000
+      },
+      "coordinate_frame": "region-demo-local-metric",
+      "settlement_summary": {
+        "site_ids": [
+          "site/demo/aldermoor",
+          "site/demo/brackenford",
+          "site/demo/coldwell",
+          "site/demo/dunmarch",
+          "site/demo/elmstead",
+          "site/demo/farrowgate",
+          "site/demo/gullhaven",
+          "site/demo/hollowmere",
+          "site/demo/ironbridge",
+          "site/demo/kelpness",
+          "site/demo/larkfield",
+          "site/demo/millbrook",
+          "site/demo/northcote",
+          "site/demo/oakhollow",
+          "site/demo/pennard",
+          "site/demo/quarrytown",
+          "site/demo/redmarsh",
+          "site/demo/stonewick",
+          "site/demo/thornby",
+          "site/demo/underhill"
+        ],
+        "population_expected_max": 22976
+      }
+    },
+    {
+      "cell_id": "region/demo/north-west",
+      "parent_id": "region/demo",
+      "neighbors": [
+        "region/demo/north-east",
+        "region/demo/south-west"
+      ],
+      "area_m2": 10000000000,
+      "bounds": {
+        "min_x_mm": 0,
+        "min_y_mm": 100000000,
+        "max_x_mm": 100000000,
+        "max_y_mm": 200000000
+      },
+      "coordinate_frame": "region-demo-local-metric",
+      "settlement_summary": {
+        "site_ids": [
+          "site/demo/aldermoor",
+          "site/demo/brackenford",
+          "site/demo/coldwell",
+          "site/demo/dunmarch",
+          "site/demo/elmstead"
+        ],
+        "population_expected_max": 7328
+      }
+    },
+    {
+      "cell_id": "region/demo/north-east",
+      "parent_id": "region/demo",
+      "neighbors": [
+        "region/demo/north-west",
+        "region/demo/south-east"
+      ],
+      "area_m2": 10000000000,
+      "bounds": {
+        "min_x_mm": 100000000,
+        "min_y_mm": 100000000,
+        "max_x_mm": 200000000,
+        "max_y_mm": 200000000
+      },
+      "coordinate_frame": "region-demo-local-metric",
+      "settlement_summary": {
+        "site_ids": [
+          "site/demo/farrowgate",
+          "site/demo/gullhaven",
+          "site/demo/hollowmere",
+          "site/demo/ironbridge",
+          "site/demo/kelpness"
+        ],
+        "population_expected_max": 7552
+      }
+    },
+    {
+      "cell_id": "region/demo/south-west",
+      "parent_id": "region/demo",
+      "neighbors": [
+        "region/demo/north-west",
+        "region/demo/south-east"
+      ],
+      "area_m2": 10000000000,
+      "bounds": {
+        "min_x_mm": 0,
+        "min_y_mm": 0,
+        "max_x_mm": 100000000,
+        "max_y_mm": 100000000
+      },
+      "coordinate_frame": "region-demo-local-metric",
+      "settlement_summary": {
+        "site_ids": [
+          "site/demo/larkfield",
+          "site/demo/millbrook",
+          "site/demo/northcote",
+          "site/demo/oakhollow",
+          "site/demo/pennard"
+        ],
+        "population_expected_max": 4032
+      }
+    },
+    {
+      "cell_id": "region/demo/south-east",
+      "parent_id": "region/demo",
+      "neighbors": [
+        "region/demo/north-east",
+        "region/demo/south-west"
+      ],
+      "area_m2": 10000000000,
+      "bounds": {
+        "min_x_mm": 100000000,
+        "min_y_mm": 0,
+        "max_x_mm": 200000000,
+        "max_y_mm": 100000000
+      },
+      "coordinate_frame": "region-demo-local-metric",
+      "settlement_summary": {
+        "site_ids": [
+          "site/demo/quarrytown",
+          "site/demo/redmarsh",
+          "site/demo/stonewick",
+          "site/demo/thornby",
+          "site/demo/underhill"
+        ],
+        "population_expected_max": 4064
+      }
+    }
+  ],
+  "region_ids": [
+    "region/demo"
+  ],
+  "settlements": [
+    {
+      "site_id": "site/demo/aldermoor",
+      "cell_id": "region/demo/north-west",
+      "coordinate_frame": "region-demo-local-metric",
+      "x_mm": 40000000,
+      "y_mm": 160000000,
+      "foundation_year": 1150,
+      "initial_population": 2600,
+      "population_expected_max": 4992,
+      "site_tags": [
+        "capital",
+        "crossroads",
+        "lordly_seat",
+        "walled"
+      ],
+      "occupation_episodes": [
+        {
+          "valid": {
+            "start_year": 1300,
+            "end_year": 1350
+          },
+          "state": "active",
+          "capacity": 4160,
+          "culture_weights": {
+            "european-organic": 10000
+          },
+          "activity_weights": {
+            "agriculture": 25,
+            "craft": 35,
+            "trade": 25,
+            "services": 15
+          }
+        },
+        {
+          "valid": {
+            "start_year": 1350,
+            "end_year": 1400
+          },
+          "state": "active",
+          "capacity": 4992,
+          "culture_weights": {
+            "european-organic": 10000
+          },
+          "activity_weights": {
+            "agriculture": 25,
+            "craft": 35,
+            "trade": 25,
+            "services": 15
+          }
+        }
+      ]
+    },
+    {
+      "site_id": "site/demo/brackenford",
+      "cell_id": "region/demo/north-west",
+      "coordinate_frame": "region-demo-local-metric",
+      "x_mm": 20000000,
+      "y_mm": 180000000,
+      "foundation_year": 1150,
+      "initial_population": 420,
+      "population_expected_max": 672,
+      "site_tags": [
+        "river",
+        "rural"
+      ],
+      "occupation_episodes": [
+        {
+          "valid": {
+            "start_year": 1300,
+            "end_year": 1400
+          },
+          "state": "active",
+          "capacity": 672,
+          "culture_weights": {
+            "european-organic": 10000
+          },
+          "activity_weights": {
+            "agriculture": 70,
+            "craft": 15,
+            "trade": 10,
+            "services": 5
+          }
+        }
+      ]
+    },
+    {
+      "site_id": "site/demo/coldwell",
+      "cell_id": "region/demo/north-west",
+      "coordinate_frame": "region-demo-local-metric",
+      "x_mm": 15000000,
+      "y_mm": 130000000,
+      "foundation_year": 1150,
+      "initial_population": 180,
+      "population_expected_max": 288,
+      "site_tags": [
+        "forest",
+        "rural"
+      ],
+      "occupation_episodes": [
+        {
+          "valid": {
+            "start_year": 1300,
+            "end_year": 1400
+          },
+          "state": "active",
+          "capacity": 288,
+          "culture_weights": {
+            "bastide": 10000
+          },
+          "activity_weights": {
+            "agriculture": 70,
+            "craft": 15,
+            "trade": 10,
+            "services": 5
+          }
+        }
+      ]
+    },
+    {
+      "site_id": "site/demo/dunmarch",
+      "cell_id": "region/demo/north-west",
+      "coordinate_frame": "region-demo-local-metric",
+      "x_mm": 90000000,
+      "y_mm": 150000000,
+      "foundation_year": 1150,
+      "initial_population": 260,
+      "population_expected_max": 416,
+      "site_tags": [
+        "frontier",
+        "rural"
+      ],
+      "occupation_episodes": [
+        {
+          "valid": {
+            "start_year": 1300,
+            "end_year": 1400
+          },
+          "state": "active",
+          "capacity": 416,
+          "culture_weights": {
+            "european-organic": 10000
+          },
+          "activity_weights": {
+            "agriculture": 70,
+            "craft": 15,
+            "trade": 10,
+            "services": 5
+          }
+        }
+      ]
+    },
+    {
+      "site_id": "site/demo/elmstead",
+      "cell_id": "region/demo/north-west",
+      "coordinate_frame": "region-demo-local-metric",
+      "x_mm": 75000000,
+      "y_mm": 185000000,
+      "foundation_year": 1150,
+      "initial_population": 600,
+      "population_expected_max": 960,
+      "site_tags": [
+        "crossroads",
+        "river"
+      ],
+      "occupation_episodes": [
+        {
+          "valid": {
+            "start_year": 1300,
+            "end_year": 1400
+          },
+          "state": "active",
+          "capacity": 960,
+          "culture_weights": {
+            "hanseatic": 10000
+          },
+          "activity_weights": {
+            "agriculture": 25,
+            "craft": 35,
+            "trade": 25,
+            "services": 15
+          }
+        }
+      ]
+    },
+    {
+      "site_id": "site/demo/farrowgate",
+      "cell_id": "region/demo/north-east",
+      "coordinate_frame": "region-demo-local-metric",
+      "x_mm": 160000000,
+      "y_mm": 170000000,
+      "foundation_year": 1150,
+      "initial_population": 2400,
+      "population_expected_max": 4608,
+      "site_tags": [
+        "capital",
+        "coastal",
+        "port",
+        "walled"
+      ],
+      "occupation_episodes": [
+        {
+          "valid": {
+            "start_year": 1300,
+            "end_year": 1350
+          },
+          "state": "active",
+          "capacity": 3840,
+          "culture_weights": {
+            "hanseatic": 10000
+          },
+          "activity_weights": {
+            "agriculture": 25,
+            "craft": 35,
+            "trade": 25,
+            "services": 15
+          }
+        },
+        {
+          "valid": {
+            "start_year": 1350,
+            "end_year": 1400
+          },
+          "state": "active",
+          "capacity": 4608,
+          "culture_weights": {
+            "hanseatic": 10000
+          },
+          "activity_weights": {
+            "agriculture": 25,
+            "craft": 35,
+            "trade": 25,
+            "services": 15
+          }
+        }
+      ]
+    },
+    {
+      "site_id": "site/demo/gullhaven",
+      "cell_id": "region/demo/north-east",
+      "coordinate_frame": "region-demo-local-metric",
+      "x_mm": 190000000,
+      "y_mm": 140000000,
+      "foundation_year": 1150,
+      "initial_population": 900,
+      "population_expected_max": 1440,
+      "site_tags": [
+        "coastal",
+        "port"
+      ],
+      "occupation_episodes": [
+        {
+          "valid": {
+            "start_year": 1300,
+            "end_year": 1400
+          },
+          "state": "active",
+          "capacity": 1440,
+          "culture_weights": {
+            "flemish-cloth-town": 10000
+          },
+          "activity_weights": {
+            "agriculture": 25,
+            "craft": 35,
+            "trade": 25,
+            "services": 15
+          }
+        }
+      ]
+    },
+    {
+      "site_id": "site/demo/hollowmere",
+      "cell_id": "region/demo/north-east",
+      "coordinate_frame": "region-demo-local-metric",
+      "x_mm": 110000000,
+      "y_mm": 160000000,
+      "foundation_year": 1150,
+      "initial_population": 300,
+      "population_expected_max": 480,
+      "site_tags": [
+        "coastal",
+        "frontier"
+      ],
+      "occupation_episodes": [
+        {
+          "valid": {
+            "start_year": 1300,
+            "end_year": 1400
+          },
+          "state": "active",
+          "capacity": 480,
+          "culture_weights": {
+            "hanseatic": 10000
+          },
+          "activity_weights": {
+            "agriculture": 70,
+            "craft": 15,
+            "trade": 10,
+            "services": 5
+          }
+        }
+      ]
+    },
+    {
+      "site_id": "site/demo/ironbridge",
+      "cell_id": "region/demo/north-east",
+      "coordinate_frame": "region-demo-local-metric",
+      "x_mm": 130000000,
+      "y_mm": 120000000,
+      "foundation_year": 1150,
+      "initial_population": 500,
+      "population_expected_max": 800,
+      "site_tags": [
+        "mineral",
+        "river"
+      ],
+      "occupation_episodes": [
+        {
+          "valid": {
+            "start_year": 1300,
+            "end_year": 1400
+          },
+          "state": "active",
+          "capacity": 800,
+          "culture_weights": {
+            "flemish-cloth-town": 10000
+          },
+          "activity_weights": {
+            "agriculture": 25,
+            "craft": 35,
+            "trade": 25,
+            "services": 15
+          }
+        }
+      ]
+    },
+    {
+      "site_id": "site/demo/kelpness",
+      "cell_id": "region/demo/north-east",
+      "coordinate_frame": "region-demo-local-metric",
+      "x_mm": 185000000,
+      "y_mm": 190000000,
+      "foundation_year": 1150,
+      "initial_population": 140,
+      "population_expected_max": 224,
+      "site_tags": [
+        "coastal",
+        "rural"
+      ],
+      "occupation_episodes": [
+        {
+          "valid": {
+            "start_year": 1300,
+            "end_year": 1400
+          },
+          "state": "active",
+          "capacity": 224,
+          "culture_weights": {
+            "bastide": 10000
+          },
+          "activity_weights": {
+            "agriculture": 70,
+            "craft": 15,
+            "trade": 10,
+            "services": 5
+          }
+        }
+      ]
+    },
+    {
+      "site_id": "site/demo/larkfield",
+      "cell_id": "region/demo/south-west",
+      "coordinate_frame": "region-demo-local-metric",
+      "x_mm": 45000000,
+      "y_mm": 45000000,
+      "foundation_year": 1150,
+      "initial_population": 1100,
+      "population_expected_max": 2112,
+      "site_tags": [
+        "lordly_seat",
+        "walled"
+      ],
+      "occupation_episodes": [
+        {
+          "valid": {
+            "start_year": 1300,
+            "end_year": 1350
+          },
+          "state": "active",
+          "capacity": 1760,
+          "culture_weights": {
+            "bastide": 10000
+          },
+          "activity_weights": {
+            "agriculture": 25,
+            "craft": 35,
+            "trade": 25,
+            "services": 15
+          }
+        },
+        {
+          "valid": {
+            "start_year": 1350,
+            "end_year": 1400
+          },
+          "state": "active",
+          "capacity": 2112,
+          "culture_weights": {
+            "bastide": 10000
+          },
+          "activity_weights": {
+            "agriculture": 25,
+            "craft": 35,
+            "trade": 25,
+            "services": 15
+          }
+        }
+      ]
+    },
+    {
+      "site_id": "site/demo/millbrook",
+      "cell_id": "region/demo/south-west",
+      "coordinate_frame": "region-demo-local-metric",
+      "x_mm": 20000000,
+      "y_mm": 70000000,
+      "foundation_year": 1150,
+      "initial_population": 350,
+      "population_expected_max": 560,
+      "site_tags": [
+        "river",
+        "rural"
+      ],
+      "occupation_episodes": [
+        {
+          "valid": {
+            "start_year": 1300,
+            "end_year": 1400
+          },
+          "state": "active",
+          "capacity": 560,
+          "culture_weights": {
+            "european-organic": 10000
+          },
+          "activity_weights": {
+            "agriculture": 70,
+            "craft": 15,
+            "trade": 10,
+            "services": 5
+          }
+        }
+      ]
+    },
+    {
+      "site_id": "site/demo/northcote",
+      "cell_id": "region/demo/south-west",
+      "coordinate_frame": "region-demo-local-metric",
+      "x_mm": 85000000,
+      "y_mm": 90000000,
+      "foundation_year": 1150,
+      "initial_population": 220,
+      "population_expected_max": 352,
+      "site_tags": [
+        "forest",
+        "frontier"
+      ],
+      "occupation_episodes": [
+        {
+          "valid": {
+            "start_year": 1300,
+            "end_year": 1400
+          },
+          "state": "active",
+          "capacity": 352,
+          "culture_weights": {
+            "bastide": 10000
+          },
+          "activity_weights": {
+            "agriculture": 70,
+            "craft": 15,
+            "trade": 10,
+            "services": 5
+          }
+        }
+      ]
+    },
+    {
+      "site_id": "site/demo/oakhollow",
+      "cell_id": "region/demo/south-west",
+      "coordinate_frame": "region-demo-local-metric",
+      "x_mm": 15000000,
+      "y_mm": 15000000,
+      "foundation_year": 1150,
+      "initial_population": 150,
+      "population_expected_max": 240,
+      "site_tags": [
+        "forest",
+        "rural"
+      ],
+      "occupation_episodes": [
+        {
+          "valid": {
+            "start_year": 1300,
+            "end_year": 1400
+          },
+          "state": "active",
+          "capacity": 240,
+          "culture_weights": {
+            "european-organic": 10000
+          },
+          "activity_weights": {
+            "agriculture": 70,
+            "craft": 15,
+            "trade": 10,
+            "services": 5
+          }
+        }
+      ]
+    },
+    {
+      "site_id": "site/demo/pennard",
+      "cell_id": "region/demo/south-west",
+      "coordinate_frame": "region-demo-local-metric",
+      "x_mm": 70000000,
+      "y_mm": 20000000,
+      "foundation_year": 1150,
+      "initial_population": 480,
+      "population_expected_max": 768,
+      "site_tags": [
+        "crossroads",
+        "multicultural"
+      ],
+      "occupation_episodes": [
+        {
+          "valid": {
+            "start_year": 1300,
+            "end_year": 1400
+          },
+          "state": "active",
+          "capacity": 768,
+          "culture_weights": {
+            "hanseatic": 6000,
+            "flemish-cloth-town": 4000
+          },
+          "activity_weights": {
+            "agriculture": 25,
+            "craft": 35,
+            "trade": 25,
+            "services": 15
+          }
+        }
+      ]
+    },
+    {
+      "site_id": "site/demo/quarrytown",
+      "cell_id": "region/demo/south-east",
+      "coordinate_frame": "region-demo-local-metric",
+      "x_mm": 150000000,
+      "y_mm": 50000000,
+      "foundation_year": 1150,
+      "initial_population": 1300,
+      "population_expected_max": 2496,
+      "site_tags": [
+        "lordly_seat",
+        "mineral",
+        "walled"
+      ],
+      "occupation_episodes": [
+        {
+          "valid": {
+            "start_year": 1300,
+            "end_year": 1350
+          },
+          "state": "active",
+          "capacity": 2080,
+          "culture_weights": {
+            "flemish-cloth-town": 10000
+          },
+          "activity_weights": {
+            "agriculture": 25,
+            "craft": 35,
+            "trade": 25,
+            "services": 15
+          }
+        },
+        {
+          "valid": {
+            "start_year": 1350,
+            "end_year": 1400
+          },
+          "state": "active",
+          "capacity": 2496,
+          "culture_weights": {
+            "flemish-cloth-town": 10000
+          },
+          "activity_weights": {
+            "agriculture": 25,
+            "craft": 35,
+            "trade": 25,
+            "services": 15
+          }
+        }
+      ]
+    },
+    {
+      "site_id": "site/demo/redmarsh",
+      "cell_id": "region/demo/south-east",
+      "coordinate_frame": "region-demo-local-metric",
+      "x_mm": 190000000,
+      "y_mm": 80000000,
+      "foundation_year": 1150,
+      "initial_population": 400,
+      "population_expected_max": 640,
+      "site_tags": [
+        "coastal",
+        "frontier",
+        "saltpan"
+      ],
+      "occupation_episodes": [
+        {
+          "valid": {
+            "start_year": 1300,
+            "end_year": 1400
+          },
+          "state": "active",
+          "capacity": 640,
+          "culture_weights": {
+            "hanseatic": 10000
+          },
+          "activity_weights": {
+            "agriculture": 70,
+            "craft": 15,
+            "trade": 10,
+            "services": 5
+          }
+        }
+      ]
+    },
+    {
+      "site_id": "site/demo/stonewick",
+      "cell_id": "region/demo/south-east",
+      "coordinate_frame": "region-demo-local-metric",
+      "x_mm": 115000000,
+      "y_mm": 85000000,
+      "foundation_year": 1150,
+      "initial_population": 260,
+      "population_expected_max": 416,
+      "site_tags": [
+        "frontier",
+        "rural"
+      ],
+      "occupation_episodes": [
+        {
+          "valid": {
+            "start_year": 1300,
+            "end_year": 1400
+          },
+          "state": "active",
+          "capacity": 416,
+          "culture_weights": {
+            "flemish-cloth-town": 10000
+          },
+          "activity_weights": {
+            "agriculture": 70,
+            "craft": 15,
+            "trade": 10,
+            "services": 5
+          }
+        }
+      ]
+    },
+    {
+      "site_id": "site/demo/thornby",
+      "cell_id": "region/demo/south-east",
+      "coordinate_frame": "region-demo-local-metric",
+      "x_mm": 125000000,
+      "y_mm": 20000000,
+      "foundation_year": 1150,
+      "initial_population": 190,
+      "population_expected_max": 304,
+      "site_tags": [
+        "pasture",
+        "rural"
+      ],
+      "occupation_episodes": [
+        {
+          "valid": {
+            "start_year": 1300,
+            "end_year": 1400
+          },
+          "state": "active",
+          "capacity": 304,
+          "culture_weights": {
+            "european-organic": 10000
+          },
+          "activity_weights": {
+            "agriculture": 70,
+            "craft": 15,
+            "trade": 10,
+            "services": 5
+          }
+        }
+      ]
+    },
+    {
+      "site_id": "site/demo/underhill",
+      "cell_id": "region/demo/south-east",
+      "coordinate_frame": "region-demo-local-metric",
+      "x_mm": 180000000,
+      "y_mm": 15000000,
+      "foundation_year": 1150,
+      "initial_population": 130,
+      "population_expected_max": 208,
+      "site_tags": [
+        "pasture",
+        "shrine"
+      ],
+      "occupation_episodes": [
+        {
+          "valid": {
+            "start_year": 1300,
+            "end_year": 1400
+          },
+          "state": "active",
+          "capacity": 208,
+          "culture_weights": {
+            "bastide": 7000,
+            "european-organic": 3000
+          },
+          "activity_weights": {
+            "agriculture": 70,
+            "craft": 15,
+            "trade": 10,
+            "services": 5
+          }
+        }
+      ]
+    }
+  ],
+  "mobility_edges": [
+    {
+      "edge_id": "edge/demo/aldermoor-brackenford",
+      "from_site_id": "site/demo/aldermoor",
+      "to_site_id": "site/demo/brackenford",
+      "valid": {
+        "start_year": 1300,
+        "end_year": 1400
+      },
+      "travel_days": 2,
+      "bidirectional": true,
+      "mode": "land"
+    },
+    {
+      "edge_id": "edge/demo/aldermoor-coldwell",
+      "from_site_id": "site/demo/aldermoor",
+      "to_site_id": "site/demo/coldwell",
+      "valid": {
+        "start_year": 1300,
+        "end_year": 1400
+      },
+      "travel_days": 2,
+      "bidirectional": true,
+      "mode": "land"
+    },
+    {
+      "edge_id": "edge/demo/aldermoor-dunmarch",
+      "from_site_id": "site/demo/aldermoor",
+      "to_site_id": "site/demo/dunmarch",
+      "valid": {
+        "start_year": 1300,
+        "end_year": 1400
+      },
+      "travel_days": 3,
+      "bidirectional": true,
+      "mode": "land"
+    },
+    {
+      "edge_id": "edge/demo/aldermoor-elmstead",
+      "from_site_id": "site/demo/aldermoor",
+      "to_site_id": "site/demo/elmstead",
+      "valid": {
+        "start_year": 1300,
+        "end_year": 1400
+      },
+      "travel_days": 2,
+      "bidirectional": true,
+      "mode": "land"
+    },
+    {
+      "edge_id": "edge/demo/farrowgate-gullhaven",
+      "from_site_id": "site/demo/farrowgate",
+      "to_site_id": "site/demo/gullhaven",
+      "valid": {
+        "start_year": 1300,
+        "end_year": 1400
+      },
+      "travel_days": 2,
+      "bidirectional": true,
+      "mode": "water"
+    },
+    {
+      "edge_id": "edge/demo/farrowgate-hollowmere",
+      "from_site_id": "site/demo/farrowgate",
+      "to_site_id": "site/demo/hollowmere",
+      "valid": {
+        "start_year": 1300,
+        "end_year": 1400
+      },
+      "travel_days": 3,
+      "bidirectional": true,
+      "mode": "land"
+    },
+    {
+      "edge_id": "edge/demo/farrowgate-ironbridge",
+      "from_site_id": "site/demo/farrowgate",
+      "to_site_id": "site/demo/ironbridge",
+      "valid": {
+        "start_year": 1300,
+        "end_year": 1400
+      },
+      "travel_days": 3,
+      "bidirectional": true,
+      "mode": "land"
+    },
+    {
+      "edge_id": "edge/demo/farrowgate-kelpness",
+      "from_site_id": "site/demo/farrowgate",
+      "to_site_id": "site/demo/kelpness",
+      "valid": {
+        "start_year": 1300,
+        "end_year": 1400
+      },
+      "travel_days": 2,
+      "bidirectional": true,
+      "mode": "land"
+    },
+    {
+      "edge_id": "edge/demo/larkfield-millbrook",
+      "from_site_id": "site/demo/larkfield",
+      "to_site_id": "site/demo/millbrook",
+      "valid": {
+        "start_year": 1300,
+        "end_year": 1400
+      },
+      "travel_days": 2,
+      "bidirectional": true,
+      "mode": "land"
+    },
+    {
+      "edge_id": "edge/demo/larkfield-northcote",
+      "from_site_id": "site/demo/larkfield",
+      "to_site_id": "site/demo/northcote",
+      "valid": {
+        "start_year": 1300,
+        "end_year": 1400
+      },
+      "travel_days": 3,
+      "bidirectional": true,
+      "mode": "land"
+    },
+    {
+      "edge_id": "edge/demo/larkfield-oakhollow",
+      "from_site_id": "site/demo/larkfield",
+      "to_site_id": "site/demo/oakhollow",
+      "valid": {
+        "start_year": 1300,
+        "end_year": 1400
+      },
+      "travel_days": 2,
+      "bidirectional": true,
+      "mode": "land"
+    },
+    {
+      "edge_id": "edge/demo/larkfield-pennard",
+      "from_site_id": "site/demo/larkfield",
+      "to_site_id": "site/demo/pennard",
+      "valid": {
+        "start_year": 1300,
+        "end_year": 1400
+      },
+      "travel_days": 2,
+      "bidirectional": true,
+      "mode": "land"
+    },
+    {
+      "edge_id": "edge/demo/quarrytown-redmarsh",
+      "from_site_id": "site/demo/quarrytown",
+      "to_site_id": "site/demo/redmarsh",
+      "valid": {
+        "start_year": 1300,
+        "end_year": 1400
+      },
+      "travel_days": 2,
+      "bidirectional": true,
+      "mode": "water"
+    },
+    {
+      "edge_id": "edge/demo/quarrytown-stonewick",
+      "from_site_id": "site/demo/quarrytown",
+      "to_site_id": "site/demo/stonewick",
+      "valid": {
+        "start_year": 1300,
+        "end_year": 1400
+      },
+      "travel_days": 2,
+      "bidirectional": true,
+      "mode": "land"
+    },
+    {
+      "edge_id": "edge/demo/quarrytown-thornby",
+      "from_site_id": "site/demo/quarrytown",
+      "to_site_id": "site/demo/thornby",
+      "valid": {
+        "start_year": 1300,
+        "end_year": 1400
+      },
+      "travel_days": 2,
+      "bidirectional": true,
+      "mode": "land"
+    },
+    {
+      "edge_id": "edge/demo/quarrytown-underhill",
+      "from_site_id": "site/demo/quarrytown",
+      "to_site_id": "site/demo/underhill",
+      "valid": {
+        "start_year": 1300,
+        "end_year": 1400
+      },
+      "travel_days": 2,
+      "bidirectional": true,
+      "mode": "land"
+    },
+    {
+      "edge_id": "edge/demo/dunmarch-hollowmere",
+      "from_site_id": "site/demo/dunmarch",
+      "to_site_id": "site/demo/hollowmere",
+      "valid": {
+        "start_year": 1300,
+        "end_year": 1400
+      },
+      "travel_days": 1,
+      "bidirectional": true,
+      "mode": "land"
+    },
+    {
+      "edge_id": "edge/demo/dunmarch-elmstead",
+      "from_site_id": "site/demo/dunmarch",
+      "to_site_id": "site/demo/elmstead",
+      "valid": {
+        "start_year": 1300,
+        "end_year": 1400
+      },
+      "travel_days": 2,
+      "bidirectional": true,
+      "mode": "land"
+    },
+    {
+      "edge_id": "edge/demo/coldwell-millbrook",
+      "from_site_id": "site/demo/coldwell",
+      "to_site_id": "site/demo/millbrook",
+      "valid": {
+        "start_year": 1300,
+        "end_year": 1400
+      },
+      "travel_days": 3,
+      "bidirectional": true,
+      "mode": "land"
+    },
+    {
+      "edge_id": "edge/demo/northcote-stonewick",
+      "from_site_id": "site/demo/northcote",
+      "to_site_id": "site/demo/stonewick",
+      "valid": {
+        "start_year": 1300,
+        "end_year": 1400
+      },
+      "travel_days": 2,
+      "bidirectional": true,
+      "mode": "land"
+    },
+    {
+      "edge_id": "edge/demo/ironbridge-stonewick",
+      "from_site_id": "site/demo/ironbridge",
+      "to_site_id": "site/demo/stonewick",
+      "valid": {
+        "start_year": 1300,
+        "end_year": 1400
+      },
+      "travel_days": 2,
+      "bidirectional": true,
+      "mode": "land"
+    },
+    {
+      "edge_id": "edge/demo/pennard-thornby",
+      "from_site_id": "site/demo/pennard",
+      "to_site_id": "site/demo/thornby",
+      "valid": {
+        "start_year": 1300,
+        "end_year": 1400
+      },
+      "travel_days": 3,
+      "bidirectional": true,
+      "mode": "land"
+    },
+    {
+      "edge_id": "edge/demo/dunmarch-northcote",
+      "from_site_id": "site/demo/dunmarch",
+      "to_site_id": "site/demo/northcote",
+      "valid": {
+        "start_year": 1300,
+        "end_year": 1400
+      },
+      "travel_days": 3,
+      "bidirectional": true,
+      "mode": "land"
+    },
+    {
+      "edge_id": "edge/demo/hollowmere-ironbridge",
+      "from_site_id": "site/demo/hollowmere",
+      "to_site_id": "site/demo/ironbridge",
+      "valid": {
+        "start_year": 1300,
+        "end_year": 1400
+      },
+      "travel_days": 2,
+      "bidirectional": true,
+      "mode": "land"
+    }
+  ],
+  "external_contacts": [
+    {
+      "contact_id": "contact/demo/north-sea",
+      "owner_scope": {
+        "kind": "cell",
+        "cell_id": "region/demo"
+      },
+      "ends": [
+        {
+          "kind": "site",
+          "site_id": "site/demo/farrowgate",
+          "external_context_id": "outside/demo/north-sea",
+          "access_edge_id": null,
+          "external_profile_id": "outside-households-demo",
+          "population_expected": 40000
+        },
+        {
+          "kind": "external",
+          "context_id": "outside/demo/north-sea"
+        }
+      ],
+      "valid": {
+        "start_year": 1300,
+        "end_year": 1400
+      }
+    },
+    {
+      "contact_id": "contact/demo/western-pass",
+      "owner_scope": {
+        "kind": "cell",
+        "cell_id": "region/demo"
+      },
+      "ends": [
+        {
+          "kind": "site",
+          "site_id": "site/demo/aldermoor",
+          "external_context_id": "outside/demo/western-march",
+          "access_edge_id": null,
+          "external_profile_id": "outside-households-demo",
+          "population_expected": 12000
+        },
+        {
+          "kind": "external",
+          "context_id": "outside/demo/western-march"
+        }
+      ],
+      "valid": {
+        "start_year": 1300,
+        "end_year": 1400
+      }
+    },
+    {
+      "contact_id": "contact/demo/southern-road",
+      "owner_scope": {
+        "kind": "cell",
+        "cell_id": "region/demo"
+      },
+      "ends": [
+        {
+          "kind": "site",
+          "site_id": "site/demo/larkfield",
+          "external_context_id": "outside/demo/southern-plain",
+          "access_edge_id": null,
+          "external_profile_id": "outside-households-demo",
+          "population_expected": 18000
+        },
+        {
+          "kind": "external",
+          "context_id": "outside/demo/southern-plain"
+        }
+      ],
+      "valid": {
+        "start_year": 1300,
+        "end_year": 1400
+      }
+    },
+    {
+      "contact_id": "contact/demo/salt-road",
+      "owner_scope": {
+        "kind": "cell",
+        "cell_id": "region/demo"
+      },
+      "ends": [
+        {
+          "kind": "site",
+          "site_id": "site/demo/dunmarch",
+          "external_context_id": "outside/demo/salt-road-east",
+          "access_edge_id": "edge/demo/dunmarch-elmstead",
+          "external_profile_id": "outside-households-demo",
+          "population_expected": 600
+        },
+        {
+          "kind": "site",
+          "site_id": "site/demo/elmstead",
+          "external_context_id": "outside/demo/salt-road-west",
+          "access_edge_id": "edge/demo/dunmarch-elmstead",
+          "external_profile_id": "outside-households-demo",
+          "population_expected": 260
+        }
+      ],
+      "valid": {
+        "start_year": 1300,
+        "end_year": 1400
+      }
+    }
+  ]
+}

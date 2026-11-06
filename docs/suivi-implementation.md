@@ -192,7 +192,7 @@ La spécification est rédigée ; les statuts ci-dessous concernent uniquement l
 |---|---|---|
 | S0 | Types, clés, atlas, contrats d’impact et validation v2 | à faire |
 | S1 | Profils culturels et archétypes exécutables ; intégrer le raccord préparé | à faire |
-| S2 | Canon général, régions, domaines fixes et contexte extérieur | à faire |
+| S2 | Canon général, régions, domaines fixes et contexte extérieur | livré sur `social-v2/s2-canon`, non fusionné |
 | S3 | Worker Lineage Lab et programme historique noyau/cohortes | à faire |
 | S4 | Complément procédural, recrutement, mandats et groupes informels | à faire |
 | S5 | API, stockage, carte, graphes interactifs, chronologie et bilans | à faire |

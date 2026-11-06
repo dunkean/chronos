@@ -1,4 +1,4 @@
-# Méthode sociale v2 — socle S0
+# Méthode sociale v2 — socle S0 et lot S2
 
 ## État implémenté
 
@@ -70,8 +70,8 @@ propriétaire, prédicat, extrémités et début.
 
 `impact` adresse un contrat, fils de son événement. `effect` adresse l'exposition
 d'une cible à ce contrat, fille du contrat et unique par cible ; il n'a pas de
-dimension annuelle. Les épisodes du profil temporel (§7.2) seront ses sous-slots,
-ajoutés en S2.
+dimension annuelle. Les épisodes du profil temporel (§7.2) sont ses sous-slots,
+de type `episode`, ajoutés en S2.
 
 `ids::random_semantics_v2` est la façade des tirages. `domain_seed` appelle
 exactement le mélangeur v1 avec les trois parties du §4.1. Les autres tirages
@@ -138,7 +138,7 @@ un contact : chacun ouvre alors son port sous le même `contact_id`.
 Le JSON d'atlas n'étant pas figé par un schéma dans l'étude, S0 emploie des
 surfaces `area_m2` entières et des bornes métriques `*_mm`, sans conversion
 géographique ni interprétation des LOD d'affichage. Les résumés d'une cellule
-incluent ses descendants. La partition démographique n'est pas implémentée.
+incluent ses descendants. La partition démographique relève du lot S2.
 
 `model` sépare provenance, précision et couverture des comptes, entités,
 états, relations et personnes. Les prédicats du §5.1 sont une énumération
@@ -217,8 +217,8 @@ cause ; tout autre début en cite une, y compris un premier segment tardif. Un
 segment qui finit avant la fin du monde sans successeur immédiat, ou avant un
 trou, cite son événement de fin dans `end_cause_event_id`. Toutes ces causes sont
 de type `edict`, `charter`, `heresy_trial` ou `banishment`, sans être postérieures
-à la date qu'elles expliquent. Un groupe fondé après `observed_start` dont le statut
-n'est pas `licit` cite donc l'un de ces événements dès sa première fiche.
+à la date qu'elles expliquent. Depuis S2, la première fiche d'une chaîne peut citer la
+`foundation` de son sujet, et la dernière sa `dissolution`.
 
 ### Impacts
 
@@ -313,14 +313,166 @@ toute autre valeur est une erreur de plan. Les conversions d'effets du §26.4
 restent à effectuer dans l'adaptateur S3, séparément des noms de paramètres de
 profils.
 
+## S2: general canon, regions and domains
+
+English is the source for this section; the French translation follows it.
+
+### Implemented
+
+**Inputs.** `general::build_canon(config, atlas, catalogue, constraints)` reads the
+S1 catalogue through `catalog::HistoryCatalogue`. `WorldConfig` carries `canon_id`
+and `society_ids` (template to `demography_society_id`): the host computes both, so
+the core has no SHA-256. `SettlementAnchor.site_tags` and `HistoryAtlas.provenance`
+are new required fields. Facts drawn from a synthetic atlas stay `synthetic`.
+`fixtures/social-v2/region-demo.atlas.json` and `region-demo.world.json` are virtual:
+one region, four cells, 20 sites, four cultures, two social profiles, 24 routes and
+four contacts over 1300-1400. Seed 11 was picked from a sweep of seeds 1-60 at the
+default rates, because it shows every event kind; it is not a calibration.
+
+**Domains.** `atlas::partition_domains` is the next-fit of §3.1. A site above 20,000
+is refused with `BudgetExceeded`. A site mixing social profiles is refused with
+`UnsupportedCapability`.
+
+**General processes.** Each region runs its own annual loop, with decade-block draws
+under fixed subkeys; a partial block keeps its full key and drops dates outside the
+period. Polities are derived: one per child cell of the region holding sites, and
+adjacent cells give the war pairs. War and epidemic are frame events with one
+`ImpactContract` each. At peace a `treaty` draws each `frontier` site of both parties
+and may move its control. The baseline follows §7.1 per region and culture, with a
+signed remainder, and never reads an event.
+
+**Region.** `region::plan_region(canon, region_id)` resolves each contract on the
+complete catalogue and compiles exposures into `LocalShock` values with the §7.5
+profiles. The local date is drawn under its own key; a military arrival cannot
+precede `start + ceil(travel_days / 365)`. Each shock has an address of the new kind
+`episode`, a sub-slot of its effect. Site markers follow §26.5, or explicit author
+series when `AuthorConstraints.site_baselines` covers the region.
+`population_expected_after_impacts` is a separate forecast and feeds no marker.
+Each domain receives its ports, sorted by travel time then ID and capped by
+`max_halo_contacts`; the rest stays a summary. The two sides of a contact share one
+drawn flow, one side's exit being the other's entry.
+
+**Birth events.**
+
+| Event | Definition | Group born |
+|---|---|---|
+| `diplomatic_contact` | One draw per contact and decade, owned by the contact's owner, phase 10, with its attached sites as participants | `embassy` on an attached site, if `availability` allows |
+| `displacement` | One draw per ruined site, owned by that site, phase 40, caused by the war frame; it feeds a `move_households` to the nearest site of the domain, else to a port | `refugee_community` on a destination site, if `availability` allows |
+| `heresy_trial` | Legal act of a jurisdiction (§27.3) | `inquisition` on the group's site, if `availability` allows |
+
+**Legality.** Initial status follows §27.4 under the controlling polity. S2 creates
+own-stock groups and event-born groups, with bootstrap ages and per-block flows.
+Per polity, kind and decade, a jurisdiction may issue `edict` (tolerated to
+proscribed), `charter` (tolerated to licit), `heresy_trial` or `banishment`. A control
+change emits one `charter`, caused by the treaty, which closes the old chains and opens
+the new ones. `validate_legal_standings` also admits two life events: `foundation`
+for the first standing of a chain and `dissolution` for the last one, each at its
+exact date and with the subject as participant.
+
+**Plan.** `population::plan_population(canon, region_plan, domain_id)` returns a plan
+that passes `validate_plan`. `plan_fingerprint` holds `PLAN_FINGERPRINT_PENDING` until
+the host hashes `plan_canonical_bytes`.
+
+**Diagnostics.** New S2 errors put a stable key in `constraint`
+(`domain.site_over_population_cap`, `plan.unknown_domain`...), with `owner` and
+`at_year` as parameters, so the interface can translate them.
+
+### Limits
+
+Not delivered: anchored institutions, offices and `role_demands` (S4), activity units
+and shared stocks (S4), interregional contagion, wealth and cohesion states, a process
+for `harvest.bad`, and candidate catalogues for a domain owner. A world-owned contact
+numbers its events across regions, so adding one shifts those ordinals.
+
+### Validation
+
+`tests/v2_s2.rs` proves byte-identical replay, `world_extent_does_not_reseed_domains`,
+`generated_baseline_nodes_are_independent_of_shocks`,
+`spared_village_keeps_baseline_target` at plan level and `plan_region` call order. No
+performance is measured, and no provider has run these plans.
+
+### Traduction française
+
+**Entrées.** `general::build_canon(config, atlas, catalogue, constraints)` lit le
+catalogue S1 par `catalog::HistoryCatalogue`. `WorldConfig` porte `canon_id` et
+`society_ids` (template vers `demography_society_id`) : l'hôte calcule les deux, et le
+noyau n'a donc pas de SHA-256. `SettlementAnchor.site_tags` et
+`HistoryAtlas.provenance` sont de nouveaux champs obligatoires. Les faits tirés d'un
+atlas synthétique restent `synthetic`. `fixtures/social-v2/region-demo.atlas.json` et
+`region-demo.world.json` sont virtuels : une région, quatre cellules, 20 sites, quatre
+cultures, deux profils sociaux, 24 routes et quatre contacts sur 1300-1400. La graine
+11 vient d'un balayage des graines 1 à 60 aux taux par défaut, car elle montre tous les
+types d'événements ; ce n'est pas une calibration.
+
+**Domaines.** `atlas::partition_domains` est le next-fit du §3.1. Un site au-delà de
+20 000 est refusé avec `BudgetExceeded`, un site mêlant des profils sociaux avec
+`UnsupportedCapability`.
+
+**Processus généraux.** Chaque région suit sa propre boucle annuelle, avec des tirages
+par bloc décennal sous sous-clés fixes ; un bloc partiel garde sa clé complète et
+écarte les dates hors période. Les collectifs politiques sont dérivés : un par cellule
+fille de la région contenant des sites, et les cellules voisines donnent les paires de
+guerre. Guerre et épidémie sont des événements-cadres, avec un `ImpactContract`
+chacun. À la paix, un `treaty` tire chaque site `frontier` des deux parties et peut en
+déplacer le contrôle. La base suit le §7.1 par région et culture, avec un reste signé,
+et ne lit aucun événement.
+
+**Région.** `region::plan_region(canon, region_id)` résout chaque contrat sur le
+catalogue complet et compile les expositions en `LocalShock` avec les profils du §7.5.
+La date locale a sa propre clé ; une arrivée militaire ne précède jamais
+`début + ceil(travel_days / 365)`. Chaque choc a une adresse du nouveau type `episode`,
+sous-slot de son effet. Les marqueurs de site suivent le §26.5, ou les séries d'auteur
+quand `AuthorConstraints.site_baselines` couvre la région.
+`population_expected_after_impacts` est une prévision séparée, qui n'alimente aucun
+marqueur. Chaque domaine reçoit ses ports, triés par temps de trajet puis ID et bornés
+par `max_halo_contacts` ; le reste devient un résumé. Les deux côtés d'un contact
+partagent un seul flux tiré : la sortie de l'un est l'entrée de l'autre.
+
+**Événements de naissance.**
+
+| Événement | Définition | Groupe né |
+|---|---|---|
+| `diplomatic_contact` | Un tirage par contact et décennie, porté par le propriétaire du contact, phase 10, avec ses sites d'attache pour participants | `embassy` sur un site d'attache, si `availability` le permet |
+| `displacement` | Un tirage par site ruiné, porté par ce site, phase 40, causé par le cadre de guerre ; il alimente un `move_households` vers le site le plus proche du domaine, sinon vers un port | `refugee_community` sur un site de destination, si `availability` le permet |
+| `heresy_trial` | Acte légal d'une juridiction (§27.3) | `inquisition` sur le site du groupe, si `availability` le permet |
+
+**Légalité.** Le statut initial suit le §27.4 sous le collectif qui contrôle le site.
+S2 crée les groupes à stock propre et les groupes nés d'un événement, avec âges de
+bootstrap et flux par bloc. Par collectif, type et décennie, une juridiction peut
+émettre `edict` (toléré vers proscrit), `charter` (toléré vers licite), `heresy_trial`
+ou `banishment`. Un changement de contrôle émet un `charter` causé par le traité, qui
+ferme les anciennes chaînes et ouvre les nouvelles. `validate_legal_standings` admet
+aussi deux événements de vie : `foundation` pour la première fiche d'une chaîne et
+`dissolution` pour la dernière, à leur date exacte et avec le sujet pour participant.
+
+**Plan.** `population::plan_population(canon, region_plan, domain_id)` rend un plan qui
+passe `validate_plan`. `plan_fingerprint` vaut `PLAN_FINGERPRINT_PENDING` jusqu'à ce que
+l'hôte hache `plan_canonical_bytes`.
+
+**Diagnostics.** Les nouvelles erreurs S2 portent une clé stable dans `constraint`
+(`domain.site_over_population_cap`, `plan.unknown_domain`...), avec `owner` et `at_year`
+pour paramètres : l'interface peut les traduire.
+
+**Limites.** Non livrés : institutions ancrées, offices et `role_demands` (S4), unités
+d'activité et stocks partagés (S4), contagion interrégionale, états de richesse et de
+cohésion, processus pour `harvest.bad`, catalogues de candidats d'un propriétaire
+domaine. Un contact détenu par le monde numérote ses événements entre régions : en
+ajouter un décale ces ordinaux.
+
+**Validation.** `tests/v2_s2.rs` prouve le rejeu à l'octet,
+`world_extent_does_not_reseed_domains`,
+`generated_baseline_nodes_are_independent_of_shocks`,
+`spared_village_keeps_baseline_target` au niveau du plan et l'ordre d'appel de
+`plan_region`. Aucune performance n'est mesurée, et aucun fournisseur n'a exécuté ces
+plans.
+
 ## Proposé, non implémenté
 
-S1–S8 conservent leur périmètre dans l'étude : catalogues exécutables et raccords,
-canon général, partition des domaines, compilation des gravités, fournisseur
+S3–S8 conservent leur périmètre dans l'étude : fournisseur
 démographique, validation des résultats et bilans, recrutement, API et vues,
 contraintes personnelles exactes, ponts et optimisations. Les signatures de
 fonctions proposées au §14.1 ne sont pas des stubs exécutables dans S0. Sources de
-catalogue autres que l'atlas, sous-slots d'effet, génération des axes, `alignment_fit`, inéligibilité, statuts initiaux et rendu des arbres de
+catalogue autres que l'atlas, génération des axes, `alignment_fit`, inéligibilité et rendu des arbres de
 nom appartiennent aux lots suivants.
 
 ## Validation et mesures

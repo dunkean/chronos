@@ -22,6 +22,7 @@ string_enum!(AddressKind {
     Event,
     Impact,
     Effect,
+    Episode,
     Group,
     Household,
     Relation,
@@ -34,13 +35,14 @@ string_enum!(AddressKind {
     Activity
 });
 impl AddressKind {
-    const ALL: [Self; 16] = [
+    const ALL: [Self; 17] = [
         Self::Entity,
         Self::Person,
         Self::Tenure,
         Self::Event,
         Self::Impact,
         Self::Effect,
+        Self::Episode,
         Self::Group,
         Self::Household,
         Self::Relation,
@@ -60,6 +62,7 @@ impl AddressKind {
             Self::Event => "event",
             Self::Impact => "impact",
             Self::Effect => "effect",
+            Self::Episode => "episode",
             Self::Group => "group",
             Self::Household => "household",
             Self::Relation => "relation",
@@ -413,9 +416,10 @@ fn fixed_slots(kind: AddressKind, fields: &[String]) -> Result<Vec<Slot>, Histor
         AddressKind::Household => (DOMAIN_SLOTS, &[Literal("household"), Text, Year]),
         AddressKind::Plan | AddressKind::Domain => (DOMAIN_SLOTS, &[]),
         AddressKind::Site | AddressKind::Activity => (&[Text, Text], &[]),
-        AddressKind::Relation | AddressKind::Standing | AddressKind::Effect => {
-            return Err(invalid("forme à segments, sans liste fixe"))
-        }
+        AddressKind::Relation
+        | AddressKind::Standing
+        | AddressKind::Effect
+        | AddressKind::Episode => return Err(invalid("address.segmented_form_has_no_fixed_slots")),
     };
     Ok([head, tail].concat())
 }
@@ -512,8 +516,8 @@ impl SemanticAddress {
         Self::from_fields(AddressKind::Impact, fields)
     }
     /// Exposition d'une cible à un contrat : fille du contrat, unique par cible.
-    /// La cible entre à plat, sans son monde. Sans dimension annuelle : les
-    /// épisodes du profil temporel (§7.2) seront ses sous-slots.
+    /// The target enters flat, without its world. No annual dimension: the local
+    /// episodes of the timing profile (§7.2) are its sub-slots.
     pub fn effect(impact: &Self, target: &Self) -> Result<Self, HistoryError> {
         if impact.kind != AddressKind::Impact {
             return Err(invalid("adresse d'impact requise"));
@@ -525,6 +529,16 @@ impl SemanticAddress {
         fields.push(target.kind.prefix().into());
         fields.extend_from_slice(&target.fields[1..]);
         Self::from_fields(AddressKind::Effect, fields)
+    }
+    /// Local episode of an effect (§7.2, §25.1): a sub-slot written after its
+    /// address. The exposure drawn once keeps its identity.
+    pub fn episode(effect: &Self, slot: &str) -> Result<Self, HistoryError> {
+        if effect.kind != AddressKind::Effect {
+            return Err(invalid("address.effect_required"));
+        }
+        let mut fields = effect.fields.clone();
+        fields.push(slot.into());
+        Self::from_fields(AddressKind::Episode, fields)
     }
     /// Événement parent d'une adresse d'impact.
     pub fn parent_event(&self) -> Option<Self> {
@@ -871,6 +885,7 @@ fn check_structure(kind: AddressKind, fields: &[String]) -> Result<(), HistoryEr
     match kind {
         AddressKind::Relation | AddressKind::Standing => parse_link(kind, fields).map(|_| ()),
         AddressKind::Effect => validate_effect_fields(fields),
+        AddressKind::Episode => validate_effect_fields(&fields[..fields.len() - 1]),
         _ => check_slots(fields, &fixed_slots(kind, fields)?),
     }
 }

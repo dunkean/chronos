@@ -1,9 +1,9 @@
-//! Atlas régional figé : aucune partition démographique ni géométrie générée.
+//! Frozen regional atlas and demographic partition (§3.1), no generated geometry.
 use super::canonical::canonical_value_bytes;
-use super::ids::OwnerScope;
+use super::ids::{DomainKey, OwnerScope, SemanticAddress};
 use super::model::{
-    required_nullable, string_enum, ErrorCode, HistoryError, TimeSpan, MAX_ABS_COORDINATE_MM,
-    MAX_ABS_YEAR,
+    required_nullable, string_enum, ErrorCode, HistoryError, Provenance, TimeSpan,
+    MAX_ABS_COORDINATE_MM, MAX_ABS_YEAR,
 };
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
@@ -68,7 +68,17 @@ pub struct SettlementAnchor {
     pub foundation_year: i32,
     pub initial_population: u64,
     pub population_expected_max: u64,
+    /// `availability` tags (§23.1), checked against the catalogue by the canon.
+    pub site_tags: BTreeSet<String>,
     pub occupation_episodes: Vec<OccupationEpisode>,
+}
+impl SettlementAnchor {
+    /// Occupation episode covering the year; a validated atlas covers them all.
+    pub fn episode_at(&self, year: i32) -> Option<&OccupationEpisode> {
+        self.occupation_episodes
+            .iter()
+            .find(|e| e.valid.contains(year))
+    }
 }
 string_enum!(MobilityMode {
     Land,
@@ -129,6 +139,8 @@ impl ExternalContact {
 pub struct HistoryAtlas {
     pub atlas_id: String,
     pub source_fingerprint: String,
+    /// Atlas status: a virtual fixture declares itself `synthetic`.
+    pub provenance: Provenance,
     pub timeline: TimeSpan,
     pub cells: Vec<AtlasCell>,
     pub region_ids: Vec<String>,
@@ -289,6 +301,7 @@ impl HistoryAtlas {
                 || !c.bounds.contains(s.x_mm, s.y_mm)
                 || s.foundation_year < -MAX_ABS_YEAR
                 || s.foundation_year > self.timeline.start_year
+                || !unique_ids(s.site_tags.iter().map(String::as_str))
                 || s.initial_population > s.population_expected_max
                 || !covers(s.occupation_episodes.iter().map(|e| e.valid), self.timeline)
                 || s.occupation_episodes.iter().any(|e| {
@@ -366,6 +379,40 @@ impl HistoryAtlas {
                 })
             })
     }
+    /// Unique region of a site, on a validated atlas.
+    pub fn region_of(&self, site: &SettlementAnchor) -> Option<&str> {
+        self.region_ids
+            .iter()
+            .find(|r| self.cell_is_within(&site.cell_id, r))
+            .map(String::as_str)
+    }
+    /// Shortest trips in days from a site, over routes valid at this date and in
+    /// their direction (§26.1). An absent site is unreachable.
+    pub fn travel_days_from(&self, origin: &str, year: i32) -> BTreeMap<String, u64> {
+        let mut best = BTreeMap::from([(origin.to_owned(), 0)]);
+        let mut frontier = BTreeSet::from([(0u64, origin.to_owned())]);
+        while let Some((days, site)) = frontier.pop_first() {
+            for edge in self
+                .mobility_edges
+                .iter()
+                .filter(|e| e.valid.contains(year))
+            {
+                let next = if edge.from_site_id == site {
+                    &edge.to_site_id
+                } else if edge.bidirectional && edge.to_site_id == site {
+                    &edge.from_site_id
+                } else {
+                    continue;
+                };
+                let total = days + u64::from(edge.travel_days);
+                if best.get(next).is_none_or(|known| total < *known) {
+                    best.insert(next.clone(), total);
+                    frontier.insert((total, next.clone()));
+                }
+            }
+        }
+        best
+    }
     /// Recherche bornée même sur un atlas non validé.
     pub fn cell_is_within(&self, cell: &str, ancestor: &str) -> bool {
         let mut current = cell;
@@ -386,6 +433,80 @@ impl HistoryAtlas {
         false
     }
 }
+/// Caps of a demonstration domain (§3.1, §17).
+pub const MAX_DOMAIN_SITES: usize = 32;
+pub const MAX_DOMAIN_POPULATION: u64 = 20_000;
+/// Whole disjoint sites of a domain, fixed at bootstrap.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
+pub struct DemographicDomain {
+    pub domain_id: String,
+    pub region_id: String,
+    pub demography_society_id: String,
+    pub site_ids: Vec<String>,
+    pub population_expected_max: u64,
+}
+/// Next-fit partition of §3.1: per region and social profile, sites sorted by
+/// cell then ID. A closed domain is never reopened. Receives each site's resolved
+/// profile; political borders play no part.
+pub fn partition_domains(
+    atlas: &HistoryAtlas,
+    world: &str,
+    site_society: &BTreeMap<String, String>,
+) -> Result<Vec<DemographicDomain>, HistoryError> {
+    let mut groups: BTreeMap<(&str, &str), Vec<&SettlementAnchor>> = BTreeMap::new();
+    for site in &atlas.settlements {
+        let located = |key: &str| HistoryError {
+            owner: Some(site.site_id.clone()),
+            at_year: Some(atlas.timeline.start_year),
+            ..HistoryError::new(ErrorCode::InvalidAtlas, key)
+        };
+        let region = atlas
+            .region_of(site)
+            .ok_or_else(|| located("domain.site_without_region"))?;
+        let society = site_society
+            .get(&site.site_id)
+            .ok_or_else(|| located("domain.site_without_society"))?;
+        if site.population_expected_max > MAX_DOMAIN_POPULATION {
+            return Err(HistoryError {
+                code: ErrorCode::BudgetExceeded,
+                ..located("domain.site_over_population_cap")
+            });
+        }
+        groups.entry((region, society)).or_default().push(site);
+    }
+    let mut domains = Vec::new();
+    for ((region, society), mut sites) in groups {
+        sites.sort_by(|a, b| (&a.cell_id, &a.site_id).cmp(&(&b.cell_id, &b.site_id)));
+        let mut ordinal = 0;
+        let mut current: Vec<&SettlementAnchor> = Vec::new();
+        let mut population = 0;
+        let mut close = |sites: &[&SettlementAnchor], population| -> Result<(), HistoryError> {
+            let key = DomainKey::new(world, region, society, ordinal)?;
+            ordinal += 1;
+            domains.push(DemographicDomain {
+                domain_id: SemanticAddress::domain(&key)?.encode(),
+                region_id: region.into(),
+                demography_society_id: society.into(),
+                site_ids: sites.iter().map(|s| s.site_id.clone()).collect(),
+                population_expected_max: population,
+            });
+            Ok(())
+        };
+        for site in sites {
+            if current.len() == MAX_DOMAIN_SITES
+                || population + site.population_expected_max > MAX_DOMAIN_POPULATION
+            {
+                close(&current, population)?;
+                current.clear();
+                population = 0;
+            }
+            current.push(site);
+            population += site.population_expected_max;
+        }
+        close(&current, population)?;
+    }
+    Ok(domains)
+}
 pub(crate) fn validate_mobility_edge(
     e: &MobilityEdge,
     timeline: TimeSpan,
@@ -405,5 +526,89 @@ pub(crate) fn validate_mobility_edge(
         ))
     } else {
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::v2::model::ProvenanceStatus;
+    fn partition(populations: &[u64]) -> Result<Vec<DemographicDomain>, HistoryError> {
+        let id = |i: usize| format!("site/{i}");
+        let settlements: Vec<_> = populations
+            .iter()
+            .enumerate()
+            .map(|(i, p)| SettlementAnchor {
+                site_id: id(i),
+                cell_id: "region".into(),
+                coordinate_frame: "m".into(),
+                x_mm: 0,
+                y_mm: 0,
+                foundation_year: 1200,
+                initial_population: *p / 2,
+                population_expected_max: *p,
+                site_tags: BTreeSet::new(),
+                occupation_episodes: vec![],
+            })
+            .collect();
+        let atlas = HistoryAtlas {
+            atlas_id: "a".into(),
+            source_fingerprint: "f".into(),
+            provenance: Provenance {
+                status: ProvenanceStatus::Synthetic,
+                source_ref: "test".into(),
+                rule_id: "test".into(),
+            },
+            timeline: TimeSpan {
+                start_year: 1300,
+                end_year: 1400,
+            },
+            cells: vec![AtlasCell {
+                cell_id: "region".into(),
+                parent_id: None,
+                neighbors: vec![],
+                area_m2: 1,
+                bounds: MetricBounds {
+                    min_x_mm: 0,
+                    min_y_mm: 0,
+                    max_x_mm: 0,
+                    max_y_mm: 0,
+                },
+                coordinate_frame: "m".into(),
+                settlement_summary: SettlementSummary {
+                    site_ids: vec![],
+                    population_expected_max: 0,
+                },
+            }],
+            region_ids: vec!["region".into()],
+            settlements,
+            mobility_edges: vec![],
+            external_contacts: vec![],
+        };
+        let society = (0..populations.len())
+            .map(|i| (id(i), "society/a".to_owned()))
+            .collect();
+        partition_domains(&atlas, "w", &society)
+    }
+    #[test]
+    fn next_fit_gives_15000_then_20000_without_reopening() {
+        let domains = partition(&[15_000, 15_000, 5_000]).unwrap();
+        let sizes: Vec<_> = domains.iter().map(|d| d.population_expected_max).collect();
+        assert_eq!(sizes, [15_000, 20_000]);
+        assert_eq!(domains[1].site_ids, ["site/1", "site/2"]);
+    }
+    #[test]
+    fn next_fit_closes_a_domain_at_32_sites() {
+        let domains = partition(&[10; 33]).unwrap();
+        assert_eq!(domains[0].site_ids.len(), MAX_DOMAIN_SITES);
+        assert_eq!(domains[1].site_ids.len(), 1);
+    }
+    #[test]
+    fn site_beyond_20000_is_refused() {
+        assert!(partition(&[20_000]).is_ok());
+        assert_eq!(
+            partition(&[20_001]).unwrap_err().code,
+            ErrorCode::BudgetExceeded
+        );
     }
 }

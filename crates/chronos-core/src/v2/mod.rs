@@ -1,6 +1,8 @@
 //! Contrats purs de Chronos social v2, indépendants du moteur v1.
 pub mod atlas;
 pub mod canonical;
+pub mod catalog;
+pub mod general;
 pub mod ids;
 pub mod model;
 pub mod population;

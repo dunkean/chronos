@@ -100,6 +100,7 @@ fn fixture_atlas() -> HistoryAtlas {
             foundation_year: 1250,
             initial_population: 100,
             population_expected_max: 200,
+            site_tags: BTreeSet::new(),
             occupation_episodes: vec![OccupationEpisode {
                 valid: PERIOD,
                 state: OccupationState::Active,
@@ -112,6 +113,7 @@ fn fixture_atlas() -> HistoryAtlas {
     HistoryAtlas {
         atlas_id: "atlas-s0".into(),
         source_fingerprint: "fixture-s0-1".into(),
+        provenance: provenance(),
         timeline: PERIOD,
         cells: vec![
             cell("region", None, &[], site_ids(0..12)),
