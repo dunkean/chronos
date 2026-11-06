@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "status": "design_proposal",
-  "catalogue_version": "chronos-social-cultures-1",
+  "catalogue_version": "chronos-social-cultures-2",
   "source_inventory": {
     "path": "magna-urbis/rust/crates/core/src/urban/catalogue.json",
     "sha256": "a4e2febf9ef50e58ded4d658b7fe21072f95c6d43b71eff1b62027764781f2fe",

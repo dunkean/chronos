@@ -904,13 +904,9 @@ Les templates du JSON choisissent un mode initial parmi `collective_body`, `appo
 
 Les overlays marqués `spatial_or_material_tag` sont transmis à l’hôte spatial et ne changent pas une loi sociale par magie. Les overlays rituels ou magiques activent des archétypes optionnels, avec les mêmes règles de densité ; ils n’ajoutent aucun pouvoir biologique non déclaré. `reproduction_profile_required` impose un profil d’ascendance explicite, pas une reproduction fongique déduite du style architectural.
 
-<<<<<<< HEAD
 Les overlays fantastiques portent `world_activation_min_setting` : `setting_profile` les active au niveau du monde, sans dépendre des 79 raccords, et un overlay de variante peut aussi les activer localement. Aucun overlay ne réactive un archétype dont le `setting` dépasse celui du monde. `monstrous_threat` ne crée pas d'archétype : il multiplie la taille et le poids de `raiding_band`, sans exigence d'ascendance.
 
-Le profil de noms est résolu par la variante dans le pack Namebench figé. Si un pool manque, S1 prépare un repli déterministe déclaré `synthetic` ; le titre générique et le nom personnel ne sont jamais pris pour une identité.
-=======
 Les organisations seront nommées par le pack de nommage de Namebench, proposé et non encore livré : une grammaire et un lexique figés que Chronos évalue lui-même avec ses tirages à clés, selon le `kind` porté par `name_profile`, le `mu_culture_id` et des faits du monde. Le filtre `tone` reçoit une seule fois, à la création du nom, la `ConductClass` de fondation ; un changement de classe ne renomme pas l’organisation. Le canon stocke `name_tree`, pas le texte ; l’empreinte `generation` du pack entre dans le manifeste du monde et l’empreinte `rendering` n’y entre pas. Le profil de noms est résolu par la variante dans le pack Namebench figé. Si un pool manque, S1 prépare un repli déterministe déclaré `synthetic` ; le titre générique et le nom personnel ne sont jamais pris pour une identité.
->>>>>>> main
 
 ### 23.4 Couverture des archétypes
 
@@ -1181,12 +1177,9 @@ Les axes et la conformité sont des entiers, sans flottant dans le canon. La pro
 | S4 | Axes des personnes et des groupes, `alignment_fit`, inéligibilité, conflits |
 | S5 | Classe de conduite et statut légal dans l’inspecteur, filtres du graphe, canal cartographique `legality`, bilan des classes |
 
-<<<<<<< HEAD
 Les stocks du lot S1 sont inscrits dans `availability.stock_per_1000_adults` (1,0 pour chacun de `base_criminal_network` et `base_charitable_order`, durée moyenne 30 ans).
 
 Ajouter les recettes `conduct_class_is_derived_from_axes`, `ancestry_never_sets_alignment`, `legal_standing_is_relative_to_jurisdiction`, `standing_change_cites_an_event`, `proscribed_person_cannot_hold_office`, `alignment_fit_is_query_independent` et `same_firm_archetype_yields_several_conduct_classes`. Ajouter aussi `ordinary_firm_class_mix_matches_targets`, `conformity_is_not_averaged`, `every_archetype_has_a_generation_path` et `density_bounds_hold_by_site_size`, que l'outil de S1 vérifie déjà sur les données.
-=======
-Ajouter les recettes `conduct_class_is_derived_from_axes`, `ancestry_never_sets_alignment`, `legal_standing_is_relative_to_jurisdiction`, `standing_change_cites_an_event`, `proscribed_person_cannot_hold_office`, `alignment_fit_is_query_independent` et `same_firm_archetype_yields_several_conduct_classes`.
 
 ## 28. Contrat d’exécution démographique de S3
 
@@ -1223,4 +1216,3 @@ Les calculs utilisent des rationnels exacts ; le multiplicateur est quantifié u
 Le mode intégré remplace les ouvertures périodiques de `Cohorts.bounds` par une éligibilité fondée sur la dernière naissance réussie. Les deux composantes doivent tendre vers `p / (1 + (s − 1) × p)` naissances par paire et par an. Retirer seulement la multiplication par l’espacement, ou substituer ce taux stationnaire, ne reproduit ni le délai après une crise ni la formation des unions.
 
 Mesurer ensuite la reproduction nette sans régulateur, les trajectoires sur un siècle et l’extinction du noyau, sur la liste de seeds enregistrée. Si un template vise le remplacement, il est recalibré et versionné pour les deux composantes ; le petit noyau n’a pas à suivre une cible, et le régulateur ne doit pas être seul à maintenir une population voulue stable.
->>>>>>> main
