@@ -891,7 +891,7 @@ Les templates du JSON choisissent un mode initial parmi `collective_body`, `appo
 
 Les overlays marqués `spatial_or_material_tag` sont transmis à l’hôte spatial et ne changent pas une loi sociale par magie. Les overlays rituels ou magiques activent des archétypes optionnels, avec les mêmes règles de densité ; ils n’ajoutent aucun pouvoir biologique non déclaré. `reproduction_profile_required` impose un profil d’ascendance explicite, pas une reproduction fongique déduite du style architectural.
 
-Le profil de noms est résolu par la variante dans le pack Namebench figé. Si un pool manque, S1 prépare un repli déterministe déclaré `synthetic` ; le titre générique et le nom personnel ne sont jamais pris pour une identité.
+Les organisations seront nommées par le pack de nommage de Namebench, proposé et non encore livré : une grammaire et un lexique figés que Chronos évalue lui-même avec ses tirages à clés, selon le `kind` porté par `name_profile`, le `mu_culture_id` et des faits du monde. Le filtre `tone` reçoit une seule fois, à la création du nom, la `ConductClass` de fondation ; un changement de classe ne renomme pas l’organisation. Le canon stocke `name_tree`, pas le texte ; l’empreinte `generation` du pack entre dans le manifeste du monde et l’empreinte `rendering` n’y entre pas. Le profil de noms est résolu par la variante dans le pack Namebench figé. Si un pool manque, S1 prépare un repli déterministe déclaré `synthetic` ; le titre générique et le nom personnel ne sont jamais pris pour une identité.
 
 ## 24. Sémantique du plan démographique et du résultat
 
@@ -1135,3 +1135,39 @@ Les axes et la conformité sont des entiers, sans flottant dans le canon. La pro
 | S5 | Classe de conduite et statut légal dans l’inspecteur, filtres du graphe, canal cartographique `legality`, bilan des classes |
 
 Ajouter les recettes `conduct_class_is_derived_from_axes`, `ancestry_never_sets_alignment`, `legal_standing_is_relative_to_jurisdiction`, `standing_change_cites_an_event`, `proscribed_person_cannot_hold_office`, `alignment_fit_is_query_independent` et `same_firm_archetype_yields_several_conduct_classes`.
+
+## 28. Contrat d’exécution démographique de S3
+
+Amendements issus de la conception de l’étape 2, proposés et non implémentés. En cas de conflit avec les §7.4, §8.4, §25.2, §25.3 ou §26.4, ce paragraphe prévaut.
+
+### 28.1 Registre et noyau précalculé
+
+Dans le mode intégré, le registre par slot et ménage fait autorité ; les comptes de cohortes en sont dérivés. Le mode standalone reste inchangé. Une cohorte d’origine est scellée avant la définition de ses permutations, et une arrivée crée une nouvelle cohorte. Les références internes sont des rangs de table ; les IDs publics restent des adresses sémantiques.
+
+Le noyau peut rester précalculé. Ses choix de fécondité et de mouvement ne dépendent que de son propre état et des entrées fixes du plan. Il émet une bande d’événements datés par phase, avec les transferts réels de ménages et leurs identifiants d’opération. Les poids de destination du §25.3, fondés sur la population réalisée combinée, ne s’appliquent qu’à la mobilité projetée. L’arrière-plan ne consomme que les événements effectifs à la date courante, et son contrôleur ne lit jamais la population de clôture du noyau pour l’année en cours. Pour une opération demandant `H` ménages, la demande d’arrière-plan est `max(0, H − ménages_déplacés_par_le_noyau)`.
+
+### 28.2 Mortalité
+
+Les univers de permutation sont les cohortes d’origine et sexes scellés. **L’ordre annuel de sélection des décès inclut l’année dans sa clé**, sous une nouvelle `mortality_rule_version`. Avec un rang fixe à vie, les résidents installés auraient déjà épuisé les rangs faibles d’un site, et les nouveaux venus y subiraient une surmortalité à risque égal. L’identité stable d’un slot n’exige pas une priorité de décès à vie.
+
+Le quota de chaque groupe homogène se calcule sur le compte des présents, avec un arrondi stochastique indexé par groupe et année. Une mortalité maternelle vise les mères réelles, pas les femmes de leur cohorte.
+
+### 28.3 Ménages
+
+Fermer un épisode de ménage ne ferme pas forcément son identité. À chaque transition, la partition de destination complète est calculée puis appliquée d’un bloc : retrait des décès et fin des unions, conservation de l’ID du ménage du survivant, divorces, majorités et nouvelles unions, puis rattachement de chaque dépendant au gardien déclaré, sinon au parent co-résident d’ID minimal, sinon à `synthetic_care`. Un ménage vide n’est clos qu’après la réaffectation de ses dépendants.
+
+Un transfert fige la liste des membres et la déplace d’un bloc ; le ménage garde son ID. Les déménagements de mariage et les ménages entrants comptent comme déjà déplacés pour la phase 40. Les unités `synthetic_care` sont immobiles dans S3. Une paire projetée n’a qu’une union dans sa vie : divorce ou décès la ferment définitivement.
+
+La clé familiale d’origine identifie l’allocation de la paire parentale, indépendamment du site et de la cohorte de naissance de l’enfant. Une arrivée compte dans le budget historique de slots. Une personne partie a une couverture bornée et un décès inconnu, sans date inventée.
+
+### 28.4 Régulateur par site
+
+Les effets d’un choc couvrent `[start_year, end_year)`. `rebase_year = end_year + recovery_years`, et le contrôleur est suspendu jusqu’à cette année incluse : l’exemple rebase en phase 80 de 1365 et reprend en 1366. Une récupération nulle inclut donc la borne de fin. Les chocs nouveaux sont traités avant de tester la fin de récupération, ce qui gère les chevauchements.
+
+Les calculs utilisent des rationnels exacts ; le multiplicateur est quantifié une seule fois en ppm. Le guide est `G = max(0, q × baseline(Y−1) + M − M_ref)`, sur l’état publié précédent, et l’erreur est `(G − noyau) − arrière-plan`. Seules les probabilités de naissance projetées éligibles sont corrigées. Une baseline nulle met le contrôleur en mode neutre ; la première baseline positive ancre `q` en phase 80 et la correction commence l’année suivante, car un apport ne peut définir `P/0`. Saturation, noyau au-dessus du guide et absence de paire éligible sont publiés. Le contrôleur ne garantit aucune cible.
+
+### 28.5 Fécondité
+
+Le mode intégré remplace les ouvertures périodiques de `Cohorts.bounds` par une éligibilité fondée sur la dernière naissance réussie. Les deux composantes doivent tendre vers `p / (1 + (s − 1) × p)` naissances par paire et par an. Retirer seulement la multiplication par l’espacement, ou substituer ce taux stationnaire, ne reproduit ni le délai après une crise ni la formation des unions.
+
+Mesurer ensuite la reproduction nette sans régulateur, les trajectoires sur un siècle et l’extinction du noyau, sur la liste de seeds enregistrée. Si un template vise le remplacement, il est recalibré et versionné pour les deux composantes ; le petit noyau n’a pas à suivre une cible, et le régulateur ne doit pas être seul à maintenir une population voulue stable.
