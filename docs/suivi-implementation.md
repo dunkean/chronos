@@ -117,7 +117,7 @@ Statuts : `à faire`, `en cours`, `fait`, `bloqué (raison)`. Chaque tâche fini
 
 ### 7.1 Paliers Chronos (vision §7.6)
 
-Les paliers ci-dessous décrivent le plan antérieur. Pour démarrer l’implémentation sociale, suivre les lots S0–S8 du §7.4 et les arbitrages D6–D12.
+Les paliers ci-dessous décrivent le plan antérieur. Pour démarrer l’implémentation sociale, suivre les lots S0–S8 du §7.4 et les arbitrages D6–D13.
 
 **P0 — Modèle `SocialEntity`** : `à faire`. Preuve de sortie : même démo et mêmes invariants, sur le nouveau modèle.
 
@@ -221,6 +221,7 @@ Première livraison utilisable : S0–S5. Les contraintes exactes avancées et l
 | D10 | Styles Magna Urbis regroupés en familles historiques avec variantes ; graphes interactifs et bilans dès le prototype | orientation validée par les commentaires utilisateur du 06/11 | Raccord et choix graphiques proposés dans le dossier |
 | D11 | Frontières statistiques dans S0–S5 ; suivi nominatif exact par contrat de liaison dans S7 | périmètre technique proposé | Limite déclarée, aucune fonctionnalité existante prétendue |
 | D12 | Lineage Lab reste en Python pour S0–S5 ; il devra passer en Rust à terme | **décidé** (Gregory, 06/11/2026) | Migration non planifiée, à placer après S5. Elle n'est pas un prérequis : la démographie reste derrière le contrat de fournisseur. Un moteur Rust sera un nouveau fournisseur versionné, donc de nouveaux canons, sans rejeu à l'identique des mondes Python |
+| D13 | Alignement et légalité dès S0–S5 : personnes et organisations typées de « sans foi ni loi » à « saint », mafia / lambda / vertueuse ; axes gradués et valeurs culturelles ; légalité par juridiction et datée | **décidé** (Gregory, 06/11/2026) | Design v2 §27. Valeurs initiales proposées, non calibrées |
 
 Pour S0–S5, D1/D2/D4 ne bloquent pas le développement : l’atlas et les géométries sont des exports figés, la fixture définit explicitement cellules/routes/sites, et aucun lien d’exécution nouveau avec Magna Urbis n’est requis. Ces décisions restent à résoudre pour les intégrations d’hôte ultérieures, sans inventer une seconde grille dans Chronos.
 
