@@ -3075,7 +3075,10 @@ impl<'a> Run<'a> {
             .family_key
             .iter()
             .zip(&names)
-            .filter_map(|(key, name)| Some((key.clone(), name.as_ref()?.surname.clone())))
+            .filter_map(|(key, name)| {
+                let house = &name.as_ref()?.house;
+                (!house.is_empty()).then(|| (key.clone(), house.clone()))
+            })
             .collect();
         let thresholds = inputs
             .catalogue
