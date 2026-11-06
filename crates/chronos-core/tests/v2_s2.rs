@@ -404,6 +404,22 @@ fn explicit_author_series_survive_unchanged() {
     partial.site_baselines.pop_first();
     assert!(build_canon(&config(), &atlas, &catalogue(), &partial).is_err());
 }
+#[test]
+fn every_domain_core_budget_admits_its_target_founders() {
+    let canon = canon();
+    let region = plan_region(&canon, REGION).unwrap();
+    let configured = &canon.config.population.limits;
+    let mut raised = 0;
+    for plan in plans(&canon, &region) {
+        let initial: u64 = plan.settlements.iter().map(|s| s.initial_population).sum();
+        let limits = &plan.limits;
+        assert!(initial * limits.core_target_share_bps / 10_000 <= limits.max_core_living);
+        assert_eq!(limits.core_target_share_bps, 500);
+        assert_eq!(limits.core_max_share_bps, 1000);
+        raised += usize::from(limits.max_core_living > configured.max_core_living);
+    }
+    assert!(raised > 0, "the demo domains exceed the configured cap");
+}
 fn seeded(seed: u64) -> WorldConfig {
     let mut config = config();
     config.world_seed = seed;
