@@ -12,6 +12,23 @@ La cible est plus exigeante qu'un atlas à une date : un village détruit devien
 
 Le cadrage existant reste applicable : **Neural Earth porte l'espace et le milieu naturel ; Magna Urbis les établissements et leur géométrie ; Chronos le temps et les transformations historiques ; Pecking Order les structures institutionnelles ; Lineage Lab les vies et filiations ; Namebench les noms.** Azgaar apporte des sources de contenu et des méthodes à adapter à ces contrats. Il n'ajoute pas un second monde spatial à maintenir en parallèle. [Conception sociale][C4]
 
+### 1.1. Principe : le modèle générique d'abord, le contenu Azgaar ensuite
+
+*Ajout du 26/10/2026, après revue.* On ne reprend pas la **structure** d'Azgaar quand un mécanisme générique de Chronos produit le même résultat. Chez Azgaar, un État *a* une religion, une culture *a* un type (naval, nomade), un État *a* une forme. Chez Chronos, ces notions sont des **étiquettes lues** dans un état plus général :
+- **idées** (croyances, langues, coutumes, savoirs, styles) ;
+- **adhésions**, des distributions portées par les cohortes ;
+- **appuis**, des relations datées comme `ENDORSES` ou `ADMINISTERS` ;
+- **structure de pouvoir** (Pecking Order) et **activités**.
+
+Ce méta-modèle est décrit dans la [conception sociale §7.8][C4]. Une religion d'État n'est donc pas imposée : elle émerge d'un événement d'adoption quand la majorité, le souverain ou une Église y poussent. La religion reste un moteur majeur, avec un poids fort dans le mécanisme générique, mais sans code propre.
+
+Ce qu'on reprend d'Azgaar se range alors en trois catégories :
+- des **catalogues de contenu** : doctrines, divinités, noms, emblèmes, biens, recettes, lieux d'intérêt, vocabulaire narratif ;
+- des **règles de lecture** : sa taxonomie folk / organisée / culte / hérésie, ses formes d'État, ses types culturels, réécrits comme classifieurs ;
+- des **heuristiques de bootstrap** : préférences de foyer, coûts d'expansion.
+
+Les sections 3.3 et 3.4 sont à lire avec ce principe.
+
 ## 2. Ce qu'Azgaar fournit et ce qui manque à Chronos
 
 Fantasy Map Generator construit une carte finie sur un graphe de cellules, puis génère successivement climat, biomes, cultures, établissements, États, routes, religions, provinces, marchés, production et couches narratives. Les données sont conservées principalement dans `grid` et `pack`. Le pipeline est une séquence ordonnée ; il ne s'agit pas d'un ordonnanceur multiéchelle à dépendances déclarées. [Pipeline][F1]
@@ -22,8 +39,8 @@ Chronos dispose déjà d'événements annuels avec causes et effets, de populati
 | --- | --- | --- | --- |
 | Emblèmes | Compose blasons, formes, couleurs, partitions et charges ; affiche et exporte les emblèmes | Couleurs de puissances, sans identité héraldique structurée | Catalogues, recette déclarative et règles de composition |
 | Lieux d'intérêt | Génère marqueurs et légendes : ruines, auberges, grottes, sources, nécropoles, rencontres et autres particularités | Pas de modèle générique de lieu d'intérêt relié à un événement, un établissement et une organisation | Tables de contenu, critères de contexte, noms et descriptions |
-| Religions | Cultes populaires, religions organisées, cultes et hérésies ; divinités, origines et expansion spatiale | Pas de croyances, d'appartenances religieuses ou de schismes simulés ; les modèles Pecking Order ne suffisent pas à les créer | Taxonomies, vocabulaire, règles de nommage et heuristiques de diffusion |
-| Cultures et territoires | Préférences géographiques, types culturels, expansion, États, provinces et relations diplomatiques | Culture surtout utilisée comme clé de noms ; puissances simples, sans provinces ni graphe social complet | Contraintes d'implantation et heuristiques de bootstrap politique |
+| Religions | Cultes populaires, religions organisées, cultes et hérésies ; divinités, origines et expansion spatiale | Pas de croyances, d'appartenances religieuses ou de schismes simulés ; les modèles Pecking Order ne suffisent pas à les créer | Vocabulaire, doctrines, divinités, règles de nommage, heuristiques de diffusion. La taxonomie devient une lecture du méta-modèle d'idées (§1.1) |
+| Cultures et territoires | Préférences géographiques, types culturels, expansion, États, provinces et relations diplomatiques | Culture surtout utilisée comme clé de noms ; puissances simples, sans provinces ni graphe social complet | Contraintes d'implantation et heuristiques de bootstrap politique. Types culturels et formes d'État deviennent des étiquettes dérivées (§1.1) |
 | Économie | Biens bruts et manufacturés, recettes, besoins, marchés, prix, production, échanges, taxes, tarifs et embargos | Six indices de ressources par site ; aucun catalogue de biens ni de recettes, aucun registre de transactions | Ontologie des biens, recettes et mécanismes économiques à redéfinir dans le temps |
 | Voyages | Itinéraires avec étapes, transports, vitesses, séjours, durées et habillage narratif | Distances et temps de trajet existent, sans voyage nommé et structuré avec étapes | Modèle d'étapes, calcul des durées et tables narratives |
 | Noms | Bases éditables et génération Markov de noms inventés | Pools Namebench figés et listes de repli, sans petit générateur productif intégré | Bases utiles et principe de génération légère, en complément de Namebench |
@@ -61,6 +78,14 @@ Les affiliations sont datées et peuvent coexister. Un schisme crée une nouvell
 
 Pour un univers fantastique, préciser séparément si une divinité est un objet de croyance ou un acteur réel. Le vocabulaire d'Azgaar ne décide pas cette règle d'univers.
 
+**Lecture méta-modèle (§1.1).** Cette séparation est un cas particulier d'un mécanisme commun :
+- la croyance est une `Idea` de dimension *croyance* ;
+- la communauté est la distribution d'adhésion des cohortes ;
+- l'organisation est une entité liée à l'idée par `ADMINISTERS` ;
+- la religion d'État est un `ENDORSES` daté.
+
+La diffusion, les conversions, les schismes (`DERIVED_FROM`) et les syncrétismes passent par le même moteur que les langues, les coutumes et les savoirs. Les catégories `Folk`, `Organized`, `Cult` et `Heresy` ne sont pas des types stockés : ce sont des classifieurs qui lisent cet état.
+
 ### 3.4. Cultures États provinces et diplomatie
 
 Les [cultures][F6] ont des préférences environnementales et des types comme fluvial, lacustre, maritime, nomade ou montagnard. Les [États][F7] et [provinces][F8] apportent des mécanismes de regroupement territorial et de subdivision. La diplomatie possède un vocabulaire de relations, dont alliance, rivalité, dépendance et hostilité.
@@ -68,6 +93,11 @@ Les [cultures][F6] ont des préférences environnementales et des types comme fl
 Ces règles sont utiles au **bootstrap P1** : définir des foyers et une répartition initiale cohérente avec le milieu et les trajets, en fonction du scénario colonisation, jeune civilisation ou vieille civilisation. Leurs champs d'expansion sont des heuristiques de génération, pas une chronologie à réutiliser comme si chaque conquête avait été simulée.
 
 Adapter les méthodes aux cellules stables de Neural Earth, avec une correspondance explicite des cultures entre Magna Urbis, Namebench et Pecking Order. Conserver des catégories distinctes pour culture, langue, croyance, citoyenneté et pouvoir politique. Le contrôle d'un territoire ne transforme pas automatiquement la culture de tous ses habitants.
+
+**Lecture méta-modèle (§1.1).**
+- Le **type culturel** (fluvial, nomade, naval…) n'est pas assigné. Il se lit dans les parts d'activités et le milieu de l'empreinte ; les préférences de foyer d'Azgaar ne servent qu'à semer le bootstrap.
+- La **forme d'État** (monarchie, théocratie, république) se lit dans la structure de pouvoir Pecking Order. Le **rang** (royaume, empire) se lit dans la taille, la diversité des peuples et la profondeur des vassalités. Une révolution change la structure, et l'étiquette suit.
+- La **culture** elle-même est une catégorie lue dans les distributions d'idées partagées (langue, coutumes, croyances), ce qui permet l'ethnogenèse.
 
 Les relations qui ont des effets deviennent des relations datées de Chronos : traité d'alliance, vassalité, embargo ou rupture. Un différend historique peut être relié à un événement ; une proximité culturelle peut rester une affinité calculée, conformément à la conception sociale. Un récit de campagne chez Azgaar n'est pas importé comme une preuve des pertes et changements de contrôle correspondants.
 
@@ -127,7 +157,8 @@ Exemples de contrats proposés, à spécifier avant leur implémentation :
 | --- | --- | --- |
 | `assign_emblem` | Entité, épisode, catalogue, clé sémantique | Recette attribuée une fois ; le renderer ne la régénère pas |
 | `propose_points_of_interest` | Scope, bloc, budgets, milieu et événements déjà réservés | Lieux et rattachements, sans modifier le canon parent |
-| `bootstrap_beliefs` | Foyers culturels, population et graphe de trajets | Croyances et affiliations initiales ; progression ultérieure par événements |
+| `bootstrap_ideas` | Foyers, population, graphe de trajets, catalogue d'idées, maturité `m` | Distributions d'adhésion initiales par dimension, organisations et appuis initiaux ; progression ultérieure par le moteur générique et des événements |
+| `classify` | État de l'entité à une date, version des règles | Étiquettes (religion d'État, forme, rang, type culturel…), jamais stockées |
 | `advance_economy` | État initial du bloc, capacités, recettes, demande et règles | État final et écritures réconciliables ; causes et effets explicites |
 | `project_journey` | Déplacement canonique, routes, transports et calendrier | Étapes et durées compatibles avec le fait macro |
 
@@ -147,7 +178,7 @@ L'adaptateur normalise sites, territoires et relations dans une **nouvelle entr�
 
 ## 5. Modèle de données et invariants à préserver
 
-Le modèle cible peut accueillir des spécifications de contenu et des épisodes datés, sans les confondre : `GoodSpec`, `RecipeSpec`, `BeliefSpec`, `EmblemSpec`, `PointOfInterest`, `Journey`, `EconomicState` et liens vers `SocialEntity`. Ces noms sont **des propositions**, absentes du contrat JSON actuel. Les petits ajouts avant P0 doivent prévoir leur migration plutôt que créer des identités concurrentes.
+Le modèle cible peut accueillir des spécifications de contenu et des épisodes datés, sans les confondre : `GoodSpec`, `RecipeSpec`, `IdeaSpec` (générique, la dimension *croyance* remplaçant un `BeliefSpec` dédié), `EmblemSpec`, `PointOfInterest`, `Journey`, `EconomicState` et liens vers `SocialEntity`. Ces noms sont **des propositions**, absentes du contrat JSON actuel. Les petits ajouts avant P0 doivent prévoir leur migration plutôt que créer des identités concurrentes.
 
 Principes communs :
 
@@ -168,7 +199,7 @@ Les lots ci-dessous complètent les paliers existants ; ils ne déclarent aucun 
 | A0 | Épingler les sources, extraire un petit pack et ses correspondances, conserver les notices | Aucune modification du moteur requise | Deux extractions identiques ; chaque entrée remonte à un fichier amont |
 | A1 | Attribuer des emblèmes et compléter les noms ; renderer déterministe | A0 ; adaptateurs temporaires sur les types actuels | Même identité avant/après rechargement, sans aléa dans le client |
 | A2 | Ajouter quelques lieux d'intérêt et descriptions dérivés des événements existants | A0 ; contrat d'identité et de date | Une destruction et une reconstruction produisent les états attendus du même lieu, sans nouveau décès ou habitant |
-| A3 | Initialiser croyances, territoires et organisations ; dater affiliations et relations | P0, P1 ; progression P2 et raffinement P3 pour les évolutions | Même répartition canonique quel que soit l'ordre d'ouverture ; aucun double comptage |
+| A3 | Méta-modèle d'idées : adhésions, appuis, moteur de diffusion et classifieurs d'étiquettes (§1.1). Puis semer croyances, langues et coutumes, territoires et organisations depuis les catalogues Azgaar ; dater affiliations et relations | P0, P1 ; progression P2 et raffinement P3 pour les évolutions | Même répartition canonique quel que soit l'ordre d'ouverture ; aucun double comptage |
 | A4 | Introduire quelques biens et recettes, puis stocks, droits et échanges | Contrat ressources R2, consommation R5, modèle social et progression | Bilan de matière réconcilié ; famine, mine et embargo ont des effets traçables |
 | A5 | Voyages structurés, couches cartographiques et exports datés | Routes canoniques et projections temporelles | Étapes compatibles avec l'arrivée ; l'export correspond à l'année affichée |
 
