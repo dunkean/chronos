@@ -20,6 +20,7 @@ Fichiers du dossier : cette spécification ; [raccord des cultures](culture-bind
 6. Une région possède un voisinage et un extérieur simplifiés. L’ouverture d’une nouvelle zone ne change pas les identités des zones déjà définies.
 7. Les styles de Magna Urbis sont regroupés en familles de paramètres historiques, avec variantes conservées.
 8. Carte temporelle, chronologie, graphes interactifs et bilans font partie du premier prototype utilisable.
+9. Personnes et organisations sont typées de « sans foi ni loi » à « saint », et une organisation se lit d’un coup d’œil comme mafia, entreprise lambda ou entreprise vertueuse. La légalité est relative à une juridiction et datée (§27).
 
 ### 1.2 Première livraison attendue
 
@@ -83,7 +84,7 @@ L’atlas de S0–S5 est une fixture régionale complète, exportée ou virtuell
 - `ExternalContact` : ID et propriétaire, extrémités, voie d’accès, profils et population extérieure attendue ;
 - les catalogues de sites candidats sur la période, sans géométrie urbaine détaillée.
 
-Le bootstrap valide ces entrées, initialise les collectifs et les comptes, crée les ports, puis fige la partition des domaines. Le bootstrap ne tue aucune personne encore inexistante : il inscrit les chocs effectifs à `start_year` comme opérations initiales du plan. Le fournisseur construit ses fondateurs pré-choc, appelle `apply_initial_program` une fois avant le premier recensement et publie le delta initial explicite. Ces opérations ne sont pas répétées à l’année suivante. Cette extension intégrée est obligatoire en S3. Les dates de fondateurs peuvent être antérieures à la couverture ; leur passé inconnu n’est pas inventé.
+Le bootstrap valide ces entrées, initialise les collectifs et les comptes, crée les ports, puis fige la partition des domaines. Le bootstrap ne tue aucune personne encore inexistante : il inscrit les chocs effectifs à `start_year` comme opérations initiales du plan. Le fournisseur construit ses fondateurs pré-choc, appelle `apply_initial_program` une fois avant le premier recensement et publie le delta initial explicite. Ces opérations ne sont pas répétées à l’année suivante. Un choc limité à `start_year` n’agit au bootstrap que par sa surmortalité ; ses effets de fécondité et de capacité, ou un multiplicateur de mortalité inférieur à 1, n’ont pas d’année simulée où s’exercer et sont publiés comme effets sans conséquence dans le delta initial. Cette extension intégrée est obligatoire en S3. Les dates de fondateurs peuvent être antérieures à la couverture ; leur passé inconnu n’est pas inventé.
 
 S0–S5 utilisent une situation initiale fournie. Les trois scénarios de maturité P1, le peuplement planétaire paresseux et les nouvelles géométries de villes ne sont pas des dépendances cachées de cette livraison. Ils pourront remplacer le fournisseur d’atlas par le même contrat.
 
@@ -131,7 +132,7 @@ world / office_id / tenure_ordinal
 world / event_owner / event_kind / origin_block / ordinal
 ```
 
-Les IDs v2 sont **l’adresse complète**, encodée sans perte en base64url sans bourrage, préfixée par le type. Encodage binaire : préfixe UTF-8 `chr2\0`, puis pour chaque champ sa longueur u32 little-endian et ses octets UTF-8. Les champs numériques sont des entiers décimaux normalisés. Leurs bornes maintiennent l’ID sous 4 096 caractères ; un dépassement est refusé. Aucun hash de 64 bits ne sert d’identité : il n’existe donc pas de collision historique cachée découverte seulement à la seconde visite.
+Les IDs v2 sont **l’adresse complète**, encodée sans perte en base64url sans bourrage, préfixée par le type et un point (`event.Y2hy…`), caractère absent de l’alphabet base64url et sans ambiguïté de schéma dans une URL relative. Chaque objet possède une seule forme d’adresse : les champs d’un domaine ou d’un propriétaire sont toujours aplatis, et un champ littéral (`household`, `transfer`, `relation`, `group_slot`) n’admet que sa valeur. Encodage binaire : préfixe UTF-8 `chr2\0`, puis pour chaque champ sa longueur u32 little-endian et ses octets UTF-8. Les champs numériques sont des entiers décimaux normalisés. Leurs bornes maintiennent l’ID sous 4 096 caractères ; un dépassement est refusé. Aucun hash de 64 bits ne sert d’identité : il n’existe donc pas de collision historique cachée découverte seulement à la seconde visite.
 
 Le namespace d’une personne inclut son domaine et son plan fournisseur. Les migrations ne changent jamais cette adresse. Les anciens IDs v1 restent opaques dans l’adaptateur v1.
 
@@ -182,6 +183,7 @@ EntityState
   lifecycle: active | dormant | dissolved
   member_count: CountMeasure
   cohesion_bps, legitimacy_bps, wealth_index, capabilities[]
+  alignment: AlignmentAxes, conduct_tags[], visibility: open | covert
   goals[], assets[], footprint_refs[], institution_version
 
 SocialRelation
@@ -190,13 +192,14 @@ SocialRelation
   cause_event_id?, provenance, rule_id
 
 ObjectRef
-  entity | office | site | asset | person_slot
+  entity | office | site | asset | person_slot | activity
 
 PersonRecord
   entity_id, provider_ref, birth_year, death_year?
   parent_refs[], union_refs[], residence_episodes[]
   source: lineage_simulated | lineage_projected | procedural | author
   ancestry_profile, social_attribute_episodes[], coverage
+  alignment_episodes[]
 ```
 
 L’entité est commune, mais la charge personnelle et les structures internes des groupes restent typées séparément. Les propriétés de sites et actifs sont reliées au graphe sans prétendre que toute montagne est un acteur social.
@@ -212,6 +215,7 @@ L’entité est commune, mais la charge personnelle et les structures internes d
 | Pouvoir | `holds_office`, `governs`, `commands`, `protects`, `owes_allegiance_to` | Mandats et capacités valides |
 | Économie | `owns`, `controls`, `claims`, `owes`, `trades_with` | Propriété distincte de l’usage et de la revendication |
 | Histoire | `allied_with`, `in_conflict_with`, `successor_of`, `split_from`, `merged_into` | Causes et continuités explicites |
+| Légalité | `LegalStanding` (§27.3), type daté distinct d’une relation libre | Toujours relative à une juridiction ; changement porté par un événement |
 
 La similarité de culture, métier, proximité ou parenté est calculée à la demande. Un lien particulier d’amitié ou de dette est un fait généré et daté. Le voisinage du graphe est borné : aucun calcul global de toutes les paires de personnes.
 
@@ -330,7 +334,7 @@ Le sélecteur d’exposition est tiré une fois par événement et cible ; le pr
 
 `ruin` produit aussi un épisode matériel d’endommagement ; il ne signifie pas que toute la population meurt. Une arrivée militaire s’observe au plus tôt à `début + ceil(travel_days/365)`, convention annuelle conservatrice. Le type d’impact et sa base de comptage sont toujours affichés.
 
-La composition initiale des chocs est `independent_survival_v1` : multiplicateurs en ppm dans l’ordre des IDs, puis `p_total = 1 − (1 − p_base_modifiée) × produit(1 − p_supplémentaire)`. Aucun autre modèle de corrélation des mortalités n’est accepté avant une version supplémentaire.
+La composition initiale des chocs est `independent_survival_v1` : multiplicateurs en ppm dans l’ordre des IDs, puis `p_total = 1 − (1 − p_base_modifiée) × produit(1 − p_supplémentaire)`. Aucun autre modèle de corrélation des mortalités n’est accepté avant une version supplémentaire. Un multiplicateur `f` agit en risque cumulatif : `p_base_modifiée = 1 − (1 − p_base)^f`, sémantique de `mortality_factor` et `fertility_factor` dans Lineage Lab, ce qui garde une probabilité valide.
 
 ## 8. Pilotage de Lineage Lab
 
@@ -875,7 +879,7 @@ Le nombre d’adultes attendu vient du résumé d’âge fourni ; défaut de fix
 
 Tous les `fit` suivants sont des scores 0–1 000. `activity_fit` vaut 1 000 si l’activité correspond, sinon zéro ; `kin_fit` est 1 000 pour une affinité familiale ciblée, sinon zéro ; `status_fit` est le score de préférence du profil, sans remplacer un filtre dur. `distance_fit = floor(1000 × travel_scale_days / (travel_scale_days + travel_days))`, avec `travel_scale_days = 30` par défaut. Un trajet interdit exclut le candidat.
 
-`weight = 1000 + 3×skill_fit + 2×activity_fit + status_fit + distance_fit + floor(kin_recruitment_bonus×kin_fit/1000) + network_fit`.
+`weight = 1000 + 3×skill_fit + 2×activity_fit + status_fit + distance_fit + floor(kin_recruitment_bonus×kin_fit/1000) + network_fit + alignment_fit`, avec `alignment_fit` défini au §27.5.
 
 Le bonus familial est un score additif 0–1 000, pas une probabilité. Le poids formel 0–100 règle le stock d’associations relativement à 50. Le multiplicateur de mobilité est en ppm ; il est résolu dans le profil social du domaine pour S3, pas appliqué implicitement par site à un moteur qui ne le prend pas en charge.
 
@@ -940,7 +944,7 @@ world / owner / transfer / origin / destination / effective_year / ordinal
 
 Les préfixes communs des adresses d’extrémités sont factorisés, sans concaténation récursive d’IDs encodés. Une relation garde son ID lorsque son poids évolue dans des épisodes ; un changement de type ou un nouveau lien après rupture possède un nouvel ordinal.
 
-Les dix `base_archetype_ids` sont toujours disponibles : ferme, atelier, commerce, services, cercle d’amis, communauté religieuse, faction, voisinage, institution locale et association de métier. Leur disponibilité ne garantit pas leur présence dans chaque village. `common_groups` ajoute un bonus de poids ×2 aux types éligibles ; il ne définit pas la liste exclusive des types possibles. Les overlays optionnels disposent d’archétypes nommés existants.
+Les douze `base_archetype_ids` sont toujours disponibles : ferme, atelier, commerce, services, cercle d’amis, communauté religieuse, faction, voisinage, institution locale, association de métier, réseau criminel et œuvre charitable (ces deux derniers ajoutés par le §27.6). Leur disponibilité ne garantit pas leur présence dans chaque village. `common_groups` ajoute un bonus de poids ×2 aux types éligibles ; il ne définit pas la liste exclusive des types possibles. Les overlays optionnels disposent d’archétypes nommés existants.
 
 Chaque `activity_unit` déclare ses `activity_ids`. Pour toute activité de poids non nul, le profil résolu doit offrir au moins un type compatible ; sinon S1 refuse le catalogue. Les classes de génération promises au §1.2 doivent également avoir leur type de base. Les densités communes, part attendue d’adultes, participation au travail et échelle de trajet sont des champs explicites du JSON.
 
@@ -1068,3 +1072,66 @@ Le compteur des années consécutives sous le seuil est mis à jour après cette
 
 Ajouter les recettes `cohesion_can_cross_split_threshold`, `cohesion_effect_is_applied_once_per_event_year`, `worker_receives_foster_limit` et `generated_baseline_nodes_are_independent_of_shocks`.
 
+## 27. Alignement et légalité
+
+Décision de produit du 6 novembre 2026, proposée ici et non implémentée. Le but est de typer personnes et organisations de « sans foi ni loi » à « saint », et de distinguer d’un coup d’œil une mafia, une entreprise lambda et une entreprise vertueuse. Toutes les valeurs numériques sont des réglages initiaux de worldbuilding, à évaluer dans les bilans.
+
+### 27.1 Axes
+
+`AlignmentAxes {morality_bps, lawfulness_bps}`, deux entiers signés de −10 000 à +10 000. `morality` va du prédateur au saint ; `lawfulness` va de la défiance de toute règle au respect scrupuleux. Ces axes décrivent une conduite, pas une nature : ils ne sont jamais tirés de `AncestryProfile`, et un mot comme « elfe » ou « orque » ne produit aucun alignement (§6.2). Une contrainte d’auteur peut les fixer explicitement.
+
+### 27.2 Classe de conduite
+
+`ConductClass` est la lecture principale. Elle est **dérivée** par une fonction pure des axes à la date demandée, jamais stockée ni tirée à part. La première règle vérifiée s’applique :
+
+| Classe | Condition | Personne | Organisation |
+|---|---|---|---|
+| `lawless` | `morality ≤ −6000` et `lawfulness ≤ −3000` | Sans foi ni loi | Mafia |
+| `crooked` | `morality ≤ −2500` | Véreux | Véreuse |
+| `ordinary` | `morality < 2500` | Ordinaire | Lambda |
+| `upright` | `morality < 7000` | Droit | Honnête |
+| `saintly` | sinon | Saint | Vertueuse |
+
+Les libellés « mafia » et « lambda » s’appliquent aux groupes organisés ; une catégorie ou une population n’a pas de classe de conduite. Les seuils sont dans `engine_defaults.alignment`.
+
+### 27.3 Légalité
+
+```text
+LegalStanding
+  id, subject: ObjectRef, jurisdiction: ObjectRef
+  status: licit | tolerated | proscribed
+  valid: [start, end), cause_event_id?, provenance, rule_id
+```
+
+Le sujet est une organisation, une activité ou une personne ; la juridiction est une institution ou un collectif gouvernant. Un même culte peut donc être licite ici et proscrit là, et un même groupe changer de statut quand le contrôle d’un site change. Tout changement après l’état initial cite un événement : `edict`, `charter`, `heresy_trial` ou `banishment`. Une personne `proscribed` dans une juridiction est hors-la-loi. L’absence de `LegalStanding` vaut `licit`.
+
+**Légalité et conduite sont indépendantes.** Une entreprise licite peut être véreuse, une résistance proscrite peut être vertueuse. `visibility = covert` marque un groupe dont l’existence est cachée ; les façades légales d’un groupe criminel sont reportées après S5.
+
+### 27.4 Valeurs culturelles
+
+Chaque famille culturelle et chaque culte déclarent `value_profile` : des poids entiers de −1 000 à +1 000 sur un catalogue fermé de `conduct_tags` (`violence`, `extortion`, `usury`, `charity`, `sorcery`, `blasphemy`…). Les archétypes et les personnes portent ces tags. `conformity_bps(entité, culture)` se calcule à la demande. Les axes comparent entre cultures ; la conformité dit ce qu’une culture donnée en pense. Une sorcière peut être `upright` et mal vue.
+
+Le statut initial d’un archétype dans une juridiction vient de la conformité à la culture de cette juridiction : au plus −5 000 donne `proscribed`, au plus −1 500 donne `tolerated`, sinon `licit`.
+
+### 27.5 Génération et effets
+
+- **Personnes.** Base culturelle, plus latent familial tiré sur la clé de famille du §8.4, plus écart individuel stable, sous la sous-clé `alignment/v1`. Chaque axe additionne trois tirages uniformes bornés afin que les extrêmes restent rares. Dans la première version, les axes d’une personne ne bougent qu’à travers un `alignment_episode` daté, causé par un événement explicite.
+- **Organisations.** Base de l’archétype, plus base culturelle, plus écart stable par slot de groupe. Une entreprise ordinaire peut ainsi être lambda, honnête ou véreuse. Une scission tire les axes du nouveau groupe sous son propre ID.
+- **Recrutement.** `alignment_fit = max(0, 1000 − floor((|Δmorality| + |Δlawfulness|) / 40))` entre la personne et le groupe.
+- **Offices.** Une personne `proscribed` dans une juridiction, ou membre connu d’un groupe `proscribed` et non `covert`, n’est pas éligible aux offices de cette juridiction.
+- **Conflits.** Une juridiction et un groupe `proscribed` non `covert` entretiennent une relation `in_conflict_with` datée.
+- **Démographie.** Rien de ceci n’entre dans le plan ni dans le worker Python. Ces champs sont consommés par la couche sociale Rust, après la table de population.
+
+Les axes et la conformité sont des entiers, sans flottant dans le canon. La provenance est `derived` pour les valeurs tirées, `synthetic` pour les bases par défaut.
+
+### 27.6 Répartition par lot
+
+| Lot | Apport |
+|---|---|
+| S0 | `AlignmentAxes`, `ConductClass` et sa fonction, `LegalStanding`, `visibility`, `conduct_tags`, `ObjectRef::Activity` |
+| S1 | `engine_defaults.alignment`, `value_profile` par famille, bases par archétype, `base_criminal_network` et `base_charitable_order` (stock initial 1 par mille adultes chacun, durée moyenne 30 ans) |
+| S2 | Statuts initiaux, événements `edict`, `charter`, `heresy_trial`, `banishment`, réévaluation au changement de contrôle |
+| S4 | Axes des personnes et des groupes, `alignment_fit`, inéligibilité, conflits |
+| S5 | Classe de conduite et statut légal dans l’inspecteur, filtres du graphe, canal cartographique `legality`, bilan des classes |
+
+Ajouter les recettes `conduct_class_is_derived_from_axes`, `ancestry_never_sets_alignment`, `legal_standing_is_relative_to_jurisdiction`, `standing_change_cites_an_event`, `proscribed_person_cannot_hold_office`, `alignment_fit_is_query_independent` et `same_firm_archetype_yields_several_conduct_classes`.
