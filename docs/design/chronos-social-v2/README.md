@@ -134,6 +134,8 @@ world / event_owner / event_kind / origin_block / ordinal
 
 Les IDs v2 sont **l’adresse complète**, encodée sans perte en base64url sans bourrage, préfixée par le type et un point (`event.Y2hy…`), caractère absent de l’alphabet base64url et sans ambiguïté de schéma dans une URL relative. Chaque objet possède une seule forme d’adresse : les champs d’un domaine ou d’un propriétaire sont toujours aplatis, et un champ littéral (`household`, `transfer`, `relation`, `group_slot`) n’admet que sa valeur. Encodage binaire : préfixe UTF-8 `chr2\0`, puis pour chaque champ sa longueur u32 little-endian et ses octets UTF-8. Les champs numériques sont des entiers décimaux normalisés. Leurs bornes maintiennent l’ID sous 4 096 caractères ; un dépassement est refusé. Aucun hash de 64 bits ne sert d’identité : il n’existe donc pas de collision historique cachée découverte seulement à la seconde visite.
 
+Un propriétaire s’écrit à plat derrière un discriminant : `world` sans autre champ, `cell` et l’ID de cellule, `site` et l’ID de site, `domain` puis région, profil et ordinal. `owner_scope`, `event_owner` et `owner` désignent cette forme dans toutes les adresses. Le discriminant fait partie de l’adresse : une cellule et un domaine de même libellé restent deux propriétaires. Les adresses dont le propriétaire est toujours un domaine (personne, ménage, plan, domaine) reprennent monde, région, profil et ordinal, sans discriminant. Dans les faits, `owner_scope` est ce type structuré sans le monde : l’atlas le porte aussi, et il est une entrée du canon, donc antérieur à tout `canon_id`.
+
 Le namespace d’une personne inclut son domaine et son plan fournisseur. Les migrations ne changent jamais cette adresse. Les anciens IDs v1 restent opaques dans l’adaptateur v1.
 
 Les adresses filles réutilisent les champs du préfixe sémantique, sans réencoder récursivement un ID parent complet comme champ. L’adresse d’une personne est aplatie en monde, domaine, algorithme fournisseur et ID local ; le manifeste mondial fixe son plan. Les objets persistants ne changent pas d’ID lorsque leur libellé ou résidence évolue.
@@ -175,8 +177,8 @@ SocialEntity
   id, semantic_address, kind, archetype_id
   nature: person | organized_group | community | category | population
   agency: none | individual | delegated | governed
-  owner_scope, existence: [start, end)
-  culture_refs[], institution_ref?, provenance
+  owner_scope: world | cell | site | domain, existence: [start, end)
+  culture_refs[], institution_ref?, provenance, name_tree?
 
 EntityState
   entity_id, at_year
@@ -198,9 +200,11 @@ PersonRecord
   entity_id, provider_ref, birth_year, death_year?
   parent_refs[], union_refs[], residence_episodes[]
   source: lineage_simulated | lineage_projected | procedural | author
-  ancestry_profile, social_attribute_episodes[], coverage
+  ancestry_profile, social_attribute_episodes[], observed_span
   alignment_episodes[]
 ```
+
+`name_tree` est l’arbre de nom du §23.3, valeur JSON opaque soumise au contrôle canonique, omise tant qu’aucun arbre n’existe. `observed_span` donne les années observées par le fournisseur, à ne pas confondre avec l’axe `coverage` du §4.3.
 
 L’entité est commune, mais la charge personnelle et les structures internes des groupes restent typées séparément. Les propriétés de sites et actifs sont reliées au graphe sans prétendre que toute montagne est un acteur social.
 
@@ -540,7 +544,7 @@ Les transferts exacts débitent et créditent les deux registres au même `Trans
 Transport proposé : processus enfant local, JSONL sur stdin/stdout, une enveloppe par ligne ; logs sur stderr. `Command` reçoit une liste d’arguments, jamais une commande shell construite par concaténation. Le chemin de l’interpréteur et la version installée sont configurés dans l’hôte.
 
 ```json
-{"protocol":"chronos-lineage-1","request_id":"req-17","method":"materialize","plan_id":"pop/demo/domain-0/v1","payload_ref":"plan-sha256"}
+{"protocol":"chronos-lineage-1","request_id":"req-17","method":"materialize","plan_id":"plan.Y2hy…","payload_ref":"plan-sha256"}
 ```
 
 `prepare` transmet le plan complet ; `materialize` réfère à cette même empreinte. Une réponse contient `request_id`, `ok`, `plan_id`, `result_fingerprint`, résultat ou erreur structurée. `request_id` ne participe à aucun tirage. Le résultat volumineux est un fichier JSON canonique UTF-8 `population-result-json-1` dans un répertoire temporaire propre au job. L’enveloppe JSONL porte `result_ref {relative_path, file_sha256, bytes, format}`. L’hôte vérifie que le chemin résolu reste dans ce répertoire, puis taille et empreinte avant de lire le fichier. Le worker publie le fichier atomiquement ; les durées restent dans les métriques de l’enveloppe, hors du fichier canonique. Les blocs binaires sont reportés à S8.
@@ -900,9 +904,13 @@ Les templates du JSON choisissent un mode initial parmi `collective_body`, `appo
 
 Les overlays marqués `spatial_or_material_tag` sont transmis à l’hôte spatial et ne changent pas une loi sociale par magie. Les overlays rituels ou magiques activent des archétypes optionnels, avec les mêmes règles de densité ; ils n’ajoutent aucun pouvoir biologique non déclaré. `reproduction_profile_required` impose un profil d’ascendance explicite, pas une reproduction fongique déduite du style architectural.
 
+<<<<<<< HEAD
 Les overlays fantastiques portent `world_activation_min_setting` : `setting_profile` les active au niveau du monde, sans dépendre des 79 raccords, et un overlay de variante peut aussi les activer localement. Aucun overlay ne réactive un archétype dont le `setting` dépasse celui du monde. `monstrous_threat` ne crée pas d'archétype : il multiplie la taille et le poids de `raiding_band`, sans exigence d'ascendance.
 
 Le profil de noms est résolu par la variante dans le pack Namebench figé. Si un pool manque, S1 prépare un repli déterministe déclaré `synthetic` ; le titre générique et le nom personnel ne sont jamais pris pour une identité.
+=======
+Les organisations seront nommées par le pack de nommage de Namebench, proposé et non encore livré : une grammaire et un lexique figés que Chronos évalue lui-même avec ses tirages à clés, selon le `kind` porté par `name_profile`, le `mu_culture_id` et des faits du monde. Le filtre `tone` reçoit une seule fois, à la création du nom, la `ConductClass` de fondation ; un changement de classe ne renomme pas l’organisation. Le canon stocke `name_tree`, pas le texte ; l’empreinte `generation` du pack entre dans le manifeste du monde et l’empreinte `rendering` n’y entre pas. Le profil de noms est résolu par la variante dans le pack Namebench figé. Si un pool manque, S1 prépare un repli déterministe déclaré `synthetic` ; le titre générique et le nom personnel ne sont jamais pris pour une identité.
+>>>>>>> main
 
 ### 23.4 Couverture des archétypes
 
@@ -936,6 +944,8 @@ Les épisodes d’occupation ne se chevauchent pas et couvrent la période rési
 
 Un choc fourni est **déjà exposé au niveau local**. Le worker ne retire pas un deuxième tirage d’exposition. Les sites sont explicitement non vides dans sa liste ; aucune liste vide ne signifie implicitement « tout le monde ».
 
+`historical_program` est une liste explicitement ordonnée par `(année, phase, op_id)`, clé d’application et de normalisation. La phase découle du type d’opération : 10 pour `protect_person`, à sa date de début ; 30 pour `force_death` ; 40 pour `move_households` et `admit_people`.
+
 `move_households` déplace au plus le nombre de ménages disponibles dans le mode souple, et enregistre la réalisation. `protect_person`, `force_death` et `admit_people` nécessitent S6 et réfèrent à `fixed_people` ; les admissions sont préparées dans le plan, pas ajoutées pour réparer un total à la fin. `bridge_plan_id` est nul pour un port statistique et obligatoire pour un pont engagé.
 
 Les contraintes `population_at_date` sont des assertions en phase 80 après les opérations explicites. Les contraintes de décès sont en phase 30, avec base et mode additionnel ou remplacement déclarés. Le remplacement désactive les aléas de mortalité normale sur son ensemble avant la sélection, sans annuler une obligation biologique dure ; un conflit est refusé. Ces modes restent conditionnés aux capacités S6.
@@ -963,7 +973,17 @@ world / owner / group_slot / archetype / origin_block / ordinal
 world / domain / household / origin_union_or_singleton / creation_year
 world / owner / relation / predicate / subject_address / object_address / start_year / ordinal
 world / owner / transfer / origin / destination / effective_year / ordinal
+world / owner / standing / subject_address / jurisdiction_address / start_year / ordinal
+world / site_id
+world / activity_id
+world / owner / asset / asset_kind / origin_block / semantic_slot
+world / event_owner / event_kind / origin_block / ordinal / impact_slot
+world / event_owner / event_kind / origin_block / ordinal / impact_slot / target
 ```
+
+Les six dernières lignes adressent, dans l’ordre, statut légal, site, activité, actif, contrat d’impact et effet. Un `ObjectRef` a une seule forme canonique : une personne est un `person_slot`, une entité de type `office` un `office`, et une relation ou un statut relie deux `ObjectRef` adressables.
+
+Un contrat d’impact est fils de son événement parent. Un **effet** est l’exposition d’une cible à un contrat : fils du contrat, unique par cible, avec `target` écrite à plat, type puis champs sans le monde. Il partage donc canon et propriétaire avec son parent, et n’a pas de dimension annuelle. Les épisodes locaux du profil temporel (§7.2) sont des sous-slots de l’effet, ajoutés en S2 à la suite de son adresse : l’exposition tirée une fois garde son identité, chaque épisode a la sienne.
 
 Les préfixes communs des adresses d’extrémités sont factorisés, sans concaténation récursive d’IDs encodés. Une relation garde son ID lorsque son poids évolue dans des épisodes ; un changement de type ou un nouveau lien après rupture possède un nouvel ordinal.
 
@@ -1125,10 +1145,10 @@ Pour une **organisation** seulement, `saintly` commence à `morality ≥ 5500` e
 LegalStanding
   id, subject: ObjectRef, jurisdiction: ObjectRef
   status: licit | tolerated | proscribed
-  valid: [start, end), cause_event_id?, provenance, rule_id
+  valid: [start, end), cause_event_id?, end_cause_event_id?, provenance, rule_id
 ```
 
-Le sujet est une organisation, une activité ou une personne ; la juridiction est une institution ou un collectif gouvernant. Un même culte peut donc être licite ici et proscrit là, et un même groupe changer de statut quand le contrôle d’un site change. Tout changement après l’état initial cite un événement : `edict`, `charter`, `heresy_trial` ou `banishment`. Une personne `proscribed` dans une juridiction est hors-la-loi. L’absence de `LegalStanding` vaut `licit`.
+Le sujet est une organisation, une activité ou une personne ; la juridiction est une institution ou un collectif gouvernant. Un même culte peut donc être licite ici et proscrit là, et un même groupe changer de statut quand le contrôle d’un site change. Tout changement cite un événement : `edict`, `charter`, `heresy_trial` ou `banishment`. Par sujet et juridiction, seul un segment commençant à `observed_start`, début de la période observée, peut être sans cause ; tout autre début en cite une, y compris un premier segment tardif. Un segment qui finit avant la fin du monde sans successeur immédiat, ou avant un trou, cite son événement de fin dans `end_cause_event_id`. Une personne `proscribed` dans une juridiction est hors-la-loi. L’absence de `LegalStanding` vaut `licit`.
 
 **Légalité et conduite sont indépendantes.** Une entreprise licite peut être véreuse, une résistance proscrite peut être vertueuse. `visibility = covert` marque un groupe dont l’existence est cachée ; les façades légales d’un groupe criminel sont reportées après S5.
 
@@ -1161,6 +1181,46 @@ Les axes et la conformité sont des entiers, sans flottant dans le canon. La pro
 | S4 | Axes des personnes et des groupes, `alignment_fit`, inéligibilité, conflits |
 | S5 | Classe de conduite et statut légal dans l’inspecteur, filtres du graphe, canal cartographique `legality`, bilan des classes |
 
+<<<<<<< HEAD
 Les stocks du lot S1 sont inscrits dans `availability.stock_per_1000_adults` (1,0 pour chacun de `base_criminal_network` et `base_charitable_order`, durée moyenne 30 ans).
 
 Ajouter les recettes `conduct_class_is_derived_from_axes`, `ancestry_never_sets_alignment`, `legal_standing_is_relative_to_jurisdiction`, `standing_change_cites_an_event`, `proscribed_person_cannot_hold_office`, `alignment_fit_is_query_independent` et `same_firm_archetype_yields_several_conduct_classes`. Ajouter aussi `ordinary_firm_class_mix_matches_targets`, `conformity_is_not_averaged`, `every_archetype_has_a_generation_path` et `density_bounds_hold_by_site_size`, que l'outil de S1 vérifie déjà sur les données.
+=======
+Ajouter les recettes `conduct_class_is_derived_from_axes`, `ancestry_never_sets_alignment`, `legal_standing_is_relative_to_jurisdiction`, `standing_change_cites_an_event`, `proscribed_person_cannot_hold_office`, `alignment_fit_is_query_independent` et `same_firm_archetype_yields_several_conduct_classes`.
+
+## 28. Contrat d’exécution démographique de S3
+
+Amendements issus de la conception de l’étape 2, proposés et non implémentés. En cas de conflit avec les §7.4, §8.4, §25.2, §25.3 ou §26.4, ce paragraphe prévaut.
+
+### 28.1 Registre et noyau précalculé
+
+Dans le mode intégré, le registre par slot et ménage fait autorité ; les comptes de cohortes en sont dérivés. Le mode standalone reste inchangé. Une cohorte d’origine est scellée avant la définition de ses permutations, et une arrivée crée une nouvelle cohorte. Les références internes sont des rangs de table ; les IDs publics restent des adresses sémantiques.
+
+Le noyau peut rester précalculé. Ses choix de fécondité et de mouvement ne dépendent que de son propre état et des entrées fixes du plan. Il émet une bande d’événements datés par phase, avec les transferts réels de ménages et leurs identifiants d’opération. Les poids de destination du §25.3, fondés sur la population réalisée combinée, ne s’appliquent qu’à la mobilité projetée. L’arrière-plan ne consomme que les événements effectifs à la date courante, et son contrôleur ne lit jamais la population de clôture du noyau pour l’année en cours. Pour une opération demandant `H` ménages, la demande d’arrière-plan est `max(0, H − ménages_déplacés_par_le_noyau)`.
+
+### 28.2 Mortalité
+
+Les univers de permutation sont les cohortes d’origine et sexes scellés. **L’ordre annuel de sélection des décès inclut l’année dans sa clé**, sous une nouvelle `mortality_rule_version`. Avec un rang fixe à vie, les résidents installés auraient déjà épuisé les rangs faibles d’un site, et les nouveaux venus y subiraient une surmortalité à risque égal. L’identité stable d’un slot n’exige pas une priorité de décès à vie.
+
+Le quota de chaque groupe homogène se calcule sur le compte des présents, avec un arrondi stochastique indexé par groupe et année. Une mortalité maternelle vise les mères réelles, pas les femmes de leur cohorte.
+
+### 28.3 Ménages
+
+Fermer un épisode de ménage ne ferme pas forcément son identité. À chaque transition, la partition de destination complète est calculée puis appliquée d’un bloc : retrait des décès et fin des unions, conservation de l’ID du ménage du survivant, divorces, majorités et nouvelles unions, puis rattachement de chaque dépendant au gardien déclaré, sinon au parent co-résident d’ID minimal, sinon à `synthetic_care`. Un ménage vide n’est clos qu’après la réaffectation de ses dépendants.
+
+Un transfert fige la liste des membres et la déplace d’un bloc ; le ménage garde son ID. Les déménagements de mariage et les ménages entrants comptent comme déjà déplacés pour la phase 40. Les unités `synthetic_care` sont immobiles dans S3. Une paire projetée n’a qu’une union dans sa vie : divorce ou décès la ferment définitivement.
+
+La clé familiale d’origine identifie l’allocation de la paire parentale, indépendamment du site et de la cohorte de naissance de l’enfant. Une arrivée compte dans le budget historique de slots. Une personne partie a une couverture bornée et un décès inconnu, sans date inventée.
+
+### 28.4 Régulateur par site
+
+Les effets d’un choc couvrent `[start_year, end_year)`. `rebase_year = end_year + recovery_years`, et le contrôleur est suspendu jusqu’à cette année incluse : l’exemple rebase en phase 80 de 1365 et reprend en 1366. Une récupération nulle inclut donc la borne de fin. Les chocs nouveaux sont traités avant de tester la fin de récupération, ce qui gère les chevauchements.
+
+Les calculs utilisent des rationnels exacts ; le multiplicateur est quantifié une seule fois en ppm. Le guide est `G = max(0, q × baseline(Y−1) + M − M_ref)`, sur l’état publié précédent, et l’erreur est `(G − noyau) − arrière-plan`. Seules les probabilités de naissance projetées éligibles sont corrigées. Une baseline nulle met le contrôleur en mode neutre ; la première baseline positive ancre `q` en phase 80 et la correction commence l’année suivante, car un apport ne peut définir `P/0`. Saturation, noyau au-dessus du guide et absence de paire éligible sont publiés. Le contrôleur ne garantit aucune cible.
+
+### 28.5 Fécondité
+
+Le mode intégré remplace les ouvertures périodiques de `Cohorts.bounds` par une éligibilité fondée sur la dernière naissance réussie. Les deux composantes doivent tendre vers `p / (1 + (s − 1) × p)` naissances par paire et par an. Retirer seulement la multiplication par l’espacement, ou substituer ce taux stationnaire, ne reproduit ni le délai après une crise ni la formation des unions.
+
+Mesurer ensuite la reproduction nette sans régulateur, les trajectoires sur un siècle et l’extinction du noyau, sur la liste de seeds enregistrée. Si un template vise le remplacement, il est recalibré et versionné pour les deux composantes ; le petit noyau n’a pas à suivre une cible, et le régulateur ne doit pas être seul à maintenir une population voulue stable.
+>>>>>>> main

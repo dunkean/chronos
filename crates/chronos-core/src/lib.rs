@@ -9,6 +9,7 @@ pub mod keys;
 pub mod model;
 pub mod names;
 pub mod social;
+pub mod v2;
 pub mod validate;
 pub mod world;
 
