@@ -390,7 +390,7 @@ Les naissances/décès et capacités sont calculés une fois. Les opérations ex
 
 ### 8.4 Noyau et complément procédural
 
-Part cible initiale 5 %, plafond 10 % et limites absolues. Le nombre de fondateurs du noyau est `floor(Pinitial × part)` ; 0 ou 1 devient 0. Un noyau vide ou éteint est un résultat libre valide : les rôles ordinaires utilisent les projections ou restent vacants ; les maisons héréditaires peuvent s’éteindre. Les ancrages requis de S6 échouent si aucune solution n’est trouvée.
+Part cible initiale 5 %, plafond 10 % et limites absolues. `plan_population` relève les limites absolues configurées au plafond de part appliqué au maximum attendu du domaine, en gardant leur rapport vivants/historiques : sinon un grand domaine les dépasse dès son premier recensement avec ses seuls fondateurs. Le nombre de fondateurs du noyau est `floor(Pinitial × part)` ; 0 ou 1 devient 0. Un noyau vide ou éteint est un résultat libre valide : les rôles ordinaires utilisent les projections ou restent vacants ; les maisons héréditaires peuvent s’éteindre. Les ancrages requis de S6 échouent si aucune solution n’est trouvée.
 
 Le plafond vivant se mesure chaque année sur `core_vivant / (core_vivant + background_vivant)` ; le plafond historique sur les personnes nées ou fondatrices cumulées des deux composantes. Les réservoirs non résidents sont exclus. Un dépassement de noyau invalide sa variante avant publication ; le §25.4 fixe les variantes suivantes. Aucun membre de famille n’est amputé et aucun dépassement de mémoire ne déclenche un repli. S3 mesure taux d’échec et extinction sur une liste de seeds, avant de relever ou régler ces budgets.
 

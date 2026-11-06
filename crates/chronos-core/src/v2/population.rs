@@ -1337,6 +1337,21 @@ pub fn plan_references(
             .collect(),
     })
 }
+/// Budgets of one domain. The configured absolute core caps are world-wide, so a
+/// large domain could exceed them at its first census with its target founders and
+/// lose every core attempt (§8.4). They rise to the share ceiling applied to the
+/// domain's expected maximum, keeping their living/historical ratio. A cap of zero
+/// disables the core and stays zero.
+fn domain_limits(limits: &PopulationLimits, expected_max: u64) -> PopulationLimits {
+    let ceiling = expected_max * limits.core_max_share_bps / 10_000;
+    let mut result = limits.clone();
+    if limits.max_core_living > 0 && ceiling > limits.max_core_living {
+        result.max_core_historical = limits.max_core_historical * ceiling / limits.max_core_living;
+        result.max_core_living = ceiling;
+    }
+    result
+}
+
 /// Compiles the fixed-horizon plan of a domain (§3.2, §14.1) and validates it. Its
 /// markers come from the shock-free baseline; shocks arrive only through `shocks`.
 pub fn plan_population(
@@ -1360,6 +1375,7 @@ pub fn plan_population(
     let defaults = &canon.config.population;
     let inside: BTreeSet<_> = domain.site_ids.iter().map(String::as_str).collect();
     let mut settlements = Vec::new();
+    let mut expected_max = 0;
     for (local_id, site_id) in domain.site_ids.iter().enumerate() {
         let site = canon
             .atlas
@@ -1367,6 +1383,7 @@ pub fn plan_population(
             .iter()
             .find(|s| &s.site_id == site_id)
             .ok_or_else(|| located("plan.unknown_site"))?;
+        expected_max += site.population_expected_max;
         let culture =
             principal_culture(&canon.atlas, site_id).ok_or_else(|| located("plan.unknown_site"))?;
         let family = &canon.catalogue.binding(&culture)?.history_family_id;
@@ -1470,7 +1487,7 @@ pub fn plan_population(
         fixed_people: Vec::new(),
         exact_constraints: Vec::new(),
         boundary_ports: region.contexts[domain_id].ports.clone(),
-        limits: defaults.limits.clone(),
+        limits: domain_limits(&defaults.limits, expected_max),
         regulation: defaults.regulation.clone(),
         core_policy: CorePolicy::FreeTry3ThenProjected,
         mobility_edges: canon
