@@ -13,7 +13,7 @@ Message à coller au début d'une nouvelle conversation, depuis `D:\workspace\se
 ```text
 Lis le design docs/design/chronos-social-v2/README.md et les contrats de son dossier, puis ce suivi.
 Vérifie git status et les chemins actuels ; le tableau de worktrees du §5 est historique.
-Commence par S0 du §7.4, puis la première tranche non terminée S0–S5 (ou la tâche indiquée).
+S0–S5 et la passe d'optimisation sont faits (§7.4) ; reprends les restes listés en fin de §7.4 (ou la tâche indiquée).
 Ne reprends pas P0.1 et ne remplace pas le moteur v1 : P0–P5 sont l'ancien plan.
 Mets à jour §7 et §9 à la fin de la session.
 ```
@@ -273,6 +273,18 @@ La spécification est rédigée ; les statuts ci-dessous concernent uniquement l
 | S7 | Liaisons exactes d’acteurs nommés entre domaines | à faire |
 | S8 | Mesures, checkpoints, sélection paresseuse, grands sites, fournisseur démographique procédural, profils mixtes, nouveaux sites dynamiques et formats binaires éventuels | à faire |
 
+Passe d'optimisation après S5 (07/11/2026, poussée : Chronos `0da6ed5`, Lineage Lab `76c1faa`) :
+
+| Lot | Travail | Statut |
+|---|---|---|
+| Affichage | Défilement avec le graphe ouvert (CSS v1 partagé), libellés des titres, offices et événements | fait |
+| Noms | Noms d'époque par culture, règles d'héritage du nom de famille, noms d'entités politiques (`display_names.rs`, `person-pools.v1.json`) | fait ; cultures encore faibles : mississippian, pnw-plank-village, guarani, mongol, chinese ; toponymes GeoNames modernes |
+| Graine | `domain_seed` sans le champ canon de l'adresse (`population/domain-seed/v3`) : un changement de noms ou de runtime ne retire plus la démographie | fait |
+| Noyau | Fournisseur `chronos-cohort-2`, règle `chronos-core-in-marriage-1` (design §28.6) : le noyau garde 107 à 127 % au lieu de perdre plus de la moitié | fait ; `chronos-cohort-1` rejoue à l'identique |
+| Performance | Résultat compact `population-result-json-2`, lecture à chaud vérifiée par SHA-256, autres domaines calculés en arrière-plan, mémoïsation des noms | fait, mesuré : 41 → 13 s à froid (19 s sans cache numba, 42 s au tout premier lancement), 15 → 4 s à chaud, archive 184 → 25 Mo, hôte 1 059 → 398 Mio |
+
+Restes, non commencés : archétypes et contacts extérieurs affichés bruts ; chronologie sur téléphone et points superposés ; bilans attendu/réalisé divergents (249 contre 336) ; seuil du mariage entrant aveugle aux chocs ; lecture à chaud sous 1 s (persister le paquet social) ; froid sous 10 s (portage Rust, D12).
+
 Après S5, à planifier : portage de Lineage Lab en Rust (D12), comme nouveau fournisseur démographique sous le même contrat.
 
 Première livraison utilisable : S0–S5. Les contraintes exactes avancées et les liaisons nominatives entre domaines sont des extensions identifiées. La source de vérité des contrats et critères de sortie est [le design](design/chronos-social-v2/README.md).
@@ -301,6 +313,7 @@ Pour S0–S5, D1/D2/D4 ne bloquent pas le développement : l’atlas et les géo
 
 ## 9. Journal
 
+- **07/11/2026, optimisation social v2** : cinq lots en worktrees (affichage, noms, graine, noyau, performance) par des agents Opus, Sonnet et Codex, fusionnés et poussés (Chronos `0da6ed5`, Lineage Lab `76c1faa`). Deux conflits Lineage résolus en gardant les deux côtés (`cohort_residence.py`, test de `materialize`). Graine de l'exemple de plan recalculée (`10500694837864289318`). Avant le push : 256 tests pytest, `cargo test --release` core et app, i18n OK ; site relancé sur 8785, premier domaine affiché en 42 s au tout premier lancement. Détail et restes en §7.4.
 - **06/11/2026, social v2 S0–S5** : implémentation de S0 à S5 par des agents Codex, Opus et Sonnet, avec une revue par lot. Ajouts de produit : alignement et légalité (§27, D13), catalogue de 133 archétypes, deux langues (D14), portage Rust à terme (D12). Mesuré sur 22 seeds sans choc : 11 000 habitants en 1300, 13 717 en 1399, reproduction nette 1,05 (§28.6). Un domaine : environ 30 s à froid, 3 s à chaud, 150 à 190 Mio. Limites : vacances et scissions rares sur la démo, noyau des plans de démo en baisse d’environ moitié, chef d’association tiré parmi les résidents, parcours de recette joué à la main.
 - **06/11/2026, design social v2** : prise en compte des deux tours de commentaires ; préparation de `docs/design/chronos-social-v2/` avec modèle social, hasard indexé, plans démographiques, pilotage interne de Lineage Lab, raccord culturel, recrutement, mandats, impacts statistiques ou exacts, monde ouvert, visualisations, API et lots S0–S8. Discussion et annotations utilisateur conservées. Relectures indépendantes par Claude Opus 5.5 et intégration des corrections sur les cycles, registres démographiques, mobilité, noyau, profils et contrats autonomes. Documentation et contrats seulement : aucun changement de moteur, aucune mesure de performance nouvelle.
 - **27/10/2026, R3k poussé** (`20bae6c`) : sel côtier solaire et bouilli dans la couche « Sel ».
