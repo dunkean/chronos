@@ -23,7 +23,7 @@ body.social { display: block; overflow: visible; min-height: 100vh; }
 .s-panel { background: var(--panel); border: 1px solid var(--line); border-radius: 4px; padding: 12px 14px; min-width: 0; }
 .s-panel > h2 { font: 700 17px/1.2 var(--font-hist); margin-bottom: 8px; }
 .s-wide { grid-column: 1 / -1; }
-.s-sheet { max-height: 80vh; overflow: auto; }
+.s-sheet { max-height: calc(78vh + 160px); overflow: auto; }
 @media (max-width: 960px) {
   .s-main { grid-template-columns: minmax(0, 1fr); }
   .s-sheet { max-height: none; }
@@ -59,7 +59,7 @@ body.social { display: block; overflow: visible; min-height: 100vh; }
 @media (max-width: 1250px) { .s-graph-grid { grid-template-columns: 1fr; } }
 .s-graph-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 4px 0 6px; font-size: 13px; }
 .s-graph-tools .s-dim { margin-left: 6px; }
-.s-cy { height: min(480px, 70vh); touch-action: pan-y; border: 1px solid var(--line); background: var(--field); border-radius: 3px; }
+.s-cy { height: max(480px, 78vh); touch-action: pan-y; border: 1px solid var(--line); background: var(--field); border-radius: 3px; }
 .s-graph-note { padding: 6px 8px; background: #f6efd9; border: 1px solid #d6b13a; margin-bottom: 6px; }
 .s-graph-count { margin-top: 6px; font-size: 13px; color: var(--ink-2); }
 .s-glist-wrap h3 { font-size: 14px; margin-bottom: 4px; }
@@ -161,7 +161,7 @@ body.social { display: block; overflow: visible; min-height: 100vh; }
 .s-map-controls select { padding: 3px 6px; border: 1px solid var(--line); background: var(--field); border-radius: 3px; }
 .s-map-fig { display: grid; grid-template-columns: minmax(0, 1fr) 220px; gap: 10px; align-items: start; }
 @media (max-width: 1100px) { .s-map-fig { grid-template-columns: 1fr; } }
-.s-map { width: 100%; height: auto; max-height: 560px; background: var(--field); border: 1px solid var(--line); }
+.s-map { width: 100%; height: auto; max-height: 88vh; background: var(--field); border: 1px solid var(--line); }
 .s-map-frame { fill: none; stroke: var(--line); stroke-dasharray: 2 4; }
 .s-map-route { stroke: #8a9ba3; stroke-width: 2; }
 .s-map-route-water { stroke: #5b8fb0; stroke-dasharray: 6 4; }
