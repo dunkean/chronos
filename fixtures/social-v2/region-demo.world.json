@@ -8,7 +8,7 @@
   "setting_profile": "historical",
   "provider": {
     "mode": "lineage_hybrid",
-    "algorithm_id": "chronos-cohort-1",
+    "algorithm_id": "chronos-cohort-2",
     "runtime_fingerprint": "synthetic-runtime-not-pinned",
     "compute_threads": 1,
     "projection_version": "chronos-social-projection-1",

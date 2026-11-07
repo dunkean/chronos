@@ -1220,7 +1220,7 @@ fn population_example_identity_is_derived_from_its_domain() {
     assert_eq!(domain.ordinal(), 0);
     assert_eq!(SemanticAddress::plan(&domain).unwrap().encode(), p.plan_id);
     // Oracle: independent Python port of keys.rs.
-    assert_eq!(p.seed, "5854947233154073793");
+    assert_eq!(p.seed, "10500694837864289318");
 }
 #[test]
 fn population_plan_rejects_unknown_fields_at_every_nesting_level() {
