@@ -62,12 +62,15 @@ pub fn serve(port: u16, paths: Paths) -> Result<(), String> {
         println!("Avertissement : web/index.html absent ; seule l'API répond.");
     }
     println!("Chronos sur http://127.0.0.1:{port}/  (Ctrl+C pour arrêter)");
-    let v2 = Arc::new(ApiState::new(
-        paths.root.clone(),
-        paths.data.clone(),
-        paths.python.clone(),
-        paths.lineage_src.clone(),
-    ));
+    let v2 = Arc::new(
+        ApiState::new(
+            paths.root.clone(),
+            paths.data.clone(),
+            paths.python.clone(),
+            paths.lineage_src.clone(),
+        )
+        .with_other_domains(),
+    );
     let app = Arc::new(App {
         paths,
         v2,

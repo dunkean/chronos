@@ -1787,13 +1787,7 @@ impl<'a> Run<'a> {
             .max()
             .unwrap_or(0)
     }
-    fn fits(
-        &self,
-        group: usize,
-        slot: u32,
-        days: u64,
-        kin: &[u32],
-    ) -> Fits {
+    fn fits(&self, group: usize, slot: u32, days: u64, kin: &[u32]) -> Fits {
         let defaults = &self.inputs.catalogue.engine_defaults;
         let rt = &self.rt[group];
         let own = u32::from(self.own_activity[slot as usize]);

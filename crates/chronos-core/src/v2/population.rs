@@ -2643,7 +2643,7 @@ type EpisodeEvent = (Stamp, i8, Register, u32, usize);
 /// host has already checked the file and result fingerprints (§4.2).
 pub fn validate_population(
     plan: &PopulationPlan,
-    result: PopulationResult,
+    mut result: PopulationResult,
 ) -> Result<VerifiedPopulation, HistoryError> {
     let mut sites: Vec<_> = plan
         .settlements
@@ -2687,6 +2687,9 @@ pub fn validate_population(
         candidate_slots: result.candidate_table.len() as u64,
         site_years,
     };
+    // Sparse counts exist to be audited. Nothing reads them afterwards and they are the
+    // largest table; the published file keeps them.
+    result.cohort_residence_counts = Vec::new();
     Ok(VerifiedPopulation {
         result,
         kinship_limits: KinshipLimits {

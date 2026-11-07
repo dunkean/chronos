@@ -19,6 +19,7 @@ use serde::Deserialize;
 use serde_json::{json, Value};
 use std::collections::BTreeMap;
 use std::path::PathBuf;
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
 use std::time::Instant;
 
@@ -69,6 +70,7 @@ pub struct WorldEntry {
     pub orch: Arc<Orchestrator>,
     pub inputs: WorldInputs,
     pub preset: String,
+    other_domains_started: AtomicBool,
 }
 type Compute = Arc<dyn Fn(&WorldEntry) -> Result<Value, HistoryError> + Send + Sync>;
 
@@ -118,6 +120,7 @@ pub struct ApiState {
     presets: Mutex<BTreeMap<String, String>>,
     jobs: Mutex<BTreeMap<String, Arc<JobState>>>,
     open_lock: Mutex<()>,
+    other_domains: bool,
 }
 impl ApiState {
     pub fn new(
@@ -135,7 +138,14 @@ impl ApiState {
             presets: Mutex::default(),
             jobs: Mutex::default(),
             open_lock: Mutex::default(),
+            other_domains: false,
         }
+    }
+    /// Once a domain answers, computes the others of its world in the background. Results
+    /// do not depend on query order, so this changes when they are ready, never what they are.
+    pub fn with_other_domains(mut self) -> Self {
+        self.other_domains = true;
+        self
     }
     fn settings(&self) -> WorkerSettings {
         WorkerSettings::resolve(
@@ -158,6 +168,7 @@ impl ApiState {
                     orch: Arc::new(orch),
                     inputs,
                     preset: preset.to_string(),
+                    other_domains_started: AtomicBool::new(false),
                 })
             })
             .clone()
@@ -487,6 +498,7 @@ fn run_or_job(
     if created {
         let entry = entry.clone();
         let worker = job.clone();
+        let other_domains = state.other_domains;
         std::thread::spawn(move || {
             let step = |stage: &'static str| {
                 let mut inner = worker.inner.lock().expect("job lock");
@@ -512,6 +524,9 @@ fn run_or_job(
                     inner.stage = "done";
                     inner.done = inner.total;
                     inner.result = Some(value);
+                    if other_domains {
+                        compute_other_domains(&entry);
+                    }
                 }
                 Err(e) => {
                     inner.state = "failed";
@@ -526,6 +541,22 @@ fn run_or_job(
     let mut body = job.describe();
     body["poll"] = json!(format!("{API_PREFIX}/jobs/{}", job.id));
     ApiResponse::json(202, &body)
+}
+
+/// One background pass per world. A failure leaves no trace: the domain's own request
+/// replays the same plan and reports it (section 13).
+fn compute_other_domains(entry: &Arc<WorldEntry>) {
+    if entry.other_domains_started.swap(true, Ordering::SeqCst) {
+        return;
+    }
+    let entry = entry.clone();
+    std::thread::spawn(move || {
+        for domain in entry.orch.domain_ids() {
+            if let Err(error) = entry.orch.prefetch(&domain) {
+                eprintln!("background domain {domain}: {error}");
+            }
+        }
+    });
 }
 
 fn held_for(entry: &WorldEntry, needs: &[String]) -> Result<Vec<Held>, HistoryError> {
