@@ -9,7 +9,7 @@ use super::model::{
     Visibility,
 };
 use super::offices::{mayor_office, resolve_office, OfficeStatus, TenureEnd, TenureMode};
-use super::population::{parse_population_result, PopulationResult};
+use super::population::{parse_population_tables, PopulationResult};
 use super::region::{plan_region, RegionPlan};
 use super::social::{
     build_from_result, membership_relation, memberships_of, project_window, GroupRecord,
@@ -131,7 +131,7 @@ fn table(world: &World, people: &[Person]) -> PopulationResult {
     };
     let config = &world.canon.config;
     let value = json!({
-        "format": "population-result-json-1", "result_type": "PopulationResult",
+        "format": "population-result-json-2", "result_type": "PopulationResult",
         "complete": true, "coverage": "complete", "stage": "test",
         "plan_id": world.plan_id(), "plan_fingerprint": "test",
         "result_fingerprint": "test",
@@ -176,7 +176,7 @@ fn table(world: &World, people: &[Person]) -> PopulationResult {
         "annual_censuses": censuses, "cohort_residence_counts": [],
         "diagnostics": {}, "validation_proof": {},
     });
-    parse_population_result(&serde_json::to_vec(&value).unwrap()).unwrap()
+    parse_population_tables(&serde_json::to_vec(&value).unwrap()).unwrap()
 }
 fn packet(world: &World, people: &[Person]) -> SocialPacket {
     build_from_result(&world.region, &table(world, people), END).unwrap()

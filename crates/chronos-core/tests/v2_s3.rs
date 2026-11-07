@@ -3,7 +3,7 @@ use chronos_core::v2::catalog::HistoryCatalogue;
 use chronos_core::v2::general::{build_canon, AuthorConstraints, GeneralCanon, WorldConfig};
 use chronos_core::v2::model::{ErrorCode, TimeSpan};
 use chronos_core::v2::population::{
-    parse_population_result, plan_population, validate_population, HistoricalOperation,
+    parse_population_tables, plan_population, validate_population, HistoricalOperation,
     PopulationPlan, PopulationResult,
 };
 use chronos_core::v2::region::plan_region;
@@ -92,7 +92,7 @@ fn tiny_result(plan: &PopulationPlan) -> Value {
                "source": "projected", "year": year, "count": 1})
     };
     json!({
-        "format": "population-result-json-1", "result_type": "PopulationResult",
+        "format": "population-result-json-2", "result_type": "PopulationResult",
         "complete": true, "coverage": "complete", "stage": "test",
         "plan_id": plan.plan_id, "plan_fingerprint": plan.plan_fingerprint,
         "result_fingerprint": "not-checked-by-the-pure-core",
@@ -129,7 +129,7 @@ fn tiny_result(plan: &PopulationPlan) -> Value {
     })
 }
 fn parsed(value: &Value) -> PopulationResult {
-    parse_population_result(&serde_json::to_vec(value).unwrap()).unwrap()
+    parse_population_tables(&serde_json::to_vec(value).unwrap()).unwrap()
 }
 
 #[test]

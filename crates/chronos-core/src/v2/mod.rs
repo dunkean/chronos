@@ -11,6 +11,7 @@ pub mod model;
 pub mod naming;
 pub mod offices;
 pub mod population;
+mod population_wire;
 pub mod query;
 pub mod recruit;
 pub mod region;
