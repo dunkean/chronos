@@ -3,7 +3,9 @@ use super::ids::random_semantics_v2::uniform_below;
 use super::model::{ErrorCode, HistoryError, NameTree};
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
+use std::cell::RefCell;
 use std::collections::{BTreeMap, BTreeSet};
+use std::rc::Rc;
 use std::sync::OnceLock;
 
 pub const PACK_BYTES: &[u8] = include_bytes!("../../../../fixtures/naming/naming-pack.json");
@@ -163,15 +165,84 @@ fn narrow<'a>(
         kept
     }
 }
-/// Nearest dotted kind with patterns, then eligibility at that level only.
-/// `choose` receives exactly the Python semantic paths and integer pool sizes.
+/// What `candidates` reads: a slot, a palette, an activity and a tone. Slots and
+/// palettes are told apart by address, which is stable while the pack is borrowed.
+type CandidateKey = (usize, usize, Option<String>, String);
+/// Expansions sharing one pack. `candidates` is a pure function of its key, so its
+/// memo changes the cost of a name, never the name.
+pub struct Expander<'p> {
+    pack: &'p Pack,
+    memo: RefCell<BTreeMap<CandidateKey, Rc<Vec<&'p Concept>>>>,
+}
+impl<'p> Expander<'p> {
+    pub fn new(pack: &'p Pack) -> Self {
+        Self {
+            pack,
+            memo: RefCell::default(),
+        }
+    }
+    fn candidates(
+        &self,
+        slot: &Slot,
+        palette: &BTreeSet<String>,
+        context: &NameContext,
+        tone: &str,
+    ) -> Rc<Vec<&'p Concept>> {
+        let key = (
+            std::ptr::from_ref(slot) as usize,
+            std::ptr::from_ref(palette) as usize,
+            context.activity.clone(),
+            tone.to_string(),
+        );
+        self.memo
+            .borrow_mut()
+            .entry(key)
+            .or_insert_with(|| Rc::new(candidates(self.pack, slot, palette, context, tone)))
+            .clone()
+    }
+    /// Chronos draws are addressed by entity identity and path, never query order.
+    pub fn expand_keyed(
+        &self,
+        kind: &str,
+        culture: &str,
+        context: &NameContext,
+        seed: u64,
+        entity_id: &str,
+    ) -> Result<Option<NameTree>, HistoryError> {
+        self.expand(kind, culture, context, |path, n| {
+            uniform_below(seed, &[NAMING_RULE, entity_id, path], 0, n as u64).map(|v| v as usize)
+        })
+    }
+    /// Nearest dotted kind with patterns, then eligibility at that level only.
+    /// `choose` receives exactly the Python semantic paths and integer pool sizes.
+    pub fn expand(
+        &self,
+        kind: &str,
+        culture: &str,
+        context: &NameContext,
+        choose: impl FnMut(&str, usize) -> Result<usize, HistoryError>,
+    ) -> Result<Option<NameTree>, HistoryError> {
+        expand_with(self, kind, culture, context, choose)
+    }
+}
+/// One expansion, without a memo shared with any other.
 pub fn expand(
     pack: &Pack,
     kind: &str,
     culture: &str,
     context: &NameContext,
+    choose: impl FnMut(&str, usize) -> Result<usize, HistoryError>,
+) -> Result<Option<NameTree>, HistoryError> {
+    Expander::new(pack).expand(kind, culture, context, choose)
+}
+fn expand_with<'p>(
+    expander: &Expander<'p>,
+    kind: &str,
+    culture: &str,
+    context: &NameContext,
     mut choose: impl FnMut(&str, usize) -> Result<usize, HistoryError>,
 ) -> Result<Option<NameTree>, HistoryError> {
+    let pack: &'p Pack = expander.pack;
     let culture_profile = pack
         .cultures
         .get(culture)
@@ -206,7 +277,7 @@ pub fn expand(
                 .filter(|s| s.part_type == "concept")
                 .all(|s| {
                     (!s.activity_filter || context.activity.is_some())
-                        && candidates(pack, s, palette, context, tone).len()
+                        && expander.candidates(s, palette, context, tone).len()
                             >= if s.name == "emblem2" { 2 } else { 1 }
                 })
     });
@@ -277,7 +348,10 @@ pub fn expand(
                 .filter(|p| p.part_type == "concept")
                 .flat_map(|p| pack.concepts[&p.id].stems.iter())
                 .collect();
-            let mut cands = candidates(pack, slot, palette, context, tone);
+            let mut cands = expander
+                .candidates(slot, palette, context, tone)
+                .as_ref()
+                .clone();
             cands.retain(|c| {
                 !banned.contains(c.id.as_str()) && c.stems.iter().all(|s| !stems.contains(s))
             });
@@ -306,7 +380,7 @@ pub fn expand(
         json!({"pattern":pattern.id,"kind":kind,"culture":culture,"register":"formal","parts":parts}),
     )?))
 }
-/// Chronos draws are addressed by entity identity and path, never query order.
+/// One keyed expansion, without a memo shared with any other.
 pub fn expand_keyed(
     pack: &Pack,
     kind: &str,
@@ -315,9 +389,7 @@ pub fn expand_keyed(
     seed: u64,
     entity_id: &str,
 ) -> Result<Option<NameTree>, HistoryError> {
-    expand(pack, kind, culture, context, |path, n| {
-        uniform_below(seed, &[NAMING_RULE, entity_id, path], 0, n as u64).map(|v| v as usize)
-    })
+    Expander::new(pack).expand_keyed(kind, culture, context, seed, entity_id)
 }
 
 #[path = "naming_render.rs"]

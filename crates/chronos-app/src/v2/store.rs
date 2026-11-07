@@ -1,6 +1,6 @@
 //! Immutable JSON packages under `worlds/<canon>/` (§16.1). A package becomes
 //! visible by one rename, after it is complete, and is never rewritten.
-use super::lineage_worker::{check_result_bytes, ProviderArtifact};
+use super::lineage_worker::ProviderArtifact;
 use super::{host_error, sha256_hex};
 use chronos_core::v2::canonical::canonical_bytes;
 use chronos_core::v2::model::{ErrorCode, HistoryError};
@@ -156,6 +156,10 @@ impl Store {
             .join("populations")
             .join(file_key(&key.plan_id))
     }
+    /// Whether a package is published, without reading it.
+    pub fn has_population(&self, key: &PopulationCacheKey) -> bool {
+        self.population_dir(key).join(PACKAGE_MANIFEST).is_file()
+    }
     /// Provider file of a published package, rechecked from its manifest. `None`
     /// when nothing is published. A damaged package is an error: population tables
     /// are authoritative data and are never silently replaced (§16.1).
@@ -190,10 +194,10 @@ impl Store {
         }
         let bytes = std::fs::read(directory.join(PROVIDER_ARCHIVE))
             .map_err(|e| store_error("store.read_failed", e))?;
+        // The same bytes as the ones checked before publication.
         if bytes.len() as u64 != package.bytes || sha256_hex(&bytes) != package.file_sha256 {
             return Err(corrupt("provider-archive"));
         }
-        check_result_bytes(&bytes, &package.result_fingerprint)?;
         Ok(Some(bytes))
     }
     /// Publishes a validated population. The proof is the entry ticket: only a

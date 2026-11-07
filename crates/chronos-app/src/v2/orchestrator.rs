@@ -378,6 +378,18 @@ impl Orchestrator {
         };
         leader.finish(self.resolve(domain_id).map(Arc::new))
     }
+    /// Leaves a domain's population in the store and nothing in memory: a later request
+    /// reads it as a warm one. Holding its packet too would cost a whole domain per domain.
+    pub fn prefetch(&self, domain_id: &str) -> Result<(), HistoryError> {
+        if self.store.has_population(&self.cache_key_of(domain_id)?) {
+            return Ok(());
+        }
+        self.population(domain_id)?;
+        if !self.packet_ready(domain_id) {
+            self.jobs.lock().expect("jobs lock").remove(domain_id);
+        }
+        Ok(())
+    }
     /// Full-horizon social packet of a domain, built once from its verified population
     /// (§14.1). The lock is held while building: one packet is computed once.
     pub fn social_packet(&self, domain_id: &str) -> Result<Arc<SocialPacket>, HistoryError> {

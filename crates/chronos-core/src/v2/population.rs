@@ -1505,7 +1505,7 @@ pub fn plan_population(
 }
 
 /// Format of the complete provider file (§13).
-pub const POPULATION_RESULT_FORMAT: &str = "population-result-json-1";
+pub const POPULATION_RESULT_FORMAT: &str = "population-result-json-2";
 /// Version of the checks `validate_population` runs; recorded in its proof.
 pub const POPULATION_VALIDATOR: &str = "chronos-core-population-1";
 
@@ -1798,8 +1798,12 @@ pub struct PopulationResult {
     /// The worker's own check: evidence, never a reason to skip the host's.
     pub validation_proof: Value,
 }
-/// Reads the provider file. Fingerprints stay with the host (§4.2).
+/// Reads the compact provider file. Fingerprints stay with the host (§4.2).
 pub fn parse_population_result(bytes: &[u8]) -> Result<PopulationResult, HistoryError> {
+    super::population_wire::decode(bytes)
+}
+/// Reads the table form directly, as tests and tools write it.
+pub fn parse_population_tables(bytes: &[u8]) -> Result<PopulationResult, HistoryError> {
     serde_json::from_slice(bytes).map_err(|e| {
         HistoryError::new(
             ErrorCode::InvalidPopulationResult,
@@ -2639,7 +2643,7 @@ type EpisodeEvent = (Stamp, i8, Register, u32, usize);
 /// host has already checked the file and result fingerprints (§4.2).
 pub fn validate_population(
     plan: &PopulationPlan,
-    result: PopulationResult,
+    mut result: PopulationResult,
 ) -> Result<VerifiedPopulation, HistoryError> {
     let mut sites: Vec<_> = plan
         .settlements
@@ -2683,6 +2687,9 @@ pub fn validate_population(
         candidate_slots: result.candidate_table.len() as u64,
         site_years,
     };
+    // Sparse counts exist to be audited. Nothing reads them afterwards and they are the
+    // largest table; the published file keeps them.
+    result.cohort_residence_counts = Vec::new();
     Ok(VerifiedPopulation {
         result,
         kinship_limits: KinshipLimits {

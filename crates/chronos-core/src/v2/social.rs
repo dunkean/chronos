@@ -302,6 +302,7 @@ pub(crate) fn founding_group_axes(
 /// reference, resolved to display text by the host rather than copied into the tree.
 pub fn initialize_organization_name(
     inputs: &SocialInputs,
+    expander: Option<&naming::Expander<'static>>,
     entity: &mut SocialEntity,
     site: &SettlementAnchor,
     region_id: &str,
@@ -406,8 +407,15 @@ pub fn initialize_organization_name(
                 activity,
                 tone: Some(tone_name.into()),
             };
-            entity.name_tree = match naming::expand_keyed(
-                pack,
+            let own;
+            let expander = match expander {
+                Some(shared) => shared,
+                None => {
+                    own = naming::Expander::new(pack);
+                    &own
+                }
+            };
+            entity.name_tree = match expander.expand_keyed(
                 &definition.name_profile,
                 culture,
                 &context,
@@ -503,7 +511,13 @@ struct Run<'a> {
     residents: Vec<Vec<Vec<u32>>>,
     people: Vec<PersonAttributes>,
     activities: Vec<String>,
+    /// `skill_initial` of each slot, by index in `activities`.
+    skill_initial: Vec<u32>,
     own_activity: Vec<u8>,
+    /// Fields of `people` that recruitment reads for every candidate.
+    status_ranks: Vec<u32>,
+    person_axes: Vec<AlignmentAxes>,
+    workforce: Vec<bool>,
     family: Vec<u32>,
     capacity: Vec<u16>,
     max_rank: u32,
@@ -527,6 +541,9 @@ struct Run<'a> {
     holds_charge: Vec<bool>,
     tenures: Vec<Tenure>,
     activity_years: Vec<u16>,
+    /// Links of each slot with the group being filled, zero outside `count_network`.
+    network_links: Vec<u32>,
+    network_touched: Vec<u32>,
     ledger: EventLedger,
     standings: Vec<LegalStanding>,
     proscribed: Vec<(usize, String, TimeSpan)>,
@@ -539,6 +556,8 @@ struct Run<'a> {
     diagnostics: Vec<SocialDiagnostic>,
     stamp: Vec<u32>,
     stamp_value: u32,
+    /// Shared by every name of the packet.
+    expander: Option<naming::Expander<'static>>,
 }
 
 /// Domain of a verified result, read back from its plan address.
@@ -664,6 +683,13 @@ impl<'a> Run<'a> {
             .iter()
             .cloned()
             .collect();
+        let skill_initial = people
+            .iter()
+            .flat_map(|p| {
+                let activities = activities.iter();
+                activities.map(|a| p.skill_initial.get(a).copied().unwrap_or(0))
+            })
+            .collect();
         let own_activity = people
             .iter()
             .map(|p| {
@@ -705,8 +731,12 @@ impl<'a> Run<'a> {
             reach,
             spans,
             residents,
+            status_ranks: people.iter().map(|p| p.status_rank).collect(),
+            person_axes: people.iter().map(|p| p.axes).collect(),
+            workforce: people.iter().map(|p| p.workforce).collect(),
             people,
             activities,
+            skill_initial,
             own_activity,
             family,
             capacity,
@@ -737,6 +767,8 @@ impl<'a> Run<'a> {
             holds_charge: vec![false; n],
             tenures: Vec::new(),
             activity_years: vec![0; n],
+            network_links: vec![0; n],
+            network_touched: Vec::new(),
             ledger,
             standings: Vec::new(),
             proscribed: Vec::new(),
@@ -749,6 +781,7 @@ impl<'a> Run<'a> {
             diagnostics,
             stamp: vec![0; n],
             stamp_value: 0,
+            expander: inputs.naming_pack.map(naming::Expander::new),
         })
     }
     fn provenance(&self, rule: &str) -> Provenance {
@@ -922,6 +955,7 @@ impl<'a> Run<'a> {
         let tone = conduct_class(axes, &thresholds);
         initialize_organization_name(
             inputs,
+            self.expander.as_ref(),
             &mut entity,
             self.sites[site],
             &self.region.region_id,
@@ -1699,33 +1733,38 @@ impl<'a> Run<'a> {
     }
     /// Links and affiliations of each person with a group in the published state Y−1;
     /// zero for a foundation (§25.5).
-    fn network(&self, group: usize, year: i32) -> BTreeMap<u32, u32> {
-        let mut counts = BTreeMap::new();
+    fn count_network(&mut self, group: usize, year: i32) {
         let previous = year - 1;
+        let counts = &mut self.network_links;
+        let touched = &mut self.network_touched;
+        let mut add = |slot: u32| {
+            if counts[slot as usize] == 0 {
+                touched.push(slot);
+            }
+            counts[slot as usize] += 1;
+        };
         for slot in &self.rt[group].published {
-            *counts.entry(*slot).or_default() += 1;
+            add(*slot);
             for link in &self.links_by_person[*slot as usize] {
                 let link = &self.links[*link as usize];
                 if link.valid.contains(previous) {
-                    let other = if link.from_slot == *slot {
+                    add(if link.from_slot == *slot {
                         link.to_slot
                     } else {
                         link.from_slot
-                    };
-                    *counts.entry(other).or_default() += 1;
+                    });
                 }
             }
         }
-        counts
+    }
+    fn clear_network(&mut self) {
+        for slot in self.network_touched.drain(..) {
+            self.network_links[slot as usize] = 0;
+        }
     }
     fn skill_of(&self, slot: u32, activity: usize) -> u32 {
         let defaults = &self.inputs.catalogue.engine_defaults;
-        let person = &self.people[slot as usize];
-        let initial = person
-            .skill_initial
-            .get(&self.activities[activity])
-            .copied()
-            .unwrap_or(0);
+        let initial = self.skill_initial[slot as usize * self.activities.len() + activity];
         let years = if usize::from(self.own_activity[slot as usize]) == activity {
             u32::from(self.activity_years[slot as usize])
         } else {
@@ -1748,20 +1787,12 @@ impl<'a> Run<'a> {
             .max()
             .unwrap_or(0)
     }
-    fn fits(
-        &self,
-        group: usize,
-        slot: u32,
-        days: u64,
-        kin: &[u32],
-        network: &BTreeMap<u32, u32>,
-    ) -> Fits {
+    fn fits(&self, group: usize, slot: u32, days: u64, kin: &[u32]) -> Fits {
         let defaults = &self.inputs.catalogue.engine_defaults;
         let rt = &self.rt[group];
-        let person = &self.people[slot as usize];
         let own = u32::from(self.own_activity[slot as usize]);
-        let gap = person.status_rank.abs_diff(rt.focus_rank);
-        let links = network.get(&slot).copied().unwrap_or(0);
+        let gap = self.status_ranks[slot as usize].abs_diff(rt.focus_rank);
+        let links = self.network_links[slot as usize];
         Fits {
             skill: self.best_skill(slot, rt.activity_mask),
             activity: if own < 32 && rt.activity_mask & (1 << own) != 0 {
@@ -1891,24 +1922,23 @@ impl<'a> Run<'a> {
             return Ok(None);
         }
         let founding = self.groups[group].entity.existence.start_year == year;
-        let network = if founding {
-            BTreeMap::new()
-        } else {
-            self.network(group, year)
-        };
+        if !founding {
+            self.count_network(group, year);
+        }
         let kin = self.member_families(group);
         let axes = self.groups[group].axes;
         let scored: Vec<(Fits, u32, u64)> = candidates
             .iter()
             .map(|slot| {
-                let mut fits = self.fits(group, *slot, 0, &kin, &network);
-                let rank = self.people[*slot as usize].status_rank;
+                let mut fits = self.fits(group, *slot, 0, &kin);
+                let rank = self.status_ranks[*slot as usize];
                 fits.status = 1_000 * rank.min(self.max_rank) / self.max_rank;
-                let alignment = alignment_fit(self.people[*slot as usize].axes, axes);
+                let alignment = alignment_fit(self.person_axes[*slot as usize], axes);
                 let bonus = self.rt[group].kin_bonus;
                 (fits, alignment, recruitment_weight(&fits, bonus, alignment))
             })
             .collect();
+        self.clear_network();
         let mut weights: Vec<u64> = scored.iter().map(|(_, _, w)| *w).collect();
         let table = &self.result.candidate_table;
         let mut kin_rule = false;
@@ -2531,7 +2561,7 @@ impl<'a> Run<'a> {
                     && age <= max_age
                     && self.stamp[i] != stamp
                     && wanted_sex.is_none_or(|sex| table.sex[i] == sex)
-                    && (!worker || self.people[i].workforce)
+                    && (!worker || self.workforce[i])
                     && (cost == 0 || self.capacity_at(*slot, year) >= self.committed[i] + cost)
                     && !barred.contains(slot)
                     && !charged.contains(slot)
@@ -2545,22 +2575,21 @@ impl<'a> Run<'a> {
         }
         pool.sort_unstable();
         let founding = self.groups[group].entity.existence.start_year == year;
-        let network = if founding {
-            BTreeMap::new()
-        } else {
-            self.network(group, year)
-        };
+        if !founding {
+            self.count_network(group, year);
+        }
         let kin = self.member_families(group);
         let axes = self.groups[group].axes;
         let bonus = self.rt[group].kin_bonus;
         let mut weights: Vec<u64> = pool
             .iter()
             .map(|(slot, days)| {
-                let fits = self.fits(group, *slot, *days, &kin, &network);
-                let alignment = alignment_fit(self.people[*slot as usize].axes, axes);
+                let fits = self.fits(group, *slot, *days, &kin);
+                let alignment = alignment_fit(self.person_axes[*slot as usize], axes);
                 recruitment_weight(&fits, bonus, alignment)
             })
             .collect();
+        self.clear_network();
         let id = self.groups[group].entity.id.clone();
         let vacancy = open as u32;
         let count = target - open;
@@ -2876,9 +2905,8 @@ impl<'a> Run<'a> {
                 activity: Some(self.people[slot as usize].activity_id.clone()),
                 tone: Some("ordinary".into()),
             };
-            let tree = if let Some(pack) = self.inputs.naming_pack {
-                match naming::expand_keyed(
-                    pack,
+            let tree = if let Some(expander) = &self.expander {
+                match expander.expand_keyed(
                     &definition.name_profile,
                     &self.people[slot as usize].culture_id,
                     &context,
