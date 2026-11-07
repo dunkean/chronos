@@ -141,7 +141,7 @@ Le namespace d’une personne inclut son domaine et son plan fournisseur. Les mi
 Les adresses filles réutilisent les champs du préfixe sémantique, sans réencoder récursivement un ID parent complet comme champ. L’adresse d’une personne est aplatie en monde, domaine, algorithme fournisseur et ID local ; le manifeste mondial fixe son plan. Les objets persistants ne changent pas d’ID lorsque leur libellé ou résidence évolue.
 
 Le mélangeur de [keys.rs](../../../crates/chronos-core/src/keys.rs) sert uniquement aux tirages indexés, derrière `random_semantics_v2`. Les sous-compteurs sont explicites. Pour un domaine :
-`domain_seed = key(world_seed, ["population/domain-seed/v2", domain_id, provider_algorithm])`.
+`domain_seed = key(world_seed, ["population/domain-seed/v3", local_domain, provider_algorithm])`, où `local_domain` joint région, société et ordinal de l’adresse du domaine, sans son champ monde : un changement de manifeste qui ne touche pas le domaine (réserves de noms, runtime épinglé) ne retire pas sa démographie.
 La graine décimale dérivée et `world_seed` figurent dans le plan. Les tirages uniformes entiers exacts utilisent le rejet. Les poids sont quantifiés et les réductions suivent l’ordre des IDs par octets UTF-8.
 
 ### 4.2 Empreintes et reproductibilité

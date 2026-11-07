@@ -982,10 +982,16 @@ fn base64_unpack(s: &str) -> Result<(Vec<u8>, u32), HistoryError> {
 /// attempts are explicit fields, never a consumed global state.
 pub mod random_semantics_v2 {
     use super::{ErrorCode, HistoryError};
+    /// The seed leaves the world (canon) field of a domain address out: a manifest
+    /// change that does not touch the domain itself (name pools, pinned runtime) must
+    /// not redraw its demography. An ID that is not a domain address is used as is.
     pub fn domain_seed(world_seed: u64, domain_id: &str, provider_algorithm: &str) -> u64 {
+        let local = super::DomainKey::from_id(domain_id)
+            .map(|k| format!("{}\u{0}{}\u{0}{}", k.region(), k.society(), k.ordinal()));
+        let local = local.as_deref().unwrap_or(domain_id);
         crate::keys::key(
             world_seed,
-            &["population/domain-seed/v2", domain_id, provider_algorithm],
+            &["population/domain-seed/v3", local, provider_algorithm],
         )
     }
     pub fn draw(seed: u64, parts: &[&str], subcounter: u64, rejection: u64) -> u64 {
@@ -1367,7 +1373,23 @@ mod tests {
         // Oracle: independent Python port of keys.rs, seed 42.
         assert_eq!(
             random_semantics_v2::domain_seed(42, "d", "a"),
-            816947332546134861
+            4511880416797658050
+        );
+    }
+    #[test]
+    fn domain_seed_ignores_the_world_of_the_domain_address() {
+        use random_semantics_v2::domain_seed;
+        let id = |world: &str| {
+            let key = DomainKey::new(world, "region/demo", "society/abc", 0).unwrap();
+            SemanticAddress::domain(&key).unwrap().encode()
+        };
+        assert_eq!(
+            domain_seed(11, &id("canon-a"), "p"),
+            domain_seed(11, &id("canon-b"), "p")
+        );
+        assert_ne!(
+            domain_seed(11, &id("canon-a"), "p"),
+            domain_seed(12, &id("canon-a"), "p")
         );
     }
     #[test]
